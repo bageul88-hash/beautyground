@@ -8,7 +8,6 @@ import { useShopProducts } from '../hooks/useShopProducts'
 import { useShopCategories } from '../hooks/useShopCategories'
 import { useShopLives } from '../hooks/useShopLives'
 import { useHeroBanners } from '../hooks/useHeroBanners'
-import { useHomeSettings } from '../hooks/useHomeSettings'
 import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
 import { useIsAdmin } from '../lib/useIsAdmin'
 
@@ -35,7 +34,6 @@ export default function AppHome() {
   // 라이브커머스는 관리자만 노출 — 일반 고객 홈에서는 "지금 라이브" 섹션을 숨긴다.
   const visibleLives = isAdmin ? lives : []
   const { banners } = useHeroBanners()
-  const { marqueeItems } = useHomeSettings()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
 
   return (
@@ -45,7 +43,7 @@ export default function AppHome() {
         {/* 상단 카카오톡 채널 추가 배너 (직각·좌측 스크롤) */}
         <KakaoPromoBar />
         <HomeBody
-          marqueeItems={marqueeItems}
+          marqueeItems={[]}
           banners={banners}
           lives={visibleLives}
           categories={categories}
