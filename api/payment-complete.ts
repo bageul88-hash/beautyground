@@ -9,6 +9,10 @@ const PORTONE_SECRET = process.env.PORTONE_V2_API_SECRET
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const MAIL_FROM = process.env.ORDER_MAIL_FROM || 'onboarding@resend.dev'
 
+// 배송정책 상수 — src/constants/index.ts 와 동일하게 유지할 것(불일치 시 정상결제가 거부되는 방향이라 안전).
+const SHIPPING_FEE = 3100
+const FREE_SHIPPING_THRESHOLD = 20000
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ ok: false, reason: 'POST 요청만 허용됩니다.' })
@@ -53,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1) 이 결제(payment_id)에 속한 주문행 전부 조회 (장바구니 다건 주문은 상품별로 여러 행)
   const { data: orderRows, error: selErr } = await supabase
     .from('orders')
-    .select('id, product_id, quantity, amount, status, order_name, buyer_name, buyer_email, products(name)')
+    .select('id, product_id, quantity, amount, status, order_name, buyer_name, buyer_email, live_id, products(name, price, sale_price)')
     .eq('payment_id', paymentId)
 
   if (selErr || !orderRows || orderRows.length === 0) {
@@ -67,7 +71,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ ok: true })
     return
   }
-  const expectedAmount = orderRows.reduce((s, r) => s + (r.amount as number), 0)
+  // ⚠️ 결제 금액 위변조 방지 — 클라이언트가 orders.amount 에 써넣은 값을 절대 신뢰하지 않고,
+  // 서버가 DB의 실제 상품가격(products.sale_price ?? price)·배송비·쿠폰으로 기대금액을 직접 재산출한다.
+  // (예전엔 orderRows 의 amount 를 그대로 합산해, 손님이 30만원 상품을 100원으로 주문·결제할 수 있었음)
+  type JoinedRow = {
+    product_id: string | null
+    quantity: number
+    live_id?: string | null
+    products?: { price?: number; sale_price?: number | null } | null
+  }
+  const rows = orderRows as unknown as JoinedRow[]
+
+  // 1) 상품 소계 = Σ (실제 판매가 × 수량). product_id 없는 행(배송비/쿠폰 행)은 서버가 별도 재계산하므로 무시.
+  let authoritativeSubtotal = 0
+  for (const r of rows) {
+    if (!r.product_id || !r.products) continue
+    const unit = r.products.sale_price ?? r.products.price ?? 0
+    authoritativeSubtotal += unit * (r.quantity as number)
+  }
+
+  // 2) 배송비 = 소계 기준 재계산 (클라이언트 배송비 행 무시)
+  const shippingFee =
+    authoritativeSubtotal > 0 && authoritativeSubtotal < FREE_SHIPPING_THRESHOLD ? SHIPPING_FEE : 0
+
+  // 3) 라이브 쿠폰 할인 = DB 쿠폰으로 재계산 (활성·최소구매액 충족 시에만). 클라이언트 쿠폰 행 무시.
+  let couponDiscount = 0
+  const liveId = rows.find((r) => r.live_id)?.live_id ?? null
+  if (liveId) {
+    const { data: coupon } = await supabase
+      .from('live_coupons')
+      .select('discount_type, discount_value, min_purchase, active')
+      .eq('live_id', liveId)
+      .eq('active', true)
+      .maybeSingle()
+    const c = coupon as { discount_type?: string; discount_value?: number; min_purchase?: number } | null
+    if (c && c.discount_value && authoritativeSubtotal >= (c.min_purchase ?? 0)) {
+      const raw =
+        c.discount_type === 'percent'
+          ? Math.round((authoritativeSubtotal * c.discount_value) / 100)
+          : c.discount_value
+      couponDiscount = Math.min(raw, authoritativeSubtotal)
+    }
+  }
+
+  const expectedAmount = authoritativeSubtotal + shippingFee - couponDiscount
 
   // 2) 포트원 실제 결제 조회
   let payment: {
