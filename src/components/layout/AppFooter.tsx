@@ -22,23 +22,8 @@ export default function AppFooter() {
           <Link to="/partner/apply" className="hover:text-text transition-colors">입점문의</Link>
         </nav>
 
-        {/* 고객센터 강조 */}
-        <div className="pt-5">
-          <p className="text-[11px] text-text-hint tracking-wide">고객센터</p>
-          <a href={`tel:${COMPANY_INFO.csPhone}`} className="block text-[24px] font-bold text-[#232f52] tracking-tight mt-0.5">
-            {COMPANY_INFO.csPhone}
-          </a>
-          <p className="text-[12px] text-text-sub mt-1.5 leading-relaxed">
-            주문·배송·상품 문의는 이메일로도 접수됩니다.
-            <br />
-            <a href={`mailto:${COMPANY_INFO.csEmail}`} className="text-text underline decoration-black/20 underline-offset-2">
-              {COMPANY_INFO.csEmail}
-            </a>
-          </p>
-        </div>
-
         {/* 사업자 정보 */}
-        <div className="mt-7 pt-5 border-t border-black/[0.06] text-[11.5px] text-text-hint leading-[1.75]">
+        <div className="pt-5 text-[11.5px] text-text-hint leading-[1.75]">
           <p className="text-text-sub font-semibold text-[12.5px] mb-1">{COMPANY_INFO.name}</p>
           <p>대표이사 {COMPANY_INFO.ceo} · 사업자등록번호 {COMPANY_INFO.bizNumber}</p>
           <p>
@@ -54,6 +39,20 @@ export default function AppFooter() {
           </p>
           <p>주소 {COMPANY_INFO.address}</p>
           <p>호스팅제공자 Vercel Inc.</p>
+        </div>
+
+        {/* 고객센터 (호스팅제공자 아래) */}
+        <div className="mt-5 text-[11.5px] text-text-hint leading-[1.75]">
+          <p className="text-text-sub font-semibold text-[12.5px] mb-1">고객센터</p>
+          <p>
+            <a href={`tel:${COMPANY_INFO.csPhone}`} className="text-text-sub">{COMPANY_INFO.csPhone}</a>
+          </p>
+          <p>주문·배송·상품 문의는 이메일로도 접수됩니다.</p>
+          <p>
+            <a href={`mailto:${COMPANY_INFO.csEmail}`} className="text-text-sub underline decoration-black/20 underline-offset-2">
+              {COMPANY_INFO.csEmail}
+            </a>
+          </p>
         </div>
 
         {/* 법적 링크 */}
