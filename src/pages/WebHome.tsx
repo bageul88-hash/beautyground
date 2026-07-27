@@ -1,3 +1,4 @@
+import TopInfoBar from '../components/layout/TopInfoBar'
 import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import HeroSection from '../components/sections/HeroSection'
@@ -16,6 +17,7 @@ import CTASection from '../components/web/CTASection'
 export default function WebHome() {
   return (
     <>
+      <TopInfoBar />
       <GNB />
       <main>
         <HeroSection />
