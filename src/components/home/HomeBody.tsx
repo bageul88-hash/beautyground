@@ -113,12 +113,6 @@ export default function HomeBody({
           </div>
         )}
       </section>
-
-      <div className="px-4 pt-8 pb-2 text-center">
-        <Link to="/partners" className="text-xs text-text-hint underline underline-offset-2">
-          브랜드 입점 문의 &amp; 회사 소개 →
-        </Link>
-      </div>
     </>
   )
 }

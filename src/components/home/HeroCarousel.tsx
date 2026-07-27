@@ -85,11 +85,13 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 aria-label={product.name}
               >
                 {product.thumbnail_url ? (
+                  // object-contain: 브랜드 원본 이미지 비율이 배너 틀(1:1.05)과 달라도
+                  // 사은품 태그·프로모션 배지 등 가장자리 요소가 잘리지 않게 전체를 보여줌
                   <img
                     src={product.thumbnail_url}
                     alt={product.name}
                     loading={current === 0 ? 'eager' : 'lazy'}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-cream-3"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-5xl" aria-hidden="true">
@@ -162,21 +164,37 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
       </div>
 
       {count > 1 && (
-        <div className="absolute left-0 right-0 bottom-2.5 z-10 flex justify-center gap-1.5">
-          {banners.map((b, i) => (
-            <button
-              key={b.id}
-              onClick={() => goTo(i)}
-              aria-label={`${i + 1}번째 배너로 이동`}
-              className="rounded-full bg-white transition-all duration-300"
-              style={{
-                width: current === i ? 18 : 6,
-                height: 6,
-                opacity: current === i ? 1 : 0.4,
-              }}
-            />
-          ))}
-        </div>
+        <>
+          <button
+            onClick={() => goTo(current - 1)}
+            aria-label="이전 배너"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-text shadow-sm active:scale-95 transition-transform"
+          >
+            <span aria-hidden="true" className="text-base leading-none">‹</span>
+          </button>
+          <button
+            onClick={() => goTo(current + 1)}
+            aria-label="다음 배너"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-text shadow-sm active:scale-95 transition-transform"
+          >
+            <span aria-hidden="true" className="text-base leading-none">›</span>
+          </button>
+          <div className="absolute left-0 right-0 bottom-2.5 z-10 flex justify-center gap-1.5">
+            {banners.map((b, i) => (
+              <button
+                key={b.id}
+                onClick={() => goTo(i)}
+                aria-label={`${i + 1}번째 배너로 이동`}
+                className="rounded-full bg-white transition-all duration-300"
+                style={{
+                  width: current === i ? 18 : 6,
+                  height: 6,
+                  opacity: current === i ? 1 : 0.4,
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
