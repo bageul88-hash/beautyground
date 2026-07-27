@@ -11,9 +11,15 @@ import {
   IconBell,
   IconMenu2,
   IconX,
+  IconHome,
+  IconClipboardCheck,
+  IconUsers,
+  IconAward,
+  IconCashBanknote,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyPartner } from '../../lib/partner'
+import { useIsAdmin } from '../../lib/useIsAdmin'
 import type { Partner } from '../../lib/types'
 
 const NAV_ITEMS = [
@@ -23,6 +29,15 @@ const NAV_ITEMS = [
   { label: '주문 관리', to: '/partner/orders', icon: IconShoppingCart },
   { label: '정산 관리', to: '/partner/settlement', icon: IconCash },
   { label: '프로필 설정', to: '/partner/profile', icon: IconUser },
+]
+
+// 관리자(is_admin) 계정에게만 사이드바에 추가로 노출되는 회사 관리 메뉴
+const ADMIN_NAV_ITEMS = [
+  { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
+  { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
+  { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
+  { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
+  { label: '진행자 정산 관리', to: '/admin/host-settlements', icon: IconCashBanknote },
 ]
 
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
@@ -36,6 +51,8 @@ export default function PartnerLayout() {
   const [partner, setPartner] = useState<Partner | null>(null)
   // 모바일: 사이드바를 드로어로 — 기본 닫힘, 햄버거로 열기
   const [menuOpen, setMenuOpen] = useState(false)
+  // 관리자 계정이면 사이드바에 '회사 관리' 메뉴를 추가로 노출
+  const { isAdmin } = useIsAdmin()
 
   useEffect(() => {
     getMyPartner().then((p) => setPartner(p))
@@ -93,7 +110,7 @@ export default function PartnerLayout() {
         </div>
 
         {/* 네비게이션 */}
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto">
           {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
@@ -112,6 +129,30 @@ export default function PartnerLayout() {
               {label}
             </NavLink>
           ))}
+
+          {/* 관리자 전용: 회사 관리 메뉴 */}
+          {isAdmin && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-[#555]">회사 관리</p>
+              {ADMIN_NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
+                      isActive
+                        ? 'text-[#b8924a] bg-[rgba(184,146,74,0.1)] border-l-[3px] border-[#b8924a] pl-[17px]'
+                        : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
+                    }`
+                  }
+                >
+                  <Icon size={18} />
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          )}
         </nav>
 
         {/* 로그아웃 */}
