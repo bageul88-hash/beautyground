@@ -71,9 +71,16 @@ create policy "hero_banners_admin_all" on public.hero_banners
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ── 6) home_settings(공지 마퀴): 쓰기를 관리자로 잠금 ──────────────────────────
-drop policy if exists "home_settings_admin_write" on public.home_settings;
-create policy "home_settings_admin_write" on public.home_settings
-  for update using (public.is_admin()) with check (public.is_admin());
+-- ⚠️ 이 DB(beautyground-main)에는 home_settings 테이블이 없어 건너뛴다(마퀴 미사용).
+--    존재하는 환경에서만 적용되도록 to_regclass 로 가드. (없으면 잠글 것도 없음)
+do $$
+begin
+  if to_regclass('public.home_settings') is not null then
+    drop policy if exists "home_settings_admin_write" on public.home_settings;
+    execute 'create policy "home_settings_admin_write" on public.home_settings
+      for update using (public.is_admin()) with check (public.is_admin())';
+  end if;
+end $$;
 
 -- ── 7) category_thumbnails: 쓰기를 관리자로 잠금 (공개 조회는 유지) ───────────────
 drop policy if exists "category_thumbnails_admin_all" on public.category_thumbnails;
