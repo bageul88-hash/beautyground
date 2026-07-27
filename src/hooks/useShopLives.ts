@@ -14,6 +14,8 @@ export function useShopLives() {
         .from('lives')
         .select('*')
         .in('status', ['live', 'scheduled'])
+        // 호스트 방송 설정 검증용 테스트 방송("호스트검증방송_숫자")은 고객 화면에 노출하지 않음
+        .not('title', 'ilike', '호스트검증방송%')
         .order('scheduled_at', { ascending: true, nullsFirst: false })
       if (!active) return
       setLives((data ?? []) as Live[])
