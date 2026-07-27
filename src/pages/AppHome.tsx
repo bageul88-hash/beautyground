@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import TopInfoBar from '../components/layout/TopInfoBar'
 import BottomNav from '../components/layout/BottomNav'
 import HomeBody from '../components/home/HomeBody'
 import { useShopProducts } from '../hooks/useShopProducts'
@@ -35,6 +36,7 @@ export default function AppHome() {
   return (
     // PC에서도 모바일 앱처럼 가운데 고정 폭 프레임 + 바깥 여백/배경 (med-ligne 참고)
     <div className="min-h-screen bg-cream-2 md:py-6">
+      <TopInfoBar />
       <div className="max-w-[480px] mx-auto bg-cream-4 min-h-screen md:min-h-0 md:rounded-lg md:overflow-hidden md:shadow-[0_12px_28px_-16px_rgba(23,19,16,.35)] pb-24">
         <HomeBody
           marqueeItems={marqueeItems}
