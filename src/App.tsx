@@ -64,6 +64,7 @@ import HostProfile from './pages/host/Profile'
 // 구매자 라이브 (Supabase 연동)
 import ShopLiveList from './pages/app/ShopLiveList'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
+import LiveGate from './components/app/LiveGate'
 
 export default function App() {
   return (
@@ -128,8 +129,9 @@ export default function App() {
         {/* 앱 UI */}
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
-        <Route path="/app/live" element={<ShopLiveList />} />
-        <Route path="/app/live/:id" element={<ShopLiveWatch />} />
+        {/* 라이브커머스: 관리자만 실제 화면, 일반 고객은 준비중 안내 */}
+        <Route path="/app/live" element={<LiveGate><ShopLiveList /></LiveGate>} />
+        <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
         <Route path="/app/brand/:id" element={<AppBrandDetail />} />

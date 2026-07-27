@@ -9,6 +9,7 @@ import { useShopLives } from '../hooks/useShopLives'
 import { useHeroBanners } from '../hooks/useHeroBanners'
 import { useHomeSettings } from '../hooks/useHomeSettings'
 import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
+import { useIsAdmin } from '../lib/useIsAdmin'
 
 export default function AppHome() {
   const navigate = useNavigate()
@@ -29,6 +30,9 @@ export default function AppHome() {
   }, [latestProducts])
   const { categories } = useShopCategories()
   const { lives } = useShopLives()
+  const { isAdmin } = useIsAdmin()
+  // 라이브커머스는 관리자만 노출 — 일반 고객 홈에서는 "지금 라이브" 섹션을 숨긴다.
+  const visibleLives = isAdmin ? lives : []
   const { banners } = useHeroBanners()
   const { marqueeItems } = useHomeSettings()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
@@ -41,7 +45,7 @@ export default function AppHome() {
         <HomeBody
           marqueeItems={marqueeItems}
           banners={banners}
-          lives={lives}
+          lives={visibleLives}
           categories={categories}
           categoryThumbnails={categoryThumbnails}
           products={products}
