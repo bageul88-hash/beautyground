@@ -69,8 +69,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 웹 홈페이지 */}
-        <Route path="/" element={<WebHome />} />
+        {/* 메인 = 소비자 쇼핑 홈. B2B 소개 페이지는 /partners로 이동 */}
+        <Route path="/" element={<AppHome />} />
+        <Route path="/partners" element={<WebHome />} />
         <Route path="/proposal" element={<CompanyProposal />} />
         <Route path="/company" element={<CompanyIntro />} />
 
