@@ -85,11 +85,13 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 aria-label={product.name}
               >
                 {product.thumbnail_url ? (
+                  // object-contain: 브랜드 원본 이미지 비율이 배너 틀(1:1.05)과 달라도
+                  // 사은품 태그·프로모션 배지 등 가장자리 요소가 잘리지 않게 전체를 보여줌
                   <img
                     src={product.thumbnail_url}
                     alt={product.name}
                     loading={current === 0 ? 'eager' : 'lazy'}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-cream-3"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-5xl" aria-hidden="true">
