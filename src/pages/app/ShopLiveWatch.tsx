@@ -37,6 +37,7 @@ export default function ShopLiveWatch() {
   const navigate = useNavigate()
 
   const [live, setLive] = useState<Live | null>(null)
+  const [hostName, setHostName] = useState<string | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [liveCoupon, setLiveCoupon] = useState<LiveCoupon | null>(null)
@@ -103,6 +104,17 @@ export default function ShopLiveWatch() {
       if (!active) return
       const liveRow = (liveData ?? null) as Live | null
       setLive(liveRow)
+
+      if (liveRow?.host_id) {
+        const { data: hostData } = await supabase
+          .from('hosts')
+          .select('name')
+          .eq('id', liveRow.host_id)
+          .single()
+        if (active) setHostName(hostData?.name ?? null)
+      } else {
+        setHostName(null)
+      }
 
       if (liveRow && liveRow.product_ids && liveRow.product_ids.length > 0) {
         const { data: prodData } = await supabase
@@ -293,9 +305,16 @@ export default function ShopLiveWatch() {
               >
                 ‹
               </button>
-              <p className="flex-1 min-w-0 text-white text-[13px] font-medium truncate" style={textShadow}>
-                {live.title}
-              </p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-[13px] font-medium truncate" style={textShadow}>
+                  {live.title}
+                </p>
+                {hostName && (
+                  <p className="text-white/75 text-[11px] truncate" style={textShadow}>
+                    {hostName} 진행
+                  </p>
+                )}
+              </div>
               <span className="shrink-0 flex items-center gap-1.5 rounded-pill bg-black/40 text-white text-[11px] font-bold px-2.5 py-1">
                 {onAir && <span className="w-1.5 h-1.5 rounded-full bg-[#ff5470] animate-pulse" />}
                 {topBadge}
