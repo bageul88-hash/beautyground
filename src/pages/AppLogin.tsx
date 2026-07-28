@@ -35,7 +35,7 @@ export default function AppLogin() {
     setError('')
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
-      options: { redirectTo: `${window.location.origin}${from}` },
+      options: { redirectTo: `${window.location.origin}${from}`, scopes: 'profile_nickname' },
     })
     if (oauthError) setError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
   }
