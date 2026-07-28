@@ -5,10 +5,10 @@ import { getMyPartner } from '../../lib/partner'
 import type { Partner } from '../../lib/types'
 
 const inputCls =
-  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#b8924a] transition-colors bg-white'
+  'w-full border border-[#eaebee] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#3B5BDB] transition-colors bg-white'
 
 const readonlyCls =
-  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#9a9080] bg-[#f7f4ef] cursor-default'
+  'w-full border border-[#eaebee] rounded-lg px-3.5 py-2.5 text-[13px] font-medium text-[#111] bg-[#f7f8fa] cursor-default'
 
 export default function PartnerProfile() {
   const [loading, setLoading] = useState(true)
@@ -66,9 +66,9 @@ export default function PartnerProfile() {
   return (
     <div className="max-w-2xl space-y-6">
       {/* 브랜드 정보 */}
-      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+      <div className="bg-white rounded-[14px] border border-[#eaebee] p-6">
         <div className="flex items-center gap-2 mb-5">
-          <IconUser size={16} className="text-[#b8924a]" />
+          <IconUser size={16} className="text-[#3B5BDB]" />
           <h3 className="text-[14px] font-bold text-[#111]">브랜드 정보</h3>
         </div>
 
@@ -104,9 +104,9 @@ export default function PartnerProfile() {
       </div>
 
       {/* 비밀번호 변경 */}
-      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+      <div className="bg-white rounded-[14px] border border-[#eaebee] p-6">
         <div className="flex items-center gap-2 mb-5">
-          <IconLock size={16} className="text-[#b8924a]" />
+          <IconLock size={16} className="text-[#3B5BDB]" />
           <h3 className="text-[14px] font-bold text-[#111]">비밀번호 변경</h3>
         </div>
 
@@ -145,7 +145,7 @@ export default function PartnerProfile() {
           <button
             type="submit"
             disabled={pwSubmitting}
-            className="w-full py-2.5 bg-[#b8924a] hover:bg-[#a07c3b] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
+            className="w-full py-2.5 bg-[#3B5BDB] hover:bg-[#2f4bc0] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
           >
             {pwSubmitting ? '변경 중...' : '비밀번호 변경'}
           </button>

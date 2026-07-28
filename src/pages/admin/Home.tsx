@@ -491,6 +491,7 @@ export default function AdminHome() {
                 lives={lives}
                 categories={categories}
                 categoryThumbnails={previewCategoryThumbnails}
+                recommended={previewProducts}
                 products={previewProducts}
                 prodLoading={prodLoading}
                 onProductClick={() => {}}

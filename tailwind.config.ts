@@ -53,8 +53,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['"Noto Sans KR"', 'sans-serif'],
-        serif: ['"Noto Serif KR"', 'serif'],
+        // 맑은고딕으로 통일(대표님 지시) — Windows는 실제 맑은고딕, Mac은 Apple SD 고딕Neo,
+        // 폰트 파일 자체를 배포하는 게 아니라 시스템에 이미 설치된 폰트를 이름으로 참조하는 방식이라 저작권 문제 없음.
+        // 둘 다 없는 환경(구형 안드로이드 등) 대비 Noto Sans KR을 웹폰트 폴백으로 마지막에 유지.
+        sans: ['"맑은 고딕"', '"Malgun Gothic"', '"Apple SD Gothic Neo"', '"Noto Sans KR"', 'sans-serif'],
+        serif: ['"맑은 고딕"', '"Malgun Gothic"', '"Apple SD Gothic Neo"', '"Noto Sans KR"', 'sans-serif'],
       },
       borderRadius: {
         sm: '8px',

@@ -3,6 +3,7 @@ import AppHeader from '../layout/AppHeader'
 import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
 import CategoryShortcutGrid from './CategoryShortcutGrid'
+import RecommendedRow from './RecommendedRow'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -16,6 +17,7 @@ interface HomeBodyProps {
   lives: Live[]
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
+  recommended: ShopProduct[]
   products: ShopProduct[]
   prodLoading: boolean
   onProductClick: (id: string) => void
@@ -30,6 +32,7 @@ export default function HomeBody({
   lives,
   categories,
   categoryThumbnails,
+  recommended,
   products,
   prodLoading,
   onProductClick,
@@ -41,6 +44,8 @@ export default function HomeBody({
       <AppHeader />
       <HeroCarousel banners={banners} />
       <CategoryShortcutGrid categories={categories} thumbnails={categoryThumbnails} onSelect={onCategoryClick} />
+
+      <RecommendedRow products={recommended} onProductClick={onProductClick} />
 
       {lives.length > 0 && (
         <section className="pt-4" aria-labelledby="home-live">
@@ -69,12 +74,12 @@ export default function HomeBody({
                       }}
                     />
                   ) : null}
-                  <div
-                    className={`w-full h-full flex items-center justify-center text-4xl ${live.thumbnail_url ? 'hidden' : ''}`}
+                  <img
+                    src="/images/bg-logo-mark.png"
+                    alt=""
+                    className={`w-full h-full object-cover ${live.thumbnail_url ? 'hidden' : ''}`}
                     aria-hidden="true"
-                  >
-                    💄
-                  </div>
+                  />
                   <span className="absolute top-2 left-2">
                     <LiveStatusBadge live={live} size="sm" />
                   </span>

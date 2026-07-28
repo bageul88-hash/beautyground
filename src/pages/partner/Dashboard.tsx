@@ -112,7 +112,7 @@ export default function PartnerDashboard() {
 
   if (!partner) {
     return (
-      <div className="max-w-md mx-auto mt-16 bg-white rounded-[14px] border border-[#e5e0d8] p-10 text-center">
+      <div className="max-w-md mx-auto mt-16 bg-white rounded-[14px] border border-[#eaebee] p-10 text-center">
         <p className="text-[16px] font-semibold text-[#111] mb-2">입점 승인 대기 중입니다</p>
         <p className="text-[14px] text-[#9a9080]">
           입점 심사가 완료되면 파트너 센터를 이용하실 수 있습니다.
@@ -125,7 +125,7 @@ export default function PartnerDashboard() {
     <>
       {/* 통계 카드 4개 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="이번 달 매출" value={monthSales} unit="원" color="#b8924a" />
+        <StatsCard label="이번 달 매출" value={monthSales} unit="원" />
         <StatsCard label="총 주문 수" value={orderCount} unit="건" />
         <StatsCard label="등록 상품 수" value={productCount} unit="개" />
         <StatsCard label="예정된 라이브" value={scheduledLives.length} unit="건" />
@@ -133,12 +133,12 @@ export default function PartnerDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* 예정된 라이브 */}
-        <div className="lg:col-span-1 bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+        <div className="lg:col-span-1 bg-white rounded-[14px] border border-[#eaebee] p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[14px] font-bold text-[#111]">예정된 라이브</h2>
             <Link
               to="/partner/live/new"
-              className="flex items-center gap-1 text-[12px] text-[#b8924a] hover:underline"
+              className="flex items-center gap-1 text-[12px] text-[#3B5BDB] hover:underline"
             >
               <IconPlus size={13} />
               라이브 예약
@@ -151,7 +151,7 @@ export default function PartnerDashboard() {
               <p className="text-[13px] text-[#9a9080]">예정된 라이브가 없습니다.</p>
               <Link
                 to="/partner/live/new"
-                className="text-[12px] text-[#b8924a] hover:underline mt-1 inline-block"
+                className="text-[12px] text-[#3B5BDB] hover:underline mt-1 inline-block"
               >
                 라이브 예약하기
               </Link>
@@ -164,7 +164,7 @@ export default function PartnerDashboard() {
                   <Link
                     key={live.id}
                     to={`/partner/live/${live.id}`}
-                    className="block p-4 bg-[#f7f4ef] rounded-xl hover:bg-[#f0ece6] transition-colors"
+                    className="block p-4 bg-[#f7f8fa] rounded-xl hover:bg-[#eef0f3] transition-colors"
                   >
                     <div className="flex items-start justify-between mb-1">
                       <p className="text-[13px] font-semibold text-[#111] leading-tight">
@@ -187,12 +187,12 @@ export default function PartnerDashboard() {
         </div>
 
         {/* 최근 주문 */}
-        <div className="lg:col-span-2 bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+        <div className="lg:col-span-2 bg-white rounded-[14px] border border-[#eaebee] p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[14px] font-bold text-[#111]">최근 주문</h2>
             <Link
               to="/partner/orders"
-              className="flex items-center gap-1 text-[12px] text-[#b8924a] hover:underline"
+              className="flex items-center gap-1 text-[12px] text-[#3B5BDB] hover:underline"
             >
               전체 보기 <IconChevronRight size={13} />
             </Link>
@@ -226,7 +226,7 @@ export default function PartnerDashboard() {
                     return (
                       <tr
                         key={order.id}
-                        className="border-b border-[#eee] hover:bg-[#fdf3e7] transition-colors"
+                        className="border-b border-[#eee] hover:bg-[#f7f8fa] transition-colors"
                       >
                         <td className="py-3.5 pr-4 text-[12px] text-[#555] font-mono">
                           {order.id.slice(0, 8)}
@@ -267,7 +267,7 @@ export default function PartnerDashboard() {
           <Link
             key={to}
             to={to}
-            className="flex items-center justify-center gap-2 bg-white border border-[#e5e0d8] rounded-xl py-4 text-[13px] font-medium text-[#555] hover:border-[#b8924a] hover:text-[#b8924a] transition-colors"
+            className="flex items-center justify-center gap-2 bg-white border border-[#eaebee] rounded-xl py-4 text-[13px] font-medium text-[#555] hover:border-[#3B5BDB] hover:text-[#3B5BDB] transition-colors"
           >
             <Icon size={18} />
             {label}

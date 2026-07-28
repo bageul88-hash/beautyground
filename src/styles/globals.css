@@ -12,7 +12,7 @@
   }
 
   html {
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
@@ -22,11 +22,10 @@
     background-color: #ffffff;
     line-height: 1.8;
     font-size: 15px;
-    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Noto Serif KR', serif;
+    font-family: '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     line-height: 1.3;
   }
 

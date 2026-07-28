@@ -19,9 +19,7 @@ export default function ShopProductCard({ product }: { product: ShopProduct }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl" aria-hidden="true">
-            💄
-          </div>
+          <img src="/images/bg-logo-mark.png" alt="" className="w-full h-full object-cover" aria-hidden="true" />
         )}
         {soldOut && (
           <div className="absolute inset-0 bg-black/45 flex items-center justify-center">

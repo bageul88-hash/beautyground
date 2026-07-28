@@ -43,6 +43,7 @@ import PartnerSettlement from './pages/partner/Settlement'
 import PartnerProfile from './pages/partner/Profile'
 
 // 관리자
+import RequireAdmin from './components/admin/RequireAdmin'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminApplications from './pages/admin/Applications'
 import AdminHome from './pages/admin/Home'
@@ -64,7 +65,6 @@ import HostProfile from './pages/host/Profile'
 // 구매자 라이브 (Supabase 연동)
 import ShopLiveList from './pages/app/ShopLiveList'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
-import LiveGate from './components/app/LiveGate'
 
 export default function App() {
   return (
@@ -103,12 +103,15 @@ export default function App() {
             <Route path="/partner/settlement" element={<PartnerSettlement />} />
             <Route path="/partner/profile" element={<PartnerProfile />} />
           </Route>
-          <Route element={<AdminLayout />}>
-            <Route path="/admin/applications" element={<AdminApplications />} />
-            <Route path="/admin/home" element={<AdminHome />} />
-            <Route path="/admin/hosts" element={<AdminHosts />} />
-            <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
-            <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
+          {/* 관리자 라우트: 로그인(RequireAuth) 위에 is_admin() 검사(RequireAdmin)를 한 겹 더 */}
+          <Route element={<RequireAdmin />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/applications" element={<AdminApplications />} />
+              <Route path="/admin/home" element={<AdminHome />} />
+              <Route path="/admin/hosts" element={<AdminHosts />} />
+              <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
+              <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
+            </Route>
           </Route>
         </Route>
 
@@ -130,8 +133,10 @@ export default function App() {
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
         {/* 라이브커머스: 관리자만 실제 화면, 일반 고객은 준비중 안내 */}
-        <Route path="/app/live" element={<LiveGate><ShopLiveList /></LiveGate>} />
-        <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
+        {/* 라이브커머스 고객 오픈: 일반 구매자도 라이브를 볼 수 있게 개방(대표님 지시 2026-07-28).
+            다시 관리자 전용으로 막으려면 각 라우트를 <LiveGate>…</LiveGate>로 감싸면 됨. */}
+        <Route path="/app/live" element={<ShopLiveList />} />
+        <Route path="/app/live/:id" element={<ShopLiveWatch />} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
         <Route path="/app/brand/:id" element={<AppBrandDetail />} />

@@ -93,6 +93,8 @@ export interface Live {
   peak_viewers?: number
   // 진행자 지정 (supabase/lives_host_id.sql) — null이면 브랜드 자체 진행(수수료 정산 대상 아님)
   host_id?: string | null
+  // 예상 방송시간(분) (supabase/lives_duration.sql) — null이면 미정
+  duration_minutes?: number | null
   created_at: string
 }
 

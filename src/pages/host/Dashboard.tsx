@@ -108,13 +108,13 @@ export default function HostDashboard() {
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="이번 달 매출" value={monthSales} unit="원" color="#b8924a" />
+        <StatsCard label="이번 달 매출" value={monthSales} unit="원" />
         <StatsCard
           label="현재 적용 등급"
           value={currentTier ? currentTier.name : '-'}
           unit={currentTier ? `${currentTier.commission_rate}%` : undefined}
         />
-        <StatsCard label="이번 달 예상 수수료" value={estimatedCommission} unit="원" color="#1D9E75" />
+        <StatsCard label="이번 달 예상 수수료" value={estimatedCommission} unit="원" />
         <StatsCard label="누적 진행 방송" value={liveCount} unit="건" />
       </div>
 

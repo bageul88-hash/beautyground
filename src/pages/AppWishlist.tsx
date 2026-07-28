@@ -87,7 +87,7 @@ export default function AppWishlist() {
                     {p.thumbnail_url ? (
                       <img src={p.thumbnail_url} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl" aria-hidden="true">💄</div>
+                      <img src="/images/bg-logo-mark.png" alt="" className="w-full h-full object-cover" aria-hidden="true" />
                     )}
                   </div>
                   <p className="text-[13px] text-text mt-1.5 line-clamp-1">{p.name}</p>

@@ -89,9 +89,7 @@ export default function ShopLiveList() {
                     className="w-full h-[220px] object-cover"
                   />
                 ) : (
-                  <div className="w-full h-[220px] bg-cream-3 flex items-center justify-center text-[56px]">
-                    💄
-                  </div>
+                  <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[220px] object-cover" />
                 )}
                 <div
                   className="absolute inset-0"
@@ -103,6 +101,7 @@ export default function ShopLiveList() {
                   {hero.status === 'scheduled' && (
                     <span className="inline-flex items-center rounded-pill bg-black/50 text-white text-[11px] font-medium px-2.5 py-1">
                       {formatDateTime(hero.scheduled_at)}
+                      {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
                     </span>
                   )}
                 </div>
@@ -134,9 +133,7 @@ export default function ShopLiveList() {
                           className="w-full h-[160px] object-cover"
                         />
                       ) : (
-                        <div className="w-full h-[160px] bg-cream-3 flex items-center justify-center text-[44px]">
-                          💄
-                        </div>
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[160px] object-cover" />
                       )}
 
                       <div className="absolute top-3 left-3">
@@ -179,9 +176,7 @@ export default function ShopLiveList() {
                         className="w-full h-[110px] object-cover"
                       />
                     ) : (
-                      <div className="w-full h-[110px] bg-cream-3 flex items-center justify-center text-[32px]">
-                        💄
-                      </div>
+                      <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[110px] object-cover" />
                     )}
                     <span className="absolute top-2 left-2 inline-flex items-center rounded-pill bg-black/60 text-white text-[10px] font-bold px-2.5 py-0.5">
                       REPLAY

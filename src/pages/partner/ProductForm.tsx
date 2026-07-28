@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  IconUpload, IconToggleRight, IconToggleLeft,
+  IconUpload,
   IconArrowUp, IconArrowDown, IconTrash, IconScissors, IconX,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
@@ -48,7 +48,6 @@ export default function ProductForm() {
   const [loading, setLoading] = useState<boolean>(isEdit)
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
-  const [liveEnabled, setLiveEnabled] = useState(false)
 
   // 파트너 정보
   const [partnerId, setPartnerId] = useState<string>('')
@@ -543,19 +542,6 @@ export default function ProductForm() {
             />
           </div>
 
-          <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] font-bold text-[#111]">라이브 전용 특가</p>
-                <p className="text-[11px] text-[#9a9080] mt-0.5">라이브 예약 시 설정 가능</p>
-              </div>
-              <button type="button" onClick={() => setLiveEnabled(!liveEnabled)}>
-                {liveEnabled
-                  ? <IconToggleRight size={30} className="text-[#b8924a]" />
-                  : <IconToggleLeft size={30} className="text-[#d0c9be]" />}
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* 우측: 상품 정보 */}

@@ -5,24 +5,20 @@ interface StatsCardProps {
   value: string | number
   unit?: string
   change?: number
-  color?: string
 }
 
-export default function StatsCard({ label, value, unit, change, color }: StatsCardProps) {
+export default function StatsCard({ label, value, unit, change }: StatsCardProps) {
   const isUp = change !== undefined && change > 0
   const isDown = change !== undefined && change < 0
 
   return (
-    <div
-      className="bg-white border border-[#e5e0d8] rounded-[14px] p-6"
-      style={color ? { borderTop: `3px solid ${color}` } : undefined}
-    >
-      <p className="text-[12px] text-[#9a9080] mb-2">{label}</p>
+    <div className="bg-white border border-[#eaebee] rounded-[14px] p-6">
+      <p className="text-[12px] text-[#6b7280] mb-2">{label}</p>
       <div className="flex items-end gap-1">
-        <p className="font-serif text-[28px] font-bold text-[#111] leading-none">
+        <p className="text-[28px] font-bold text-[#3B5BDB] leading-none">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </p>
-        {unit && <span className="text-[13px] text-[#9a9080] mb-0.5">{unit}</span>}
+        {unit && <span className="text-[13px] text-[#6b7280] mb-0.5">{unit}</span>}
       </div>
       {change !== undefined && (
         <div className={`flex items-center gap-1 mt-2 text-[12px] font-medium ${isUp ? 'text-[#1D9E75]' : isDown ? 'text-[#D85A30]' : 'text-[#9a9080]'}`}>

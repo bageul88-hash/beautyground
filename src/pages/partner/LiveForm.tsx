@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { IconCalendar, IconPackage, IconCheck, IconTag, IconUserStar } from '@tabler/icons-react'
+import { IconCalendar, IconPackage, IconCheck, IconTag, IconUserStar, IconX } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyPartner } from '../../lib/partner'
 import type { Live, LiveCoupon, Host } from '../../lib/types'
@@ -32,6 +32,8 @@ export default function LiveForm() {
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  // 판매 상품이 많아 전부 스크롤하기 불편 → 이름 검색으로 좁혀서 고르게
+  const [productQuery, setProductQuery] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -80,6 +82,7 @@ export default function LiveForm() {
           setThumbnailUrl(lr.thumbnail_url ?? '')
           setSelectedIds(lr.product_ids ?? [])
           setHostId(lr.host_id ?? '')
+          if (lr.duration_minutes != null) setDuration(String(lr.duration_minutes))
           if (lr.scheduled_at) {
             const d = new Date(lr.scheduled_at)
             const pad = (n: number) => String(n).padStart(2, '0')
@@ -129,6 +132,7 @@ export default function LiveForm() {
       thumbnail_url: thumbnailUrl || null,
       product_ids: selectedIds,
       host_id: hostId || null,
+      duration_minutes: Number(duration) > 0 ? Number(duration) : null,
     }
 
     let liveId = id
@@ -263,53 +267,92 @@ export default function LiveForm() {
       </div>
 
       {/* 판매 상품 */}
-      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+      <div className="bg-white rounded-[14px] border border-[#eaebee] p-6">
         <h3 className="flex items-center gap-1.5 text-[14px] font-bold text-[#111] mb-4">
           <IconPackage size={14} />판매 상품 선택
+          {selectedIds.length > 0 && (
+            <span className="ml-1 text-[12px] font-semibold text-[#3B5BDB]">{selectedIds.length}개 선택됨</span>
+          )}
         </h3>
 
         {products.length === 0 ? (
           <p className="text-[13px] text-[#9a9080]">
             먼저 상품을 등록해 주세요.{' '}
-            <Link to="/partner/products/new" className="text-[#b8924a] font-medium hover:underline">
+            <Link to="/partner/products/new" className="text-[#3B5BDB] font-medium hover:underline">
               상품 등록하기
             </Link>
           </p>
         ) : (
-          <div className="space-y-2">
-            {products.map(product => {
-              const selected = selectedIds.includes(product.id)
-              const displayPrice = product.sale_price ?? product.price
-              return (
-                <div
-                  key={product.id}
-                  onClick={() => toggleProduct(product.id)}
-                  className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors ${
-                    selected ? 'border-[#b8924a] bg-[#fdf8f0]' : 'border-[#e5e0d8] hover:border-[#b8924a]'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors shrink-0 ${
-                    selected ? 'bg-[#b8924a] border-[#b8924a]' : 'border-[#e5e0d8]'
-                  }`}>
-                    {selected && <IconCheck size={12} color="white" />}
-                  </div>
-                  <div className="w-12 h-12 bg-[#f7f4ef] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                    {product.thumbnail_url
-                      ? <img src={product.thumbnail_url} alt={product.name} className="w-full h-full object-cover" />
-                      : <span className="text-[10px] text-[#bbb]">이미지</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-[#111] truncate">{product.name}</p>
-                    <p className="text-[12px] text-[#9a9080]">{displayPrice.toLocaleString()}원</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+          <>
+            {/* 선택한 상품: 상단에 칩으로 모아 보여줘 스크롤 없이 확인·해제 가능 */}
+            {selectedIds.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedIds.map(sid => {
+                  const p = products.find(pr => pr.id === sid)
+                  if (!p) return null
+                  return (
+                    <button
+                      key={sid}
+                      type="button"
+                      onClick={() => toggleProduct(sid)}
+                      className="flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-full bg-[#EBF1FE] text-[#3B5BDB] text-[12px] font-medium"
+                    >
+                      <span className="max-w-[160px] truncate">{p.name}</span>
+                      <IconX size={13} />
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
-        {selectedIds.length > 0 && (
-          <p className="text-[12px] text-[#b8924a] mt-3">{selectedIds.length}개 상품 선택됨</p>
+            {/* 이름 검색 — 185개를 다 내리지 않고 좁혀서 고르기 */}
+            <input
+              type="text"
+              value={productQuery}
+              onChange={e => setProductQuery(e.target.value)}
+              placeholder="상품명 검색"
+              className={`${inputCls} mb-2`}
+            />
+
+            {/* 목록: 고정 높이 스크롤 박스 → 페이지 전체가 늘어나지 않음 */}
+            <div className="max-h-[320px] overflow-y-auto rounded-xl border border-[#eaebee] divide-y divide-[#f1f2f4]">
+              {(() => {
+                const q = productQuery.trim().toLowerCase()
+                const filtered = q ? products.filter(p => p.name.toLowerCase().includes(q)) : products
+                if (filtered.length === 0) {
+                  return <p className="text-[13px] text-[#9a9080] p-4 text-center">검색 결과가 없습니다.</p>
+                }
+                return filtered.map(product => {
+                  const selected = selectedIds.includes(product.id)
+                  const displayPrice = product.sale_price ?? product.price
+                  return (
+                    <div
+                      key={product.id}
+                      onClick={() => toggleProduct(product.id)}
+                      className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
+                        selected ? 'bg-[#EBF1FE]' : 'hover:bg-[#f7f8fa]'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors shrink-0 ${
+                        selected ? 'bg-[#3B5BDB] border-[#3B5BDB]' : 'border-[#d5d7db]'
+                      }`}>
+                        {selected && <IconCheck size={12} color="white" />}
+                      </div>
+                      <div className="w-11 h-11 bg-[#f1f2f4] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                        {product.thumbnail_url
+                          ? <img src={product.thumbnail_url} alt={product.name} className="w-full h-full object-cover" />
+                          : <span className="text-[10px] text-[#bbb]">이미지</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-[#111] truncate">{product.name}</p>
+                        <p className="text-[12px] text-[#9a9080]">{displayPrice.toLocaleString()}원</p>
+                      </div>
+                    </div>
+                  )
+                })
+              })()}
+            </div>
+          </>
         )}
       </div>
 
@@ -411,21 +454,24 @@ export default function LiveForm() {
         <p className="text-[12px] text-red-500 bg-red-50 rounded-lg px-4 py-3">{error}</p>
       )}
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => navigate('/partner/live')}
-          className="px-6 py-2.5 border border-[#e5e0d8] text-[#555] rounded-lg text-[13px] hover:bg-[#f7f4ef] transition-colors"
-        >
-          취소
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex-1 py-2.5 bg-[#b8924a] hover:bg-[#a07c3b] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
-        >
-          {submitting ? '저장 중...' : isEdit ? '라이브 수정' : '라이브 예약'}
-        </button>
+      {/* 하단 액션바 — 상품 목록이 길어도 항상 보이도록 화면 하단에 고정(sticky) */}
+      <div className="sticky bottom-0 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/95 backdrop-blur border-t border-[#eaebee]">
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/partner/live')}
+            className="px-6 py-2.5 border border-[#eaebee] text-[#555] rounded-lg text-[13px] hover:bg-[#f7f8fa] transition-colors"
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 py-2.5 bg-[#3B5BDB] hover:bg-[#2f4bc0] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
+          >
+            {submitting ? '저장 중...' : isEdit ? '라이브 수정' : '라이브 예약'}
+          </button>
+        </div>
       </div>
     </form>
   )

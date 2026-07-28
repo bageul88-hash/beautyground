@@ -9,7 +9,6 @@ import { useShopCategories } from '../hooks/useShopCategories'
 import { useShopLives } from '../hooks/useShopLives'
 import { useHeroBanners } from '../hooks/useHeroBanners'
 import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
-import { useIsAdmin } from '../lib/useIsAdmin'
 
 export default function AppHome() {
   const navigate = useNavigate()
@@ -28,11 +27,27 @@ export default function AppHome() {
     }
     return out
   }, [latestProducts])
+  // 추천 상품: 신상품 그리드에 이미 나온 상품과 겹치지 않게 나머지 중에서 브랜드당 최대 2개
+  // (별도 추천 로직·관리자 큐레이션은 아직 없음 — 우선 신상품과 안 겹치는 실제 판매중 상품으로 채움)
+  const recommended = useMemo(() => {
+    const shown = new Set(products.map((p) => p.id))
+    const perBrand = new Map<string, number>()
+    const out: typeof latestProducts = []
+    for (const p of latestProducts) {
+      if (shown.has(p.id)) continue
+      const key = p.brand_name ?? p.id
+      const n = perBrand.get(key) ?? 0
+      if (n >= 2) continue
+      perBrand.set(key, n + 1)
+      out.push(p)
+      if (out.length >= 10) break
+    }
+    return out
+  }, [latestProducts, products])
   const { categories } = useShopCategories()
   const { lives } = useShopLives()
-  const { isAdmin } = useIsAdmin()
-  // 라이브커머스는 관리자만 노출 — 일반 고객 홈에서는 "지금 라이브" 섹션을 숨긴다.
-  const visibleLives = isAdmin ? lives : []
+  // 라이브커머스 고객 오픈(대표님 지시 2026-07-28) — 일반 고객 홈에도 "지금 라이브" 섹션 노출.
+  const visibleLives = lives
   const { banners } = useHeroBanners()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
 
@@ -48,6 +63,7 @@ export default function AppHome() {
           lives={visibleLives}
           categories={categories}
           categoryThumbnails={categoryThumbnails}
+          recommended={recommended}
           products={products}
           prodLoading={prodLoading}
           onProductClick={(id) => navigate(`/app/product/${id}`)}

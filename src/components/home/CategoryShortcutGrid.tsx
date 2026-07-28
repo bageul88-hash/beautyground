@@ -31,9 +31,7 @@ export default function CategoryShortcutGrid({ categories, thumbnails, onSelect 
                 {image ? (
                   <img src={image} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xl" aria-hidden="true">
-                    💄
-                  </span>
+                  <img src="/images/bg-logo-mark.png" alt="" className="w-full h-full object-cover" aria-hidden="true" />
                 )}
               </div>
               <span className="text-[12px] text-text truncate max-w-full">{category}</span>

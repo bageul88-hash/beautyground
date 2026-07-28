@@ -286,7 +286,9 @@ export default function ShopLiveWatch() {
                       : undefined
                   }
                 >
-                  {!live.thumbnail_url && <span className="text-[64px]">💄</span>}
+                  {!live.thumbnail_url && (
+                    <img src="/images/bg-logo-icon.png" alt="" className="w-20 h-20 rounded-2xl object-contain opacity-90" />
+                  )}
                 </div>
               )}
             </div>
@@ -373,29 +375,48 @@ export default function ShopLiveWatch() {
                 </div>
               )}
 
-              {primaryProduct && (
-                <button
-                  type="button"
-                  onClick={() => openBuy(primaryProduct)}
-                  className="mr-14 flex items-center gap-2.5 bg-black/55 backdrop-blur-sm border border-gold/30 rounded-2xl px-2.5 py-2 text-left"
-                >
-                  {primaryProduct.thumbnail_url ? (
-                    <img src={primaryProduct.thumbnail_url} alt={primaryProduct.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
-                  ) : (
-                    <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-[16px] shrink-0">💄</div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-1 text-[9.5px] font-extrabold text-gold-light mb-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gold-light" />
-                      {primaryProduct.id === highlightId ? '지금 판매중' : '판매 상품'}
-                    </p>
-                    <p className="text-[12px] text-white font-semibold truncate" style={textShadow}>{primaryProduct.name}</p>
+              {primaryProduct && (() => {
+                const sell = primaryProduct.sale_price ?? primaryProduct.price
+                const hasSale = primaryProduct.sale_price != null && primaryProduct.sale_price < primaryProduct.price
+                const rate = hasSale ? Math.round((1 - (primaryProduct.sale_price as number) / primaryProduct.price) * 100) : 0
+                const isSelling = primaryProduct.id === highlightId
+                // 흰색 상품카드(더캐스트 참고): 썸네일 | 이름+할인율·가격 | 상품보기 버튼
+                return (
+                  <div className="mr-14 flex items-stretch bg-white rounded-2xl overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.3)]">
+                    <button
+                      type="button"
+                      onClick={() => openBuy(primaryProduct)}
+                      className="flex items-center gap-2.5 flex-1 min-w-0 p-2 text-left"
+                    >
+                      {primaryProduct.thumbnail_url ? (
+                        <img src={primaryProduct.thumbnail_url} alt={primaryProduct.name} className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        {isSelling && (
+                          <p className="flex items-center gap-1 text-[9.5px] font-extrabold text-[#e8402a] mb-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#e8402a] animate-pulse" />
+                            지금 판매중
+                          </p>
+                        )}
+                        <p className="text-[12.5px] text-text font-medium truncate">{primaryProduct.name}</p>
+                        <p className="mt-0.5 flex items-baseline gap-1.5">
+                          {hasSale && <span className="text-[14px] font-extrabold text-[#e8402a]">{rate}%</span>}
+                          <span className="text-[15px] font-extrabold text-text">{won(sell)}</span>
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openBuy(primaryProduct)}
+                      className="self-stretch px-4 flex items-center justify-center border-l border-cream-2 text-[12px] font-semibold text-text-sub leading-tight shrink-0"
+                    >
+                      상품<br />보기
+                    </button>
                   </div>
-                  <p className="shrink-0 text-[12px] font-extrabold text-white" style={textShadow}>
-                    {won(primaryProduct.sale_price ?? primaryProduct.price)}
-                  </p>
-                </button>
-              )}
+                )
+              })()}
 
               {live.pinned_message && (
                 <div className="mr-14 flex items-start gap-1.5 bg-black/45 backdrop-blur-sm rounded-lg px-3 py-1.5">
@@ -504,7 +525,7 @@ export default function ShopLiveWatch() {
                             {product.thumbnail_url ? (
                               <img src={product.thumbnail_url} alt={product.name} className="w-16 h-16 rounded-md object-cover shrink-0" />
                             ) : (
-                              <div className="w-16 h-16 rounded-md bg-cream-3 flex items-center justify-center text-[24px] shrink-0">💄</div>
+                              <img src="/images/bg-logo-mark.png" alt="" className="w-16 h-16 rounded-md object-cover shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="text-[14px] font-medium text-text line-clamp-1">{product.name}</p>
