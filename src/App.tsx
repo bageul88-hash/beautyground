@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { supabase } from './lib/supabase'
+import { mergeGuestCartToServer } from './lib/cart'
 import WebHome from './pages/WebHome'
 import CompanyProposal from './pages/CompanyProposal'
 import CompanyIntro from './pages/CompanyIntro'
@@ -67,6 +70,15 @@ import ShopLiveList from './pages/app/ShopLiveList'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 
 export default function App() {
+  // 로그인 시(카카오 포함) 게스트 장바구니를 서버 장바구니로 합친다.
+  // 게스트 카트가 비어있으면 no-op이라 SIGNED_IN이 여러 번 떠도 안전.
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') void mergeGuestCartToServer()
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>

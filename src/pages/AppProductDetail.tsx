@@ -174,7 +174,7 @@ export default function AppProductDetail() {
 
   const onAddToCart = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 담을 수 없습니다'); return }
-    if (!(await requireLogin())) return
+    // 장바구니는 로그인 없이 담을 수 있다(게스트 장바구니). 로그인은 결제 시점에만.
     const { error } = await addToCart(id, quantity)
     showToast(error ? '장바구니 담기에 실패했습니다' : '장바구니에 담았습니다')
   }

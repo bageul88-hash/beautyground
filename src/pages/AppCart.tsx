@@ -9,16 +9,13 @@ import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 export default function AppCart() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
-  const [loggedIn, setLoggedIn] = useState(true)
   const [lines, setLines] = useState<CartLine[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     let active = true
     ;(async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!active) return
-      if (!session) { setLoggedIn(false); setLoading(false); return }
+      // 로그인 여부와 무관하게 장바구니를 불러온다(게스트는 브라우저 저장분).
       const cart = await getCart()
       if (!active) return
       // 담아둔 사이 재고가 줄어 수량이 초과된 라인은 재고에 맞춰 자동 조정
@@ -78,7 +75,13 @@ export default function AppCart() {
   const deliveryFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const total = subtotal + deliveryFee
 
-  const goOrder = () => {
+  const goOrder = async () => {
+    // 주문(결제) 시점에만 로그인 요구 — 비로그인이면 로그인으로 보냄(게스트 장바구니는 localStorage에 유지됨).
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      navigate('/app/login', { state: { from: '/app/cart' } })
+      return
+    }
     navigate('/app/order', {
       state: {
         items: selectedLines.map((l) => ({
@@ -97,26 +100,6 @@ export default function AppCart() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-text-hint text-[14px]">불러오는 중...</p>
-      </div>
-    )
-  }
-
-  if (!loggedIn) {
-    return (
-      <div className="min-h-screen bg-cream-4">
-        <BackHeader title="장바구니" />
-        <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
-          <span className="text-5xl mb-4" aria-hidden="true">🛒</span>
-          <p className="text-[16px] font-bold text-text mb-2">로그인이 필요해요</p>
-          <p className="text-[13px] text-text-sub mb-6">로그인하면 장바구니를 이용할 수 있어요</p>
-          <button
-            onClick={() => navigate('/app/login', { state: { from: '/app/cart' } })}
-            className="bg-gold text-white font-semibold text-[14px] px-8 py-3 rounded-pill hover:bg-gold-light transition-colors"
-          >
-            로그인하기
-          </button>
-        </div>
-        <BottomNav />
       </div>
     )
   }
