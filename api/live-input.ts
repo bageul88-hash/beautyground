@@ -82,19 +82,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { data: live } = await supabase
     .from('lives')
-    .select('id, title, partner_id, stream_uid')
+    .select('id, title, partner_id, host_id, stream_uid')
     .eq('id', liveId)
     .single()
   if (!live) {
     res.status(404).json({ ok: false, reason: '라이브를 찾을 수 없습니다.' })
     return
   }
-  const { data: partner } = await supabase
-    .from('partners')
-    .select('id, user_id')
-    .eq('id', live.partner_id)
-    .single()
-  if (!partner || partner.user_id !== user.id) {
+
+  // 방송 채널 관리 권한: 브랜드(파트너) 본인 또는 이 라이브에 지정된 진행자(host) 본인
+  let authorized = false
+  if (live.partner_id) {
+    const { data: partner } = await supabase
+      .from('partners')
+      .select('id, user_id')
+      .eq('id', live.partner_id)
+      .single()
+    if (partner && partner.user_id === user.id) authorized = true
+  }
+  if (!authorized && live.host_id) {
+    const { data: host } = await supabase
+      .from('hosts')
+      .select('id, user_id')
+      .eq('id', live.host_id)
+      .single()
+    if (host && host.user_id === user.id) authorized = true
+  }
+  if (!authorized) {
     res.status(403).json({ ok: false, reason: '본인 라이브만 관리할 수 있습니다.' })
     return
   }
