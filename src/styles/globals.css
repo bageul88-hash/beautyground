@@ -105,6 +105,21 @@
   animation: float-heart 1.8s ease-out forwards;
 }
 
+/* 온에어 표시등 — 방송 중일 때만. 크기·위치는 그대로 두고 불투명도만 변한다
+   (DESIGN.md: 움직임은 불투명도와 transform으로만, 튕김 없음) */
+@keyframes onair-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.25; }
+}
+.onair-dot {
+  animation: onair-blink 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .onair-dot {
+    animation: none;
+  }
+}
+
 /* 구매 후기 흐르는 띠 (오른쪽 → 왼쪽 무한 루프) */
 @keyframes review-marquee {
   from { transform: translateX(0); }

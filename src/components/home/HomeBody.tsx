@@ -1,20 +1,15 @@
-import { Link } from 'react-router-dom'
 import AppHeader from '../layout/AppHeader'
 import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
 import CategoryShortcutGrid from './CategoryShortcutGrid'
-import RecommendedRow from './RecommendedRow'
-import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
+import ProductRail from './ProductRail'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
-import type { Live } from '../../lib/types'
-import LiveStatusBadge from '../live/LiveStatusBadge'
 
 interface HomeBodyProps {
   marqueeItems: string[]
   banners: HeroBanner[]
-  lives: Live[]
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
@@ -29,7 +24,6 @@ interface HomeBodyProps {
 export default function HomeBody({
   marqueeItems,
   banners,
-  lives,
   categories,
   categoryThumbnails,
   recommended,
@@ -45,79 +39,21 @@ export default function HomeBody({
       <HeroCarousel banners={banners} />
       <CategoryShortcutGrid categories={categories} thumbnails={categoryThumbnails} onSelect={onCategoryClick} />
 
-      <RecommendedRow products={recommended} onProductClick={onProductClick} />
-
-      {lives.length > 0 && (
-        <section className="pt-4" aria-labelledby="home-live">
-          <div className="flex items-center justify-between px-4 mb-2.5">
-            <h2 id="home-live" className="text-base font-bold text-text">
-              지금 라이브
-            </h2>
-            <Link to="/app/live" className="text-xs text-text-sub">
-              전체보기 ›
-            </Link>
-          </div>
-          <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide">
-            {lives.map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="flex-shrink-0 w-[150px]">
-                <div className="relative aspect-square rounded-lg overflow-hidden bg-cream-3">
-                  {live.thumbnail_url ? (
-                    <img
-                      src={live.thumbnail_url}
-                      alt={live.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const img = e.currentTarget
-                        img.style.display = 'none'
-                        img.nextElementSibling?.classList.remove('hidden')
-                      }}
-                    />
-                  ) : null}
-                  <img
-                    src="/images/bg-logo-mark.png"
-                    alt=""
-                    className={`w-full h-full object-cover ${live.thumbnail_url ? 'hidden' : ''}`}
-                    aria-hidden="true"
-                  />
-                  <span className="absolute top-2 left-2">
-                    <LiveStatusBadge live={live} size="sm" />
-                  </span>
-                </div>
-                <p className="text-sm text-text mt-1.5 truncate">{live.title}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="px-4 pt-5" aria-labelledby="home-products">
-        <h2 id="home-products" className="text-base font-bold text-text mb-3">
-          신상품
-        </h2>
-        {prodLoading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ShopProductCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : products.length === 0 ? (
-          <p className="text-center py-10 text-text-hint text-sm">준비 중입니다</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {products.map((product) => (
-              <button
-                key={product.id}
-                onClick={() => onProductClick(product.id)}
-                className="text-left focus:outline-none focus:shadow-focus rounded-lg"
-                aria-label={product.name}
-              >
-                <ShopProductCard product={product} />
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+      {/* 추천 상품·신상품은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
+          좌우 버튼 탐색이 두 섹션에서 항상 일치한다. */}
+      <ProductRail
+        id="home-recommended"
+        title="추천 상품"
+        products={recommended}
+        onProductClick={onProductClick}
+      />
+      <ProductRail
+        id="home-products"
+        title="신상품"
+        products={products}
+        loading={prodLoading}
+        onProductClick={onProductClick}
+      />
     </>
   )
 }

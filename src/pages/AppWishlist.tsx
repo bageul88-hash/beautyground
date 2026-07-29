@@ -4,6 +4,7 @@ import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import { supabase } from '../lib/supabase'
 import { getWishlist, removeWish, type WishlistLine } from '../lib/wishlist'
+import ImagePlaceholder from '../components/common/ImagePlaceholder'
 
 export default function AppWishlist() {
   const navigate = useNavigate()
@@ -87,7 +88,7 @@ export default function AppWishlist() {
                     {p.thumbnail_url ? (
                       <img src={p.thumbnail_url} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
-                      <img src="/images/bg-logo-mark.png" alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                      <ImagePlaceholder />
                     )}
                   </div>
                   <p className="text-[13px] text-text mt-1.5 line-clamp-1">{p.name}</p>

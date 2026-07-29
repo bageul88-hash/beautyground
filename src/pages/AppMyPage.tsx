@@ -210,40 +210,6 @@ export default function AppMyPage() {
         </div>
       </div>
 
-      {/* 백화점 멤버십 */}
-      <div className="mt-2 bg-white px-5 py-4">
-        <h2 className="text-[14px] font-bold text-text mb-3">백화점 멤버십 연동</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { key: 'ak', name: 'AK플라자', logo: '/images/memberships/ak.png', connected: true },
-            { key: 'lotte', name: '롯데백화점', logo: '/images/memberships/lotte.svg', connected: false },
-            { key: 'shinsegae', name: '신세계백화점', logo: '/images/memberships/shinsegae.png', connected: false },
-            { key: 'hyundai', name: '현대백화점', logo: '/images/memberships/hyundai.png', connected: false },
-          ].map(({ key, name, logo, connected }) => (
-            <button
-              key={key}
-              className="rounded-md py-4 px-3 flex flex-col items-center justify-center gap-2.5 border transition-colors focus:outline-none focus:shadow-focus"
-              style={{
-                backgroundColor: connected ? '#faf5ea' : '#f8f7f5',
-                borderColor: connected ? '#b8924a' : '#e5e0d8',
-              }}
-              aria-label={`${name} 멤버십 ${connected ? '연동됨' : '연동하기'}`}
-            >
-              <img src={logo} alt={name} className="h-[16px] max-w-[120px] object-contain" />
-              <span
-                className="text-[10px] px-2 py-0.5 rounded-pill font-medium"
-                style={{
-                  backgroundColor: connected ? '#b8924a' : '#e5e0d8',
-                  color: connected ? '#fff' : '#9a9080',
-                }}
-              >
-                {connected ? '연동됨' : '연동'}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* 메뉴 */}
       <div className="mt-2 bg-white">
         {buildMenuItems(user).map(({ icon, label, path, count, value }) => (

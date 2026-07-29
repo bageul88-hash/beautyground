@@ -4,10 +4,10 @@ export default function MarqueeBar({ items }: { items: string[] }) {
   const loop = [...items, ...items]
 
   return (
-    <div className="h-[34px] bg-white border-b border-cream-2 overflow-hidden flex items-center">
+    <div className="h-[34px] bg-paper border-b border-rule overflow-hidden flex items-center">
       <div className="flex gap-10 whitespace-nowrap px-4 animate-marquee">
         {loop.map((text, i) => (
-          <span key={i} className="text-[12.5px] font-semibold text-text">
+          <span key={i} className="text-[12.5px] font-bold text-ink">
             {text}
           </span>
         ))}

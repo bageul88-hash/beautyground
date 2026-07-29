@@ -3,7 +3,6 @@ import { supabase } from '../../lib/supabase'
 import { won } from '../../lib/format'
 import Button from '../../components/common/Button'
 import HomeBody from '../../components/home/HomeBody'
-import { useShopLives } from '../../hooks/useShopLives'
 import { useShopCategories } from '../../hooks/useShopCategories'
 import { useShopProducts } from '../../hooks/useShopProducts'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
@@ -58,7 +57,6 @@ export default function AdminHome() {
   const [savingCategory, setSavingCategory] = useState<string | null>(null)
 
   // 미리보기용 실데이터
-  const { lives } = useShopLives()
   const { categories } = useShopCategories()
   const { products: previewProducts, loading: prodLoading } = useShopProducts({ sort: 'latest', pageSize: 10 })
 
@@ -488,7 +486,6 @@ export default function AdminHome() {
               <HomeBody
                 marqueeItems={marqueeItems.filter((t) => t.trim())}
                 banners={previewBanners}
-                lives={lives}
                 categories={categories}
                 categoryThumbnails={previewCategoryThumbnails}
                 recommended={previewProducts}

@@ -5,6 +5,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // ── 새 비주얼 월드 "생방송 슬레이트" (DESIGN.md) ──
+        // 흰 바탕 + 원색 3개. 색은 사실을 말할 때만 켜진다:
+        // 빨강=지금 벌어지는 일 / 파랑=확정된 정보·행동 / 노랑=조건부 혜택.
+        paper: '#FFFFFF',
+        ink: {
+          DEFAULT: '#17181C', // 본문·기본 버튼 바탕 (순검정 아닌 먹색)
+          soft: '#5B5E66', // 보조 설명·브랜드명
+          faint: '#8E9199', // 캡션·단위·플레이스홀더
+        },
+        rule: '#E3E5E9', // 면을 나누는 1px 선 — 이 시스템의 유일한 구획 수단
+        quiet: '#F4F5F7', // 입력·비활성 등 눌린 면
+        signal: {
+          red: '#E60012',
+          blue: '#0047FF',
+          yellow: '#FFD400',
+        },
+
+        // ── 구 골드 월드 (폐기 대상) ──
+        // 아직 전환되지 않은 화면들이 참조 중이라 남겨둔다. 화면을 하나씩
+        // 새 월드로 옮기면서 제거할 것 — 신규 작업에서 새로 쓰지 말 것.
         gold: {
           DEFAULT: '#b8924a',
           light: '#d4af6e',
@@ -60,6 +80,9 @@ const config: Config = {
         serif: ['"맑은 고딕"', '"Malgun Gothic"', '"Apple SD Gothic Neo"', '"Noto Sans KR"', 'sans-serif'],
       },
       borderRadius: {
+        // 새 월드: 면은 직각(0), 손으로 누르는 것만 4px. 그 외 값은 구 월드 잔재.
+        field: '0px',
+        control: '4px',
         sm: '8px',
         md: '14px',
         lg: '20px',
@@ -67,7 +90,8 @@ const config: Config = {
         pill: '999px',
       },
       boxShadow: {
-        focus: '0 0 0 2px #b8924a',
+        focus: '0 0 0 2px #b8924a', // 구 월드
+        ring: '0 0 0 2px #FFFFFF, 0 0 0 4px #0047FF', // 새 월드 포커스 링(2px 띄운 파랑)
       },
     },
   },

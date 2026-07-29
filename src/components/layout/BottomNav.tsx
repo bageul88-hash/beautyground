@@ -1,37 +1,38 @@
 import { Link, useLocation } from 'react-router-dom'
+import { IconHome, IconSearch, IconHeart, IconUser } from '../common/Icon'
 
+// 온라인몰과 라이브커머스를 당분간 분리하기로 해(대표님 지시 2026-07-29)
+// '라이브' 탭을 뺐다 — 온라인몰 상시 네비게이션에 라이브 진입점을 두지 않는다.
 const NAV_ITEMS = [
-  { path: '/app/home', icon: '🏠', label: '홈' },
-  { path: '/app/live', icon: '📺', label: '라이브' },
-  { path: '/app/category', icon: '🔍', label: '카테고리' },
-  { path: '/app/wishlist', icon: '🤍', label: '찜' },
-  { path: '/app/mypage', icon: '👤', label: '마이' },
+  { path: '/app/home', Icon: IconHome, label: '홈' },
+  { path: '/app/category', Icon: IconSearch, label: '카테고리' },
+  { path: '/app/wishlist', Icon: IconHeart, label: '찜' },
+  { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]
 
-const GOLD = '#b8924a'
-const GRAY = '#9a9080'
-
+// 선택 표시에 원색을 쓰지 않는다 — 신호색(빨강·파랑·노랑)은 사실을 말할 때만 켜지고,
+// 탭 선택 같은 상시 상태에 색을 소모하면 온에어 신호가 묻힌다. 굵기와 잉크 농도로만 구분.
 export default function BottomNav() {
   const { pathname } = useLocation()
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
-      <div className="max-w-[480px] mx-auto bg-white border-t border-cream-2 pb-safe">
+      <div className="max-w-[480px] mx-auto bg-paper border-t border-rule pb-safe">
         <div className="flex items-stretch h-14">
-          {NAV_ITEMS.map(({ path, icon, label }) => {
+          {NAV_ITEMS.map(({ path, Icon, label }) => {
             const isActive = pathname === path
             return (
               <Link
                 key={path}
                 to={path}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5"
+                className={`flex-1 flex flex-col items-center justify-center gap-1 focus:outline-none focus-visible:shadow-ring ${
+                  isActive ? 'text-ink' : 'text-ink-faint'
+                }`}
                 aria-label={label}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span className="text-lg leading-none" aria-hidden="true">{icon}</span>
-                <span className="text-xs" style={{ color: isActive ? GOLD : GRAY }}>
-                  {label}
-                </span>
+                <Icon className="w-[21px] h-[21px]" strokeWidth={isActive ? 2 : 1.6} />
+                <span className={`text-[11px] leading-none ${isActive ? 'font-bold' : ''}`}>{label}</span>
               </Link>
             )
           })}

@@ -11,7 +11,7 @@ const sep = <span className="text-black/15" aria-hidden="true">|</span>
 
 export default function AppFooter() {
   return (
-    <footer className="bg-cream-3 border-t border-cream-2">
+    <footer className="bg-paper border-t border-rule">
       <div className="px-5 pt-7 pb-9">
         {/* 상단 링크 탭 */}
         <nav className="flex items-center gap-4 text-[13px] font-semibold text-text-sub pb-5 border-b border-black/[0.06]" aria-label="하단 메뉴">
@@ -59,7 +59,7 @@ export default function AppFooter() {
         <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12.5px]">
           <Link to="/terms" className="text-text-sub hover:text-text transition-colors">이용약관</Link>
           {sep}
-          <Link to="/privacy" className="text-text font-semibold hover:text-gold transition-colors">개인정보처리방침</Link>
+          <Link to="/privacy" className="text-text font-semibold hover:text-ink transition-colors">개인정보처리방침</Link>
           {sep}
           <Link to="/company" className="text-text-sub hover:text-text transition-colors">회사소개</Link>
         </div>
