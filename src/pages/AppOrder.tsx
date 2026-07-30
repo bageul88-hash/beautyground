@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { COMPANY_INFO } from '../lib/companyInfo'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 import { getAddresses, addAddress, type Address } from '../lib/addresses'
+import { searchAddress } from '../lib/daumPostcode'
 import type { LiveCoupon } from '../lib/types'
 import { couponDiscountAmount, couponEligible, couponLabel, couponSoldOut } from '../lib/coupons'
 
@@ -51,6 +52,7 @@ export default function AppOrder() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [addressDetail, setAddressDetail] = useState('')
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [saveNewAddress, setSaveNewAddress] = useState(true)
@@ -65,7 +67,14 @@ export default function AppOrder() {
     setName(a.recipient_name)
     setPhone(a.phone)
     setAddress(a.address)
+    setAddressDetail('')
     setSelectedAddressId(a.id)
+  }
+  const handleSearchAddress = async () => {
+    const result = await searchAddress().catch(() => null)
+    if (!result) return
+    setAddress(result.address)
+    setSelectedAddressId(null)
   }
   // 모바일 간편결제는 결제 후 이 페이지로 새로 리다이렉트됨 — 복귀 첫 화면부터 '결제 확인 중'으로 시작해야
   // 확인이 끝나기 전에 "주문할 상품이 없습니다"(빈 주문서)가 먼저 보이는 혼란이 없다
@@ -227,6 +236,8 @@ export default function AppOrder() {
   const couponPreview = liveCoupon && couponEligible(liveCoupon, subtotal) ? couponDiscountAmount(liveCoupon, subtotal) : 0
   const total = subtotal + deliveryFee - couponPreview
 
+  const fullAddress = [address, addressDetail].map((s) => s.trim()).filter(Boolean).join(' ')
+
   const handlePay = async () => {
     setMessage('')
     if (items.length === 0) { setMessage('주문할 상품이 없습니다.'); return }
@@ -255,7 +266,7 @@ export default function AppOrder() {
 
     // 새로 입력한(=저장된 배송지 아닌) 주소면 다음에 쓰게 저장
     if (!selectedAddressId && saveNewAddress) {
-      await addAddress({ recipientName: name.trim(), phone: phone.trim(), address: address.trim(), makeDefault: savedAddresses.length === 0 })
+      await addAddress({ recipientName: name.trim(), phone: phone.trim(), address: fullAddress, makeDefault: savedAddresses.length === 0 })
     }
 
     setStatus('paying')
@@ -499,7 +510,30 @@ export default function AppOrder() {
 
         <input value={name} onChange={(e) => editField(setName)(e.target.value)} placeholder="받는 분 성함" className={field} />
         <input value={phone} onChange={(e) => editField(setPhone)(e.target.value)} placeholder="연락처 (010-0000-0000)" className={field} />
-        <input value={address} onChange={(e) => editField(setAddress)(e.target.value)} placeholder="배송 주소" className={field} />
+        <div className="flex gap-2">
+          <input
+            value={address}
+            readOnly
+            onClick={handleSearchAddress}
+            placeholder="주소 검색을 눌러주세요"
+            className={`${field} cursor-pointer`}
+          />
+          <button
+            type="button"
+            onClick={handleSearchAddress}
+            className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 focus:outline-none focus-visible:shadow-ring"
+          >
+            주소 검색
+          </button>
+        </div>
+        {address && (
+          <input
+            value={addressDetail}
+            onChange={(e) => editField(setAddressDetail)(e.target.value)}
+            placeholder="상세 주소 (동/호수 등)"
+            className={field}
+          />
+        )}
 
         {!selectedAddressId && (
           <label className="flex items-center gap-2 cursor-pointer">

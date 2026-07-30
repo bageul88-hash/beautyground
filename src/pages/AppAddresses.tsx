@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import AppFrame from '../components/layout/AppFrame'
 import { supabase } from '../lib/supabase'
 import { getAddresses, addAddress, setDefaultAddress, deleteAddress, type Address } from '../lib/addresses'
+import { searchAddress } from '../lib/daumPostcode'
 
 const field =
   'w-full rounded-control bg-paper border border-rule px-3.5 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring'
@@ -16,8 +18,14 @@ export default function AppAddresses() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [addressDetail, setAddressDetail] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  const handleSearchAddress = async () => {
+    const result = await searchAddress().catch(() => null)
+    if (result) setAddress(result.address)
+  }
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -38,10 +46,11 @@ export default function AppAddresses() {
       return
     }
     setSaving(true)
-    const { error: err } = await addAddress({ recipientName: name.trim(), phone: phone.trim(), address: address.trim() })
+    const fullAddress = [address, addressDetail].map((s) => s.trim()).filter(Boolean).join(' ')
+    const { error: err } = await addAddress({ recipientName: name.trim(), phone: phone.trim(), address: fullAddress })
     setSaving(false)
     if (err) { setError('배송지 저장에 실패했습니다.'); return }
-    setName(''); setPhone(''); setAddress(''); setShowForm(false)
+    setName(''); setPhone(''); setAddress(''); setAddressDetail(''); setShowForm(false)
     await load()
   }
 
@@ -61,7 +70,7 @@ export default function AppAddresses() {
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen bg-paper">
+      <AppFrame>
         <BackHeader title="배송지 관리" />
         <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
           <p className="text-[15px] text-ink-soft mb-6">로그인이 필요해요</p>
@@ -72,12 +81,12 @@ export default function AppAddresses() {
             로그인하기
           </button>
         </div>
-      </div>
+      </AppFrame>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-10">
+    <AppFrame>
       <BackHeader title="배송지 관리" />
 
       <div className="px-4 pt-4 space-y-3">
@@ -112,7 +121,30 @@ export default function AppAddresses() {
             <h2 className="text-[14px] font-bold text-ink">새 배송지</h2>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="받는 분 성함" className={field} />
             <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="연락처 (010-0000-0000)" className={field} />
-            <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="배송 주소" className={field} />
+            <div className="flex gap-2">
+              <input
+                value={address}
+                readOnly
+                onClick={handleSearchAddress}
+                placeholder="주소 검색을 눌러주세요"
+                className={`${field} cursor-pointer`}
+              />
+              <button
+                type="button"
+                onClick={handleSearchAddress}
+                className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 focus:outline-none focus-visible:shadow-ring"
+              >
+                주소 검색
+              </button>
+            </div>
+            {address && (
+              <input
+                value={addressDetail}
+                onChange={(e) => setAddressDetail(e.target.value)}
+                placeholder="상세 주소 (동/호수 등)"
+                className={field}
+              />
+            )}
             {error && <p className="text-[13px] text-signal-red">{error}</p>}
             <div className="flex gap-2">
               {addresses.length > 0 && (
@@ -134,6 +166,6 @@ export default function AppAddresses() {
           </button>
         )}
       </div>
-    </div>
+    </AppFrame>
   )
 }
