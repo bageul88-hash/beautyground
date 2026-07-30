@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import { supabase } from '../lib/supabase'
@@ -83,6 +83,7 @@ function fromMock(m: (typeof ALL_PRODUCTS)[number]): ProductView {
 export default function AppProductDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState(0)
   const [activeImg, setActiveImg] = useState(0)
@@ -120,6 +121,33 @@ export default function AppProductDetail() {
     return () => { active = false }
   }, [id])
 
+  // 비로그인 상태로 "구매하기"를 눌러 로그인 페이지로 갔다가(?intent=buy 태그) 로그인 완료 후
+  // 이 페이지로 돌아오면, 다시 누르게 하지 않고 자동으로 주문서까지 이어간다.
+  useEffect(() => {
+    if (loading || !view || !id) return
+    if (new URLSearchParams(location.search).get('intent') !== 'buy') return
+    let active = true
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!active || !session) return
+      navigate('/app/order', {
+        replace: true,
+        state: {
+          items: [
+            {
+              product_id: id,
+              name: view.name,
+              price: view.price,
+              quantity,
+              thumbnail: view.images[0] ?? null,
+            },
+          ],
+        },
+      })
+    })()
+    return () => { active = false }
+  }, [loading, view, id, quantity, location.search, navigate])
+
   const showToast = (msg: string) => {
     setToast(msg)
     window.setTimeout(() => setToast(''), 2000)
@@ -149,16 +177,18 @@ export default function AppProductDetail() {
   const isDbProduct = !!id && !/^\d+$/.test(id)
 
   // 비로그인이면 로그인 페이지로 보내고, 로그인 후 원래 페이지로 복귀
-  const requireLogin = async (): Promise<boolean> => {
+  // intent를 넘기면 로그인 완료 후 그 의도(예: 구매)를 자동으로 이어간다
+  const requireLogin = async (intent?: string): Promise<boolean> => {
     const { data: { session } } = await supabase.auth.getSession()
     if (session) return true
-    navigate('/app/login', { state: { from: `/app/product/${id}` } })
+    const qs = intent ? `?intent=${intent}` : ''
+    navigate('/app/login', { state: { from: `/app/product/${id}${qs}` } })
     return false
   }
 
   const onBuy = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 구매할 수 없습니다'); return }
-    if (!(await requireLogin())) return
+    if (!(await requireLogin('buy'))) return
     navigate('/app/order', {
       state: {
         items: [
