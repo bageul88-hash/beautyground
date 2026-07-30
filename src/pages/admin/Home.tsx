@@ -4,7 +4,7 @@ import { won } from '../../lib/format'
 import Button from '../../components/common/Button'
 import HomeBody from '../../components/home/HomeBody'
 import { useShopCategories } from '../../hooks/useShopCategories'
-import { useShopProducts } from '../../hooks/useShopProducts'
+import { useHomeProductSections } from '../../hooks/useHomeProductSections'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
@@ -58,7 +58,11 @@ export default function AdminHome() {
 
   // 미리보기용 실데이터
   const { categories } = useShopCategories()
-  const { products: previewProducts, loading: prodLoading } = useShopProducts({ sort: 'latest', pageSize: 10 })
+  // 실제 구매자 홈과 완전히 같은 로직(브랜드당 최대 2개, 신상품·추천 분리)으로 미리보기를 채운다.
+  // 전엔 최신 10개를 두 레일에 그대로 중복 표시해서 실제로는 스크롤이 안 되는 상황에서도
+  // 미리보기만 스크롤되는 것처럼 보였다 — 실제 화면과 다른 걸 보여주는 미리보기였음.
+  const { products: previewProducts, recommended: previewRecommended, loading: prodLoading } =
+    useHomeProductSections()
 
   const load = async () => {
     setLoading(true)
@@ -312,7 +316,7 @@ export default function AdminHome() {
               <select
                 value={selectedProductId}
                 onChange={(e) => setSelectedProductId(e.target.value)}
-                className="flex-1 text-[14px] border border-cream-2 rounded-md px-3 py-2.5 bg-white"
+                className="flex-1 min-w-0 text-[14px] border border-cream-2 rounded-md px-3 py-2.5 bg-white"
               >
                 <option value="">배너에 추가할 상품 선택…</option>
                 {availableProducts.map((p) => (
@@ -482,18 +486,22 @@ export default function AdminHome() {
             className="border-4 border-[#1a1710] rounded-[24px] overflow-hidden"
             style={{ width: 390, height: 720 }}
           >
-            <div className="w-full h-full overflow-y-auto bg-cream-4 pointer-events-none">
-              <HomeBody
-                marqueeItems={marqueeItems.filter((t) => t.trim())}
-                banners={previewBanners}
-                categories={categories}
-                categoryThumbnails={previewCategoryThumbnails}
-                recommended={previewProducts}
-                products={previewProducts}
-                prodLoading={prodLoading}
-                onProductClick={() => {}}
-                onCategoryClick={() => {}}
-              />
+            {/* 스크롤은 이 컨테이너가 담당(pointer-events 정상) — 클릭 차단은 안쪽 콘텐츠에만 걸어서
+                미리보기 버튼이 눌리진 않되 휠·드래그 스크롤은 그대로 동작하게 한다. */}
+            <div className="w-full h-full overflow-y-auto bg-cream-4">
+              <div className="pointer-events-none">
+                <HomeBody
+                  marqueeItems={marqueeItems.filter((t) => t.trim())}
+                  banners={previewBanners}
+                  categories={categories}
+                  categoryThumbnails={previewCategoryThumbnails}
+                  recommended={previewRecommended}
+                  products={previewProducts}
+                  prodLoading={prodLoading}
+                  onProductClick={() => {}}
+                  onCategoryClick={() => {}}
+                />
+              </div>
             </div>
           </div>
         </div>

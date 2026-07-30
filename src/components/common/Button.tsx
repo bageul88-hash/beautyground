@@ -36,7 +36,10 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       className={[
-        'rounded-pill font-sans font-medium transition-colors duration-200 focus:outline-none focus:shadow-focus disabled:opacity-50 disabled:cursor-not-allowed',
+        // shrink-0 + whitespace-nowrap: 옆에 가변폭 요소(select 등)와 한 줄에 있을 때
+        // 폭이 부족하다고 알약 버튼 자체가 찌그러들며 글자가 줄바꿈되는 것을 막는다
+        // (좁아져야 하는 건 항상 옆의 가변폭 요소이지, 라벨 있는 버튼이 아니다).
+        'rounded-pill font-sans font-medium transition-colors duration-200 shrink-0 whitespace-nowrap focus:outline-none focus:shadow-focus disabled:opacity-50 disabled:cursor-not-allowed',
         variantClasses[variant],
         sizeClasses[size],
         className,

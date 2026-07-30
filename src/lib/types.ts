@@ -207,5 +207,5 @@ export const PRODUCT_CATEGORIES = [
   '헤어·바디',
   '이너뷰티',
   '뷰티 디바이스',
-  '기타',
+  '퍼퓸 디퓨저',
 ] as const
