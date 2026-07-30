@@ -10,6 +10,8 @@ import { ALL_PRODUCTS, SHIPPING_NOTICE } from '../constants'
 import ProductInfoTable from '../components/product/ProductInfoTable'
 import CategoryTabBar from '../components/product/CategoryTabBar'
 import ReviewSummary from '../components/product/ReviewSummary'
+import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/Icon'
+import ImagePlaceholder from '../components/common/ImagePlaceholder'
 
 const DETAIL_TABS = ['상품정보', '성분', '배송/반품']
 
@@ -125,16 +127,16 @@ export default function AppProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-text-hint text-[14px]">불러오는 중...</p>
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
     )
   }
 
   if (!view) {
     return (
-      <div className="min-h-screen bg-cream-4 flex items-center justify-center">
-        <p className="text-text-hint">상품을 찾을 수 없습니다.</p>
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <p className="text-ink-faint">상품을 찾을 수 없습니다.</p>
       </div>
     )
   }
@@ -194,17 +196,17 @@ export default function AppProductDetail() {
 
   return (
     <div
-      className="min-h-screen bg-white"
+      className="min-h-screen bg-paper"
       style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
     >
       <BackHeader
         rightElement={
-          <div className="flex items-center gap-3">
-            <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'}>
-              <span className="text-xl" aria-hidden="true">{wished ? '❤️' : '🤍'}</span>
+          <div className="flex items-center gap-3 text-ink">
+            <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
+              <IconHeart filled={wished} />
             </button>
-            <button onClick={() => navigate('/app/cart')} aria-label="장바구니">
-              <span className="text-xl" aria-hidden="true">🛒</span>
+            <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="focus:outline-none focus-visible:shadow-ring">
+              <IconCart />
             </button>
           </div>
         }
@@ -220,7 +222,7 @@ export default function AppProductDetail() {
       <div className="md:flex-1 md:min-w-0">
       {view.images.length > 0 ? (
         <div>
-          <div className="aspect-square max-h-[560px] md:max-w-[560px] md:mx-auto bg-cream flex items-center justify-center overflow-hidden">
+          <div className="aspect-square max-h-[560px] md:max-w-[560px] md:mx-auto bg-quiet flex items-center justify-center overflow-hidden">
             <img
               src={view.images[Math.min(activeImg, view.images.length - 1)]}
               alt={view.name}
@@ -233,7 +235,7 @@ export default function AppProductDetail() {
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  className={`shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === activeImg ? 'border-gold' : 'border-cream-2'}`}
+                  className={`shrink-0 w-14 h-14 overflow-hidden border-2 focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'border-ink' : 'border-rule'}`}
                   aria-label={`${i + 1}번째 이미지`}
                 >
                   <img src={url} alt="" className="w-full h-full object-cover" />
@@ -243,38 +245,32 @@ export default function AppProductDetail() {
           )}
         </div>
       ) : (
-        <div
-          className="h-[280px] flex items-center justify-center"
-          style={{ backgroundColor: view.thumbColor ?? '#2a1a2e' }}
-          aria-hidden="true"
-        >
-          <span className="text-[100px] opacity-60">{view.thumbIcon ?? '🧴'}</span>
-        </div>
+        <ImagePlaceholder className="aspect-square w-full" />
       )}
       </div>{/* /왼쪽 컬럼 */}
 
       {/* 오른쪽 컬럼: 구매 박스 (데스크톱 sticky) */}
       <div className="px-4 pt-5 pb-4 md:w-[380px] md:shrink-0 md:sticky md:top-4 md:pt-0">
-        {view.brand && <p className="text-[13px] text-text-sub">{view.brand}</p>}
-        <h1 className="text-[18px] font-bold text-text mt-1 leading-tight">{view.name}</h1>
+        {view.brand && <p className="text-[13px] text-ink-soft">{view.brand}</p>}
+        <h1 className="text-[18px] font-bold text-ink mt-1 leading-tight">{view.name}</h1>
 
         {/* 가격 */}
         <div className="flex items-end gap-2 mt-3">
           {discountRate > 0 && (
-            <span className="text-[22px] font-bold text-gold">{discountRate}%</span>
+            <span className="text-[22px] font-bold tabular-nums text-ink">{discountRate}%</span>
           )}
-          <span className="text-[24px] font-bold text-text">
+          <span className="text-[24px] font-bold tabular-nums text-ink">
             {view.price.toLocaleString('ko-KR')}원
           </span>
           {view.originalPrice && (
-            <span className="text-text-hint text-[15px] line-through pb-0.5">
+            <span className="text-ink-faint text-[15px] tabular-nums line-through pb-0.5">
               {view.originalPrice.toLocaleString('ko-KR')}원
             </span>
           )}
         </div>
 
         {view.soldOut && (
-          <p className="mt-2 inline-block text-[12px] font-semibold text-[#633806] bg-[#FAEEDA] px-2.5 py-1 rounded-full">
+          <p className="mt-2 inline-block text-[12px] font-bold tracking-[0.04em] text-paper bg-ink px-2.5 py-1">
             일시 품절
           </p>
         )}
@@ -289,27 +285,27 @@ export default function AppProductDetail() {
         />
 
         {/* 수량 선택 */}
-        <div className="mt-5 flex items-center justify-between py-4 border-t border-b border-cream-2">
-          <span className="text-[14px] font-medium text-text">수량</span>
+        <div className="mt-5 flex items-center justify-between py-4 border-t border-b border-rule">
+          <span className="text-[14px] font-bold text-ink">수량</span>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-9 h-9 rounded-full border border-cream-2 flex items-center justify-center text-text hover:bg-cream-2 transition-colors disabled:opacity-40"
+              className="w-9 h-9 rounded-control border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="수량 감소"
               disabled={quantity <= 1 || view.soldOut}
             >
-              <span aria-hidden="true">−</span>
+              <IconMinus className="w-4 h-4" />
             </button>
-            <span className="text-[16px] font-bold text-text w-6 text-center" aria-live="polite">
+            <span className="text-[16px] font-bold tabular-nums text-ink w-6 text-center" aria-live="polite">
               {quantity}
             </span>
             <button
               onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
-              className="w-9 h-9 rounded-full border border-cream-2 flex items-center justify-center text-text hover:bg-cream-2 transition-colors disabled:opacity-40"
+              className="w-9 h-9 rounded-control border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="수량 증가"
               disabled={quantity >= maxQty || view.soldOut}
             >
-              <span aria-hidden="true">+</span>
+              <IconPlus className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -317,15 +313,15 @@ export default function AppProductDetail() {
         {/* 합계 + 버튼 (모바일은 하단 sticky 바가 대신하므로 데스크톱에서만) */}
         <div className="hidden md:block">
           <div className="flex items-center justify-between mt-3">
-            <span className="text-[14px] text-text-sub">총 상품 금액</span>
-            <span className="text-[20px] font-bold text-gold">{total.toLocaleString('ko-KR')}원</span>
+            <span className="text-[14px] text-ink-soft">총 상품 금액</span>
+            <span className="text-[20px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
           </div>
 
-          {/* 구매 버튼 (남색 구매하기 + 장바구니 담기 + 관심상품등록) */}
+          {/* 구매 버튼 */}
           <button
             onClick={onBuy}
             disabled={view.soldOut}
-            className="w-full mt-4 bg-[#232f52] text-white font-bold text-[15px] py-3.5 rounded-lg hover:bg-[#2e3d6a] transition-colors disabled:opacity-40"
+            className="w-full mt-4 rounded-control bg-ink text-paper font-bold text-[15px] py-3.5 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
           >
             {view.soldOut ? '일시 품절' : '구매하기'}
           </button>
@@ -333,13 +329,13 @@ export default function AppProductDetail() {
             <button
               onClick={onAddToCart}
               disabled={view.soldOut}
-              className="flex-1 border border-cream-2 text-text font-semibold text-[13px] py-3 rounded-lg hover:bg-cream-2 transition-colors disabled:opacity-40"
+              className="flex-1 rounded-control border border-rule text-ink font-bold text-[13px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             >
               장바구니 담기
             </button>
             <button
               onClick={toggleWish}
-              className="flex-1 border border-cream-2 text-text font-semibold text-[13px] py-3 rounded-lg hover:bg-cream-2 transition-colors"
+              className="flex-1 rounded-control border border-rule text-ink font-bold text-[13px] py-3 focus:outline-none focus-visible:shadow-ring"
             >
               {wished ? '♥ 관심상품' : '관심상품등록'}
             </button>
@@ -347,17 +343,17 @@ export default function AppProductDetail() {
         </div>
 
         {/* 배송 안내 */}
-        <p className="text-[12px] text-text-hint mt-3">{SHIPPING_NOTICE}</p>
+        <p className="text-[12px] text-ink-faint mt-3">{SHIPPING_NOTICE}</p>
       </div>
 
       </div>{/* /데스크톱 2컬럼 */}
 
       {/* 리뷰 요약 (대표 → 리뷰 → 상세 순서). 클릭 시 별도 리뷰 페이지로 이동 */}
-      <ReviewSummary summary={view.reviewSummary} productId={id} className="border-t border-cream-2" />
+      <ReviewSummary summary={view.reviewSummary} productId={id} className="border-t border-rule" />
 
       {/* 상세 이미지 (DB 상품) */}
       {view.detailImages.length > 0 && (
-        <div className="border-t border-cream-2">
+        <div className="border-t border-rule">
           {/* PC에서 상세컷을 넓게(원본 ~1020px) 가운데 정렬, 모바일은 화면 폭 그대로 */}
           <div className="max-w-[1000px] mx-auto w-full">
             {view.detailImages.map((url, i) => (
@@ -369,23 +365,23 @@ export default function AppProductDetail() {
 
       {/* 상세 탭 (목데이터 안내용) */}
       {view.images.length === 0 && (
-        <div className="border-t border-cream-2">
-          <div className="flex border-b border-cream-2">
+        <div className="border-t border-rule">
+          <div className="flex border-b border-rule">
             {DETAIL_TABS.map((tab, i) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(i)}
-                className={`flex-1 py-3 text-[13px] font-medium relative ${activeTab === i ? 'text-text' : 'text-text-hint'}`}
+                className={`flex-1 py-3 text-[13px] font-bold relative focus:outline-none focus-visible:shadow-ring ${activeTab === i ? 'text-ink' : 'text-ink-faint'}`}
                 aria-pressed={activeTab === i}
               >
                 {tab}
                 {activeTab === i && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gold rounded-full" aria-hidden="true" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-ink" aria-hidden="true" />
                 )}
               </button>
             ))}
           </div>
-          <div className="px-4 py-5 text-[13px] text-text-sub leading-relaxed">
+          <div className="px-4 py-5 text-[13px] text-ink-soft leading-relaxed">
             {activeTab === 0 && <p>{view.description ?? `${view.brand} ${view.name} 상품입니다.`}</p>}
             {activeTab === 1 && <p>전성분은 제품 포장을 참조해 주세요.</p>}
             {activeTab === 2 && (
@@ -401,26 +397,26 @@ export default function AppProductDetail() {
 
       {/* 모바일 하단 sticky 구매 바 (하단 네비 바로 위에 쌓임, 데스크톱은 우측 구매박스가 있어 숨김) */}
       <div
-        className="fixed left-0 right-0 bg-white border-t border-cream-2 px-4 py-3 z-40 md:hidden"
+        className="fixed left-0 right-0 bg-paper border-t border-rule px-4 py-3 z-40 md:hidden"
         style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-center gap-2.5">
           <div className="shrink-0">
-            <p className="text-[10px] text-text-hint leading-none mb-0.5">수량 {quantity}</p>
-            <p className="text-[15px] font-bold text-gold leading-none">{total.toLocaleString('ko-KR')}원</p>
+            <p className="text-[10px] text-ink-faint leading-none mb-0.5">수량 {quantity}</p>
+            <p className="text-[15px] font-bold tabular-nums text-ink leading-none">{total.toLocaleString('ko-KR')}원</p>
           </div>
           <button
             onClick={onAddToCart}
             disabled={view.soldOut}
-            className="shrink-0 border border-[#232f52] text-[#232f52] font-semibold text-[13px] px-4 py-3 rounded-lg hover:bg-cream-2 transition-colors disabled:opacity-40"
+            className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             aria-label="장바구니 담기"
           >
-            🛒 담기
+            <IconCart className="w-5 h-5" />
           </button>
           <button
             onClick={onBuy}
             disabled={view.soldOut}
-            className="flex-1 bg-[#232f52] text-white font-semibold text-[14px] py-3 rounded-lg hover:bg-[#2e3d6a] transition-colors disabled:opacity-40"
+            className="flex-1 rounded-control bg-ink text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
           >
             {view.soldOut ? '일시 품절' : '구매하기'}
           </button>
@@ -429,7 +425,7 @@ export default function AppProductDetail() {
 
       {/* 토스트 */}
       {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-text text-white text-[13px] px-4 py-2.5 rounded-full">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-control bg-ink text-paper text-[13px] px-4 py-2.5">
           {toast}
         </div>
       )}

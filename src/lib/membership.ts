@@ -12,11 +12,12 @@ export interface MembershipTier {
   bg: string
 }
 
+// 등급 배지는 색 대신 잉크 농도로만 단계를 구분한다(원색은 신호 전용 — 등급은 신호가 아니라 상태 표시).
 export const TIERS: MembershipTier[] = [
-  { key: 'BASIC', label: 'BASIC', min: 0, rewardRate: 1, color: '#6b7280', bg: '#f3f4f6' },
-  { key: 'SILVER', label: 'SILVER', min: 100_000, rewardRate: 2, color: '#64748b', bg: '#eef2f7' },
-  { key: 'GOLD', label: 'GOLD', min: 300_000, rewardRate: 3, color: '#a16207', bg: '#fdf3d7' },
-  { key: 'VIP', label: 'VIP', min: 700_000, rewardRate: 5, color: '#7c2d5e', bg: '#fbe9f3' },
+  { key: 'BASIC', label: 'BASIC', min: 0, rewardRate: 1, color: '#8E9199', bg: '#F4F5F7' },
+  { key: 'SILVER', label: 'SILVER', min: 100_000, rewardRate: 2, color: '#5B5E66', bg: '#F4F5F7' },
+  { key: 'GOLD', label: 'GOLD', min: 300_000, rewardRate: 3, color: '#17181C', bg: '#FFFFFF' },
+  { key: 'VIP', label: 'VIP', min: 700_000, rewardRate: 5, color: '#FFFFFF', bg: '#17181C' },
 ]
 
 // 누적 구매금액으로 등급 산정

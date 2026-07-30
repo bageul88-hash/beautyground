@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { IconBack } from '../common/Icon'
 
 interface BackHeaderProps {
   title?: string
@@ -18,18 +19,18 @@ export default function BackHeader({ title, rightElement, onBack, transparent = 
   return (
     <header
       className={`flex items-center justify-between px-4 py-3 h-14 sticky top-0 z-50 ${
-        transparent ? 'bg-transparent' : 'bg-white border-b border-cream-2'
+        transparent ? 'bg-transparent' : 'bg-paper border-b border-rule'
       }`}
     >
       <button
         onClick={handleBack}
-        className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-cream-2 transition-colors"
+        className="w-9 h-9 flex items-center justify-center text-ink focus:outline-none focus-visible:shadow-ring"
         aria-label="뒤로 가기"
       >
-        <span className="text-lg" aria-hidden="true">←</span>
+        <IconBack className="w-[22px] h-[22px]" />
       </button>
       {title && (
-        <h1 className="text-[16px] font-bold text-text absolute left-1/2 -translate-x-1/2">
+        <h1 className="text-[16px] font-bold text-ink absolute left-1/2 -translate-x-1/2">
           {title}
         </h1>
       )}

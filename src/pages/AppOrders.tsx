@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import { supabase } from '../lib/supabase'
 import type { Order } from '../lib/types'
+import ImagePlaceholder from '../components/common/ImagePlaceholder'
 
 // 주문내역 — 같은 결제(payment_id) 단위로 묶어 보여준다.
 // 결제 미완료(pending/failed) 행은 잔재이므로 표시하지 않는다.
@@ -22,12 +23,13 @@ interface OrderGroup {
   trackingCarrier: string | null
 }
 
+// 배송 진행 상태는 전부 잉크(중립)로 — 지금 처리해야 할 것만(취소 요청) 신호색을 쓴다.
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  paid: { label: '결제완료', cls: 'bg-gold/15 text-gold' },
-  shipped: { label: '배송중', cls: 'bg-[#EEF3FE] text-[#2E5AAC]' },
-  done: { label: '배송완료', cls: 'bg-[#E1F5EE] text-[#0B7A55]' },
-  cancelled: { label: '취소됨', cls: 'bg-cream-3 text-text-hint' },
-  cancel_requested: { label: '취소 요청됨', cls: 'bg-[#FDF0EC] text-[#B4472A]' },
+  paid: { label: '결제완료', cls: 'bg-ink text-paper' },
+  shipped: { label: '배송중', cls: 'bg-ink text-paper' },
+  done: { label: '배송완료', cls: 'bg-quiet text-ink-soft' },
+  cancelled: { label: '취소됨', cls: 'bg-quiet text-ink-faint' },
+  cancel_requested: { label: '취소 요청됨', cls: 'bg-paper text-signal-red border border-signal-red' },
 }
 const VISIBLE_STATUSES = new Set(Object.keys(STATUS_BADGE))
 
@@ -100,17 +102,17 @@ export default function AppOrders() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-white flex items-center justify-center text-text-hint text-[14px]">불러오는 중...</div>
+    return <div className="min-h-screen bg-paper flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
   }
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen bg-cream-4">
+      <div className="min-h-screen bg-paper">
         <BackHeader title="주문 내역" />
         <div className="flex flex-col items-center justify-center px-8 pt-28 text-center">
-          <p className="text-[15px] text-text mb-2 font-semibold">로그인이 필요해요</p>
-          <p className="text-[13px] text-text-hint mb-6">주문 내역은 로그인 후 확인할 수 있어요.</p>
-          <button onClick={() => navigate('/app/login')} className="bg-gold text-white font-semibold text-[14px] px-8 py-3.5 rounded-pill">
+          <p className="text-[15px] text-ink mb-2 font-bold">로그인이 필요해요</p>
+          <p className="text-[13px] text-ink-faint mb-6">주문 내역은 로그인 후 확인할 수 있어요.</p>
+          <button onClick={() => navigate('/app/login')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring">
             로그인하기
           </button>
         </div>
@@ -119,19 +121,18 @@ export default function AppOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-4 pb-16">
+    <div className="min-h-screen bg-paper pb-16">
       <BackHeader title="주문 내역" />
 
       {msg && (
-        <div className="mx-4 mt-3 bg-[#FDF0EC] text-[#B4472A] text-[12.5px] rounded-md px-4 py-3">{msg}</div>
+        <div className="mx-4 mt-3 bg-paper border border-signal-red text-signal-red text-[12.5px] rounded-control px-4 py-3">{msg}</div>
       )}
 
       {groups.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-8 pt-28 text-center">
-          <div className="text-4xl mb-4" aria-hidden="true">📦</div>
-          <p className="text-[15px] text-text font-semibold mb-2">아직 주문 내역이 없어요</p>
-          <p className="text-[13px] text-text-hint mb-6">마음에 드는 상품을 찾아보세요.</p>
-          <button onClick={() => navigate('/app/home')} className="bg-gold text-white font-semibold text-[14px] px-8 py-3.5 rounded-pill">
+          <p className="text-[15px] text-ink font-bold mb-2">아직 주문 내역이 없어요</p>
+          <p className="text-[13px] text-ink-faint mb-6">마음에 드는 상품을 찾아보세요.</p>
+          <button onClick={() => navigate('/app/home')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring">
             쇼핑하러 가기
           </button>
         </div>
@@ -142,27 +143,29 @@ export default function AppOrders() {
             const d = new Date(g.createdAt)
             const dateStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
             return (
-              <div key={g.paymentId} className="bg-white rounded-[14px] border border-cream-2 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-cream-3">
-                  <span className="text-[12.5px] text-text-hint">{dateStr} 주문</span>
-                  <span className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-pill ${badge.cls}`}>{badge.label}</span>
+              <div key={g.paymentId} className="bg-paper border border-rule overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-rule">
+                  <span className="text-[12.5px] text-ink-faint">{dateStr} 주문</span>
+                  <span className={`text-[11.5px] font-bold px-2.5 py-1 rounded-control ${badge.cls}`}>{badge.label}</span>
                 </div>
 
-                <div className="divide-y divide-cream-3">
+                <div className="divide-y divide-rule">
                   {g.items.map((it) => (
                     <Link
                       key={it.id}
                       to={it.product_id ? `/app/product/${it.product_id}` : '#'}
-                      className="flex items-center gap-3 px-4 py-3"
+                      className="flex items-center gap-3 px-4 py-3 focus:outline-none focus-visible:shadow-ring"
                     >
-                      <div className="w-14 h-14 rounded-md bg-cream-3 overflow-hidden shrink-0">
-                        {it.products?.thumbnail_url && (
+                      <div className="w-14 h-14 bg-quiet overflow-hidden shrink-0">
+                        {it.products?.thumbnail_url ? (
                           <img src={it.products.thumbnail_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <ImagePlaceholder />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13.5px] text-text truncate">{it.products?.name ?? it.order_name ?? '상품'}</p>
-                        <p className="text-[12px] text-text-hint mt-0.5">
+                        <p className="text-[13.5px] text-ink truncate">{it.products?.name ?? it.order_name ?? '상품'}</p>
+                        <p className="text-[12px] text-ink-faint mt-0.5 tabular-nums">
                           {it.quantity}개 · {it.amount.toLocaleString('ko-KR')}원
                         </p>
                       </div>
@@ -170,19 +173,19 @@ export default function AppOrders() {
                   ))}
                 </div>
 
-                <div className="px-4 py-3 bg-cream-4/60 border-t border-cream-3">
+                <div className="px-4 py-3 bg-quiet border-t border-rule">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12.5px] text-text-hint">
+                    <span className="text-[12.5px] text-ink-faint">
                       {g.shippingFee > 0 ? `배송비 ${g.shippingFee.toLocaleString('ko-KR')}원 포함` : '무료배송'}
                     </span>
-                    <span className="text-[14.5px] font-bold text-text">
+                    <span className="text-[14.5px] font-bold tabular-nums text-ink">
                       총 {g.total.toLocaleString('ko-KR')}원
                     </span>
                   </div>
 
                   {g.trackingNumber && (
-                    <p className="mt-2 text-[12.5px] text-text-sub">
-                      🚚 {g.trackingCarrier ? `${g.trackingCarrier} ` : ''}운송장 <b className="select-all">{g.trackingNumber}</b>
+                    <p className="mt-2 text-[12.5px] text-ink-soft">
+                      {g.trackingCarrier ? `${g.trackingCarrier} ` : ''}운송장 <b className="select-all">{g.trackingNumber}</b>
                     </p>
                   )}
 
@@ -190,13 +193,13 @@ export default function AppOrders() {
                     <button
                       onClick={() => requestCancel(g)}
                       disabled={cancelling === g.paymentId}
-                      className="mt-3 w-full text-[13px] text-text-sub border border-cream-2 rounded-md py-2.5 bg-white hover:bg-cream-4 transition disabled:opacity-50"
+                      className="mt-3 w-full text-[13px] text-ink-soft rounded-control border border-rule py-2.5 bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
                     >
                       {cancelling === g.paymentId ? '요청 중...' : '주문 취소 요청'}
                     </button>
                   )}
                   {g.status === 'cancel_requested' && (
-                    <p className="mt-2 text-[12px] text-[#B4472A]">확인 후 취소가 확정됩니다.</p>
+                    <p className="mt-2 text-[12px] text-signal-red">확인 후 취소가 확정됩니다.</p>
                   )}
                 </div>
               </div>

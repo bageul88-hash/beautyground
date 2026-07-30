@@ -7,8 +7,8 @@ import BottomNav from './BottomNav'
  */
 export default function AppFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-cream-2 md:py-6">
-      <div className="max-w-[480px] mx-auto bg-cream-4 min-h-screen md:min-h-0 md:rounded-lg md:overflow-hidden md:shadow-[0_12px_28px_-16px_rgba(23,19,16,.35)] pb-24">
+    <div className="min-h-screen bg-quiet md:py-6">
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-24">
         {children}
         <BottomNav />
       </div>

@@ -5,6 +5,7 @@ import AppFrame from '../components/layout/AppFrame'
 import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
 import { useShopProducts, type ShopSort } from '../hooks/useShopProducts'
 import { useShopCategories } from '../hooks/useShopCategories'
+import { IconSearch } from '../components/common/Icon'
 
 // 소비자 카테고리 슬러그 → 실제 products.category 저장값 (초기 탭 결정용)
 const SLUG_TO_CATEGORY: Record<string, string> = {
@@ -55,15 +56,15 @@ export default function AppCategoryDetail() {
       <BackHeader
         title={selected ?? '전체 상품'}
         rightElement={
-          <button aria-label="검색" className="text-xl text-text">
-            <span aria-hidden="true">🔍</span>
+          <button aria-label="검색" className="text-ink focus:outline-none focus-visible:shadow-ring">
+            <IconSearch className="w-5 h-5" />
           </button>
         }
       />
 
       {/* 카테고리 탭 */}
       <nav
-        className="bg-white border-b border-cream-2 sticky top-14 z-20"
+        className="bg-paper border-b border-rule sticky top-14 z-20"
         aria-label="카테고리"
       >
         <div className="flex gap-2 px-4 py-2.5 overflow-x-auto scrollbar-hide">
@@ -74,8 +75,8 @@ export default function AppCategoryDetail() {
                 key={t ?? '__all__'}
                 onClick={() => setSelected(t)}
                 aria-pressed={active}
-                className={`flex-shrink-0 px-3.5 py-1.5 rounded-pill text-[13px] font-medium transition-colors ${
-                  active ? 'bg-gold text-white' : 'bg-cream-3 text-text-sub hover:text-text'
+                className={`flex-shrink-0 rounded-control px-3.5 py-1.5 text-[13px] font-bold focus:outline-none focus-visible:shadow-ring ${
+                  active ? 'bg-ink text-paper' : 'bg-paper text-ink-soft border border-rule'
                 }`}
               >
                 {t ?? '전체'}
@@ -86,12 +87,12 @@ export default function AppCategoryDetail() {
       </nav>
 
       {/* 정렬 바 */}
-      <div className="bg-white border-b border-cream-2 px-4 py-2.5 flex items-center justify-between">
-        <p className="text-[13px] text-text-sub">전체 {products.length}개</p>
+      <div className="bg-paper border-b border-rule px-4 py-2.5 flex items-center justify-between">
+        <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
         <div className="relative">
           <button
             onClick={() => setShowSort(!showSort)}
-            className="flex items-center gap-1.5 text-[13px] text-text"
+            className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
             aria-haspopup="listbox"
             aria-expanded={showSort}
           >
@@ -100,7 +101,7 @@ export default function AppCategoryDetail() {
           </button>
           {showSort && (
             <div
-              className="absolute right-0 top-full mt-1 bg-white border border-cream-2 rounded-md overflow-hidden z-20 min-w-[120px]"
+              className="absolute right-0 top-full mt-1 bg-paper border border-rule overflow-hidden z-20 min-w-[120px]"
               role="listbox"
               aria-label="정렬 옵션"
             >
@@ -113,8 +114,8 @@ export default function AppCategoryDetail() {
                     setSortIdx(i)
                     setShowSort(false)
                   }}
-                  className={`block w-full px-4 py-2.5 text-[13px] text-left hover:bg-cream-2 transition-colors ${
-                    sortIdx === i ? 'text-gold font-semibold' : 'text-text'
+                  className={`block w-full px-4 py-2.5 text-[13px] text-left focus:outline-none focus-visible:shadow-ring ${
+                    sortIdx === i ? 'text-ink font-bold' : 'text-ink-soft'
                   }`}
                 >
                   {opt.label}
@@ -133,12 +134,12 @@ export default function AppCategoryDetail() {
           ))}
         </div>
       ) : error ? (
-        <div className="text-center py-16 text-text-hint text-[14px]">{error}</div>
+        <div className="text-center py-16 text-ink-faint text-[14px]">{error}</div>
       ) : products.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-text-hint text-[14px]">상품이 준비 중입니다.</p>
+          <p className="text-ink-faint text-[14px]">상품이 준비 중입니다.</p>
           {selected && (
-            <button onClick={() => setSelected(null)} className="text-gold mt-3 text-[13px]">
+            <button onClick={() => setSelected(null)} className="text-ink font-bold mt-3 text-[13px] focus:outline-none focus-visible:shadow-ring">
               전체 상품 보기 →
             </button>
           )}
@@ -150,7 +151,7 @@ export default function AppCategoryDetail() {
               <button
                 key={product.id}
                 onClick={() => navigate(`/app/product/${product.id}`)}
-                className="text-left focus:outline-none focus:shadow-focus rounded-md"
+                className="text-left focus:outline-none focus-visible:shadow-ring"
                 aria-label={`${product.brand_name ?? ''} ${product.name}`}
               >
                 <ShopProductCard product={product} />
@@ -162,7 +163,7 @@ export default function AppCategoryDetail() {
               <button
                 onClick={loadMore}
                 disabled={loading}
-                className="w-full py-3 border border-cream-2 rounded-md text-[14px] text-text-sub hover:border-gold hover:text-gold disabled:opacity-50 transition-colors"
+                className="w-full py-3 rounded-control border border-rule text-[14px] text-ink-soft disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
               >
                 {loading ? '불러오는 중…' : '더보기'}
               </button>

@@ -26,11 +26,11 @@ export default function ProductInfoTable({
     ? [
         [
           '소비자가',
-          <span className={hasDiscount ? 'line-through text-[#bbb]' : 'text-[#111]'}>
+          <span className={hasDiscount ? 'line-through text-ink-faint' : 'text-ink'}>
             {consumerPrice.toLocaleString('ko-KR')}원
           </span>,
         ],
-        ['판매가', <span className="font-bold text-[#c0392b]">{salePrice.toLocaleString('ko-KR')}원</span>],
+        ['판매가', <span className="font-bold tabular-nums text-ink">{salePrice.toLocaleString('ko-KR')}원</span>],
       ]
     : []
   const rows: Array<[string, ReactNode]> = [
@@ -46,9 +46,9 @@ export default function ProductInfoTable({
   return (
     <dl className={`text-[13px] ${className}`}>
       {rows.map(([label, value], i) => (
-        <div key={i} className="flex items-start py-2.5 border-b border-[#f0ede7] last:border-b-0">
-          <dt className="w-[84px] shrink-0 text-[#8a8a8a]">{label}</dt>
-          <dd className="flex-1 text-[#333] leading-relaxed">{value}</dd>
+        <div key={i} className="flex items-start py-2.5 border-b border-rule last:border-b-0">
+          <dt className="w-[84px] shrink-0 text-ink-faint">{label}</dt>
+          <dd className="flex-1 text-ink leading-relaxed">{value}</dd>
         </div>
       ))}
     </dl>

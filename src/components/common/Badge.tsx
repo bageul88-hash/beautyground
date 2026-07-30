@@ -17,15 +17,16 @@ export default function Badge({ type, label, deptKey, className = '' }: BadgePro
   let classes = ''
 
   if (type === 'live') {
-    classes = 'bg-[#FF4757] text-white text-[9px] font-bold px-2 py-0.5 rounded-pill tracking-wider'
+    classes = 'bg-signal-red text-paper text-[9px] font-bold px-2 py-0.5 rounded-control tracking-wider'
   } else if (type === 'dept' && deptKey) {
-    classes = `${DEPT_BADGE_COLORS[deptKey]} text-[11px] font-medium px-2.5 py-1 rounded-pill`
+    // 백화점별 실제 브랜드 색 — 우리 시스템 색이 아니라 파트너사(롯데·신세계·현대) 고유색이라 예외
+    classes = `${DEPT_BADGE_COLORS[deptKey]} text-[11px] font-bold px-2.5 py-1 rounded-control`
   } else if (type === 'vip') {
-    classes = 'bg-gold text-white text-[10px] font-bold px-2.5 py-0.5 rounded-pill'
+    classes = 'bg-ink text-paper text-[10px] font-bold px-2.5 py-0.5 rounded-control'
   } else if (type === 'age') {
-    classes = 'bg-cream-2 text-text-sub text-[11px] font-medium px-2.5 py-1 rounded-pill'
+    classes = 'bg-quiet text-ink-soft text-[11px] font-bold px-2.5 py-1 rounded-control'
   } else {
-    classes = 'bg-cream-2 text-text-sub text-[12px] px-3 py-1 rounded-pill'
+    classes = 'bg-quiet text-ink-soft text-[12px] px-3 py-1 rounded-control'
   }
 
   return (

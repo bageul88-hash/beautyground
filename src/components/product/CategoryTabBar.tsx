@@ -16,10 +16,8 @@ export default function CategoryTabBar({ active }: { active?: string | null }) {
       key={label}
       type="button"
       onClick={onClick}
-      className={`shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors border ${
-        isActive
-          ? 'bg-gold text-white border-gold'
-          : 'bg-white text-text-sub border-cream-2 hover:border-gold/60 hover:text-text'
+      className={`shrink-0 px-3.5 py-1.5 rounded-control text-[13px] font-bold whitespace-nowrap border focus:outline-none focus-visible:shadow-ring ${
+        isActive ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink-soft border-rule'
       }`}
     >
       {label}
@@ -27,7 +25,7 @@ export default function CategoryTabBar({ active }: { active?: string | null }) {
   )
 
   return (
-    <nav className="sticky top-14 z-40 bg-white/95 backdrop-blur border-b border-cream-2">
+    <nav className="sticky top-14 z-40 bg-paper border-b border-rule">
       <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2.5">
         {chip('전체', active == null, () => go(null))}
         {categories.map((cat) => chip(cat, active === cat, () => go(cat)))}

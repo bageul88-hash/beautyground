@@ -52,11 +52,22 @@ export function IconSearch(p: IconProps) {
   )
 }
 
-export function IconHeart(p: IconProps) {
+// filled: 찜한 상태 — 색을 새로 쓰지 않고 채움 여부로만 상태를 구분한다(잉크 단색 유지).
+export function IconHeart({ filled, ...p }: IconProps & { filled?: boolean }) {
   return (
-    <Svg {...p}>
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth={p.strokeWidth ?? 1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`shrink-0 ${p.className ?? 'w-[22px] h-[22px]'}`}
+      aria-hidden="true"
+      focusable="false"
+    >
       <path d="M12 19.5S4 14.6 4 9.6A4.1 4.1 0 0 1 12 7.9a4.1 4.1 0 0 1 8 1.7c0 5-8 9.9-8 9.9Z" />
-    </Svg>
+    </svg>
   )
 }
 
@@ -75,6 +86,46 @@ export function IconCart(p: IconProps) {
       <path d="M3.2 4.5h2.3l2.3 10.2h9.5l2-7.3H6.4" />
       <circle cx="9.3" cy="19" r="1.4" />
       <circle cx="16.8" cy="19" r="1.4" />
+    </Svg>
+  )
+}
+
+export function IconBack(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M14.5 5 8 12l6.5 7" />
+    </Svg>
+  )
+}
+
+export function IconClose(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="m6 6 12 12M18 6 6 18" />
+    </Svg>
+  )
+}
+
+export function IconMinus(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M5 12h14" />
+    </Svg>
+  )
+}
+
+export function IconPlus(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 5v14M5 12h14" />
+    </Svg>
+  )
+}
+
+export function IconChevronRight(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="m9 5 7 7-7 7" />
     </Svg>
   )
 }

@@ -5,6 +5,7 @@ import BottomNav from '../components/layout/BottomNav'
 import { supabase } from '../lib/supabase'
 import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../lib/cart'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
+import { IconCart, IconClose, IconMinus, IconPlus } from '../components/common/Icon'
 
 export default function AppCart() {
   const navigate = useNavigate()
@@ -98,40 +99,40 @@ export default function AppCart() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-text-hint text-[14px]">불러오는 중...</p>
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-cream-4 pb-40">
+    <div className="min-h-screen bg-paper pb-40">
       <BackHeader title="장바구니" />
 
       {lines.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24">
-          <span className="text-5xl mb-4" aria-hidden="true">🛒</span>
-          <p className="text-[16px] font-bold text-text mb-2">장바구니가 비어있어요</p>
-          <p className="text-[13px] text-text-sub mb-6">마음에 드는 상품을 담아보세요</p>
+          <IconCart className="w-12 h-12 mb-4 text-ink-faint" />
+          <p className="text-[16px] font-bold text-ink mb-2">장바구니가 비어있어요</p>
+          <p className="text-[13px] text-ink-soft mb-6">마음에 드는 상품을 담아보세요</p>
           <button
             onClick={() => navigate('/app/home')}
-            className="bg-gold text-white font-semibold text-[14px] px-8 py-3 rounded-pill hover:bg-gold-light transition-colors"
+            className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3 focus:outline-none focus-visible:shadow-ring"
           >
             쇼핑 계속하기
           </button>
         </div>
       ) : (
         <>
-          <div className="bg-white px-5 py-3 flex items-center gap-3 border-b border-cream-2">
+          <div className="bg-paper px-5 py-3 flex items-center gap-3 border-b border-rule">
             <input
               type="checkbox"
               id="select-all"
               checked={selectableLines.length > 0 && selected.size === selectableLines.length}
               onChange={toggleAll}
-              className="w-4 h-4 accent-gold"
+              className="w-4 h-4 accent-ink"
               aria-label="전체 선택"
             />
-            <label htmlFor="select-all" className="text-[13px] text-text cursor-pointer">
+            <label htmlFor="select-all" className="text-[13px] text-ink cursor-pointer">
               전체 선택 ({selected.size}/{selectableLines.length})
             </label>
           </div>
@@ -144,8 +145,8 @@ export default function AppCart() {
               return (
                 <div
                   key={line.id}
-                  className={`bg-white rounded-md p-4 border transition-colors ${
-                    unavailable ? 'border-cream-2 opacity-60' : selected.has(line.id) ? 'border-gold/40' : 'border-cream-2'
+                  className={`bg-paper p-4 border ${
+                    unavailable ? 'border-rule opacity-60' : selected.has(line.id) ? 'border-ink' : 'border-rule'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -154,58 +155,58 @@ export default function AppCart() {
                       checked={selected.has(line.id)}
                       onChange={() => toggleSelect(line.id)}
                       disabled={unavailable}
-                      className="w-4 h-4 accent-gold mt-1 flex-shrink-0 disabled:opacity-40"
+                      className="w-4 h-4 accent-ink mt-1 flex-shrink-0 disabled:opacity-40"
                       aria-label={`${line.product.name} 선택`}
                     />
-                    <div className="w-16 h-16 rounded-md overflow-hidden bg-cream flex-shrink-0 relative">
+                    <div className="w-16 h-16 overflow-hidden bg-quiet flex-shrink-0 relative">
                       {line.product.thumbnail_url ? (
                         <img src={line.product.thumbnail_url} alt="" className="w-full h-full object-cover" />
                       ) : null}
                       {unavailable && (
-                        <span className="absolute inset-0 bg-black/45 text-white text-[11px] font-bold flex items-center justify-center">품절</span>
+                        <span className="absolute inset-0 bg-ink/70 text-paper text-[11px] font-bold flex items-center justify-center">품절</span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
-                        <p className="text-[13px] font-semibold text-text leading-tight line-clamp-2">{line.product.name}</p>
+                        <p className="text-[13px] font-bold text-ink leading-tight line-clamp-2">{line.product.name}</p>
                         <button
                           onClick={() => removeItem(line)}
-                          className="text-text-hint hover:text-text ml-2 flex-shrink-0"
+                          className="text-ink-faint ml-2 flex-shrink-0 focus:outline-none focus-visible:shadow-ring"
                           aria-label={`${line.product.name} 삭제`}
                         >
-                          <span aria-hidden="true">✕</span>
+                          <IconClose className="w-4 h-4" />
                         </button>
                       </div>
                       {unavailable ? (
-                        <p className="text-[12px] text-[#B4472A] mt-2">현재 구매할 수 없는 상품이에요 (품절/판매중지)</p>
+                        <p className="text-[12px] text-signal-red mt-2">현재 구매할 수 없는 상품이에요 (품절/판매중지)</p>
                       ) : (
                         <>
                           {stock <= 5 && (
-                            <p className="text-[11px] text-[#B4472A] mt-1">재고 {stock}개 남음</p>
+                            <p className="text-[11px] text-signal-red mt-1">재고 {stock}개 남음</p>
                           )}
                           <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center gap-2 border border-cream-2 rounded-pill">
+                            <div className="flex items-center gap-2 rounded-control border border-rule">
                               <button
                                 onClick={() => updateQty(line, -1)}
-                                className="w-7 h-7 flex items-center justify-center text-text-sub hover:text-text disabled:opacity-40"
+                                className="w-7 h-7 flex items-center justify-center text-ink-soft disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
                                 aria-label="수량 감소"
                                 disabled={line.quantity <= 1}
                               >
-                                <span aria-hidden="true">−</span>
+                                <IconMinus className="w-3.5 h-3.5" />
                               </button>
-                              <span className="text-[13px] font-medium text-text w-4 text-center" aria-live="polite">
+                              <span className="text-[13px] font-bold tabular-nums text-ink w-4 text-center" aria-live="polite">
                                 {line.quantity}
                               </span>
                               <button
                                 onClick={() => updateQty(line, 1)}
-                                className="w-7 h-7 flex items-center justify-center text-text-sub hover:text-text disabled:opacity-40"
+                                className="w-7 h-7 flex items-center justify-center text-ink-soft disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
                                 aria-label="수량 증가"
                                 disabled={line.quantity >= stock}
                               >
-                                <span aria-hidden="true">+</span>
+                                <IconPlus className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                            <span className="text-[15px] font-bold text-text">
+                            <span className="text-[15px] font-bold tabular-nums text-ink">
                               {(price * line.quantity).toLocaleString('ko-KR')}원
                             </span>
                           </div>
@@ -218,27 +219,27 @@ export default function AppCart() {
             })}
           </div>
 
-          <div className="mx-4 mt-3 bg-white rounded-md p-4 border border-cream-2">
-            <h2 className="text-[14px] font-bold text-text mb-3">주문 요약</h2>
+          <div className="mx-4 mt-3 bg-paper p-4 border border-rule">
+            <h2 className="text-[14px] font-bold text-ink mb-3">주문 요약</h2>
             <div className="space-y-2 text-[13px]">
               <div className="flex justify-between">
-                <span className="text-text-sub">상품 금액</span>
-                <span className="text-text">{subtotal.toLocaleString('ko-KR')}원</span>
+                <span className="text-ink-soft">상품 금액</span>
+                <span className="text-ink tabular-nums">{subtotal.toLocaleString('ko-KR')}원</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-sub">배송비</span>
-                <span className={deliveryFee === 0 ? 'text-[#1D9E75] font-medium' : 'text-text'}>
+                <span className="text-ink-soft">배송비</span>
+                <span className={deliveryFee === 0 ? 'text-signal-blue font-bold' : 'text-ink tabular-nums'}>
                   {deliveryFee === 0 ? '무료' : `${deliveryFee.toLocaleString('ko-KR')}원`}
                 </span>
               </div>
               {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
-                <p className="text-[11px] text-text-hint">
+                <p className="text-[11px] text-ink-faint">
                   {(FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString('ko-KR')}원 더 담으면 무료 배송
                 </p>
               )}
-              <div className="flex justify-between pt-2 border-t border-cream-2 mt-2">
-                <span className="text-[15px] font-bold text-text">총 결제금액</span>
-                <span className="text-[18px] font-bold text-gold">{total.toLocaleString('ko-KR')}원</span>
+              <div className="flex justify-between pt-2 border-t border-rule mt-2">
+                <span className="text-[15px] font-bold text-ink">총 결제금액</span>
+                <span className="text-[18px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
               </div>
             </div>
           </div>
@@ -248,13 +249,13 @@ export default function AppCart() {
       {lines.length > 0 && (
         // 하단 네비(z-50, bottom-0) 위에 쌓이도록 위치 — bottom-0 이면 네비에 가려 클릭 불가
         <div
-          className="fixed left-0 right-0 bg-white border-t border-cream-2 px-4 py-3 z-40"
+          className="fixed left-0 right-0 bg-paper border-t border-rule px-4 py-3 z-40"
           style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
         >
           <button
             onClick={goOrder}
             disabled={selected.size === 0}
-            className="w-full bg-[#232f52] text-white font-bold text-[15px] py-4 rounded-pill hover:bg-[#2e3d6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
           >
             {selected.size > 0 ? `선택 상품 주문 (${total.toLocaleString('ko-KR')}원)` : '상품을 선택해주세요'}
           </button>

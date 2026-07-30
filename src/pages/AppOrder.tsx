@@ -21,7 +21,7 @@ interface OrderItem {
 type Status = 'idle' | 'paying' | 'verifying' | 'done' | 'error'
 
 const field =
-  'w-full bg-white border border-cream-2 rounded-md px-3.5 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition'
+  'w-full rounded-control bg-paper border border-rule px-3.5 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring'
 
 export default function AppOrder() {
   const navigate = useNavigate()
@@ -372,16 +372,15 @@ export default function AppOrder() {
 
   if (status === 'done' && doneOrder) {
     return (
-      <div className="min-h-screen bg-cream-4 flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-20 h-20 rounded-full bg-gold/15 flex items-center justify-center text-4xl mb-5" aria-hidden="true">✅</div>
-        <h1 className="font-serif text-[24px] font-bold text-text mb-2">주문이 완료되었습니다</h1>
-        <p className="text-text-sub text-[14px] leading-relaxed mb-2">{doneOrder.orderName}</p>
-        <p className="text-[16px] font-bold text-gold mb-8">{doneOrder.amount.toLocaleString('ko-KR')}원 결제 완료</p>
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+        <h1 className="text-[24px] font-bold text-ink mb-2">주문이 완료되었습니다</h1>
+        <p className="text-ink-soft text-[14px] leading-relaxed mb-2">{doneOrder.orderName}</p>
+        <p className="text-[16px] font-bold tabular-nums text-ink mb-8">{doneOrder.amount.toLocaleString('ko-KR')}원 결제 완료</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button onClick={() => navigate('/app/orders')} className="w-full bg-gold text-white font-semibold text-[15px] py-4 rounded-pill hover:bg-gold-light transition-colors">
+          <button onClick={() => navigate('/app/orders')} className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring">
             주문 내역 확인
           </button>
-          <button onClick={() => navigate('/app/home')} className="w-full bg-cream-3 text-text-sub font-semibold text-[15px] py-4 rounded-pill hover:bg-cream-2 transition-colors">
+          <button onClick={() => navigate('/app/home')} className="w-full rounded-control border border-rule text-ink-soft font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring">
             계속 쇼핑하기
           </button>
         </div>
@@ -390,30 +389,28 @@ export default function AppOrder() {
   }
 
   if (!checkedAuth) {
-    return <div className="min-h-screen bg-white flex items-center justify-center text-text-hint text-[14px]">불러오는 중...</div>
+    return <div className="min-h-screen bg-paper flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
   }
 
   // 결제 후 리다이렉트 복귀 중에는 주문상품 목록이 비어 있으므로(빈 주문서 오인 방지) 확인/실패 화면을 먼저 처리
   if (status === 'verifying') {
     return (
-      <div className="min-h-screen bg-cream-4 flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-20 h-20 rounded-full bg-gold/15 flex items-center justify-center text-4xl mb-5 animate-pulse" aria-hidden="true">💳</div>
-        <h1 className="font-serif text-[20px] font-bold text-text mb-2">결제를 확인하고 있어요</h1>
-        <p className="text-text-sub text-[14px]">잠시만 기다려주세요…</p>
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+        <h1 className="text-[20px] font-bold text-ink mb-2">결제를 확인하고 있어요</h1>
+        <p className="text-ink-soft text-[14px]">잠시만 기다려주세요…</p>
       </div>
     )
   }
   if (status === 'error' && items.length === 0) {
     return (
-      <div className="min-h-screen bg-cream-4 flex flex-col items-center justify-center px-8 text-center">
-        <div className="text-4xl mb-5" aria-hidden="true">😢</div>
-        <h1 className="font-serif text-[20px] font-bold text-text mb-2">결제가 완료되지 않았습니다</h1>
-        <p className="text-text-sub text-[13.5px] leading-relaxed mb-8">{message || '결제가 취소되었거나 실패했습니다. 다시 시도해주세요.'}</p>
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+        <h1 className="text-[20px] font-bold text-ink mb-2">결제가 완료되지 않았습니다</h1>
+        <p className="text-ink-soft text-[13.5px] leading-relaxed mb-8">{message || '결제가 취소되었거나 실패했습니다. 다시 시도해주세요.'}</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button onClick={() => navigate('/app/cart')} className="w-full bg-gold text-white font-semibold text-[15px] py-4 rounded-pill hover:bg-gold-light transition-colors">
+          <button onClick={() => navigate('/app/cart')} className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring">
             장바구니로 이동
           </button>
-          <button onClick={() => navigate('/app/home')} className="w-full bg-cream-3 text-text-sub font-semibold text-[15px] py-4 rounded-pill hover:bg-cream-2 transition-colors">
+          <button onClick={() => navigate('/app/home')} className="w-full rounded-control border border-rule text-ink-soft font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring">
             홈으로
           </button>
         </div>
@@ -422,9 +419,9 @@ export default function AppOrder() {
   }
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-cream-4 flex flex-col items-center justify-center px-8 text-center">
-        <p className="text-[15px] text-text-sub mb-6">주문할 상품이 없습니다.</p>
-        <button onClick={() => navigate('/app/cart')} className="bg-gold text-white font-semibold text-[14px] px-8 py-3 rounded-pill hover:bg-gold-light transition-colors">
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+        <p className="text-[15px] text-ink-soft mb-6">주문할 상품이 없습니다.</p>
+        <button onClick={() => navigate('/app/cart')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3 focus:outline-none focus-visible:shadow-ring">
           장바구니로 이동
         </button>
       </div>
@@ -432,41 +429,41 @@ export default function AppOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-4 pb-40">
+    <div className="min-h-screen bg-paper pb-40">
       <BackHeader title="주문/결제" />
 
       {!paymentReady && (
-        <div className="bg-[#FDF6E7] border-b border-[#EFE3C4] px-5 py-3">
-          <p className="text-[12.5px] text-[#8a6d1f] leading-relaxed">
-            🔔 지금은 <b>오픈 준비 기간</b>이에요. 주문서 작성까지 미리 확인하실 수 있고, 결제는 정식 오픈 후 가능합니다.
+        <div className="bg-quiet border-b border-rule px-5 py-3">
+          <p className="text-[12.5px] text-ink-soft leading-relaxed">
+            지금은 <b className="text-ink">오픈 준비 기간</b>이에요. 주문서 작성까지 미리 확인하실 수 있고, 결제는 정식 오픈 후 가능합니다.
           </p>
         </div>
       )}
 
       {liveCoupon && !couponSoldOut(liveCoupon) && subtotal < liveCoupon.min_purchase && (
-        <div className="bg-[#FDF8F0] border-b border-[#F0E4CC] px-5 py-3">
-          <p className="text-[12.5px] text-[#8a6d1f]">
-            🎁 {(liveCoupon.min_purchase - subtotal).toLocaleString('ko-KR')}원 더 담으면 라이브 쿠폰 {couponLabel(liveCoupon)} 적용!
+        <div className="bg-quiet border-b border-rule px-5 py-3">
+          <p className="text-[12.5px] text-ink-soft">
+            <span className="font-bold text-ink">{(liveCoupon.min_purchase - subtotal).toLocaleString('ko-KR')}원</span> 더 담으면 라이브 쿠폰 {couponLabel(liveCoupon)} 적용!
           </p>
         </div>
       )}
 
       {(blockedNames.length > 0 || itemNotices.length > 0) && (
-        <div className="bg-[#FDF0EC] border-b border-[#F5D9CF] px-5 py-3 space-y-1">
+        <div className="bg-quiet border-b border-rule px-5 py-3 space-y-1">
           {blockedNames.map((n) => (
-            <p key={n} className="text-[12.5px] text-[#B4472A]">⚠️ "{n}"은(는) 품절/판매종료되어 주문에서 제외했어요.</p>
+            <p key={n} className="text-[12.5px] text-signal-red">"{n}"은(는) 품절/판매종료되어 주문에서 제외했어요.</p>
           ))}
           {itemNotices.map((t) => (
-            <p key={t} className="text-[12.5px] text-[#B4472A]">ℹ️ {t}</p>
+            <p key={t} className="text-[12.5px] text-signal-red">{t}</p>
           ))}
         </div>
       )}
 
       {/* 배송지 */}
-      <div className="bg-white px-5 py-5 border-b border-cream-2 space-y-3">
+      <div className="bg-paper px-5 py-5 border-b border-rule space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-bold text-text">배송지</h2>
-          <button type="button" onClick={() => navigate('/app/addresses')} className="text-[12px] text-gold hover:underline">
+          <h2 className="text-[15px] font-bold text-ink">배송지</h2>
+          <button type="button" onClick={() => navigate('/app/addresses')} className="text-[12px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
             배송지 관리
           </button>
         </div>
@@ -478,12 +475,12 @@ export default function AppOrder() {
                 key={a.id}
                 type="button"
                 onClick={() => selectSavedAddress(a)}
-                className={`shrink-0 text-left rounded-md border px-3 py-2 text-[12px] max-w-[180px] transition-colors ${
-                  selectedAddressId === a.id ? 'border-gold bg-gold/5' : 'border-cream-2'
+                className={`shrink-0 text-left rounded-control border px-3 py-2 text-[12px] max-w-[180px] focus:outline-none focus-visible:shadow-ring ${
+                  selectedAddressId === a.id ? 'border-ink' : 'border-rule'
                 }`}
               >
-                <p className="font-semibold text-text truncate">{a.recipient_name}{a.is_default ? ' · 기본' : ''}</p>
-                <p className="text-text-hint truncate">{a.address}</p>
+                <p className="font-bold text-ink truncate">{a.recipient_name}{a.is_default ? ' · 기본' : ''}</p>
+                <p className="text-ink-faint truncate">{a.address}</p>
               </button>
             ))}
           </div>
@@ -495,8 +492,8 @@ export default function AppOrder() {
 
         {!selectedAddressId && (
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={saveNewAddress} onChange={(e) => setSaveNewAddress(e.target.checked)} className="w-4 h-4 accent-gold" />
-            <span className="text-[13px] text-text-sub">이 배송지 저장하기</span>
+            <input type="checkbox" checked={saveNewAddress} onChange={(e) => setSaveNewAddress(e.target.checked)} className="w-4 h-4 accent-ink" />
+            <span className="text-[13px] text-ink-soft">이 배송지 저장하기</span>
           </label>
         )}
 
@@ -510,19 +507,19 @@ export default function AppOrder() {
       </div>
 
       {/* 주문 상품 */}
-      <div className="bg-white mt-2 px-5 py-5">
-        <h2 className="text-[15px] font-bold text-text mb-3">주문 상품 ({items.length})</h2>
+      <div className="bg-paper mt-2 px-5 py-5">
+        <h2 className="text-[15px] font-bold text-ink mb-3">주문 상품 ({items.length})</h2>
         <div className="space-y-3">
           {items.map((item) => (
             <div key={item.product_id} className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-md overflow-hidden bg-cream flex-shrink-0">
+              <div className="w-14 h-14 overflow-hidden bg-quiet flex-shrink-0">
                 {item.thumbnail && <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-text truncate">{item.name}</p>
+                <p className="text-[13px] font-bold text-ink truncate">{item.name}</p>
                 <div className="flex items-center justify-between mt-0.5">
-                  <span className="text-[12px] text-text-sub">수량 {item.quantity}개</span>
-                  <span className="text-[13px] font-bold text-text">{(item.price * item.quantity).toLocaleString('ko-KR')}원</span>
+                  <span className="text-[12px] text-ink-soft">수량 {item.quantity}개</span>
+                  <span className="text-[13px] font-bold tabular-nums text-ink">{(item.price * item.quantity).toLocaleString('ko-KR')}원</span>
                 </div>
               </div>
             </div>
@@ -531,44 +528,44 @@ export default function AppOrder() {
       </div>
 
       {/* 결제 금액 */}
-      <div className="bg-white mt-2 px-5 py-5">
-        <h2 className="text-[15px] font-bold text-text mb-3">결제 금액</h2>
+      <div className="bg-paper mt-2 px-5 py-5">
+        <h2 className="text-[15px] font-bold text-ink mb-3">결제 금액</h2>
         <div className="space-y-2 text-[13px]">
           <div className="flex justify-between">
-            <span className="text-text-sub">상품 금액</span>
-            <span className="text-text">{subtotal.toLocaleString('ko-KR')}원</span>
+            <span className="text-ink-soft">상품 금액</span>
+            <span className="text-ink tabular-nums">{subtotal.toLocaleString('ko-KR')}원</span>
           </div>
           {couponPreview > 0 && (
             <div className="flex justify-between">
-              <span className="text-[#b8924a]">라이브 쿠폰 할인</span>
-              <span className="text-[#b8924a] font-medium">-{couponPreview.toLocaleString('ko-KR')}원</span>
+              <span className="text-signal-blue">라이브 쿠폰 할인</span>
+              <span className="text-signal-blue font-bold tabular-nums">-{couponPreview.toLocaleString('ko-KR')}원</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-text-sub">배송비</span>
-            <span className={deliveryFee === 0 ? 'text-[#1D9E75] font-medium' : 'text-text'}>
+            <span className="text-ink-soft">배송비</span>
+            <span className={deliveryFee === 0 ? 'text-signal-blue font-bold' : 'text-ink tabular-nums'}>
               {deliveryFee === 0 ? '무료' : `${deliveryFee.toLocaleString('ko-KR')}원`}
             </span>
           </div>
-          <div className="flex justify-between pt-3 border-t border-cream-2 mt-3">
-            <span className="text-[15px] font-bold text-text">총 결제금액</span>
-            <span className="text-[20px] font-bold text-gold">{total.toLocaleString('ko-KR')}원</span>
+          <div className="flex justify-between pt-3 border-t border-rule mt-3">
+            <span className="text-[15px] font-bold text-ink">총 결제금액</span>
+            <span className="text-[20px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
           </div>
         </div>
       </div>
 
       {/* 안내 — 체크박스 대신 결제 시 동의 간주(쿠팡·네이버식). 주문 확인·정정 절차는 이 주문서 화면 자체로 충족 */}
-      <div className="bg-white mt-2 px-5 py-5">
-        <p className="text-[12px] text-text-sub leading-relaxed">
+      <div className="bg-paper mt-2 px-5 py-5">
+        <p className="text-[12px] text-ink-soft leading-relaxed">
           결제하기 버튼을 누르면 주문 내용을 확인한 것으로 보며,{' '}
           <a href="/terms" target="_blank" rel="noreferrer" className="underline">이용약관</a> 및{' '}
           <a href="/privacy" target="_blank" rel="noreferrer" className="underline">개인정보처리방침</a>에 동의한 것으로 간주됩니다.
         </p>
-        {message && <p className="text-[13px] text-[#FF4757] mt-3" role="alert">{message}</p>}
+        {message && <p className="text-[13px] text-signal-red mt-3" role="alert">{message}</p>}
         {paymentReady && (
-          <p className="text-[11px] text-text-hint mt-3">테스트 모드 결제입니다. 실제 청구되지 않습니다.</p>
+          <p className="text-[11px] text-ink-faint mt-3">테스트 모드 결제입니다. 실제 청구되지 않습니다.</p>
         )}
-        <p className="text-[11px] text-text-hint mt-4 pt-3 border-t border-cream-2 leading-relaxed">
+        <p className="text-[11px] text-ink-faint mt-4 pt-3 border-t border-rule leading-relaxed">
           {COMPANY_INFO.name} | 대표: {COMPANY_INFO.ceo} | 사업자등록번호: {COMPANY_INFO.bizNumber} | 통신판매업신고: {COMPANY_INFO.mailOrderNumber}
           <br />
           {COMPANY_INFO.address} | 고객센터: {COMPANY_INFO.csPhone}
@@ -576,11 +573,11 @@ export default function AppOrder() {
       </div>
 
       {/* 결제 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-cream-2 px-4 py-4 z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-paper border-t border-rule px-4 py-4 z-40">
         <button
           onClick={handlePay}
           disabled={busy}
-          className="w-full bg-[#232f52] text-white font-bold text-[15px] py-4 rounded-pill hover:bg-[#2e3d6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
           aria-disabled={busy}
         >
           {status === 'paying' ? '결제 진행 중…'

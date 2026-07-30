@@ -4,6 +4,7 @@ import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import { supabase } from '../lib/supabase'
 import type { Product, ScrapedReview } from '../lib/types'
+import { IconClose, IconBack, IconChevronRight } from '../components/common/Icon'
 
 // 리뷰의 사진 배열 (photos 우선, 없으면 photo 단수)
 function reviewPhotos(r: ScrapedReview): string[] {
@@ -20,8 +21,9 @@ const metaLine = (r: ScrapedReview) => [maskAuthor(r.author), r.date].filter(Boo
 function Stars({ value, className = '' }: { value: number; className?: string }) {
   const full = Math.round(value)
   return (
-    <span className={`text-gold tracking-tight ${className}`} aria-hidden="true">
-      {[0, 1, 2, 3, 4].map((i) => (i < full ? '★' : '☆')).join('')}
+    <span className={`tracking-tight ${className}`} aria-hidden="true">
+      <span className="text-ink">{'★'.repeat(full)}</span>
+      <span className="text-rule">{'★'.repeat(Math.max(0, 5 - full))}</span>
     </span>
   )
 }
@@ -100,8 +102,8 @@ export default function AppProductReviews() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-text-hint text-[14px]">불러오는 중...</p>
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
     )
   }
@@ -110,7 +112,7 @@ export default function AppProductReviews() {
   const curPics = cur ? reviewPhotos(cur) : []
 
   return (
-    <div className="min-h-screen bg-white" style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
+    <div className="min-h-screen bg-paper" style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
       <BackHeader title="리뷰" onBack={() => navigate(`/app/product/${id}`)} />
 
       <div className="max-w-[1000px] mx-auto">
@@ -119,33 +121,33 @@ export default function AppProductReviews() {
           <button
             type="button"
             onClick={() => navigate(`/app/product/${id}`)}
-            className="w-full text-left px-4 pt-4 text-[13px] text-text-sub truncate hover:text-text transition-colors"
+            className="w-full text-left px-4 pt-4 text-[13px] text-ink-soft truncate focus:outline-none focus-visible:shadow-ring"
           >
             ‹ {name}
           </button>
         )}
 
         {/* 요약 */}
-        <div className="px-4 py-5 flex items-center gap-4 border-b border-cream-2">
+        <div className="px-4 py-5 flex items-center gap-4 border-b border-rule">
           <div className="text-center">
-            <p className="text-[34px] font-bold text-text leading-none">{avg != null ? avg.toFixed(1) : '-'}</p>
+            <p className="text-[34px] font-bold tabular-nums text-ink leading-none">{avg != null ? avg.toFixed(1) : '-'}</p>
             <Stars value={avg ?? 0} className="text-[15px] mt-1.5" />
           </div>
-          <div className="text-[13px] text-text-sub">
-            <p className="font-semibold text-text text-[15px]">리뷰 {count.toLocaleString('ko-KR')}개</p>
-            <p className="mt-0.5 text-text-hint">실제 구매 후기</p>
+          <div className="text-[13px] text-ink-soft">
+            <p className="font-bold text-ink text-[15px]">리뷰 {count.toLocaleString('ko-KR')}개</p>
+            <p className="mt-0.5 text-ink-faint">실제 구매 후기</p>
           </div>
         </div>
 
         {reviews.length === 0 ? (
-          <div className="px-4 py-16 text-center text-text-hint text-[14px]">아직 등록된 리뷰가 없습니다.</div>
+          <div className="px-4 py-16 text-center text-ink-faint text-[14px]">아직 등록된 리뷰가 없습니다.</div>
         ) : (
           <>
             {/* PHOTO REVIEW 그리드 */}
             {photoReviews.length > 0 && (
-              <section className="px-4 py-5 border-b border-cream-2">
-                <h2 className="text-[13px] font-bold tracking-[0.08em] text-text mb-3">
-                  PHOTO REVIEW <span className="text-text-hint font-medium">({photoReviews.length})</span>
+              <section className="px-4 py-5 border-b border-rule">
+                <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink mb-3">
+                  PHOTO REVIEW <span className="text-ink-faint font-bold">({photoReviews.length})</span>
                 </h2>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5">
                   {photoReviews.map(({ i, pics }) => (
@@ -153,12 +155,12 @@ export default function AppProductReviews() {
                       key={i}
                       type="button"
                       onClick={() => setOpenIdx(i)}
-                      className="relative aspect-square rounded-lg overflow-hidden bg-cream"
+                      className="relative aspect-square overflow-hidden bg-quiet focus:outline-none focus-visible:shadow-ring"
                       aria-label={`포토 리뷰 ${i + 1} 보기`}
                     >
                       <img src={pics[0]} alt="" loading="lazy" className="w-full h-full object-cover" onError={hideParent} />
                       {pics.length > 1 && (
-                        <span className="absolute top-1 right-1 bg-black/55 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                        <span className="absolute top-1 right-1 bg-ink/70 text-paper text-[10px] font-bold px-1.5 py-0.5">
                           +{pics.length - 1}
                         </span>
                       )}
@@ -170,25 +172,25 @@ export default function AppProductReviews() {
 
             {/* 전체 리뷰 카드 리스트 */}
             <section className="px-4 py-5">
-              <h2 className="text-[13px] font-bold tracking-[0.08em] text-text mb-3">전체 리뷰</h2>
-              <ul className="divide-y divide-cream-2">
+              <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink mb-3">전체 리뷰</h2>
+              <ul className="divide-y divide-rule">
                 {reviews.map((r, i) => {
                   const pics = reviewPhotos(r)
                   return (
                     <li key={i}>
-                      <button type="button" onClick={() => setOpenIdx(i)} className="w-full text-left flex gap-3 py-4">
+                      <button type="button" onClick={() => setOpenIdx(i)} className="w-full text-left flex gap-3 py-4 focus:outline-none focus-visible:shadow-ring">
                         {pics.length > 0 && (
                           <div className="relative shrink-0">
-                            <img src={pics[0]} alt="" loading="lazy" className="w-20 h-20 rounded-lg object-cover bg-cream" onError={hideParent} />
-                            {pics.length > 1 && <span className="absolute top-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded">+{pics.length - 1}</span>}
+                            <img src={pics[0]} alt="" loading="lazy" className="w-20 h-20 object-cover bg-quiet" onError={hideParent} />
+                            {pics.length > 1 && <span className="absolute top-1 right-1 bg-ink/70 text-paper text-[9px] px-1">+{pics.length - 1}</span>}
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <Stars value={r.rating ?? 5} className="text-[13px]" />
-                            {metaLine(r) && <span className="text-[11px] text-text-hint">{metaLine(r)}</span>}
+                            {metaLine(r) && <span className="text-[11px] text-ink-faint">{metaLine(r)}</span>}
                           </div>
-                          <p className="text-[13px] text-text-sub leading-relaxed line-clamp-3">{r.text || '사진 후기'}</p>
+                          <p className="text-[13px] text-ink-soft leading-relaxed line-clamp-3">{r.text || '사진 후기'}</p>
                         </div>
                       </button>
                     </li>
@@ -202,18 +204,24 @@ export default function AppProductReviews() {
 
       {/* 리뷰 상세 모달 */}
       {cur && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={() => setOpenIdx(null)}>
-          <div className="bg-white rounded-2xl overflow-hidden max-w-[440px] w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] bg-ink/70 flex items-center justify-center p-4" onClick={() => setOpenIdx(null)}>
+          <div className="bg-paper overflow-hidden max-w-[440px] w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {curPics.length > 0 && (
-              <div className="relative bg-cream">
+              <div className="relative bg-quiet">
                 <img src={curPics[Math.min(photoIdx, curPics.length - 1)]} alt="리뷰 사진" className="w-full max-h-[60vh] object-contain block" onError={hideParent} />
                 <button type="button" onClick={() => setOpenIdx(null)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center" aria-label="닫기">✕</button>
+                  className="absolute top-2 right-2 w-8 h-8 bg-ink/70 text-paper flex items-center justify-center focus:outline-none focus-visible:shadow-ring" aria-label="닫기">
+                  <IconClose className="w-4 h-4" />
+                </button>
                 {curPics.length > 1 && (
                   <>
-                    <button type="button" onClick={() => setPhotoIdx((p) => (p - 1 + curPics.length) % curPics.length)} className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/45 text-white text-lg" aria-label="이전 사진">‹</button>
-                    <button type="button" onClick={() => setPhotoIdx((p) => (p + 1) % curPics.length)} className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/45 text-white text-lg" aria-label="다음 사진">›</button>
-                    <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/55 text-white text-[11px] px-2 py-0.5 rounded-full">
+                    <button type="button" onClick={() => setPhotoIdx((p) => (p - 1 + curPics.length) % curPics.length)} className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-ink/70 text-paper flex items-center justify-center focus:outline-none focus-visible:shadow-ring" aria-label="이전 사진">
+                      <IconBack className="w-4 h-4" />
+                    </button>
+                    <button type="button" onClick={() => setPhotoIdx((p) => (p + 1) % curPics.length)} className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-ink/70 text-paper flex items-center justify-center focus:outline-none focus-visible:shadow-ring" aria-label="다음 사진">
+                      <IconChevronRight className="w-4 h-4" />
+                    </button>
+                    <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-ink/70 text-paper text-[11px] tabular-nums px-2 py-0.5">
                       {Math.min(photoIdx, curPics.length - 1) + 1} / {curPics.length}
                     </span>
                   </>
@@ -224,11 +232,13 @@ export default function AppProductReviews() {
               <div className="flex items-center justify-between mb-2">
                 <Stars value={cur.rating ?? 5} className="text-[15px]" />
                 {curPics.length === 0 && (
-                  <button type="button" onClick={() => setOpenIdx(null)} className="text-text-hint text-lg leading-none" aria-label="닫기">✕</button>
+                  <button type="button" onClick={() => setOpenIdx(null)} className="text-ink-faint focus:outline-none focus-visible:shadow-ring" aria-label="닫기">
+                    <IconClose className="w-4 h-4" />
+                  </button>
                 )}
               </div>
-              <p className="text-[14px] text-text leading-relaxed whitespace-pre-wrap">{cur.text || '작성된 후기 내용이 없습니다.'}</p>
-              {metaLine(cur) && <p className="mt-3 text-[12px] text-text-hint">{metaLine(cur)}</p>}
+              <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">{cur.text || '작성된 후기 내용이 없습니다.'}</p>
+              {metaLine(cur) && <p className="mt-3 text-[12px] text-ink-faint">{metaLine(cur)}</p>}
             </div>
           </div>
         </div>
