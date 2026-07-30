@@ -225,8 +225,9 @@ export default function AppProductDetail() {
   }
 
   return (
+    <div className="min-h-screen bg-quiet md:py-6">
     <div
-      className="min-h-screen bg-paper"
+      className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule"
       style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
     >
       <BackHeader
@@ -245,14 +246,10 @@ export default function AppProductDetail() {
       {/* 상단 고정 카테고리 바 (스크롤해도 헤더 아래에 고정) */}
       <CategoryTabBar active={view.category} />
 
-      {/* 데스크톱 2컬럼(왼쪽 이미지 / 오른쪽 구매박스 sticky), 모바일 세로 유지 */}
-      <div className="md:flex md:items-start md:gap-8 md:max-w-[1100px] md:mx-auto md:px-6 md:pt-4">
-
-      {/* 왼쪽 컬럼: 이미지 갤러리 */}
-      <div className="md:flex-1 md:min-w-0">
+      {/* 다른 /app/* 페이지와 동일하게 항상 480px 단일 컬럼 (데스크톱 전용 2컬럼 레이아웃 폐기) */}
       {view.images.length > 0 ? (
         <div>
-          <div className="aspect-square max-h-[560px] md:max-w-[560px] md:mx-auto bg-quiet flex items-center justify-center overflow-hidden">
+          <div className="aspect-square max-h-[560px] bg-quiet flex items-center justify-center overflow-hidden">
             <img
               src={view.images[Math.min(activeImg, view.images.length - 1)]}
               alt={view.name}
@@ -277,10 +274,8 @@ export default function AppProductDetail() {
       ) : (
         <ImagePlaceholder className="aspect-square w-full" />
       )}
-      </div>{/* /왼쪽 컬럼 */}
 
-      {/* 오른쪽 컬럼: 구매 박스 (데스크톱 sticky) */}
-      <div className="px-4 pt-5 pb-4 md:w-[380px] md:shrink-0 md:sticky md:top-4 md:pt-0">
+      <div className="px-4 pt-5 pb-4">
         {view.brand && <p className="text-[13px] text-ink-soft">{view.brand}</p>}
         <h1 className="text-[18px] font-bold text-ink mt-1 leading-tight">{view.name}</h1>
 
@@ -340,43 +335,9 @@ export default function AppProductDetail() {
           </div>
         </div>
 
-        {/* 합계 + 버튼 (모바일은 하단 sticky 바가 대신하므로 데스크톱에서만) */}
-        <div className="hidden md:block">
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-[14px] text-ink-soft">총 상품 금액</span>
-            <span className="text-[20px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
-          </div>
-
-          {/* 구매 버튼 */}
-          <button
-            onClick={onBuy}
-            disabled={view.soldOut}
-            className="w-full mt-4 rounded-control bg-ink text-paper font-bold text-[15px] py-3.5 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
-          >
-            {view.soldOut ? '일시 품절' : '구매하기'}
-          </button>
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={onAddToCart}
-              disabled={view.soldOut}
-              className="flex-1 rounded-control border border-rule text-ink font-bold text-[13px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
-            >
-              장바구니 담기
-            </button>
-            <button
-              onClick={toggleWish}
-              className="flex-1 rounded-control border border-rule text-ink font-bold text-[13px] py-3 focus:outline-none focus-visible:shadow-ring"
-            >
-              {wished ? '♥ 관심상품' : '관심상품등록'}
-            </button>
-          </div>
-        </div>
-
         {/* 배송 안내 */}
         <p className="text-[12px] text-ink-faint mt-3">{SHIPPING_NOTICE}</p>
       </div>
-
-      </div>{/* /데스크톱 2컬럼 */}
 
       {/* 리뷰 요약 (대표 → 리뷰 → 상세 순서). 클릭 시 별도 리뷰 페이지로 이동 */}
       <ReviewSummary summary={view.reviewSummary} productId={id} className="border-t border-rule" />
@@ -384,12 +345,9 @@ export default function AppProductDetail() {
       {/* 상세 이미지 (DB 상품) */}
       {view.detailImages.length > 0 && (
         <div className="border-t border-rule">
-          {/* PC에서 상세컷을 넓게(원본 ~1020px) 가운데 정렬, 모바일은 화면 폭 그대로 */}
-          <div className="max-w-[1000px] mx-auto w-full">
-            {view.detailImages.map((url, i) => (
-              <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
-            ))}
-          </div>
+          {view.detailImages.map((url, i) => (
+            <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
+          ))}
         </div>
       )}
 
@@ -425,31 +383,33 @@ export default function AppProductDetail() {
         </div>
       )}
 
-      {/* 모바일 하단 sticky 구매 바 (하단 네비 바로 위에 쌓임, 데스크톱은 우측 구매박스가 있어 숨김) */}
+      {/* 하단 sticky 구매 바 (하단 네비 바로 위에 쌓임, 모든 화면 폭에서 동일) */}
       <div
-        className="fixed left-0 right-0 bg-paper border-t border-rule px-4 py-3 z-40 md:hidden"
+        className="fixed left-0 right-0 z-40"
         style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
       >
-        <div className="flex items-center gap-2.5">
-          <div className="shrink-0">
-            <p className="text-[10px] text-ink-faint leading-none mb-0.5">수량 {quantity}</p>
-            <p className="text-[15px] font-bold tabular-nums text-ink leading-none">{total.toLocaleString('ko-KR')}원</p>
+        <div className="max-w-[480px] mx-auto bg-paper border-t border-rule px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="shrink-0">
+              <p className="text-[10px] text-ink-faint leading-none mb-0.5">수량 {quantity}</p>
+              <p className="text-[15px] font-bold tabular-nums text-ink leading-none">{total.toLocaleString('ko-KR')}원</p>
+            </div>
+            <button
+              onClick={onAddToCart}
+              disabled={view.soldOut}
+              className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+              aria-label="장바구니 담기"
+            >
+              <IconCart className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onBuy}
+              disabled={view.soldOut}
+              className="flex-1 rounded-control bg-ink text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+            >
+              {view.soldOut ? '일시 품절' : '구매하기'}
+            </button>
           </div>
-          <button
-            onClick={onAddToCart}
-            disabled={view.soldOut}
-            className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
-            aria-label="장바구니 담기"
-          >
-            <IconCart className="w-5 h-5" />
-          </button>
-          <button
-            onClick={onBuy}
-            disabled={view.soldOut}
-            className="flex-1 rounded-control bg-ink text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
-          >
-            {view.soldOut ? '일시 품절' : '구매하기'}
-          </button>
         </div>
       </div>
 
@@ -461,6 +421,7 @@ export default function AppProductDetail() {
       )}
 
       <BottomNav />
+    </div>
     </div>
   )
 }

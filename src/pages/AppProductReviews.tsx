@@ -102,8 +102,10 @@ export default function AppProductReviews() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper flex items-center justify-center">
-        <p className="text-ink-faint text-[14px]">불러오는 중...</p>
+      <div className="min-h-screen bg-quiet md:py-6">
+        <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
+          <p className="text-ink-faint text-[14px]">불러오는 중...</p>
+        </div>
       </div>
     )
   }
@@ -112,10 +114,14 @@ export default function AppProductReviews() {
   const curPics = cur ? reviewPhotos(cur) : []
 
   return (
-    <div className="min-h-screen bg-paper" style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div
+      className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule"
+      style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}
+    >
       <BackHeader title="리뷰" onBack={() => navigate(`/app/product/${id}`)} />
 
-      <div className="max-w-[1000px] mx-auto">
+      <div>
         {/* 상품명 (클릭 시 상품 페이지로) */}
         {name && (
           <button
@@ -149,7 +155,7 @@ export default function AppProductReviews() {
                 <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink mb-3">
                   PHOTO REVIEW <span className="text-ink-faint font-bold">({photoReviews.length})</span>
                 </h2>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   {photoReviews.map(({ i, pics }) => (
                     <button
                       key={i}
@@ -245,6 +251,7 @@ export default function AppProductReviews() {
       )}
 
       <BottomNav />
+    </div>
     </div>
   )
 }
