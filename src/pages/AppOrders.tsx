@@ -87,7 +87,7 @@ export default function AppOrders() {
   useEffect(() => { load() }, [])
 
   const requestCancel = async (g: OrderGroup) => {
-    if (!window.confirm('이 주문의 취소를 요청할까요?\n판매자 확인 후 취소가 확정됩니다.')) return
+    if (!window.confirm('이 주문의 취소를 요청할까요?\n확인 후 취소가 확정됩니다.')) return
     setCancelling(g.paymentId)
     setMsg('')
     const { data, error } = await supabase.rpc('request_order_cancel', { p_payment_id: g.paymentId })
@@ -196,7 +196,7 @@ export default function AppOrders() {
                     </button>
                   )}
                   {g.status === 'cancel_requested' && (
-                    <p className="mt-2 text-[12px] text-[#B4472A]">판매자 확인 후 취소가 확정됩니다.</p>
+                    <p className="mt-2 text-[12px] text-[#B4472A]">확인 후 취소가 확정됩니다.</p>
                   )}
                 </div>
               </div>
