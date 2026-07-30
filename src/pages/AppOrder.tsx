@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import * as PortOne from '@portone/browser-sdk/v2'
 import BackHeader from '../components/layout/BackHeader'
@@ -22,6 +22,17 @@ type Status = 'idle' | 'paying' | 'verifying' | 'done' | 'error'
 
 const field =
   'w-full rounded-control bg-paper border border-rule px-3.5 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring'
+
+// 다른 /app/* 페이지들과 동일하게 480px 모바일 카드 폭으로 고정 (BottomNav는 없음 — 결제 흐름 중엔 하단 탭 숨김)
+function OrderFrame({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div className="min-h-screen bg-quiet md:py-6">
+      <div className={`max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule ${className}`}>
+        {children}
+      </div>
+    </div>
+  )
+}
 
 export default function AppOrder() {
   const navigate = useNavigate()
@@ -372,7 +383,7 @@ export default function AppOrder() {
 
   if (status === 'done' && doneOrder) {
     return (
-      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+      <OrderFrame className="flex flex-col items-center justify-center px-8 text-center">
         <h1 className="text-[24px] font-bold text-ink mb-2">주문이 완료되었습니다</h1>
         <p className="text-ink-soft text-[14px] leading-relaxed mb-2">{doneOrder.orderName}</p>
         <p className="text-[16px] font-bold tabular-nums text-ink mb-8">{doneOrder.amount.toLocaleString('ko-KR')}원 결제 완료</p>
@@ -384,26 +395,26 @@ export default function AppOrder() {
             계속 쇼핑하기
           </button>
         </div>
-      </div>
+      </OrderFrame>
     )
   }
 
   if (!checkedAuth) {
-    return <div className="min-h-screen bg-paper flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
+    return <OrderFrame className="flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</OrderFrame>
   }
 
   // 결제 후 리다이렉트 복귀 중에는 주문상품 목록이 비어 있으므로(빈 주문서 오인 방지) 확인/실패 화면을 먼저 처리
   if (status === 'verifying') {
     return (
-      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+      <OrderFrame className="flex flex-col items-center justify-center px-8 text-center">
         <h1 className="text-[20px] font-bold text-ink mb-2">결제를 확인하고 있어요</h1>
         <p className="text-ink-soft text-[14px]">잠시만 기다려주세요…</p>
-      </div>
+      </OrderFrame>
     )
   }
   if (status === 'error' && items.length === 0) {
     return (
-      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+      <OrderFrame className="flex flex-col items-center justify-center px-8 text-center">
         <h1 className="text-[20px] font-bold text-ink mb-2">결제가 완료되지 않았습니다</h1>
         <p className="text-ink-soft text-[13.5px] leading-relaxed mb-8">{message || '결제가 취소되었거나 실패했습니다. 다시 시도해주세요.'}</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -414,22 +425,22 @@ export default function AppOrder() {
             홈으로
           </button>
         </div>
-      </div>
+      </OrderFrame>
     )
   }
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+      <OrderFrame className="flex flex-col items-center justify-center px-8 text-center">
         <p className="text-[15px] text-ink-soft mb-6">주문할 상품이 없습니다.</p>
         <button onClick={() => navigate('/app/cart')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3 focus:outline-none focus-visible:shadow-ring">
           장바구니로 이동
         </button>
-      </div>
+      </OrderFrame>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-40">
+    <OrderFrame className="pb-40">
       <BackHeader title="주문/결제" />
 
       {!paymentReady && (
@@ -572,19 +583,21 @@ export default function AppOrder() {
         </p>
       </div>
 
-      {/* 결제 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-paper border-t border-rule px-4 py-4 z-40">
-        <button
-          onClick={handlePay}
-          disabled={busy}
-          className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
-          aria-disabled={busy}
-        >
-          {status === 'paying' ? '결제 진행 중…'
-            : paymentReady ? `${total.toLocaleString('ko-KR')}원 결제하기`
-            : `${total.toLocaleString('ko-KR')}원 · 결제 오픈 준비 중`}
-        </button>
+      {/* 결제 버튼 (다른 페이지 하단 탭과 동일하게 뷰포트 기준 fixed + 내부 480px 카드폭으로 정렬) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40">
+        <div className="max-w-[480px] mx-auto bg-paper border-t border-rule px-4 py-4">
+          <button
+            onClick={handlePay}
+            disabled={busy}
+            className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
+            aria-disabled={busy}
+          >
+            {status === 'paying' ? '결제 진행 중…'
+              : paymentReady ? `${total.toLocaleString('ko-KR')}원 결제하기`
+              : `${total.toLocaleString('ko-KR')}원 · 결제 오픈 준비 중`}
+          </button>
+        </div>
       </div>
-    </div>
+    </OrderFrame>
   )
 }
