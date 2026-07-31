@@ -138,7 +138,7 @@ export default function PartnerDashboard() {
             <h2 className="text-[14px] font-bold text-[#111]">예정된 라이브</h2>
             <Link
               to="/partner/live/new"
-              className="flex items-center gap-1 text-[12px] text-[#3B5BDB] hover:underline"
+              className="flex items-center gap-1 text-[12px] text-[#b8924a] hover:underline"
             >
               <IconPlus size={13} />
               라이브 예약
@@ -151,7 +151,7 @@ export default function PartnerDashboard() {
               <p className="text-[13px] text-[#9a9080]">예정된 라이브가 없습니다.</p>
               <Link
                 to="/partner/live/new"
-                className="text-[12px] text-[#3B5BDB] hover:underline mt-1 inline-block"
+                className="text-[12px] text-[#b8924a] hover:underline mt-1 inline-block"
               >
                 라이브 예약하기
               </Link>
@@ -192,7 +192,7 @@ export default function PartnerDashboard() {
             <h2 className="text-[14px] font-bold text-[#111]">최근 주문</h2>
             <Link
               to="/partner/orders"
-              className="flex items-center gap-1 text-[12px] text-[#3B5BDB] hover:underline"
+              className="flex items-center gap-1 text-[12px] text-[#b8924a] hover:underline"
             >
               전체 보기 <IconChevronRight size={13} />
             </Link>
@@ -267,7 +267,7 @@ export default function PartnerDashboard() {
           <Link
             key={to}
             to={to}
-            className="flex items-center justify-center gap-2 bg-white border border-[#eaebee] rounded-xl py-4 text-[13px] font-medium text-[#555] hover:border-[#3B5BDB] hover:text-[#3B5BDB] transition-colors"
+            className="flex items-center justify-center gap-2 bg-white border border-[#eaebee] rounded-xl py-4 text-[13px] font-medium text-[#555] hover:border-[#b8924a] hover:text-[#b8924a] transition-colors"
           >
             <Icon size={18} />
             {label}

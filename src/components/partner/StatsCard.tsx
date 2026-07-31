@@ -15,7 +15,7 @@ export default function StatsCard({ label, value, unit, change }: StatsCardProps
     <div className="bg-white border border-[#eaebee] rounded-[14px] p-6">
       <p className="text-[12px] text-[#6b7280] mb-2">{label}</p>
       <div className="flex items-end gap-1">
-        <p className="text-[28px] font-bold text-[#3B5BDB] leading-none">
+        <p className="text-[28px] font-bold text-[#b8924a] leading-none">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </p>
         {unit && <span className="text-[13px] text-[#6b7280] mb-0.5">{unit}</span>}

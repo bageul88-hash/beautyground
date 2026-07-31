@@ -271,14 +271,14 @@ export default function LiveForm() {
         <h3 className="flex items-center gap-1.5 text-[14px] font-bold text-[#111] mb-4">
           <IconPackage size={14} />판매 상품 선택
           {selectedIds.length > 0 && (
-            <span className="ml-1 text-[12px] font-semibold text-[#3B5BDB]">{selectedIds.length}개 선택됨</span>
+            <span className="ml-1 text-[12px] font-semibold text-[#b8924a]">{selectedIds.length}개 선택됨</span>
           )}
         </h3>
 
         {products.length === 0 ? (
           <p className="text-[13px] text-[#9a9080]">
             먼저 상품을 등록해 주세요.{' '}
-            <Link to="/partner/products/new" className="text-[#3B5BDB] font-medium hover:underline">
+            <Link to="/partner/products/new" className="text-[#b8924a] font-medium hover:underline">
               상품 등록하기
             </Link>
           </p>
@@ -295,7 +295,7 @@ export default function LiveForm() {
                       key={sid}
                       type="button"
                       onClick={() => toggleProduct(sid)}
-                      className="flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-full bg-[#EBF1FE] text-[#3B5BDB] text-[12px] font-medium"
+                      className="flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-full bg-[#FAEEDA] text-[#b8924a] text-[12px] font-medium"
                     >
                       <span className="max-w-[160px] truncate">{p.name}</span>
                       <IconX size={13} />
@@ -330,11 +330,11 @@ export default function LiveForm() {
                       key={product.id}
                       onClick={() => toggleProduct(product.id)}
                       className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
-                        selected ? 'bg-[#EBF1FE]' : 'hover:bg-[#f7f8fa]'
+                        selected ? 'bg-[#FAEEDA]' : 'hover:bg-[#f7f8fa]'
                       }`}
                     >
                       <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors shrink-0 ${
-                        selected ? 'bg-[#3B5BDB] border-[#3B5BDB]' : 'border-[#d5d7db]'
+                        selected ? 'bg-[#b8924a] border-[#b8924a]' : 'border-[#d5d7db]'
                       }`}>
                         {selected && <IconCheck size={12} color="white" />}
                       </div>
@@ -467,7 +467,7 @@ export default function LiveForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 py-2.5 bg-[#3B5BDB] hover:bg-[#2f4bc0] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
+            className="flex-1 py-2.5 bg-[#b8924a] hover:bg-[#a07c3b] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
           >
             {submitting ? '저장 중...' : isEdit ? '라이브 수정' : '라이브 예약'}
           </button>
