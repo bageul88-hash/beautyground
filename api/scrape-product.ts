@@ -57,6 +57,22 @@ function cleanProductName(raw: string | null | undefined): string {
   return s.trim()
 }
 
+// ₩ 표기 가격 폴백 추출 — Gemini 키가 없거나 실패했을 때 본문 텍스트에서 직접 파싱.
+// 상품명 바로 아래 가격 영역(본문 앞쪽)만 훑는다 — 뒤쪽(배송비·추천상품)의 원화 표기 오탐 방지.
+// "₩23,900 ₩28,000" 처럼 판매가·정가가 붙어 나오면 작은 쪽을 판매가로, 큰 쪽을 정가로 판단.
+function extractPriceFallback(bodyText: string): { price: number | null; sale_price: number | null } {
+  const window = bodyText.slice(0, 3000)
+  const nums = [...window.matchAll(/₩\s?([\d,]{3,})/g)]
+    .map((m) => parseInt(m[1].replace(/,/g, ''), 10))
+    .filter((n) => Number.isFinite(n) && n > 0)
+  if (nums.length === 0) return { price: null, sale_price: null }
+  if (nums.length === 1) return { price: nums[0], sale_price: null }
+  const [a, b] = nums
+  if (a < b) return { price: b, sale_price: a }
+  if (a > b) return { price: a, sale_price: b }
+  return { price: a, sale_price: null }
+}
+
 // 숫자(가격) 정규화: number 또는 "33,000원" 같은 문자열 → 정수
 function toIntOrNull(v: unknown): number | null {
   if (v == null) return null
@@ -389,6 +405,12 @@ ${bodyText}`
   const category =
     ai.category && CATEGORIES.includes(ai.category) ? ai.category : null
 
+  // Gemini 가 가격을 못 잡았으면(키 없음/실패) 본문의 ₩ 표기로 폴백
+  const aiPrice = toIntOrNull(ai.price)
+  const aiSalePrice = toIntOrNull(ai.sale_price)
+  const priceFallback =
+    aiPrice == null && aiSalePrice == null ? extractPriceFallback(bodyText) : null
+
   const data: ScrapeData = {
     // 상품명: og:title(정제) 1순위 → 상품명 요소(정제) → Gemini(정제) 순
     name:
@@ -396,8 +418,8 @@ ${bodyText}`
       cleanProductName(nameEl) ||
       cleanProductName(ai.name ? String(ai.name) : '') ||
       null,
-    price: toIntOrNull(ai.price),
-    sale_price: toIntOrNull(ai.sale_price),
+    price: aiPrice ?? priceFallback?.price ?? null,
+    sale_price: aiSalePrice ?? priceFallback?.sale_price ?? null,
     description: (ai.description && String(ai.description).trim()) || metaDesc || null,
     summary,
     thumbnail_url: gallery[0] ?? images[0] ?? thumbnailUrl, // 대표 = 갤러리 첫 장
