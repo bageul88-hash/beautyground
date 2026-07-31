@@ -29,8 +29,7 @@ export default function PartnerApplyComplete() {
               <p className="text-[14px] font-semibold text-text mb-1">다음 단계</p>
               <ul className="text-[13px] text-text-sub space-y-1.5">
                 <li>• 심사 통과 시 파트너 대시보드 접근이 활성화됩니다.</li>
-                <li>• 로그인 후 상품 등록 · 라이브 예약을 진행할 수 있습니다.</li>
-                <li>• 사전 BA 교육 일정 조율 후 라이브를 시작합니다.</li>
+                <li>• 로그인 후 상품 등록을 진행할 수 있습니다.</li>
               </ul>
             </div>
 

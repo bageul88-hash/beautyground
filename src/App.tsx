@@ -88,9 +88,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 메인 = 소비자 쇼핑 홈. B2B 소개 페이지는 /partners로 이동 */}
+        {/* 메인 = 소비자 쇼핑 홈. /partners는 예전 라이브커머스 중심 B2B 랜딩페이지라(하위
+            10개 컴포넌트 전체가 라이브 소개) 어디서도 링크하지 않고 관리자 전용으로 보존만 함(2026-07-31) */}
         <Route path="/" element={<AppHome />} />
-        <Route path="/partners" element={<WebHome />} />
+        <Route path="/partners" element={<LiveGate><WebHome /></LiveGate>} />
         <Route path="/proposal" element={<CompanyProposal />} />
         <Route path="/company" element={<CompanyIntro />} />
 
@@ -135,9 +136,11 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* 진행자(라이브 호스트): 회원가입 → 승인 → 로그인 */}
-        <Route path="/host/register" element={<HostRegister />} />
-        <Route path="/host/login" element={<HostLogin />} />
+        {/* 진행자(라이브 호스트): 회원가입 → 승인 → 로그인.
+            라이브커머스를 온라인몰과 분리해 공개 노출하지 않기로 해(2026-07-31)
+            링크가 없어도 직접 URL로 열리던 이 두 페이지도 관리자 전용으로 막음. */}
+        <Route path="/host/register" element={<LiveGate><HostRegister /></LiveGate>} />
+        <Route path="/host/login" element={<LiveGate><HostLogin /></LiveGate>} />
 
         <Route element={<RequireHostAuth />}>
           <Route element={<HostLayout />}>

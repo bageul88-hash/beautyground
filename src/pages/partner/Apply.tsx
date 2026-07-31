@@ -21,7 +21,6 @@ interface FormData {
 const GUIDE_ITEMS = [
   '롯데·신세계·현대 백화점 공식 파트너 브랜드에 한해 입점 신청이 가능합니다.',
   '입점 심사는 신청 후 영업일 기준 3~5일 내 완료됩니다.',
-  '공식 BA 출연이 필수이며, 사전 교육 후 라이브를 진행합니다.',
 ]
 
 const INITIAL_FORM: FormData = {
@@ -185,7 +184,7 @@ export default function PartnerApply() {
                 <label htmlFor="message" className="block text-[13px] font-medium text-text mb-1.5">
                   브랜드 소개
                 </label>
-                <textarea id="message" name="message" rows={4} value={form.message} onChange={handleChange} placeholder="브랜드 소개, 주요 상품, 라이브 희망 일정 등을 자유롭게 입력해 주세요" className={`${field} resize-none`} />
+                <textarea id="message" name="message" rows={4} value={form.message} onChange={handleChange} placeholder="브랜드 소개, 주요 상품 등을 자유롭게 입력해 주세요" className={`${field} resize-none`} />
               </div>
 
               <div className="bg-cream rounded-md p-5 border-l-[3px]" style={{ borderLeftColor: '#b8924a' }}>
