@@ -3,6 +3,7 @@ import { IconTrash, IconPencil } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { won } from '../../lib/format'
 import Button from '../../components/common/Button'
+import ColorSwatchPicker from '../../components/common/ColorSwatchPicker'
 
 interface MembershipTierRow {
   id: string
@@ -121,7 +122,7 @@ export default function AdminMembershipTiers() {
 
         <form
           onSubmit={handleSubmit}
-          className="bg-paper rounded-md border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto_auto] gap-3 items-end"
+          className="bg-paper border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto_auto] gap-3 items-end"
         >
           <div>
             <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">등급 코드</label>
@@ -155,18 +156,18 @@ export default function AdminMembershipTiers() {
           </div>
           <div>
             <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">글자색</label>
-            <input
-              type="color"
-              value={form.color} onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-              className="w-12 h-[42px] border border-rule rounded-control cursor-pointer"
+            <ColorSwatchPicker
+              label="글자색"
+              value={form.color}
+              onChange={(hex) => setForm((p) => ({ ...p, color: hex }))}
             />
           </div>
           <div>
             <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">배경색</label>
-            <input
-              type="color"
-              value={form.bg} onChange={(e) => setForm((p) => ({ ...p, bg: e.target.value }))}
-              className="w-12 h-[42px] border border-rule rounded-control cursor-pointer"
+            <ColorSwatchPicker
+              label="배경색"
+              value={form.bg}
+              onChange={(hex) => setForm((p) => ({ ...p, bg: hex }))}
             />
           </div>
           <div className="flex gap-2">
@@ -182,7 +183,7 @@ export default function AdminMembershipTiers() {
         </form>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-md px-4 py-3 mb-5">
+          <div className="bg-paper border border-signal-red text-signal-red text-[13px] px-4 py-3 mb-5">
             {error}
           </div>
         )}
@@ -192,7 +193,7 @@ export default function AdminMembershipTiers() {
         ) : tiers.length === 0 ? (
           <div className="py-20 text-center text-[14px] text-ink-faint">등록된 등급이 없습니다. 위에서 추가해 주세요.</div>
         ) : (
-          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
+          <div className="bg-paper border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
                 <tr className="border-b border-rule text-ink-soft">
@@ -222,7 +223,7 @@ export default function AdminMembershipTiers() {
                         <button onClick={() => startEdit(tier)} className="text-ink-faint hover:text-ink" aria-label="수정">
                           <IconPencil size={16} />
                         </button>
-                        <button onClick={() => setConfirmDel(tier)} className="text-ink-faint hover:text-red-500" aria-label="삭제">
+                        <button onClick={() => setConfirmDel(tier)} className="text-ink-faint hover:text-signal-red" aria-label="삭제">
                           <IconTrash size={16} />
                         </button>
                       </div>
@@ -237,7 +238,7 @@ export default function AdminMembershipTiers() {
 
       {confirmDel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setConfirmDel(null)}>
-          <div className="bg-paper rounded-md w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-paper border border-rule w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
             <p className="text-[15px] font-bold text-ink mb-2">'{confirmDel.label}' 등급을 삭제할까요?</p>
             <p className="text-[13px] text-ink-soft mb-6 leading-relaxed">
               이 등급을 삭제하면 해당 구간 고객은 다음으로 낮은 등급으로 재산정됩니다.

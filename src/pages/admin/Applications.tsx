@@ -108,13 +108,13 @@ export default function AdminApplications() {
       <main className="max-w-[1100px] p-8">
         <h1 className="text-[22px] font-bold text-ink mb-4">파트너 신청 관리</h1>
 
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 text-[13px] rounded-md px-4 py-3 mb-5 leading-relaxed">
+        <div className="bg-quiet border border-rule text-ink-soft text-[13px] px-4 py-3 mb-5 leading-relaxed">
           ※ 승인/반려는 RLS 정책상 service_role 또는 별도 정책이 필요할 수
           있습니다. 동작하지 않으면 Supabase SQL Editor에서 수동 승인하세요.
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-md px-4 py-3 mb-5">
+          <div className="bg-paper border border-signal-red text-signal-red text-[13px] px-4 py-3 mb-5">
             {error}
           </div>
         )}
@@ -128,7 +128,7 @@ export default function AdminApplications() {
             접수된 파트너 신청이 없습니다.
           </div>
         ) : (
-          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
+          <div className="bg-paper border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
                 <tr className="border-b border-rule text-ink-soft">
@@ -168,7 +168,7 @@ export default function AdminApplications() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${badge.className}`}
+                          className={`inline-flex items-center rounded-control px-2.5 py-1 text-[12px] font-bold ${badge.className}`}
                         >
                           {badge.label}
                         </span>

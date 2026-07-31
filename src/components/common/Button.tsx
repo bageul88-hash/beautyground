@@ -28,6 +28,14 @@ const sizeClasses = {
   lg: 'text-[15px] px-8 py-4',
 }
 
+// 새 월드(ink/inkOutline/accent/danger)는 DESIGN.md대로 4px+파랑 포커스링,
+// 구 월드(gold/ghost/outline/cancel)는 기존 알약+골드링을 그대로 유지(아직 미전환 화면용).
+const NEW_WORLD_VARIANTS = new Set<ButtonProps['variant']>(['ink', 'inkOutline', 'accent', 'danger'])
+const shapeClasses = {
+  new: 'rounded-control focus-visible:shadow-ring',
+  legacy: 'rounded-pill focus:shadow-focus',
+}
+
 export default function Button({
   variant = 'gold',
   size = 'md',
@@ -37,6 +45,7 @@ export default function Button({
   disabled = false,
   className = '',
 }: ButtonProps) {
+  const shape = shapeClasses[NEW_WORLD_VARIANTS.has(variant) ? 'new' : 'legacy']
   return (
     <button
       type={type}
@@ -44,9 +53,10 @@ export default function Button({
       disabled={disabled}
       className={[
         // shrink-0 + whitespace-nowrap: 옆에 가변폭 요소(select 등)와 한 줄에 있을 때
-        // 폭이 부족하다고 알약 버튼 자체가 찌그러들며 글자가 줄바꿈되는 것을 막는다
+        // 폭이 부족하다고 버튼 자체가 찌그러들며 글자가 줄바꿈되는 것을 막는다
         // (좁아져야 하는 건 항상 옆의 가변폭 요소이지, 라벨 있는 버튼이 아니다).
-        'rounded-pill font-sans font-medium transition-colors duration-200 shrink-0 whitespace-nowrap focus:outline-none focus:shadow-focus disabled:opacity-50 disabled:cursor-not-allowed',
+        'font-sans font-medium transition-colors duration-200 shrink-0 whitespace-nowrap focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+        shape,
         variantClasses[variant],
         sizeClasses[size],
         className,

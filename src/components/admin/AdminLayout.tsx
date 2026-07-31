@@ -47,7 +47,7 @@ export default function AdminLayout() {
       <aside className="w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-30">
         <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
-            <p className="text-ink font-serif text-[20px] font-bold tracking-wide">
+            <p className="text-ink text-[20px] font-bold tracking-wide">
               뷰티그라운드
             </p>
             <p className="text-ink-faint text-[11px] mt-0.5 tracking-widest uppercase">Admin Center</p>
