@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
 import { COMPANY_INFO } from '../../lib/companyInfo'
 
-// 라이브커머스(진행자 지원)는 온라인몰과 당분간 분리 — 노출 안 함(2026-07-31)
+// 라이브커머스(진행자 지원)·입점 신청(브랜드 모집)은 온라인몰과 당분간 분리 — 노출 안 함(2026-07-31)
 const FOOTER_LINKS = [
   { href: '/about', label: '회사소개' },
-  { href: '/partner/apply', label: '입점안내' },
   { href: '/privacy', label: '개인정보처리방침' },
 ]
 

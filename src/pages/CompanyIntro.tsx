@@ -226,16 +226,10 @@ export default function CompanyIntro() {
             뷰티그라운드와 함께하고 싶으신가요?
           </p>
           <p className="text-white/50 text-[14px] mb-8">
-            입점 · 제휴 · 협업 문의는 아래 연락처로 편하게 연락 주세요
+            제휴 · 협업 문의는 아래 연락처로 편하게 연락 주세요
           </p>
           <p className="text-gold text-[16px] font-bold mb-10">{COMPANY_INFO.csEmail}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              to="/proposal"
-              className="text-[13px] text-white/70 hover:text-gold border border-white/20 hover:border-gold rounded-pill px-5 py-2.5 transition-colors"
-            >
-              입점 제안서 보기
-            </Link>
             <Link
               to="/app/home"
               className="text-[13px] text-white/70 hover:text-gold border border-white/20 hover:border-gold rounded-pill px-5 py-2.5 transition-colors"

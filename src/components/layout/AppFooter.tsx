@@ -18,8 +18,6 @@ export default function AppFooter() {
           <Link to="/app/login" className="hover:text-ink transition-colors">로그인</Link>
           {sep}
           <a href={`tel:${COMPANY_INFO.csPhone}`} className="hover:text-ink transition-colors">고객센터</a>
-          {sep}
-          <Link to="/partner/apply" className="hover:text-ink transition-colors">입점문의</Link>
         </nav>
 
         {/* 사업자 정보 */}

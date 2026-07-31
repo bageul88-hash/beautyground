@@ -92,7 +92,8 @@ export default function App() {
             10개 컴포넌트 전체가 라이브 소개) 어디서도 링크하지 않고 관리자 전용으로 보존만 함(2026-07-31) */}
         <Route path="/" element={<AppHome />} />
         <Route path="/partners" element={<LiveGate><WebHome /></LiveGate>} />
-        <Route path="/proposal" element={<CompanyProposal />} />
+        {/* /proposal은 전체가 "입점 브랜드 모집" 제안서라 온라인몰 공개범위에서 뺌(2026-07-31) — 관리자만 */}
+        <Route path="/proposal" element={<LiveGate><CompanyProposal /></LiveGate>} />
         <Route path="/company" element={<CompanyIntro />} />
 
         {/* 법적 고지 */}
@@ -100,11 +101,12 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about" element={<Company />} />
 
-        {/* 입점: 회원가입 → 신청 → 완료 */}
-        <Route path="/partner/register" element={<PartnerRegister />} />
+        {/* 입점(신규 브랜드 모집)도 온라인몰과 분리해 비노출(2026-07-31) — 신청 관련 3개는
+            관리자 전용으로 막고, 이미 입점된 브랜드가 계속 써야 하는 로그인만 열어둠 */}
+        <Route path="/partner/register" element={<LiveGate><PartnerRegister /></LiveGate>} />
         <Route path="/partner/login" element={<PartnerLogin />} />
-        <Route path="/partner/apply" element={<PartnerApply />} />
-        <Route path="/partner/apply/complete" element={<PartnerApplyComplete />} />
+        <Route path="/partner/apply" element={<LiveGate><PartnerApply /></LiveGate>} />
+        <Route path="/partner/apply/complete" element={<LiveGate><PartnerApplyComplete /></LiveGate>} />
 
         {/* 파트너 전용 + 관리자 (로그인 필요) */}
         <Route element={<RequireAuth />}>

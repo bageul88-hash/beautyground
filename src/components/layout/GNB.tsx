@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const NAV_LINKS = [
-  { href: '/join', label: '입점안내' },
   { href: '#success', label: '성공스토리' },
   { href: '#solution', label: 'B2B솔루션' },
   { href: '/partnership', label: '광고·제휴' },
