@@ -73,6 +73,7 @@ import HostProfile from './pages/host/Profile'
 // 구매자 라이브 (Supabase 연동)
 import ShopLiveList from './pages/app/ShopLiveList'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
+import LiveGate from './components/app/LiveGate'
 
 export default function App() {
   // 로그인 시(카카오 포함) 게스트 장바구니를 서버 장바구니로 합친다.
@@ -151,11 +152,10 @@ export default function App() {
         {/* 앱 UI */}
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
-        {/* 라이브커머스: 관리자만 실제 화면, 일반 고객은 준비중 안내 */}
-        {/* 라이브커머스 고객 오픈: 일반 구매자도 라이브를 볼 수 있게 개방(대표님 지시 2026-07-28).
-            다시 관리자 전용으로 막으려면 각 라우트를 <LiveGate>…</LiveGate>로 감싸면 됨. */}
-        <Route path="/app/live" element={<ShopLiveList />} />
-        <Route path="/app/live/:id" element={<ShopLiveWatch />} />
+        {/* 라이브커머스: 온라인몰과 당분간 분리(대표님 지시 2026-07-31) — 관리자만 실제 화면,
+            일반 고객은 준비중 안내. 7/28에 한 번 고객 개방했었으나 다시 막음. */}
+        <Route path="/app/live" element={<LiveGate><ShopLiveList /></LiveGate>} />
+        <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
         <Route path="/app/brand/:id" element={<AppBrandDetail />} />
