@@ -56,6 +56,8 @@ import AdminHome from './pages/admin/Home'
 import AdminHosts from './pages/admin/Hosts'
 import AdminCommissionTiers from './pages/admin/CommissionTiers'
 import AdminHostSettlements from './pages/admin/HostSettlements'
+import AdminMembers from './pages/admin/Members'
+import AdminMembershipTiers from './pages/admin/MembershipTiers'
 
 // 진행자(라이브 호스트) 인증/전용 (RequireHostAuth + HostLayout)
 import HostRegister from './pages/host/Register'
@@ -126,6 +128,8 @@ export default function App() {
               <Route path="/admin/hosts" element={<AdminHosts />} />
               <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
               <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
+              <Route path="/admin/members" element={<AdminMembers />} />
+              <Route path="/admin/membership-tiers" element={<AdminMembershipTiers />} />
             </Route>
           </Route>
         </Route>

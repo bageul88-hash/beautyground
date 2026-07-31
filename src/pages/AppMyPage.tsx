@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
 import { supabase } from '../lib/supabase'
-import { getMyMembership, TIERS, type MembershipInfo } from '../lib/membership'
+import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
 import { IconUser } from '../components/common/Icon'
 
 // 실제 로그인 사용자 프로필 (포인트/쿠폰은 아직 적립·발급 시스템이 없어 0 — 가짜 숫자 금지)
@@ -43,6 +43,7 @@ export default function AppMyPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
+  const [tiers, setTiers] = useState<MembershipTier[]>([])
   const [showTierGuide, setShowTierGuide] = useState(false)
 
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
@@ -58,7 +59,7 @@ export default function AppMyPage() {
     const name = meta?.name || authUser.email?.split('@')[0] || '고객'
 
     // 실제 주문 건수(같은 결제 1건 = payment_id 1개, 카트 다건이어도 중복집계 안 되게 dedupe)
-    const [{ data: orderRows }, { count: wishlistCount }, ms] = await Promise.all([
+    const [{ data: orderRows }, { count: wishlistCount }, ms, tiersLoaded] = await Promise.all([
       supabase
         .from('orders')
         .select('payment_id')
@@ -69,10 +70,12 @@ export default function AppMyPage() {
         .select('id', { count: 'exact', head: true })
         .eq('user_id', authUser.id),
       getMyMembership(),
+      getTiers(),
     ])
     const orderCount = new Set((orderRows ?? []).map((r) => (r as { payment_id: string | null }).payment_id)).size
 
     setMembership(ms)
+    setTiers(tiersLoaded)
     setUser({ name, email: authUser.email ?? '', points: 0, coupons: 0, orders: orderCount, wishlist: wishlistCount ?? 0 })
   }
 
@@ -179,7 +182,7 @@ export default function AppMyPage() {
               <div className="mt-3 pt-3 border-t border-rule">
                 <p className="text-[12px] font-bold text-ink mb-2">회원 등급 안내 (누적 구매금액 기준)</p>
                 <div className="space-y-1.5">
-                  {TIERS.map((t) => (
+                  {tiers.map((t) => (
                     <div key={t.key} className="flex items-center justify-between text-[12px]">
                       <span className="flex items-center gap-2">
                         <span

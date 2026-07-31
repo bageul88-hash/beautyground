@@ -10,11 +10,15 @@ import {
   IconVideo,
   IconShoppingCart,
   IconCash,
+  IconAddressBook,
+  IconMedal,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
 const NAV_ITEMS = [
   { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
+  { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
+  { label: '회원 등급 설정', to: '/admin/membership-tiers', icon: IconMedal },
   { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
   { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
   { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
