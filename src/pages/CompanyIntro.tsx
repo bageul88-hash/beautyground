@@ -18,16 +18,11 @@ const BUSINESS = [
   },
   {
     no: '02',
-    title: '라이브커머스 플랫폼',
-    desc: '자체 라이브커머스 쇼핑몰을 운영하며 브랜드별 라이브 방송, 라이브 한정 특가, 다시보기까지 온라인 판매의 전 과정을 지원합니다.',
-  },
-  {
-    no: '03',
     title: '글로벌 유통 · 수출',
     desc: '미국 TJX·Costco, 일본 로프트(LOFT), 베트남 Guardian, 중국 KKV 등 해외 대형 채널과 Amazon·Qoo10·Shopee 이커머스를 통해 K-Beauty 브랜드의 해외 진출을 연계합니다.',
   },
   {
-    no: '04',
+    no: '03',
     title: '브랜드 파트너십 · 마케팅',
     desc: '브랜드 총판·유통 대행과 SNS 바이럴, 카카오 CRM 연계 마케팅으로 파트너 브랜드의 국내외 성장을 함께 만듭니다.',
   },
@@ -37,7 +32,7 @@ const HISTORY = [
   { year: '2022', title: '법인 설립 및 오프라인 매장 오픈', desc: '(주)뷰티그라운드 법인 설립 · AK플라자 뷰티 편집샵 오픈' },
   { year: '2023', title: '백화점 팝업스토어 확대 & 글로벌 진출', desc: '롯데 잠실점, 수원 AK 서현, 현대 판교 등 팝업 진행 · Amazon · Qoo10 · Shopee 진출' },
   { year: '2024', title: '글로벌 유통 오프라인 대형 채널 확장', desc: '미국 TJX · Costco / 일본 로프트(LOFT) / 베트남 Guardian / 중국 KKV · SANFU 진출' },
-  { year: '2025', title: '브랜드 총판 대행 확대 및 채널 확장', desc: '브랜드 마케팅 및 유통 대행 확대 · 라이브커머스 공식 런칭' },
+  { year: '2025', title: '브랜드 총판 대행 확대 및 채널 확장', desc: '브랜드 마케팅 및 유통 대행 확대' },
   { year: '2026', title: '백화점 매장 확장 및 AI 마케팅 도입', desc: '백화점 편집샵 매장 본격 확장(AK백화점, 롯데 등) · AI 기반 데이터 마케팅 도입' },
 ]
 
@@ -73,9 +68,9 @@ export default function CompanyIntro() {
             "The Right Beauty - The Right Life"
           </p>
           <p className="text-white/60 text-[14px] sm:text-[15px] leading-relaxed max-w-[560px] mx-auto mt-8">
-            뷰티그라운드는 백화점 편집샵과 라이브커머스, 글로벌 유통을 잇는
+            뷰티그라운드는 백화점 편집샵과 온라인 쇼핑몰, 글로벌 유통을 잇는
             K-Beauty 커머스 컴퍼니입니다. 검증된 브랜드를 발굴하고,
-            오프라인 매장과 온라인 방송에서 고객과 직접 만나게 합니다.
+            오프라인 매장과 온라인에서 고객과 직접 만나게 합니다.
           </p>
         </section>
 
@@ -101,7 +96,7 @@ export default function CompanyIntro() {
               ['대표자', COMPANY_INFO.ceo],
               ['설립', '2022년'],
               ['본사', COMPANY_INFO.address],
-              ['사업 영역', '백화점 뷰티 편집샵 · 라이브커머스 · K-Beauty 글로벌 유통·마케팅'],
+              ['사업 영역', '백화점 뷰티 편집샵 · 온라인 쇼핑몰 · K-Beauty 글로벌 유통·마케팅'],
               ['오프라인 매장', 'AK플라자 광명점 · 수원점 운영 중'],
             ].map(([k, v]) => (
               <div key={k}>
