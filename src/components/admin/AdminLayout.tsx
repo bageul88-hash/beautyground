@@ -42,7 +42,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-quiet">
+    <div className="flex min-h-screen bg-paper">
       {/* 사이드바 — 화이트+블랙 텍스트(새 월드). 진한 배경색·골드 강조 없이 얇은 선과 잉크 농도로만 상태 구분. */}
       <aside className="w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-30">
         <div className="px-6 pt-8 pb-6 border-b border-rule">

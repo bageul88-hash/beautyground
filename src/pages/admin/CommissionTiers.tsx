@@ -129,7 +129,7 @@ export default function AdminCommissionTiers() {
           </div>
           <div className="flex gap-2">
             <Button
-              type="submit" variant="ink" size="sm"
+              type="submit" variant="accent" size="sm"
               label={submitting ? '저장 중...' : form.id ? '수정' : '추가'}
               disabled={submitting}
             />
@@ -193,7 +193,7 @@ export default function AdminCommissionTiers() {
             </p>
             <div className="flex gap-2 justify-end">
               <Button variant="inkOutline" size="sm" label="취소" onClick={() => setConfirmDel(null)} />
-              <Button variant="ink" size="sm" label="삭제" onClick={() => void handleDelete()} />
+              <Button variant="danger" size="sm" label="삭제" onClick={() => void handleDelete()} />
             </div>
           </div>
         </div>

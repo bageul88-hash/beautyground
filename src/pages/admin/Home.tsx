@@ -258,7 +258,7 @@ export default function AdminHome() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[15px] font-bold text-ink">상단 공지 마퀴</h2>
             <Button
-              variant="ink"
+              variant="accent"
               size="sm"
               label={savingMarquee ? '저장 중…' : marqueeSaved ? '저장됨 ✓' : '저장'}
               onClick={() => void saveMarquee()}
@@ -326,7 +326,7 @@ export default function AdminHome() {
                 ))}
               </select>
               <Button
-                variant="ink"
+                variant="accent"
                 size="md"
                 label="추가"
                 onClick={() => void addProductBanner()}
@@ -364,7 +364,7 @@ export default function AdminHome() {
                 className="text-[14px] border border-rule rounded-md px-3 py-2"
               />
               <Button
-                variant="ink"
+                variant="accent"
                 size="md"
                 label="브랜드 배너 추가"
                 onClick={() => void addCustomBanner()}
@@ -419,7 +419,7 @@ export default function AdminHome() {
                       onClick={() => void toggleActive(row)}
                       disabled={busyId === row.id}
                       className={`text-[12px] font-medium rounded-pill px-2.5 py-1 ${
-                        row.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                        row.active ? 'bg-signal-blue/10 text-signal-blue' : 'bg-quiet text-ink-faint'
                       }`}
                     >
                       {row.active ? '노출중' : '숨김'}

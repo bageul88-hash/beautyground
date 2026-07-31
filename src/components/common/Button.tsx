@@ -1,5 +1,5 @@
 interface ButtonProps {
-  variant?: 'gold' | 'ghost' | 'outline' | 'cancel' | 'ink' | 'inkOutline'
+  variant?: 'gold' | 'ghost' | 'outline' | 'cancel' | 'ink' | 'inkOutline' | 'accent' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   label: string
   onClick?: () => void
@@ -16,6 +16,10 @@ const variantClasses = {
   // 새 월드(화이트+블랙) — admin 섹션 전용. gold/cancel은 아직 미전환 화면(web/partner/host)이 쓰므로 그대로 둔다.
   ink: 'bg-ink text-paper hover:opacity-90 active:opacity-80',
   inkOutline: 'bg-paper border border-rule text-ink-soft hover:border-ink-faint hover:text-ink',
+  // 강조는 원색 1개(signal-blue)만 — "확정된 정보·행동"(DESIGN.md). 여러 색을 쓰면 지저분해 보인다는
+  // 대표님 지시로 admin의 모든 1차 액션 버튼은 이 파랑 하나로 통일. 삭제 등 파괴적 액션만 예외로 danger(red).
+  accent: 'bg-signal-blue text-paper hover:opacity-90 active:opacity-80',
+  danger: 'bg-signal-red text-paper hover:opacity-90 active:opacity-80',
 }
 
 const sizeClasses = {

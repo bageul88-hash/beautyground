@@ -6,10 +6,11 @@ import Button from '../../components/common/Button'
 
 type AppStatus = PartnerApplication['status']
 
+// 강조는 원색 1개(signal-blue)만 — 승인=파랑, 나머지(심사중/반려)는 회색 톤으로 구분.
 const statusBadge: Record<AppStatus, { label: string; className: string }> = {
-  pending: { label: '심사중', className: 'bg-amber-100 text-amber-700' },
-  approved: { label: '승인', className: 'bg-green-100 text-green-700' },
-  rejected: { label: '반려', className: 'bg-gray-100 text-gray-500' },
+  pending: { label: '심사중', className: 'bg-quiet text-ink-soft' },
+  approved: { label: '승인', className: 'bg-signal-blue/10 text-signal-blue' },
+  rejected: { label: '반려', className: 'bg-quiet text-ink-faint' },
 }
 
 export default function AdminApplications() {
@@ -176,7 +177,7 @@ export default function AdminApplications() {
                         {app.status === 'pending' ? (
                           <div className="flex items-center gap-2">
                             <Button
-                              variant="ink"
+                              variant="accent"
                               size="sm"
                               label="승인"
                               disabled={busyId === app.id}

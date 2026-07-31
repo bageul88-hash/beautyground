@@ -13,10 +13,11 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'suspended', label: '정지됨' },
 ]
 
+// 강조는 원색 1개(signal-blue)만 — 활동중=파랑, 나머지(가입대기/정지됨)는 회색 톤으로 구분.
 const statusBadge: Record<Host['status'], { label: string; className: string }> = {
-  pending: { label: '가입대기', className: 'bg-amber-100 text-amber-700' },
-  active: { label: '활동중', className: 'bg-green-100 text-green-700' },
-  suspended: { label: '정지됨', className: 'bg-gray-100 text-gray-500' },
+  pending: { label: '가입대기', className: 'bg-quiet text-ink-soft' },
+  active: { label: '활동중', className: 'bg-signal-blue/10 text-signal-blue' },
+  suspended: { label: '정지됨', className: 'bg-quiet text-ink-faint' },
 }
 
 export default function AdminHosts() {
@@ -120,7 +121,7 @@ export default function AdminHosts() {
                         <div className="flex items-center gap-2">
                           {host.status !== 'active' && (
                             <Button
-                              variant="ink" size="sm" label="승인/활성화"
+                              variant="accent" size="sm" label="승인/활성화"
                               disabled={busyId === host.id}
                               onClick={() => void changeStatus(host, 'active')}
                             />

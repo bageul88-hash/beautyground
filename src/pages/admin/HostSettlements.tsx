@@ -12,9 +12,10 @@ function thisMonthKey() {
   return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`
 }
 
+// 강조는 원색 1개(signal-blue)만 — 지급 완료=파랑, 정산 대기=회색.
 const STATUS_BADGE: Record<HostSettlement['status'], { label: string; bg: string; text: string }> = {
-  pending: { label: '정산 대기', bg: 'bg-[#FAEEDA]', text: 'text-[#633806]' },
-  paid:    { label: '지급 완료', bg: 'bg-[#E1F5EE]', text: 'text-[#085041]' },
+  pending: { label: '정산 대기', bg: 'bg-quiet', text: 'text-ink-soft' },
+  paid:    { label: '지급 완료', bg: 'bg-signal-blue/10', text: 'text-signal-blue' },
 }
 
 export default function AdminHostSettlements() {
@@ -122,7 +123,7 @@ export default function AdminHostSettlements() {
               />
             </div>
             <Button variant="inkOutline" size="sm" label={previewing ? '계산 중...' : '미리보기'} disabled={previewing} onClick={() => void handlePreview()} />
-            <Button variant="ink" size="sm" label={generating ? '생성 중...' : '정산 생성'} disabled={generating} onClick={() => void handleGenerate()} />
+            <Button variant="accent" size="sm" label={generating ? '생성 중...' : '정산 생성'} disabled={generating} onClick={() => void handleGenerate()} />
           </div>
 
           {preview && (
@@ -192,7 +193,7 @@ export default function AdminHostSettlements() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {row.status === 'pending' ? (
                           <Button
-                            variant="ink" size="sm" label={payingId === row.id ? '처리 중...' : '지급 완료 처리'}
+                            variant="accent" size="sm" label={payingId === row.id ? '처리 중...' : '지급 완료 처리'}
                             disabled={payingId === row.id}
                             onClick={() => void handleMarkPaid(row)}
                           />
