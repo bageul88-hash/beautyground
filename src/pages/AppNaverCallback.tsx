@@ -57,7 +57,8 @@ export default function AppNaverCallback() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
       {error ? (
         <>
           <p className="text-[15px] text-signal-red font-bold mb-4">{error}</p>
@@ -71,6 +72,7 @@ export default function AppNaverCallback() {
       ) : (
         <p className="text-[14px] text-ink-faint">네이버 로그인 처리 중…</p>
       )}
+    </div>
     </div>
   )
 }

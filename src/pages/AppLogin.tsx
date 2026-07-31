@@ -41,9 +41,10 @@ export default function AppLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="로그인" />
-      <div className="max-w-[420px] mx-auto px-6 py-10">
+      <div className="px-6 py-10">
         <h1 className="text-[24px] font-bold text-ink text-center mb-8">뷰티그라운드</h1>
 
         {/* 카카오 로그인 — 공식 버튼 규격(#FEE500 배경 + 검정 85% 텍스트, 카카오 고유색 예외) */}
@@ -94,6 +95,7 @@ export default function AppLogin() {
           </p>
         </form>
       </div>
+    </div>
     </div>
   )
 }

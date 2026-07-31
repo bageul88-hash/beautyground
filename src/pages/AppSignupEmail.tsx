@@ -63,20 +63,23 @@ export default function AppSignupEmail() {
 
   if (needsVerify) {
     return (
-      <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-8 text-center">
+      <div className="min-h-screen bg-quiet md:py-6">
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
         <h1 className="text-[18px] font-bold text-ink mb-2">인증 이메일을 보냈습니다</h1>
         <p className="text-[13px] text-ink-soft leading-relaxed mb-8">
           {email} 로 전송된 링크를 확인한 후 로그인해 주세요.
         </p>
         <Link to="/app/login" className="text-ink text-[14px] font-bold focus:outline-none focus-visible:shadow-ring">로그인하러 가기</Link>
       </div>
+      </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="쇼핑몰 회원가입" />
-      <div className="max-w-[420px] mx-auto px-6 py-10">
+      <div className="px-6 py-10">
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-[13px] font-bold text-ink mb-1.5">이름</label>
@@ -115,6 +118,7 @@ export default function AppSignupEmail() {
           </p>
         </form>
       </div>
+    </div>
     </div>
   )
 }

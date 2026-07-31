@@ -99,14 +99,17 @@ export default function AppCart() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper flex items-center justify-center">
+      <div className="min-h-screen bg-quiet md:py-6">
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
         <p className="text-ink-faint text-[14px]">불러오는 중...</p>
+      </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-40">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-40">
       <BackHeader title="장바구니" />
 
       {lines.length === 0 ? (
@@ -249,20 +252,23 @@ export default function AppCart() {
       {lines.length > 0 && (
         // 하단 네비(z-50, bottom-0) 위에 쌓이도록 위치 — bottom-0 이면 네비에 가려 클릭 불가
         <div
-          className="fixed left-0 right-0 bg-paper border-t border-rule px-4 py-3 z-40"
+          className="fixed left-0 right-0 z-40"
           style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
         >
-          <button
-            onClick={goOrder}
-            disabled={selected.size === 0}
-            className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
-          >
-            {selected.size > 0 ? `선택 상품 주문 (${total.toLocaleString('ko-KR')}원)` : '상품을 선택해주세요'}
-          </button>
+          <div className="max-w-[480px] mx-auto bg-paper border-t border-rule px-4 py-3">
+            <button
+              onClick={goOrder}
+              disabled={selected.size === 0}
+              className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
+            >
+              {selected.size > 0 ? `선택 상품 주문 (${total.toLocaleString('ko-KR')}원)` : '상품을 선택해주세요'}
+            </button>
+          </div>
         </div>
       )}
 
       <BottomNav />
+    </div>
     </div>
   )
 }

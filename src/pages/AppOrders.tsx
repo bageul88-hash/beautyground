@@ -102,12 +102,17 @@ export default function AppOrders() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-paper flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
+    return (
+      <div className="min-h-screen bg-quiet md:py-6">
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
+      </div>
+    )
   }
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen bg-paper">
+      <div className="min-h-screen bg-quiet md:py-6">
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
         <BackHeader title="주문 내역" />
         <div className="flex flex-col items-center justify-center px-8 pt-28 text-center">
           <p className="text-[15px] text-ink mb-2 font-bold">로그인이 필요해요</p>
@@ -117,11 +122,13 @@ export default function AppOrders() {
           </button>
         </div>
       </div>
+      </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-16">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-16">
       <BackHeader title="주문 내역" />
 
       {msg && (
@@ -207,6 +214,7 @@ export default function AppOrders() {
           })}
         </div>
       )}
+    </div>
     </div>
   )
 }

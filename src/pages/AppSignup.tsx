@@ -43,9 +43,10 @@ export default function AppSignup() {
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-quiet md:py-6">
+    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="" />
-      <div className="max-w-[420px] mx-auto px-6 py-10">
+      <div className="px-6 py-10">
         <h1 className="text-[24px] font-bold text-ink text-center mb-8">회원가입</h1>
 
         <div className="rounded-control border border-rule p-6 space-y-3">
@@ -107,6 +108,7 @@ export default function AppSignup() {
           <Link to="/app/login" state={{ from }} className="text-ink font-bold underline focus:outline-none focus-visible:shadow-ring">로그인</Link>
         </p>
       </div>
+    </div>
     </div>
   )
 }
