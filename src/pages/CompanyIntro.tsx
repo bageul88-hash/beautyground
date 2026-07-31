@@ -245,7 +245,7 @@ export default function CompanyIntro() {
               to="/app/home"
               className="text-[13px] text-white/70 hover:text-gold border border-white/20 hover:border-gold rounded-pill px-5 py-2.5 transition-colors"
             >
-              라이브 쇼핑몰 둘러보기
+              온라인 쇼핑몰 둘러보기
             </Link>
           </div>
         </section>
