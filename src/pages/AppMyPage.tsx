@@ -31,7 +31,7 @@ function buildMenuItems(user: RealUser) {
 
 const SETTING_ITEMS = [
   { label: '알림 설정' },
-  { label: '계정/보안' },
+  { label: '계정/보안', path: '/app/account' },
   { label: '이용약관', path: '/terms' },
   { label: '개인정보처리방침', path: '/privacy' },
   { label: '고객센터', path: '/about' },
@@ -123,7 +123,10 @@ export default function AppMyPage() {
             </div>
             <p className="text-[13px] text-ink-soft mt-0.5">{user.email}</p>
           </div>
-          <button className="text-[12px] text-ink-soft rounded-control border border-rule px-3 py-1.5 focus:outline-none focus-visible:shadow-ring">
+          <button
+            onClick={() => navigate('/app/account')}
+            className="text-[12px] text-ink-soft rounded-control border border-rule px-3 py-1.5 focus:outline-none focus-visible:shadow-ring"
+          >
             프로필 수정
           </button>
         </div>

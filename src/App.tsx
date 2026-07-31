@@ -19,6 +19,7 @@ import AppLogin from './pages/AppLogin'
 import AppSignup from './pages/AppSignup'
 import AppSignupEmail from './pages/AppSignupEmail'
 import AppNaverCallback from './pages/AppNaverCallback'
+import AppAccount from './pages/AppAccount'
 import AppAddresses from './pages/AppAddresses'
 import AppWishlist from './pages/AppWishlist'
 
@@ -164,6 +165,7 @@ export default function App() {
         <Route path="/app/signup" element={<AppSignup />} />
         <Route path="/app/signup/email" element={<AppSignupEmail />} />
         <Route path="/app/auth/naver/callback" element={<AppNaverCallback />} />
+        <Route path="/app/account" element={<AppAccount />} />
         <Route path="/app/addresses" element={<AppAddresses />} />
         <Route path="/app/wishlist" element={<AppWishlist />} />
 
