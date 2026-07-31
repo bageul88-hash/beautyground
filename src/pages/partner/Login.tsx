@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import GNB from '../../components/layout/GNB'
 import Footer from '../../components/layout/Footer'
-import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
+
+const field =
+  'w-full rounded-control bg-paper border border-rule px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition'
 
 export default function PartnerLogin() {
   const navigate = useNavigate()
@@ -35,13 +37,13 @@ export default function PartnerLogin() {
   return (
     <>
       <GNB />
-      <main className="py-20 md:py-28" style={{ backgroundColor: '#f7f4ef' }}>
+      <main className="py-20 md:py-28 bg-paper">
         <div className="max-w-[420px] mx-auto px-6">
           <div className="text-center mb-8">
-            <span className="text-gold text-[13px] font-medium tracking-widest uppercase mb-3 block">
+            <span className="text-ink-soft text-[12px] font-bold tracking-[0.08em] uppercase mb-3 block">
               PARTNER LOGIN
             </span>
-            <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-text">
+            <h1 className="text-[28px] md:text-[32px] font-bold text-ink">
               파트너 로그인
             </h1>
           </div>
@@ -49,12 +51,11 @@ export default function PartnerLogin() {
           <form
             onSubmit={handleSubmit}
             noValidate
-            className="bg-white rounded-md p-6 md:p-8 border"
-            style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
+            className="bg-paper border border-rule p-6 md:p-8"
           >
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-[13px] font-medium text-text mb-1.5">
+                <label htmlFor="email" className="block text-[13px] font-bold text-ink mb-1.5">
                   이메일
                 </label>
                 <input
@@ -64,11 +65,11 @@ export default function PartnerLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="brand@company.com"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
+                  className={field}
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-[13px] font-medium text-text mb-1.5">
+                <label htmlFor="password" className="block text-[13px] font-bold text-ink mb-1.5">
                   비밀번호
                 </label>
                 <input
@@ -78,28 +79,27 @@ export default function PartnerLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="비밀번호"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
+                  className={field}
                 />
               </div>
 
               {error && (
-                <p className="text-[13px] text-[#FF4757]" role="alert">
+                <p className="text-[13px] text-signal-red" role="alert">
                   {error}
                 </p>
               )}
 
-              <Button
+              <button
                 type="submit"
-                variant="gold"
-                size="md"
-                label={submitting ? '로그인 중…' : '로그인'}
                 disabled={submitting}
-                className="w-full"
-              />
+                className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-3.5 disabled:opacity-60 focus:outline-none focus-visible:shadow-ring"
+              >
+                {submitting ? '로그인 중…' : '로그인'}
+              </button>
 
-              <p className="text-center text-[13px] text-text-sub pt-1">
+              <p className="text-center text-[13px] text-ink-soft pt-1">
                 아직 계정이 없으신가요?{' '}
-                <Link to="/partner/register" className="text-gold hover:underline">
+                <Link to="/partner/register" className="text-ink font-bold focus:outline-none focus-visible:shadow-ring">
                   회원가입
                 </Link>
               </p>

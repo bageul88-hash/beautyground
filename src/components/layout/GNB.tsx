@@ -14,7 +14,7 @@ export default function GNB() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-black/5"
+      className="sticky top-0 z-50 border-b border-rule"
       style={{
         backgroundColor: 'rgba(255,255,255,0.96)',
         backdropFilter: 'blur(12px)',
@@ -22,7 +22,7 @@ export default function GNB() {
       }}
     >
       <div className="max-w-[1280px] mx-auto px-6 flex items-center justify-between h-16">
-        <Link to="/" className="font-serif text-[22px] font-bold text-gold" aria-label="뷰티그라운드 홈">
+        <Link to="/" className="text-[22px] font-bold text-ink" aria-label="뷰티그라운드 홈">
           뷰티그라운드
         </Link>
 
@@ -32,7 +32,7 @@ export default function GNB() {
             <Link
               key={href}
               to={href}
-              className="text-[14px] text-text-sub font-medium hover:text-text transition-colors"
+              className="text-[14px] text-ink-soft font-medium hover:text-ink transition-colors"
             >
               {label}
             </Link>
@@ -40,7 +40,7 @@ export default function GNB() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link to="/app/home" className="hidden md:block text-[13px] text-text-sub hover:text-gold transition-colors">
+          <Link to="/app/home" className="hidden md:block text-[13px] text-ink-soft hover:text-ink transition-colors">
             앱 보기
           </Link>
 
@@ -59,14 +59,14 @@ export default function GNB() {
       {/* 모바일 드로어 */}
       {menuOpen && (
         <nav
-          className="md:hidden bg-white border-t border-cream-2 px-6 py-4"
+          className="md:hidden bg-paper border-t border-rule px-6 py-4"
           aria-label="모바일 메뉴"
         >
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               to={href}
-              className="block py-3 text-[15px] text-text border-b border-cream-2 last:border-0"
+              className="block py-3 text-[15px] text-ink border-b border-rule last:border-0"
               onClick={() => setMenuOpen(false)}
             >
               {label}
