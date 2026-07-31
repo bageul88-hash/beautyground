@@ -94,7 +94,7 @@ export default function PartnerLayout() {
         {/* 로고 */}
         <div className="px-6 pt-8 pb-6 border-b border-[#eaebee]">
           <Link to="/" className="block">
-            <p className="text-[#111] text-[18px] font-bold tracking-tight hover:text-[#b8924a] transition-colors">
+            <p className="text-[#111] text-[18px] font-bold tracking-tight hover:text-[#1a1e36] transition-colors">
               뷰티그라운드
             </p>
             <p className="text-[#9ca3af] text-[11px] mt-0.5 tracking-widest uppercase">Partner Center</p>
@@ -120,8 +120,8 @@ export default function PartnerLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 mb-0.5 rounded-lg text-[13px] font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#b8924a] text-white'
-                    : 'text-[#374151] hover:bg-[#FAEEDA] hover:text-[#b8924a]'
+                    ? 'bg-[#1a1e36] text-white'
+                    : 'text-[#374151] hover:bg-[#eef0f6] hover:text-[#1a1e36]'
                 }`
               }
             >
@@ -142,8 +142,8 @@ export default function PartnerLayout() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 mb-0.5 rounded-lg text-[13px] font-medium transition-colors ${
                       isActive
-                        ? 'bg-[#b8924a] text-white'
-                        : 'text-[#374151] hover:bg-[#FAEEDA] hover:text-[#b8924a]'
+                        ? 'bg-[#1a1e36] text-white'
+                        : 'text-[#374151] hover:bg-[#eef0f6] hover:text-[#1a1e36]'
                     }`
                   }
                 >
@@ -187,7 +187,7 @@ export default function PartnerLayout() {
             <button className="relative text-[#9a9080] hover:text-[#111] transition-colors" aria-label="알림">
               <IconBell size={20} />
             </button>
-            <div className="w-8 h-8 rounded-full bg-[#b8924a] text-white text-[12px] font-bold flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[#1a1e36] text-white text-[12px] font-bold flex items-center justify-center">
               {initials}
             </div>
           </div>

@@ -6,7 +6,7 @@ import { getMyPartner } from '../../lib/partner'
 import type { Live, LiveCoupon, Host } from '../../lib/types'
 
 const inputCls =
-  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#b8924a] transition-colors bg-white'
+  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1e36] transition-colors bg-white'
 
 interface ProductOption {
   id: string
@@ -271,14 +271,14 @@ export default function LiveForm() {
         <h3 className="flex items-center gap-1.5 text-[14px] font-bold text-[#111] mb-4">
           <IconPackage size={14} />판매 상품 선택
           {selectedIds.length > 0 && (
-            <span className="ml-1 text-[12px] font-semibold text-[#b8924a]">{selectedIds.length}개 선택됨</span>
+            <span className="ml-1 text-[12px] font-semibold text-[#1a1e36]">{selectedIds.length}개 선택됨</span>
           )}
         </h3>
 
         {products.length === 0 ? (
           <p className="text-[13px] text-[#9a9080]">
             먼저 상품을 등록해 주세요.{' '}
-            <Link to="/partner/products/new" className="text-[#b8924a] font-medium hover:underline">
+            <Link to="/partner/products/new" className="text-[#1a1e36] font-medium hover:underline">
               상품 등록하기
             </Link>
           </p>
@@ -295,7 +295,7 @@ export default function LiveForm() {
                       key={sid}
                       type="button"
                       onClick={() => toggleProduct(sid)}
-                      className="flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-full bg-[#FAEEDA] text-[#b8924a] text-[12px] font-medium"
+                      className="flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-full bg-[#eef0f6] text-[#1a1e36] text-[12px] font-medium"
                     >
                       <span className="max-w-[160px] truncate">{p.name}</span>
                       <IconX size={13} />
@@ -330,11 +330,11 @@ export default function LiveForm() {
                       key={product.id}
                       onClick={() => toggleProduct(product.id)}
                       className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
-                        selected ? 'bg-[#FAEEDA]' : 'hover:bg-[#f7f8fa]'
+                        selected ? 'bg-[#eef0f6]' : 'hover:bg-[#f7f8fa]'
                       }`}
                     >
                       <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors shrink-0 ${
-                        selected ? 'bg-[#b8924a] border-[#b8924a]' : 'border-[#d5d7db]'
+                        selected ? 'bg-[#1a1e36] border-[#1a1e36]' : 'border-[#d5d7db]'
                       }`}>
                         {selected && <IconCheck size={12} color="white" />}
                       </div>
@@ -381,7 +381,7 @@ export default function LiveForm() {
             type="checkbox"
             checked={couponEnabled}
             onChange={e => setCouponEnabled(e.target.checked)}
-            className="w-4 h-4 accent-[#b8924a]"
+            className="w-4 h-4 accent-[#1a1e36]"
           />
         </label>
 
@@ -392,7 +392,7 @@ export default function LiveForm() {
                 type="button"
                 onClick={() => setDiscountType('amount')}
                 className={`flex-1 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
-                  discountType === 'amount' ? 'border-[#b8924a] bg-[#fdf8f0] text-[#b8924a]' : 'border-[#e5e0d8] text-[#9a9080]'
+                  discountType === 'amount' ? 'border-[#1a1e36] bg-[#fdf8f0] text-[#1a1e36]' : 'border-[#e5e0d8] text-[#9a9080]'
                 }`}
               >
                 금액 할인
@@ -401,7 +401,7 @@ export default function LiveForm() {
                 type="button"
                 onClick={() => setDiscountType('percent')}
                 className={`flex-1 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
-                  discountType === 'percent' ? 'border-[#b8924a] bg-[#fdf8f0] text-[#b8924a]' : 'border-[#e5e0d8] text-[#9a9080]'
+                  discountType === 'percent' ? 'border-[#1a1e36] bg-[#fdf8f0] text-[#1a1e36]' : 'border-[#e5e0d8] text-[#9a9080]'
                 }`}
               >
                 퍼센트 할인
@@ -467,7 +467,7 @@ export default function LiveForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 py-2.5 bg-[#b8924a] hover:bg-[#a07c3b] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
+            className="flex-1 py-2.5 bg-[#1a1e36] hover:bg-[#12142a] disabled:opacity-60 text-white font-semibold rounded-lg text-[13px] transition-colors"
           >
             {submitting ? '저장 중...' : isEdit ? '라이브 수정' : '라이브 예약'}
           </button>
