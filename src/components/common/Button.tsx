@@ -1,5 +1,5 @@
 interface ButtonProps {
-  variant?: 'gold' | 'ghost' | 'outline' | 'cancel'
+  variant?: 'gold' | 'ghost' | 'outline' | 'cancel' | 'ink' | 'inkOutline'
   size?: 'sm' | 'md' | 'lg'
   label: string
   onClick?: () => void
@@ -13,6 +13,9 @@ const variantClasses = {
   ghost: 'bg-transparent border border-[#333] text-[#bbb] hover:border-[#555]',
   outline: 'bg-transparent border border-gold text-gold hover:bg-gold/10',
   cancel: 'bg-cream-3 text-text-sub hover:bg-cream-2',
+  // 새 월드(화이트+블랙) — admin 섹션 전용. gold/cancel은 아직 미전환 화면(web/partner/host)이 쓰므로 그대로 둔다.
+  ink: 'bg-ink text-paper hover:opacity-90 active:opacity-80',
+  inkOutline: 'bg-paper border border-rule text-ink-soft hover:border-ink-faint hover:text-ink',
 }
 
 const sizeClasses = {

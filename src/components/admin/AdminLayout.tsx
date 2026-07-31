@@ -42,15 +42,15 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f7f4ef]">
-      {/* 사이드바 */}
-      <aside className="w-[240px] min-h-screen bg-[#0e0c08] flex flex-col fixed left-0 top-0 z-30">
-        <div className="px-6 pt-8 pb-6 border-b border-white/10">
+    <div className="flex min-h-screen bg-quiet">
+      {/* 사이드바 — 화이트+블랙 텍스트(새 월드). 진한 배경색·골드 강조 없이 얇은 선과 잉크 농도로만 상태 구분. */}
+      <aside className="w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-30">
+        <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
-            <p className="text-[#b8924a] font-serif text-[20px] font-bold tracking-wide hover:text-[#d4aa6a] transition-colors">
+            <p className="text-ink font-serif text-[20px] font-bold tracking-wide">
               뷰티그라운드
             </p>
-            <p className="text-[#555] text-[11px] mt-0.5 tracking-widest uppercase">Admin Center</p>
+            <p className="text-ink-faint text-[11px] mt-0.5 tracking-widest uppercase">Admin Center</p>
           </Link>
         </div>
 
@@ -62,8 +62,8 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
                   isActive
-                    ? 'text-[#b8924a] bg-[rgba(184,146,74,0.1)] border-l-[3px] border-[#b8924a] pl-[17px]'
-                    : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
+                    ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
+                    : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
                 }`
               }
             >
@@ -73,8 +73,8 @@ export default function AdminLayout() {
           ))}
 
           {/* 판매자 센터 바로가기 */}
-          <div className="mt-3 pt-3 border-t border-white/10">
-            <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-[#555]">판매자 관리</p>
+          <div className="mt-3 pt-3 border-t border-rule">
+            <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-ink-faint">판매자 관리</p>
             {SELLER_NAV_ITEMS.map(({ label, to, icon: Icon }) => (
               <NavLink
                 key={to}
@@ -82,8 +82,8 @@ export default function AdminLayout() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
                     isActive
-                      ? 'text-[#b8924a] bg-[rgba(184,146,74,0.1)] border-l-[3px] border-[#b8924a] pl-[17px]'
-                      : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
+                      ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
+                      : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
                   }`
                 }
               >
@@ -94,10 +94,10 @@ export default function AdminLayout() {
           </div>
         </nav>
 
-        <div className="px-6 py-6 border-t border-white/10">
+        <div className="px-6 py-6 border-t border-rule">
           <button
             onClick={() => void handleLogout()}
-            className="flex items-center gap-2 text-[#555] hover:text-white text-[13px] transition-colors"
+            className="flex items-center gap-2 text-ink-faint hover:text-ink text-[13px] transition-colors"
           >
             <IconLogout size={16} />
             로그아웃

@@ -15,7 +15,7 @@ interface MembershipTierRow {
 }
 
 const inputCls =
-  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#b8924a] transition-colors bg-white'
+  'w-full border border-rule rounded-control px-3.5 py-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper'
 
 interface FormState {
   id: string | null
@@ -108,37 +108,37 @@ export default function AdminMembershipTiers() {
 
   return (
     <>
-      <header className="h-[60px] bg-white border-b border-[#eee] flex items-center px-8 sticky top-0 z-20">
-        <p className="text-[15px] font-semibold text-[#111]">회원 등급 설정</p>
+      <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
+        <p className="text-[15px] font-semibold text-ink">회원 등급 설정</p>
       </header>
 
       <main className="max-w-[1000px] p-8">
-        <h1 className="text-[22px] font-bold text-text mb-2">회원 등급 설정</h1>
-        <p className="text-[13px] text-text-sub mb-6">
+        <h1 className="text-[22px] font-bold text-ink mb-2">회원 등급 설정</h1>
+        <p className="text-[13px] text-ink-soft mb-6">
           고객의 누적 구매금액이 기준 금액 이상이면 해당 등급이 적용됩니다. 저장 후 고객 화면(마이페이지)에는
           새로고침 시 반영됩니다.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto_auto] gap-3 items-end"
+          className="bg-paper rounded-md border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto_auto_auto] gap-3 items-end"
         >
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">등급 코드</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">등급 코드</label>
             <input
               value={form.tierKey} onChange={(e) => setForm((p) => ({ ...p, tierKey: e.target.value }))}
               placeholder="예: GOLD" className={inputCls}
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">등급명(표시)</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">등급명(표시)</label>
             <input
               value={form.label} onChange={(e) => setForm((p) => ({ ...p, label: e.target.value }))}
               placeholder="예: GOLD" className={inputCls}
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">기준 누적구매금액(원, 이상)</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">기준 누적구매금액(원, 이상)</label>
             <input
               type="number" min={0}
               value={form.minSpent} onChange={(e) => setForm((p) => ({ ...p, minSpent: e.target.value }))}
@@ -146,7 +146,7 @@ export default function AdminMembershipTiers() {
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">적립률(%)</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">적립률(%)</label>
             <input
               type="number" min={0} max={100} step="0.1"
               value={form.rewardRate} onChange={(e) => setForm((p) => ({ ...p, rewardRate: e.target.value }))}
@@ -154,29 +154,29 @@ export default function AdminMembershipTiers() {
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">글자색</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">글자색</label>
             <input
               type="color"
               value={form.color} onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-              className="w-12 h-[42px] border border-[#e5e0d8] rounded-lg cursor-pointer"
+              className="w-12 h-[42px] border border-rule rounded-control cursor-pointer"
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">배경색</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">배경색</label>
             <input
               type="color"
               value={form.bg} onChange={(e) => setForm((p) => ({ ...p, bg: e.target.value }))}
-              className="w-12 h-[42px] border border-[#e5e0d8] rounded-lg cursor-pointer"
+              className="w-12 h-[42px] border border-rule rounded-control cursor-pointer"
             />
           </div>
           <div className="flex gap-2">
             <Button
-              type="submit" variant="gold" size="sm"
+              type="submit" variant="ink" size="sm"
               label={submitting ? '저장 중...' : form.id ? '수정' : '추가'}
               disabled={submitting}
             />
             {form.id && (
-              <Button type="button" variant="cancel" size="sm" label="취소" onClick={resetForm} />
+              <Button type="button" variant="inkOutline" size="sm" label="취소" onClick={resetForm} />
             )}
           </div>
         </form>
@@ -188,14 +188,14 @@ export default function AdminMembershipTiers() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">불러오는 중…</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : tiers.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">등록된 등급이 없습니다. 위에서 추가해 주세요.</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">등록된 등급이 없습니다. 위에서 추가해 주세요.</div>
         ) : (
-          <div className="bg-white rounded-md border overflow-x-auto" style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}>
+          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
-                <tr className="border-b border-cream-2 text-text-sub">
+                <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">배지</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">등급 코드</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">기준 누적구매금액</th>
@@ -205,7 +205,7 @@ export default function AdminMembershipTiers() {
               </thead>
               <tbody>
                 {tiers.map((tier) => (
-                  <tr key={tier.id} className="border-b border-cream-2 last:border-b-0">
+                  <tr key={tier.id} className="border-b border-rule last:border-b-0">
                     <td className="px-4 py-3">
                       <span
                         className="inline-flex items-center rounded-control px-2.5 py-1 text-[11px] font-bold border"
@@ -214,15 +214,15 @@ export default function AdminMembershipTiers() {
                         {tier.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text font-medium whitespace-nowrap">{tier.tier_key}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{won(tier.min_spent)} 이상</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{tier.reward_rate}%</td>
+                    <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{tier.tier_key}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{won(tier.min_spent)} 이상</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{tier.reward_rate}%</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <button onClick={() => startEdit(tier)} className="text-[#9a9080] hover:text-[#b8924a]" aria-label="수정">
+                        <button onClick={() => startEdit(tier)} className="text-ink-faint hover:text-ink" aria-label="수정">
                           <IconPencil size={16} />
                         </button>
-                        <button onClick={() => setConfirmDel(tier)} className="text-[#9a9080] hover:text-red-500" aria-label="삭제">
+                        <button onClick={() => setConfirmDel(tier)} className="text-ink-faint hover:text-red-500" aria-label="삭제">
                           <IconTrash size={16} />
                         </button>
                       </div>
@@ -237,14 +237,14 @@ export default function AdminMembershipTiers() {
 
       {confirmDel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setConfirmDel(null)}>
-          <div className="bg-white rounded-md w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="text-[15px] font-bold text-text mb-2">'{confirmDel.label}' 등급을 삭제할까요?</p>
-            <p className="text-[13px] text-text-sub mb-6 leading-relaxed">
+          <div className="bg-paper rounded-md w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="text-[15px] font-bold text-ink mb-2">'{confirmDel.label}' 등급을 삭제할까요?</p>
+            <p className="text-[13px] text-ink-soft mb-6 leading-relaxed">
               이 등급을 삭제하면 해당 구간 고객은 다음으로 낮은 등급으로 재산정됩니다.
             </p>
             <div className="flex gap-2 justify-end">
-              <Button variant="cancel" size="sm" label="취소" onClick={() => setConfirmDel(null)} />
-              <Button variant="gold" size="sm" label="삭제" onClick={() => void handleDelete()} />
+              <Button variant="inkOutline" size="sm" label="취소" onClick={() => setConfirmDel(null)} />
+              <Button variant="ink" size="sm" label="삭제" onClick={() => void handleDelete()} />
             </div>
           </div>
         </div>

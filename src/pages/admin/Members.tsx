@@ -56,13 +56,13 @@ export default function AdminMembers() {
 
   return (
     <>
-      <header className="h-[60px] bg-white border-b border-[#eee] flex items-center px-8 sticky top-0 z-20">
-        <p className="text-[15px] font-semibold text-[#111]">회원 관리</p>
+      <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
+        <p className="text-[15px] font-semibold text-ink">회원 관리</p>
       </header>
 
       <main className="max-w-[1200px] p-8">
-        <h1 className="text-[22px] font-bold text-text mb-2">회원 관리</h1>
-        <p className="text-[13px] text-text-sub mb-6">
+        <h1 className="text-[22px] font-bold text-ink mb-2">회원 관리</h1>
+        <p className="text-[13px] text-ink-soft mb-6">
           총 {members.length}명 가입. 등급은 회원 등급 설정(누적구매금액 기준)에 따라 자동 산정됩니다.
         </p>
 
@@ -71,7 +71,7 @@ export default function AdminMembers() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="이메일·이름·연락처로 검색"
-            className="w-full max-w-[360px] border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#b8924a] transition-colors bg-white"
+            className="w-full max-w-[360px] border border-rule rounded-control px-3.5 py-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper"
           />
         </div>
 
@@ -82,16 +82,16 @@ export default function AdminMembers() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">불러오는 중…</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : filtered.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">
+          <div className="py-20 text-center text-[14px] text-ink-faint">
             {members.length === 0 ? '가입된 회원이 없습니다.' : '검색 결과가 없습니다.'}
           </div>
         ) : (
-          <div className="bg-white rounded-md border overflow-x-auto" style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}>
+          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
-                <tr className="border-b border-cream-2 text-text-sub">
+                <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">가입일</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">이메일</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">이름</th>
@@ -104,19 +104,19 @@ export default function AdminMembers() {
               </thead>
               <tbody>
                 {filtered.map((m) => (
-                  <tr key={m.id} className="border-b border-cream-2 last:border-b-0">
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{formatDateTime(m.created_at)}</td>
-                    <td className="px-4 py-3 text-text font-medium whitespace-nowrap">{m.email || '-'}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{m.name || '-'}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{m.phone || '-'}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{PROVIDER_LABEL[m.provider] ?? m.provider}</td>
+                  <tr key={m.id} className="border-b border-rule last:border-b-0">
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(m.created_at)}</td>
+                    <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{m.email || '-'}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{m.name || '-'}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{m.phone || '-'}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{PROVIDER_LABEL[m.provider] ?? m.provider}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium bg-[#f4f0e8] text-[#8a6d2f]">
+                      <span className="inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium bg-quiet text-ink">
                         {m.tier_label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{won(m.total_spent)}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{m.order_count}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{won(m.total_spent)}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{m.order_count}</td>
                   </tr>
                 ))}
               </tbody>

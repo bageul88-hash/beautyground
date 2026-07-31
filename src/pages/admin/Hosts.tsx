@@ -58,12 +58,12 @@ export default function AdminHosts() {
 
   return (
     <>
-      <header className="h-[60px] bg-white border-b border-[#eee] flex items-center px-8 sticky top-0 z-20">
-        <p className="text-[15px] font-semibold text-[#111]">진행자 관리</p>
+      <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
+        <p className="text-[15px] font-semibold text-ink">진행자 관리</p>
       </header>
 
       <main className="max-w-[1100px] p-8">
-        <h1 className="text-[22px] font-bold text-text mb-4">진행자 관리</h1>
+        <h1 className="text-[22px] font-bold text-ink mb-4">진행자 관리</h1>
 
         <div className="flex items-center gap-2 mb-5 flex-wrap">
           {STATUS_FILTERS.map((f) => (
@@ -71,7 +71,7 @@ export default function AdminHosts() {
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={`px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${
-                filter === f.value ? 'bg-[#b8924a] text-white' : 'bg-white border border-[#e5e0d8] text-[#555]'
+                filter === f.value ? 'bg-ink text-paper' : 'bg-paper border border-rule text-ink-soft'
               }`}
             >
               {f.label}
@@ -86,14 +86,14 @@ export default function AdminHosts() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">불러오는 중…</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : visible.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">해당하는 진행자가 없습니다.</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">해당하는 진행자가 없습니다.</div>
         ) : (
-          <div className="bg-white rounded-md border overflow-x-auto" style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}>
+          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
-                <tr className="border-b border-cream-2 text-text-sub">
+                <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">가입일</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">이름</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">연락처</th>
@@ -106,11 +106,11 @@ export default function AdminHosts() {
                 {visible.map((host) => {
                   const badge = statusBadge[host.status]
                   return (
-                    <tr key={host.id} className="border-b border-cream-2 last:border-b-0">
-                      <td className="px-4 py-3 text-text-sub whitespace-nowrap">{formatDateTime(host.created_at)}</td>
-                      <td className="px-4 py-3 text-text font-medium">{host.name}</td>
-                      <td className="px-4 py-3 text-text-sub whitespace-nowrap">{host.phone ?? '-'}</td>
-                      <td className="px-4 py-3 text-text-sub">{host.email ?? '-'}</td>
+                    <tr key={host.id} className="border-b border-rule last:border-b-0">
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(host.created_at)}</td>
+                      <td className="px-4 py-3 text-ink font-medium">{host.name}</td>
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{host.phone ?? '-'}</td>
+                      <td className="px-4 py-3 text-ink-soft">{host.email ?? '-'}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${badge.className}`}>
                           {badge.label}
@@ -120,14 +120,14 @@ export default function AdminHosts() {
                         <div className="flex items-center gap-2">
                           {host.status !== 'active' && (
                             <Button
-                              variant="gold" size="sm" label="승인/활성화"
+                              variant="ink" size="sm" label="승인/활성화"
                               disabled={busyId === host.id}
                               onClick={() => void changeStatus(host, 'active')}
                             />
                           )}
                           {host.status !== 'suspended' && (
                             <Button
-                              variant="cancel" size="sm" label="정지"
+                              variant="inkOutline" size="sm" label="정지"
                               disabled={busyId === host.id}
                               onClick={() => void changeStatus(host, 'suspended')}
                             />

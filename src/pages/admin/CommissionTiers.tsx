@@ -6,7 +6,7 @@ import { won } from '../../lib/format'
 import Button from '../../components/common/Button'
 
 const inputCls =
-  'w-full border border-[#e5e0d8] rounded-lg px-3.5 py-2.5 text-[13px] text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#b8924a] transition-colors bg-white'
+  'w-full border border-rule rounded-control px-3.5 py-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper'
 
 interface FormState {
   id: string | null
@@ -89,30 +89,30 @@ export default function AdminCommissionTiers() {
 
   return (
     <>
-      <header className="h-[60px] bg-white border-b border-[#eee] flex items-center px-8 sticky top-0 z-20">
-        <p className="text-[15px] font-semibold text-[#111]">수수료 등급 관리</p>
+      <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
+        <p className="text-[15px] font-semibold text-ink">수수료 등급 관리</p>
       </header>
 
       <main className="max-w-[900px] p-8">
-        <h1 className="text-[22px] font-bold text-text mb-2">수수료 등급 관리</h1>
-        <p className="text-[13px] text-text-sub mb-6">
+        <h1 className="text-[22px] font-bold text-ink mb-2">수수료 등급 관리</h1>
+        <p className="text-[13px] text-ink-soft mb-6">
           진행자의 월 매출이 기준 매출 이상이면 해당 등급의 수수료율이 적용됩니다. 매출이 가장 높은 조건을
           만족하는 등급이 자동 선택됩니다.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6 grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end"
+          className="bg-paper rounded-md border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end"
         >
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">등급명</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">등급명</label>
             <input
               value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
               placeholder="예: 브론즈" className={inputCls}
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">기준 매출 (원, 이상)</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">기준 매출 (원, 이상)</label>
             <input
               type="number" min={0}
               value={form.minSales} onChange={(e) => setForm((p) => ({ ...p, minSales: e.target.value }))}
@@ -120,7 +120,7 @@ export default function AdminCommissionTiers() {
             />
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-[#555] mb-1.5">수수료율 (%)</label>
+            <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">수수료율 (%)</label>
             <input
               type="number" min={0} max={100} step="0.1"
               value={form.commissionRate} onChange={(e) => setForm((p) => ({ ...p, commissionRate: e.target.value }))}
@@ -129,12 +129,12 @@ export default function AdminCommissionTiers() {
           </div>
           <div className="flex gap-2">
             <Button
-              type="submit" variant="gold" size="sm"
+              type="submit" variant="ink" size="sm"
               label={submitting ? '저장 중...' : form.id ? '수정' : '추가'}
               disabled={submitting}
             />
             {form.id && (
-              <Button type="button" variant="cancel" size="sm" label="취소" onClick={resetForm} />
+              <Button type="button" variant="inkOutline" size="sm" label="취소" onClick={resetForm} />
             )}
           </div>
         </form>
@@ -146,14 +146,14 @@ export default function AdminCommissionTiers() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">불러오는 중…</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : tiers.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">등록된 등급이 없습니다. 위에서 추가해 주세요.</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">등록된 등급이 없습니다. 위에서 추가해 주세요.</div>
         ) : (
-          <div className="bg-white rounded-md border overflow-x-auto" style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}>
+          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
-                <tr className="border-b border-cream-2 text-text-sub">
+                <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">등급명</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">기준 매출</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수수료율</th>
@@ -162,16 +162,16 @@ export default function AdminCommissionTiers() {
               </thead>
               <tbody>
                 {tiers.map((tier) => (
-                  <tr key={tier.id} className="border-b border-cream-2 last:border-b-0">
-                    <td className="px-4 py-3 text-text font-medium">{tier.name}</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{won(tier.min_sales)} 이상</td>
-                    <td className="px-4 py-3 text-text-sub whitespace-nowrap">{tier.commission_rate}%</td>
+                  <tr key={tier.id} className="border-b border-rule last:border-b-0">
+                    <td className="px-4 py-3 text-ink font-medium">{tier.name}</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{won(tier.min_sales)} 이상</td>
+                    <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{tier.commission_rate}%</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <button onClick={() => startEdit(tier)} className="text-[#9a9080] hover:text-[#b8924a]" aria-label="수정">
+                        <button onClick={() => startEdit(tier)} className="text-ink-faint hover:text-ink" aria-label="수정">
                           <IconPencil size={16} />
                         </button>
-                        <button onClick={() => setConfirmDel(tier)} className="text-[#9a9080] hover:text-red-500" aria-label="삭제">
+                        <button onClick={() => setConfirmDel(tier)} className="text-ink-faint hover:text-red-500" aria-label="삭제">
                           <IconTrash size={16} />
                         </button>
                       </div>
@@ -186,14 +186,14 @@ export default function AdminCommissionTiers() {
 
       {confirmDel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setConfirmDel(null)}>
-          <div className="bg-white rounded-md w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="text-[15px] font-bold text-text mb-2">'{confirmDel.name}' 등급을 삭제할까요?</p>
-            <p className="text-[13px] text-text-sub mb-6 leading-relaxed">
+          <div className="bg-paper rounded-md w-full max-w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="text-[15px] font-bold text-ink mb-2">'{confirmDel.name}' 등급을 삭제할까요?</p>
+            <p className="text-[13px] text-ink-soft mb-6 leading-relaxed">
               이미 생성된 과거 정산 내역은 등급명·수수료율이 스냅샷으로 저장돼 있어 영향을 받지 않습니다.
             </p>
             <div className="flex gap-2 justify-end">
-              <Button variant="cancel" size="sm" label="취소" onClick={() => setConfirmDel(null)} />
-              <Button variant="gold" size="sm" label="삭제" onClick={() => void handleDelete()} />
+              <Button variant="inkOutline" size="sm" label="취소" onClick={() => setConfirmDel(null)} />
+              <Button variant="ink" size="sm" label="삭제" onClick={() => void handleDelete()} />
             </div>
           </div>
         </div>

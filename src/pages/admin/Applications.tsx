@@ -100,12 +100,12 @@ export default function AdminApplications() {
 
   return (
     <>
-      <header className="h-[60px] bg-white border-b border-[#eee] flex items-center px-8 sticky top-0 z-20">
-        <p className="text-[15px] font-semibold text-[#111]">파트너 신청 관리</p>
+      <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
+        <p className="text-[15px] font-semibold text-ink">파트너 신청 관리</p>
       </header>
 
       <main className="max-w-[1100px] p-8">
-        <h1 className="text-[22px] font-bold text-text mb-4">파트너 신청 관리</h1>
+        <h1 className="text-[22px] font-bold text-ink mb-4">파트너 신청 관리</h1>
 
         <div className="bg-amber-50 border border-amber-200 text-amber-800 text-[13px] rounded-md px-4 py-3 mb-5 leading-relaxed">
           ※ 승인/반려는 RLS 정책상 service_role 또는 별도 정책이 필요할 수
@@ -119,21 +119,18 @@ export default function AdminApplications() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">
+          <div className="py-20 text-center text-[14px] text-ink-faint">
             불러오는 중…
           </div>
         ) : apps.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">
+          <div className="py-20 text-center text-[14px] text-ink-faint">
             접수된 파트너 신청이 없습니다.
           </div>
         ) : (
-          <div
-            className="bg-white rounded-md border overflow-x-auto"
-            style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
-          >
+          <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
               <thead>
-                <tr className="border-b border-cream-2 text-text-sub">
+                <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">신청일</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">브랜드명</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">담당자</th>
@@ -149,21 +146,21 @@ export default function AdminApplications() {
                   return (
                     <tr
                       key={app.id}
-                      className="border-b border-cream-2 last:border-b-0"
+                      className="border-b border-rule last:border-b-0"
                     >
-                      <td className="px-4 py-3 text-text-sub whitespace-nowrap">
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">
                         {formatDateTime(app.created_at)}
                       </td>
-                      <td className="px-4 py-3 text-text font-medium">
+                      <td className="px-4 py-3 text-ink font-medium">
                         {app.brand_name}
                       </td>
-                      <td className="px-4 py-3 text-text-sub">
+                      <td className="px-4 py-3 text-ink-soft">
                         {app.owner_name ?? '-'}
                       </td>
-                      <td className="px-4 py-3 text-text-sub whitespace-nowrap">
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">
                         {app.phone}
                       </td>
-                      <td className="px-4 py-3 text-text-sub">
+                      <td className="px-4 py-3 text-ink-soft">
                         {app.category && app.category.length > 0
                           ? app.category.join(', ')
                           : '-'}
@@ -179,14 +176,14 @@ export default function AdminApplications() {
                         {app.status === 'pending' ? (
                           <div className="flex items-center gap-2">
                             <Button
-                              variant="gold"
+                              variant="ink"
                               size="sm"
                               label="승인"
                               disabled={busyId === app.id}
                               onClick={() => void approve(app)}
                             />
                             <Button
-                              variant="cancel"
+                              variant="inkOutline"
                               size="sm"
                               label="반려"
                               disabled={busyId === app.id}
@@ -194,7 +191,7 @@ export default function AdminApplications() {
                             />
                           </div>
                         ) : (
-                          <span className="text-text-hint">-</span>
+                          <span className="text-ink-faint">-</span>
                         )}
                       </td>
                     </tr>
