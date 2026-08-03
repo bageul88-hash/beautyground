@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopAuthLayout from '../components/auth/DesktopAuthLayout'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
@@ -15,7 +16,7 @@ const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
 export default function AppSignupEmail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const from = (location.state as { from?: string } | null)?.from ?? '/app/mypage'
 
   const [name, setName] = useState('')
@@ -65,17 +66,79 @@ export default function AppSignupEmail() {
   }
 
   if (needsVerify) {
-    return (
-      <div className="min-h-screen bg-quiet md:py-6">
-      <ViewModeToggle mode={mode} onToggle={toggle} />
-      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
+    const verifyContent = (
+      <div className="flex flex-col items-center text-center">
         <h1 className="text-[18px] font-bold text-ink mb-2">인증 이메일을 보냈습니다</h1>
         <p className="text-[13px] text-ink-soft leading-relaxed mb-8">
           {email} 로 전송된 링크를 확인한 후 로그인해 주세요.
         </p>
         <Link to="/app/login" className="text-ink text-[14px] font-bold focus:outline-none focus-visible:shadow-ring">로그인하러 가기</Link>
       </div>
+    )
+    if (isDesktop) {
+      return (
+        <>
+          <ViewModeToggle mode={mode} onToggle={toggle} />
+          <DesktopAuthLayout>{verifyContent}</DesktopAuthLayout>
+        </>
+      )
+    }
+    return (
+      <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
+        {verifyContent}
       </div>
+      </div>
+    )
+  }
+
+  const formContent = (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <div>
+        <label htmlFor="name" className="block text-[13px] font-bold text-ink mb-1.5">이름</label>
+        <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" className={field} />
+      </div>
+      <div>
+        <label htmlFor="phone" className="block text-[13px] font-bold text-ink mb-1.5">연락처</label>
+        <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className={field} />
+      </div>
+      <div>
+        <label htmlFor="email" className="block text-[13px] font-bold text-ink mb-1.5">이메일</label>
+        <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="buyer@example.com" className={field} />
+      </div>
+      <div>
+        <label htmlFor="password" className="block text-[13px] font-bold text-ink mb-1.5">비밀번호</label>
+        <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상, 영문+숫자" className={field} />
+      </div>
+      <div>
+        <label htmlFor="passwordConfirm" className="block text-[13px] font-bold text-ink mb-1.5">비밀번호 확인</label>
+        <input id="passwordConfirm" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호 재입력" className={field} />
+      </div>
+
+      {error && <p className="text-[13px] text-signal-red" role="alert">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-3.5 disabled:opacity-60 focus:outline-none focus-visible:shadow-ring"
+      >
+        {submitting ? '가입 중…' : '회원가입'}
+      </button>
+
+      <p className="text-center text-[13px] text-ink-soft pt-1">
+        이미 계정이 있으신가요?{' '}
+        <Link to="/app/login" state={{ from }} className="text-ink font-bold focus:outline-none focus-visible:shadow-ring">로그인</Link>
+      </p>
+    </form>
+  )
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopAuthLayout title="쇼핑몰 회원가입">{formContent}</DesktopAuthLayout>
+      </>
     )
   }
 
@@ -85,43 +148,7 @@ export default function AppSignupEmail() {
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="쇼핑몰 회원가입" />
       <div className="px-6 py-10">
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-[13px] font-bold text-ink mb-1.5">이름</label>
-            <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" className={field} />
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-[13px] font-bold text-ink mb-1.5">연락처</label>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="010-0000-0000" className={field} />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-[13px] font-bold text-ink mb-1.5">이메일</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="buyer@example.com" className={field} />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-[13px] font-bold text-ink mb-1.5">비밀번호</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8자 이상, 영문+숫자" className={field} />
-          </div>
-          <div>
-            <label htmlFor="passwordConfirm" className="block text-[13px] font-bold text-ink mb-1.5">비밀번호 확인</label>
-            <input id="passwordConfirm" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="비밀번호 재입력" className={field} />
-          </div>
-
-          {error && <p className="text-[13px] text-signal-red" role="alert">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-3.5 disabled:opacity-60 focus:outline-none focus-visible:shadow-ring"
-          >
-            {submitting ? '가입 중…' : '회원가입'}
-          </button>
-
-          <p className="text-center text-[13px] text-ink-soft pt-1">
-            이미 계정이 있으신가요?{' '}
-            <Link to="/app/login" state={{ from }} className="text-ink font-bold focus:outline-none focus-visible:shadow-ring">로그인</Link>
-          </p>
-        </form>
+        {formContent}
       </div>
     </div>
     </div>
