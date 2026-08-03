@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopProductDetail from '../components/product/DesktopProductDetail'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { addToCart } from '../lib/cart'
@@ -86,7 +87,7 @@ export default function AppProductDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState(0)
   const [activeImg, setActiveImg] = useState(0)
@@ -231,6 +232,27 @@ export default function AppProductDetail() {
     } else {
       await removeWish(id)
     }
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopProductDetail
+          id={id}
+          view={view}
+          discountRate={discountRate}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          maxQty={maxQty}
+          total={total}
+          wished={wished}
+          toggleWish={toggleWish}
+          onBuy={onBuy}
+          onAddToCart={onAddToCart}
+        />
+      </>
+    )
   }
 
   return (
