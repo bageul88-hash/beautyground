@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopMyPage from '../components/mypage/DesktopMyPage'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
@@ -43,7 +44,7 @@ const EMPTY_USER: RealUser = { name: '게스트', email: '로그인이 필요해
 
 export default function AppMyPage() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
   const [tiers, setTiers] = useState<MembershipTier[]>([])
@@ -98,6 +99,28 @@ export default function AppMyPage() {
     await supabase.auth.signOut()
     setToast('로그아웃되었습니다')
     setTimeout(() => navigate('/app/home'), 900)
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopMyPage
+          user={user}
+          membership={membership}
+          tiers={tiers}
+          showTierGuide={showTierGuide}
+          onToggleTierGuide={() => setShowTierGuide((v) => !v)}
+          loggedIn={loggedIn}
+          onLogout={handleLogout}
+        />
+        {toast && (
+          <div className="fixed left-1/2 -translate-x-1/2 bottom-10 z-50 rounded-control bg-ink text-paper text-[13px] px-4 py-2.5" role="status">
+            {toast}
+          </div>
+        )}
+      </>
+    )
   }
 
   return (

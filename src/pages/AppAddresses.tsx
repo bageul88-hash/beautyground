@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopAddresses from '../components/address/DesktopAddresses'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getAddresses, addAddress, setDefaultAddress, deleteAddress, type Address } from '../lib/addresses'
@@ -13,7 +14,7 @@ const field =
 
 export default function AppAddresses() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -73,6 +74,33 @@ export default function AppAddresses() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopAddresses
+          loggedIn={loggedIn}
+          addresses={addresses}
+          showForm={showForm}
+          onShowForm={setShowForm}
+          name={name}
+          onName={setName}
+          phone={phone}
+          onPhone={setPhone}
+          address={address}
+          onSearchAddress={handleSearchAddress}
+          addressDetail={addressDetail}
+          onAddressDetail={setAddressDetail}
+          saving={saving}
+          error={error}
+          onAdd={handleAdd}
+          onSetDefault={handleSetDefault}
+          onDelete={handleDelete}
+        />
+      </>
     )
   }
 

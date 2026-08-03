@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopProductReviews from '../components/review/DesktopProductReviews'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import type { Product, ScrapedReview } from '../lib/types'
@@ -34,7 +35,7 @@ export default function AppProductReviews() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
   const [reviews, setReviews] = useState<ScrapedReview[]>([])
@@ -116,6 +117,27 @@ export default function AppProductReviews() {
 
   const cur = openIdx != null ? reviews[openIdx] : null
   const curPics = cur ? reviewPhotos(cur) : []
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopProductReviews
+          id={id}
+          name={name}
+          avg={avg}
+          count={count}
+          reviews={reviews}
+          photoReviews={photoReviews}
+          openIdx={openIdx}
+          setOpenIdx={setOpenIdx}
+          photoIdx={photoIdx}
+          setPhotoIdx={setPhotoIdx}
+          hideParent={hideParent}
+        />
+      </>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
