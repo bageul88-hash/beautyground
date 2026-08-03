@@ -84,7 +84,9 @@ export default function DesktopHome({
           aria-label="다음 배너"
         >
           {heroImage ? (
-            <img src={heroImage} alt="" className="w-full h-full object-cover" />
+            // object-contain: 브랜드 원본 배너 비율이 이 틀(16:9)과 달라도 상단 사은품 태그·프로모션
+            // 배지가 잘리지 않는다(HeroCarousel과 동일한 원칙).
+            <img src={heroImage} alt="" className="w-full h-full object-contain" />
           ) : (
             <ImagePlaceholder />
           )}
