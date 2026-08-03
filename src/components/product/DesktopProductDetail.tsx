@@ -73,9 +73,7 @@ export default function DesktopProductDetail({
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto">
-        <CategoryTabBar active={view.category} />
-      </div>
+      <CategoryTabBar active={view.category} stickyTop="top-16" />
 
       <div className="max-w-[1280px] mx-auto px-6 py-10 grid grid-cols-[1.4fr_1fr] gap-12 items-start">
         {/* 콘텐츠 영역 */}

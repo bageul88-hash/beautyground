@@ -2,12 +2,22 @@ import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopCategory from '../components/category/DesktopCategory'
 import { useViewMode } from '../lib/viewMode'
 import { CATEGORIES } from '../constants'
 
 export default function AppCategory() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopCategory />
+      </>
+    )
+  }
 
   return (
     <AppFrame>

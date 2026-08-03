@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopWishlist from '../components/wishlist/DesktopWishlist'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getWishlist, removeWish, type WishlistLine } from '../lib/wishlist'
@@ -11,7 +12,7 @@ import { IconHeart } from '../components/common/Icon'
 
 export default function AppWishlist() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [lines, setLines] = useState<WishlistLine[]>([])
@@ -41,6 +42,15 @@ export default function AppWishlist() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopWishlist loggedIn={loggedIn} lines={lines} onRemove={handleRemove} />
+      </>
     )
   }
 

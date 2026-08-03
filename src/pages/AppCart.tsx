@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopCart from '../components/cart/DesktopCart'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../lib/cart'
@@ -11,7 +12,7 @@ import { IconCart, IconClose, IconMinus, IconPlus } from '../components/common/I
 
 export default function AppCart() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [lines, setLines] = useState<CartLine[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -108,6 +109,29 @@ export default function AppCart() {
         <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
       </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopCart
+          lines={lines}
+          selected={selected}
+          selectableCount={selectableLines.length}
+          isUnavailable={isUnavailable}
+          lineStock={lineStock}
+          onToggleSelect={toggleSelect}
+          onToggleAll={toggleAll}
+          onUpdateQty={updateQty}
+          onRemove={removeItem}
+          subtotal={subtotal}
+          deliveryFee={deliveryFee}
+          total={total}
+          onOrder={goOrder}
+        />
+      </>
     )
   }
 

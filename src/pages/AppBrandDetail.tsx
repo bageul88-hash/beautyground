@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopBrandDetail from '../components/brand/DesktopBrandDetail'
 import { useViewMode } from '../lib/viewMode'
 import ProductCard from '../components/product/ProductCard'
 import Badge from '../components/common/Badge'
@@ -10,7 +11,7 @@ import { BRANDS } from '../constants'
 export default function AppBrandDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
 
   const brand = BRANDS.find(b => b.id === Number(id))
 
@@ -22,6 +23,15 @@ export default function AppBrandDetail() {
         <p className="text-ink-faint">브랜드를 찾을 수 없습니다.</p>
       </div>
       </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopBrandDetail brand={brand} onProductClick={(pid) => navigate(`/app/product/${pid}`)} />
+      </>
     )
   }
 

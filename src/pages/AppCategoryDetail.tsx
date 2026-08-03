@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopCategoryDetail from '../components/category/DesktopCategoryDetail'
 import { useViewMode } from '../lib/viewMode'
 import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
 import { useShopProducts, type ShopSort } from '../hooks/useShopProducts'
@@ -28,7 +29,7 @@ export default function AppCategoryDetail() {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [sortIdx, setSortIdx] = useState(0)
   const [showSort, setShowSort] = useState(false)
 
@@ -53,6 +54,27 @@ export default function AppCategoryDetail() {
   })
 
   const tabs = useMemo<(string | null)[]>(() => [null, ...categories], [categories])
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopCategoryDetail
+          title={selected ?? '전체 상품'}
+          tabs={tabs}
+          selected={selected}
+          onSelect={setSelected}
+          sortIdx={sortIdx}
+          onSort={setSortIdx}
+          products={products}
+          loading={loading}
+          error={error}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+        />
+      </>
+    )
+  }
 
   return (
     <AppFrame>
