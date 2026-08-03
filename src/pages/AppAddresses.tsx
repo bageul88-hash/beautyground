@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getAddresses, addAddress, setDefaultAddress, deleteAddress, type Address } from '../lib/addresses'
 import { searchAddress } from '../lib/daumPostcode'
@@ -11,6 +13,7 @@ const field =
 
 export default function AppAddresses() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -67,6 +70,7 @@ export default function AppAddresses() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
     )
@@ -75,6 +79,7 @@ export default function AppAddresses() {
   if (!loggedIn) {
     return (
       <AppFrame>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
         <BackHeader title="배송지 관리" />
         <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
           <p className="text-[15px] text-ink-soft mb-6">로그인이 필요해요</p>
@@ -91,6 +96,7 @@ export default function AppAddresses() {
 
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader title="배송지 관리" />
 
       <div className="px-4 pt-4 space-y-3">

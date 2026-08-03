@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
 const field =
@@ -11,6 +13,7 @@ const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
 // 이용약관 제8조("마이페이지 등을 통해 탈퇴 요청 가능")를 실제로 이행하는 화면.
 export default function AppAccount() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [hasPasswordAuth, setHasPasswordAuth] = useState(false)
@@ -84,6 +87,7 @@ export default function AppAccount() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
     )
@@ -91,6 +95,7 @@ export default function AppAccount() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="계정/보안" />
       <div className="px-5 py-6 space-y-8">

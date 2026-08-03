@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { addToCart } from '../lib/cart'
 import { isWished, addWish, removeWish } from '../lib/wishlist'
@@ -84,6 +86,7 @@ export default function AppProductDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const { mode, toggle } = useViewMode()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState(0)
   const [activeImg, setActiveImg] = useState(0)
@@ -156,6 +159,7 @@ export default function AppProductDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
         <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
@@ -166,6 +170,7 @@ export default function AppProductDetail() {
   if (!view) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
         <p className="text-ink-faint">상품을 찾을 수 없습니다.</p>
       </div>
@@ -230,6 +235,7 @@ export default function AppProductDetail() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div
       className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule"
       style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}

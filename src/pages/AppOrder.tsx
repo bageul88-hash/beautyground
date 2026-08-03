@@ -2,6 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import * as PortOne from '@portone/browser-sdk/v2'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { COMPANY_INFO } from '../lib/companyInfo'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
@@ -26,8 +28,10 @@ const field =
 
 // 다른 /app/* 페이지들과 동일하게 480px 모바일 카드 폭으로 고정 (BottomNav는 없음 — 결제 흐름 중엔 하단 탭 숨김)
 function OrderFrame({ children, className = '' }: { children: ReactNode; className?: string }) {
+  const { mode, toggle } = useViewMode()
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className={`max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule ${className}`}>
         {children}
       </div>

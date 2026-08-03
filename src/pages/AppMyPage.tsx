@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
 import { IconUser } from '../components/common/Icon'
@@ -41,6 +43,7 @@ const EMPTY_USER: RealUser = { name: '게스트', email: '로그인이 필요해
 
 export default function AppMyPage() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
   const [tiers, setTiers] = useState<MembershipTier[]>([])
@@ -99,6 +102,7 @@ export default function AppMyPage() {
 
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <AppHeader />
 
       {/* 프로필 카드 */}

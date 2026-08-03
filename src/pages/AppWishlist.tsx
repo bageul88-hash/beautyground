@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getWishlist, removeWish, type WishlistLine } from '../lib/wishlist'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
@@ -9,6 +11,7 @@ import { IconHeart } from '../components/common/Icon'
 
 export default function AppWishlist() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [lines, setLines] = useState<WishlistLine[]>([])
@@ -35,6 +38,7 @@ export default function AppWishlist() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
     )
@@ -43,6 +47,7 @@ export default function AppWishlist() {
   if (!loggedIn) {
     return (
       <AppFrame>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
         <BackHeader title="찜 목록" />
         <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
           <IconHeart className="w-10 h-10 mb-4 text-ink-faint" />
@@ -60,6 +65,7 @@ export default function AppWishlist() {
 
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader title="찜 목록" />
 
       {lines.length === 0 ? (

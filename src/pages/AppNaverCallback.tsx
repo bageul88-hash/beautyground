@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
 // 네이버 로그인 콜백 — AppSignup.tsx에서 네이버로 보낼 때 sessionStorage에 저장해둔
 // state/from과 대조(CSRF 방지)한 뒤, 서버(/api/auth-naver)에 code를 넘겨 세션 토큰을 받는다.
 export default function AppNaverCallback() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -58,6 +61,7 @@ export default function AppNaverCallback() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
       {error ? (
         <>

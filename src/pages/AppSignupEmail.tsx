@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
 // 쇼핑몰(이메일) 회원가입 — AppSignup.tsx(방법 선택 화면)의 "쇼핑몰 회원가입" 버튼에서 진입.
@@ -13,6 +15,7 @@ const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
 export default function AppSignupEmail() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { mode, toggle } = useViewMode()
   const from = (location.state as { from?: string } | null)?.from ?? '/app/mypage'
 
   const [name, setName] = useState('')
@@ -64,6 +67,7 @@ export default function AppSignupEmail() {
   if (needsVerify) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex flex-col items-center justify-center px-8 text-center">
         <h1 className="text-[18px] font-bold text-ink mb-2">인증 이메일을 보냈습니다</h1>
         <p className="text-[13px] text-ink-soft leading-relaxed mb-8">
@@ -77,6 +81,7 @@ export default function AppSignupEmail() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="쇼핑몰 회원가입" />
       <div className="px-6 py-10">

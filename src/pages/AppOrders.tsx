@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import type { Order } from '../lib/types'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
@@ -67,6 +69,7 @@ function groupOrders(rows: OrderRow[]): OrderGroup[] {
 
 export default function AppOrders() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [groups, setGroups] = useState<OrderGroup[]>([])
@@ -104,6 +107,7 @@ export default function AppOrders() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
     )
@@ -112,6 +116,7 @@ export default function AppOrders() {
   if (!loggedIn) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
         <BackHeader title="주문 내역" />
         <div className="flex flex-col items-center justify-center px-8 pt-28 text-center">
@@ -128,6 +133,7 @@ export default function AppOrders() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-16">
       <BackHeader title="주문 내역" />
 

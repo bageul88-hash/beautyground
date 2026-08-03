@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
 import { useShopProducts, type ShopSort } from '../hooks/useShopProducts'
 import { useShopCategories } from '../hooks/useShopCategories'
@@ -26,6 +28,7 @@ export default function AppCategoryDetail() {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [sortIdx, setSortIdx] = useState(0)
   const [showSort, setShowSort] = useState(false)
 
@@ -53,6 +56,7 @@ export default function AppCategoryDetail() {
 
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader
         title={selected ?? '전체 상품'}
         rightElement={

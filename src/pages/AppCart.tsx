@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../lib/cart'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
@@ -9,6 +11,7 @@ import { IconCart, IconClose, IconMinus, IconPlus } from '../components/common/I
 
 export default function AppCart() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [lines, setLines] = useState<CartLine[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -100,6 +103,7 @@ export default function AppCart() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
         <p className="text-ink-faint text-[14px]">불러오는 중...</p>
       </div>
@@ -109,6 +113,7 @@ export default function AppCart() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-40">
       <BackHeader title="장바구니" />
 

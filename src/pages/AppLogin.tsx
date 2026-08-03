@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
 const field =
@@ -8,6 +10,7 @@ const field =
 
 export default function AppLogin() {
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/app/mypage'
 
@@ -42,6 +45,7 @@ export default function AppLogin() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="로그인" />
       <div className="px-6 py-10">

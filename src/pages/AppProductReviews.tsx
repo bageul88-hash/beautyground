@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import type { Product, ScrapedReview } from '../lib/types'
 import { IconClose, IconBack, IconChevronRight } from '../components/common/Icon'
@@ -32,6 +34,7 @@ export default function AppProductReviews() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [params] = useSearchParams()
+  const { mode, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
   const [reviews, setReviews] = useState<ScrapedReview[]>([])
@@ -103,6 +106,7 @@ export default function AppProductReviews() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+        <ViewModeToggle mode={mode} onToggle={toggle} />
         <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
           <p className="text-ink-faint text-[14px]">불러오는 중...</p>
         </div>
@@ -115,6 +119,7 @@ export default function AppProductReviews() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div
       className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule"
       style={{ paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}

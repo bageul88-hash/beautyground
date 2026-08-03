@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import ProductCard from '../components/product/ProductCard'
 import Badge from '../components/common/Badge'
 import { BRANDS } from '../constants'
@@ -8,12 +10,14 @@ import { BRANDS } from '../constants'
 export default function AppBrandDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
 
   const brand = BRANDS.find(b => b.id === Number(id))
 
   if (!brand) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
         <p className="text-ink-faint">브랜드를 찾을 수 없습니다.</p>
       </div>
@@ -23,6 +27,7 @@ export default function AppBrandDetail() {
 
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader
         title=""
         transparent

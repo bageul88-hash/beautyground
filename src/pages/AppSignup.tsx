@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
 // 회원가입 진입 화면 — 카카오/네이버/휴대폰인증/쇼핑몰(이메일) 4개 방법 중 선택.
@@ -10,6 +12,7 @@ import { supabase } from '../lib/supabase'
 export default function AppSignup() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { mode, toggle } = useViewMode()
   const from = (location.state as { from?: string } | null)?.from ?? '/app/mypage'
   const [notice, setNotice] = useState('')
 
@@ -44,6 +47,7 @@ export default function AppSignup() {
 
   return (
     <div className="min-h-screen bg-quiet md:py-6">
+    <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
       <BackHeader title="" />
       <div className="px-6 py-10">
