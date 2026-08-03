@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopOrders from '../components/order/DesktopOrders'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import type { Order } from '../lib/types'
@@ -69,7 +70,7 @@ function groupOrders(rows: OrderRow[]): OrderGroup[] {
 
 export default function AppOrders() {
   const navigate = useNavigate()
-  const { mode, toggle } = useViewMode()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [groups, setGroups] = useState<OrderGroup[]>([])
@@ -110,6 +111,15 @@ export default function AppOrders() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center text-ink-faint text-[14px]">불러오는 중...</div>
       </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopOrders loggedIn={loggedIn} groups={groups} msg={msg} cancelling={cancelling} onRequestCancel={requestCancel} />
+      </>
     )
   }
 

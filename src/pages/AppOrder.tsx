@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import * as PortOne from '@portone/browser-sdk/v2'
 import BackHeader from '../components/layout/BackHeader'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopOrder from '../components/order/DesktopOrder'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { COMPANY_INFO } from '../lib/companyInfo'
@@ -41,6 +42,7 @@ function OrderFrame({ children, className = '' }: { children: ReactNode; classNa
 
 export default function AppOrder() {
   const navigate = useNavigate()
+  const { mode, isDesktop, toggle } = useViewMode()
   const location = useLocation()
   const [params, setParams] = useSearchParams()
 
@@ -451,6 +453,44 @@ export default function AppOrder() {
           장바구니로 이동
         </button>
       </OrderFrame>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
+      <DesktopOrder
+        paymentReady={paymentReady}
+        liveCoupon={liveCoupon}
+        subtotal={subtotal}
+        blockedNames={blockedNames}
+        itemNotices={itemNotices}
+        savedAddresses={savedAddresses}
+        selectedAddressId={selectedAddressId}
+        onSelectSavedAddress={selectSavedAddress}
+        name={name}
+        onName={editField(setName)}
+        phone={phone}
+        onPhone={editField(setPhone)}
+        address={address}
+        onSearchAddress={handleSearchAddress}
+        addressDetail={addressDetail}
+        onAddressDetail={editField(setAddressDetail)}
+        saveNewAddress={saveNewAddress}
+        onSaveNewAddress={setSaveNewAddress}
+        deliveryMemo={deliveryMemo}
+        onDeliveryMemo={setDeliveryMemo}
+        items={items}
+        couponPreview={couponPreview}
+        deliveryFee={deliveryFee}
+        total={total}
+        message={message}
+        busy={busy}
+        status={status}
+        onPay={handlePay}
+      />
+      </>
     )
   }
 
