@@ -56,6 +56,7 @@ export default function AppHome() {
     // 프레임 바깥(quiet)은 페이지 배경이 아니라 앱 밖 여백이라 흰색이 아니어도 된다.
     // 프레임을 띄우는 그림자는 쓰지 않고 좌우 1px 선으로만 경계를 만든다(무그림자 규칙).
     <div className="min-h-screen bg-quiet md:py-6">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border-x md:border-rule pb-24">
         {/* 상단 카카오톡 채널 추가 배너 (직각·좌측 스크롤) */}
         <KakaoPromoBar />
