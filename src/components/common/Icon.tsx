@@ -23,6 +23,24 @@ function Svg({ children, className, strokeWidth = 1.6 }: IconProps & { children:
   )
 }
 
+export function IconDesktop(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="3" y="4.5" width="18" height="12" rx="1" />
+      <path d="M9 20.5h6M12 16.5v4" />
+    </Svg>
+  )
+}
+
+export function IconMobile(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="7" y="3" width="10" height="18" rx="1.5" />
+      <path d="M11 18h2" />
+    </Svg>
+  )
+}
+
 export function IconHome(p: IconProps) {
   return (
     <Svg {...p}>

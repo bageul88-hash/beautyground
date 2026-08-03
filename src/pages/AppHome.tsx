@@ -3,6 +3,9 @@ import BottomNav from '../components/layout/BottomNav'
 import AppFooter from '../components/layout/AppFooter'
 import KakaoPromoBar from '../components/home/KakaoPromoBar'
 import HomeBody from '../components/home/HomeBody'
+import DesktopHome from '../components/home/DesktopHome'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
 import { useHomeProductSections } from '../hooks/useHomeProductSections'
 import { useShopCategories } from '../hooks/useShopCategories'
 import { useHeroBanners } from '../hooks/useHeroBanners'
@@ -24,6 +27,29 @@ export default function AppHome() {
   const { categories } = useShopCategories()
   const { banners } = useHeroBanners()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
+  const { mode, isDesktop, toggle } = useViewMode()
+
+  const goProduct = (id: string) => navigate(`/app/product/${id}`)
+  const goCategory = (cat: string | null) =>
+    navigate(cat ? `/app/category/all?cat=${encodeURIComponent(cat)}` : '/app/category/all')
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopHome
+          banners={banners}
+          categories={categories}
+          categoryThumbnails={categoryThumbnails}
+          recommended={recommended}
+          products={products}
+          prodLoading={prodLoading}
+          onProductClick={goProduct}
+          onCategoryClick={goCategory}
+        />
+      </>
+    )
+  }
 
   return (
     // PC에서도 모바일 앱처럼 가운데 고정 폭 프레임.
