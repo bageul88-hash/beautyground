@@ -34,8 +34,9 @@ import PartnerLogin from './pages/partner/Login'
 import PartnerApply from './pages/partner/Apply'
 import PartnerApplyComplete from './pages/partner/ApplyComplete'
 
-// 파트너 전용 (RequireAuth + PartnerLayout)
+// 파트너 전용 (RequireAuth + RequirePartner + PartnerLayout)
 import RequireAuth from './components/partner/RequireAuth'
+import RequirePartner from './components/partner/RequirePartner'
 import PartnerLayout from './components/partner/PartnerLayout'
 import PartnerDashboard from './pages/partner/Dashboard'
 import PartnerProducts from './pages/partner/Products'
@@ -59,10 +60,11 @@ import AdminHostSettlements from './pages/admin/HostSettlements'
 import AdminMembers from './pages/admin/Members'
 import AdminMembershipTiers from './pages/admin/MembershipTiers'
 
-// 진행자(라이브 호스트) 인증/전용 (RequireHostAuth + HostLayout)
+// 진행자(라이브 호스트) 인증/전용 (RequireHostAuth + RequireHost + HostLayout)
 import HostRegister from './pages/host/Register'
 import HostLogin from './pages/host/Login'
 import RequireHostAuth from './components/host/RequireHostAuth'
+import RequireHost from './components/host/RequireHost'
 import HostLayout from './components/host/HostLayout'
 import HostDashboard from './pages/host/Dashboard'
 import HostLives from './pages/host/Lives'
@@ -110,19 +112,23 @@ export default function App() {
 
         {/* 파트너 전용 + 관리자 (로그인 필요) */}
         <Route element={<RequireAuth />}>
-          <Route element={<PartnerLayout />}>
-            <Route path="/partner/dashboard" element={<PartnerDashboard />} />
-            <Route path="/partner/products" element={<PartnerProducts />} />
-            <Route path="/partner/products/new" element={<ProductForm />} />
-            <Route path="/partner/products/:id" element={<ProductDetail />} />
-            <Route path="/partner/products/:id/edit" element={<ProductForm />} />
-            <Route path="/partner/live" element={<PartnerLives />} />
-            <Route path="/partner/live/new" element={<LiveForm />} />
-            <Route path="/partner/live/:id/edit" element={<LiveForm />} />
-            <Route path="/partner/live/:id" element={<LiveDetail />} />
-            <Route path="/partner/orders" element={<PartnerOrders />} />
-            <Route path="/partner/settlement" element={<PartnerSettlement />} />
-            <Route path="/partner/profile" element={<PartnerProfile />} />
+          {/* RequirePartner: 로그인만으로는 일반 고객도 URL 직접입력으로 페이지 껍데기가 열렸기에,
+              partners 테이블에 실제 본인 레코드가 있는지 한 번 더 확인 (2026-08-03 추가) */}
+          <Route element={<RequirePartner />}>
+            <Route element={<PartnerLayout />}>
+              <Route path="/partner/dashboard" element={<PartnerDashboard />} />
+              <Route path="/partner/products" element={<PartnerProducts />} />
+              <Route path="/partner/products/new" element={<ProductForm />} />
+              <Route path="/partner/products/:id" element={<ProductDetail />} />
+              <Route path="/partner/products/:id/edit" element={<ProductForm />} />
+              <Route path="/partner/live" element={<PartnerLives />} />
+              <Route path="/partner/live/new" element={<LiveForm />} />
+              <Route path="/partner/live/:id/edit" element={<LiveForm />} />
+              <Route path="/partner/live/:id" element={<LiveDetail />} />
+              <Route path="/partner/orders" element={<PartnerOrders />} />
+              <Route path="/partner/settlement" element={<PartnerSettlement />} />
+              <Route path="/partner/profile" element={<PartnerProfile />} />
+            </Route>
           </Route>
           {/* 관리자 라우트: 로그인(RequireAuth) 위에 is_admin() 검사(RequireAdmin)를 한 겹 더 */}
           <Route element={<RequireAdmin />}>
@@ -145,12 +151,16 @@ export default function App() {
         <Route path="/host/login" element={<LiveGate><HostLogin /></LiveGate>} />
 
         <Route element={<RequireHostAuth />}>
-          <Route element={<HostLayout />}>
-            <Route path="/host/dashboard" element={<HostDashboard />} />
-            <Route path="/host/lives" element={<HostLives />} />
-            <Route path="/host/live/:id" element={<HostLiveSales />} />
-            <Route path="/host/settlement" element={<HostSettlementPage />} />
-            <Route path="/host/profile" element={<HostProfile />} />
+          {/* RequireHost: 로그인만으로는 일반 고객도 URL 직접입력으로 페이지 껍데기가 열렸기에,
+              hosts 테이블에 실제 본인 레코드가 있는지 한 번 더 확인 (2026-08-03 추가) */}
+          <Route element={<RequireHost />}>
+            <Route element={<HostLayout />}>
+              <Route path="/host/dashboard" element={<HostDashboard />} />
+              <Route path="/host/lives" element={<HostLives />} />
+              <Route path="/host/live/:id" element={<HostLiveSales />} />
+              <Route path="/host/settlement" element={<HostSettlementPage />} />
+              <Route path="/host/profile" element={<HostProfile />} />
+            </Route>
           </Route>
         </Route>
 
