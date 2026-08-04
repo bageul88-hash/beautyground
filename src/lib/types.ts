@@ -184,6 +184,11 @@ export interface HostSettlementRow extends HostSettlement {
   host_name: string
 }
 
+// admin_list_partner_settlements() RPC 반환 행 — 브랜드명 조인 포함
+export interface PartnerSettlementRow extends Settlement {
+  brand_name: string
+}
+
 // host_sales_view 조회 결과 행 — 구매자 PII(이름/연락처)는 의도적으로 포함하지 않음
 export interface HostSaleRow {
   id: string

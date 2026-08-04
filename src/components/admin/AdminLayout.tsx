@@ -12,6 +12,12 @@ import {
   IconCash,
   IconAddressBook,
   IconMedal,
+  IconShoppingBag,
+  IconBox,
+  IconBuildingStore,
+  IconReceipt2,
+  IconBroadcast,
+  IconTicket,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
@@ -19,7 +25,13 @@ const NAV_ITEMS = [
   { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
   { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
   { label: '회원 등급 설정', to: '/admin/membership-tiers', icon: IconMedal },
+  { label: '전체 주문 관리', to: '/admin/orders', icon: IconShoppingBag },
+  { label: '전체 상품 관리', to: '/admin/products', icon: IconBox },
+  { label: '파트너 관리', to: '/admin/partners', icon: IconBuildingStore },
+  { label: '파트너 정산 관리', to: '/admin/settlements', icon: IconReceipt2 },
   { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
+  { label: '라이브 방송 관리', to: '/admin/lives', icon: IconBroadcast },
+  { label: '쿠폰 현황', to: '/admin/coupons', icon: IconTicket },
   { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
   { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
   { label: '진행자 정산 관리', to: '/admin/host-settlements', icon: IconCashBanknote },
