@@ -96,7 +96,7 @@ export default function DesktopHome({
                         onProductClick(b.product.id)
                       }
                     }}
-                    className="relative shrink-0 w-[44%] min-w-[320px] aspect-[690/592] bg-quiet overflow-hidden"
+                    className="relative shrink-0 w-[calc((100%-20px)/3)] min-w-[280px] aspect-[690/592] bg-quiet overflow-hidden"
                     style={{ scrollSnapAlign: 'start' }}
                   >
                     {image ? (
