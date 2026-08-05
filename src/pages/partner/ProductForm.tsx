@@ -209,18 +209,14 @@ export default function ProductForm() {
     const desc = (d.summary && d.summary.trim()) || d.description
     if (desc) { setDescription(desc); filled++ }
 
-    // 대표 이미지 갤러리: 스크랩한 갤러리(없으면 전체 이미지)를 갤러리 영역에 채움
+    // 대표 이미지 갤러리: 스크랩한 갤러리(없으면 전체 이미지)로 갤러리 영역을 교체
+    // (다른 상품 URL을 새로 불러온 것이므로 이전 상품의 이미지가 남아있으면 안 됨)
     const gallery = toStrArr(d.gallery)
     const imgs = gallery.length > 0 ? gallery : toStrArr(d.images)
     if (imgs.length > 0) {
       setThumbnailUrl(imgs[0]) // 대표 = 갤러리 첫 장
       setUploadError('')
-      setGalleryImages(prev => {
-        const existing = prev.filter(u => u.trim() !== '')
-        const seen = new Set(existing)
-        const added = imgs.filter(u => !seen.has(u))
-        return [...existing, ...added]
-      })
+      setGalleryImages(imgs)
       filled++
     } else if (d.thumbnail_url) {
       setThumbnailUrl(d.thumbnail_url)
@@ -228,17 +224,12 @@ export default function ProductForm() {
       filled++
     }
 
-    // 상세 이미지: 스크랩한 상세컷을 상세 이미지 목록에 append (중복 제거)
+    // 상세 이미지: 스크랩한 상세컷으로 상세 이미지 목록을 통째로 교체.
+    // 못 찾은 사이트(Cafe24 외 대부분)는 빈 배열로 교체 — 이전에 불러온 다른 상품의 상세이미지가
+    // 남아 있으면 안 되므로 "찾은 게 없으면 기존 값 유지" 하지 않는다.
     const details = toStrArr(d.detail_images)
-    if (details.length > 0) {
-      setDetailImages(prev => {
-        const existing = prev.filter(u => u.trim() !== '')
-        const seen = new Set(existing)
-        const added = details.filter(u => !seen.has(u))
-        return [...existing, ...added]
-      })
-      filled++
-    }
+    setDetailImages(details)
+    if (details.length > 0) filled++
 
     return { filled, imgCount: imgs.length }
   }
