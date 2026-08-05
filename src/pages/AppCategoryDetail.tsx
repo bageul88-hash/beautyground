@@ -8,6 +8,7 @@ import { useViewMode } from '../lib/viewMode'
 import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
 import { useShopProducts, type ShopSort } from '../hooks/useShopProducts'
 import { useShopCategories } from '../hooks/useShopCategories'
+import { useShopBrands } from '../hooks/useShopBrands'
 import { IconSearch } from '../components/common/Icon'
 
 // 소비자 카테고리 슬러그 → 실제 products.category 저장값 (초기 탭 결정용)
@@ -32,9 +33,12 @@ export default function AppCategoryDetail() {
   const { mode, isDesktop, toggle } = useViewMode()
   const [sortIdx, setSortIdx] = useState(0)
   const [showSort, setShowSort] = useState(false)
+  const [showBrand, setShowBrand] = useState(false)
+  const [brandId, setBrandId] = useState<string | null>(null)
 
   // 탭: 전체 + 판매중 상품이 있는 실제 category 값 (0개 카테고리는 숨김)
   const { categories } = useShopCategories()
+  const { brands } = useShopBrands()
   // 초기 탭: ?cat=<실제 category> 우선, 없으면 슬러그 매핑, 그 외 전체
   const [selected, setSelected] = useState<string | null>(
     searchParams.get('cat') ?? (id ? SLUG_TO_CATEGORY[id] ?? null : null)
@@ -49,9 +53,11 @@ export default function AppCategoryDetail() {
 
   const { products, loading, error, hasMore, loadMore } = useShopProducts({
     category: selected ?? undefined,
+    brand: brandId ?? undefined,
     sort: SORT_OPTIONS[sortIdx].value,
     pageSize: 20,
   })
+  const selectedBrandName = brandId ? brands.find((b) => b.id === brandId)?.name ?? '브랜드' : '브랜드 전체'
 
   const tabs = useMemo<(string | null)[]>(() => [null, ...categories], [categories])
 
@@ -64,6 +70,9 @@ export default function AppCategoryDetail() {
           tabs={tabs}
           selected={selected}
           onSelect={setSelected}
+          brands={brands}
+          brandId={brandId}
+          onSelectBrand={setBrandId}
           sortIdx={sortIdx}
           onSort={setSortIdx}
           products={products}
@@ -115,7 +124,52 @@ export default function AppCategoryDetail() {
       {/* 정렬 바 */}
       <div className="bg-paper border-b border-rule px-4 py-2.5 flex items-center justify-between">
         <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
-        <div className="relative">
+        <div className="flex items-center gap-3">
+          {brands.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowBrand(!showBrand)}
+                className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
+                aria-haspopup="listbox"
+                aria-expanded={showBrand}
+              >
+                <span>{selectedBrandName}</span>
+                <span aria-hidden="true">{showBrand ? '▲' : '▼'}</span>
+              </button>
+              {showBrand && (
+                <div
+                  className="absolute right-0 top-full mt-1 bg-paper border border-rule overflow-y-auto z-20 min-w-[140px] max-h-[280px]"
+                  role="listbox"
+                  aria-label="브랜드 옵션"
+                >
+                  <button
+                    role="option"
+                    aria-selected={brandId === null}
+                    onClick={() => { setBrandId(null); setShowBrand(false) }}
+                    className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                      brandId === null ? 'text-ink font-bold' : 'text-ink-soft'
+                    }`}
+                  >
+                    브랜드 전체
+                  </button>
+                  {brands.map((b) => (
+                    <button
+                      key={b.id}
+                      role="option"
+                      aria-selected={brandId === b.id}
+                      onClick={() => { setBrandId(b.id); setShowBrand(false) }}
+                      className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                        brandId === b.id ? 'text-ink font-bold' : 'text-ink-soft'
+                      }`}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="relative">
           <button
             onClick={() => setShowSort(!showSort)}
             className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
@@ -149,6 +203,7 @@ export default function AppCategoryDetail() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
 

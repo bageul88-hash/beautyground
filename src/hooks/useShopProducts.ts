@@ -16,6 +16,7 @@ export interface ShopProduct {
 
 interface Options {
   category?: string
+  brand?: string // partner_id
   sort?: ShopSort
   pageSize?: number
 }
@@ -31,7 +32,7 @@ interface ProductRow {
 }
 
 // 소비자 앱: 판매중(on_sale) 상품 목록. 브랜드명은 partner_brands 뷰에서 매핑.
-export function useShopProducts({ category, sort = 'latest', pageSize = 20 }: Options = {}) {
+export function useShopProducts({ category, brand, sort = 'latest', pageSize = 20 }: Options = {}) {
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -53,6 +54,7 @@ export function useShopProducts({ category, sort = 'latest', pageSize = 20 }: Op
           .eq('status', 'on_sale')
 
         if (category) q = q.eq('category', category)
+        if (brand) q = q.eq('partner_id', brand)
         if (sort === 'price_asc') q = q.order(priceCol, { ascending: true })
         else if (sort === 'price_desc') q = q.order(priceCol, { ascending: false })
         else q = q.order('created_at', { ascending: false })
@@ -100,10 +102,10 @@ export function useShopProducts({ category, sort = 'latest', pageSize = 20 }: Op
       setProducts((prev) => (replace ? mapped : [...prev, ...mapped]))
       setLoading(false)
     },
-    [category, sort, pageSize]
+    [category, brand, sort, pageSize]
   )
 
-  // 카테고리/정렬 변경 시 첫 페이지부터 다시 로드
+  // 카테고리/브랜드/정렬 변경 시 첫 페이지부터 다시 로드
   useEffect(() => {
     setPage(0)
     fetchPage(0, true)

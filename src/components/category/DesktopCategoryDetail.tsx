@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
 import DesktopHeader from '../layout/DesktopHeader'
 import type { ShopProduct, ShopSort } from '../../hooks/useShopProducts'
+import type { ShopBrand } from '../../hooks/useShopBrands'
 
 const SORT_OPTIONS: { label: string; value: ShopSort }[] = [
   { label: '최신순', value: 'latest' },
@@ -14,6 +16,9 @@ interface Props {
   tabs: (string | null)[]
   selected: string | null
   onSelect: (t: string | null) => void
+  brands: ShopBrand[]
+  brandId: string | null
+  onSelectBrand: (id: string | null) => void
   sortIdx: number
   onSort: (i: number) => void
   products: ShopProduct[]
@@ -29,6 +34,9 @@ export default function DesktopCategoryDetail({
   tabs,
   selected,
   onSelect,
+  brands,
+  brandId,
+  onSelectBrand,
   sortIdx,
   onSort,
   products,
@@ -38,6 +46,8 @@ export default function DesktopCategoryDetail({
   onLoadMore,
 }: Props) {
   const navigate = useNavigate()
+  const [showBrand, setShowBrand] = useState(false)
+  const selectedBrandName = brandId ? brands.find((b) => b.id === brandId)?.name ?? '브랜드' : '브랜드 전체'
 
   return (
     <div className="bg-paper min-h-screen">
@@ -67,6 +77,50 @@ export default function DesktopCategoryDetail({
 
           <div className="flex items-center gap-4 shrink-0">
             <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
+            {brands.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowBrand(!showBrand)}
+                  className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
+                  aria-haspopup="listbox"
+                  aria-expanded={showBrand}
+                >
+                  <span>{selectedBrandName}</span>
+                  <span aria-hidden="true">{showBrand ? '▲' : '▼'}</span>
+                </button>
+                {showBrand && (
+                  <div
+                    className="absolute right-0 top-full mt-1 bg-paper border border-rule overflow-y-auto z-20 min-w-[160px] max-h-[320px]"
+                    role="listbox"
+                    aria-label="브랜드 옵션"
+                  >
+                    <button
+                      role="option"
+                      aria-selected={brandId === null}
+                      onClick={() => { onSelectBrand(null); setShowBrand(false) }}
+                      className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                        brandId === null ? 'text-ink font-bold' : 'text-ink-soft'
+                      }`}
+                    >
+                      브랜드 전체
+                    </button>
+                    {brands.map((b) => (
+                      <button
+                        key={b.id}
+                        role="option"
+                        aria-selected={brandId === b.id}
+                        onClick={() => { onSelectBrand(b.id); setShowBrand(false) }}
+                        className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                          brandId === b.id ? 'text-ink font-bold' : 'text-ink-soft'
+                        }`}
+                      >
+                        {b.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex gap-1">
               {SORT_OPTIONS.map((opt, i) => (
                 <button

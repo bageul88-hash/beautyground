@@ -27,6 +27,7 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<ProductRow[]>([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [brandFilter, setBrandFilter] = useState<string>('all')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [reviewTarget, setReviewTarget] = useState<ProductRow | null>(null)
@@ -63,14 +64,20 @@ export default function AdminProducts() {
     setProducts((prev) => prev.filter((p) => p.id !== product.id))
   }
 
+  const brandOptions = useMemo(() => {
+    const names = new Set(products.map((p) => p.partners?.brand_name).filter((n): n is string => !!n))
+    return [...names].sort((a, b) => a.localeCompare(b, 'ko'))
+  }, [products])
+
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
     return products.filter((p) => {
       const matchSearch = !q || p.name.toLowerCase().includes(q) || (p.partners?.brand_name ?? '').toLowerCase().includes(q)
       const matchFilter = filter === 'all' || p.status === filter
-      return matchSearch && matchFilter
+      const matchBrand = brandFilter === 'all' || p.partners?.brand_name === brandFilter
+      return matchSearch && matchFilter && matchBrand
     })
-  }, [products, search, filter])
+  }, [products, search, filter, brandFilter])
 
   return (
     <>
@@ -92,6 +99,16 @@ export default function AdminProducts() {
               className="w-full pl-9 pr-4 py-2.5 border border-rule rounded-control text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper"
             />
           </div>
+          <select
+            value={brandFilter}
+            onChange={(e) => setBrandFilter(e.target.value)}
+            className="px-3.5 py-2.5 border border-rule rounded-control text-[13px] text-ink bg-paper focus:outline-none focus:border-ink transition-colors"
+          >
+            <option value="all">전체 브랜드</option>
+            {brandOptions.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
           <div className="flex gap-2 flex-wrap">
             {FILTERS.map(({ value, label }) => (
               <button
@@ -114,7 +131,7 @@ export default function AdminProducts() {
         {loading ? (
           <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : visible.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-ink-faint">{search || filter !== 'all' ? '조건에 맞는 상품이 없습니다' : '등록된 상품이 없습니다'}</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">{search || filter !== 'all' || brandFilter !== 'all' ? '조건에 맞는 상품이 없습니다' : '등록된 상품이 없습니다'}</div>
         ) : (
           <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
