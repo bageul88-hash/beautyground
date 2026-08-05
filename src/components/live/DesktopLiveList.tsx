@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import LiveStatusBadge from './LiveStatusBadge'
-import DesktopHeader from '../layout/DesktopHeader'
+import { IconCart } from '../common/Icon'
 import { formatDateTime } from '../../lib/format'
 import type { Live } from '../../lib/types'
 
@@ -14,10 +14,22 @@ interface Props {
 
 // PC 버전 — 라이브 목록. 모바일의 세로 스택(히어로 1개 + 카드 리스트)을 넓은 화면에서는
 // 큰 히어로 배너 + 3열 카드 그리드로 펼친다. 다시보기는 톤 낮춰 4열로 작게.
+// 헤더는 공용 DesktopHeader(카테고리탭 포함) 대신 전용 단순 헤더를 쓴다 — 온라인몰 전체 탐색과
+// 라이브커머스(지금 방송 중인 상품을 사러 오는 것)는 목적이 달라, 카테고리 탐색 UI가 안 맞는다
+// (2026-08-06, 결제·계정설정 페이지가 공용헤더를 안 쓰는 것과 같은 이유).
 export default function DesktopLiveList({ loading, hero, restLives, replays, hostNames }: Props) {
   return (
     <div className="bg-paper min-h-screen">
-      <DesktopHeader />
+      <header className="bg-paper border-b border-rule sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
+            뷰티그라운드
+          </Link>
+          <Link to="/app/cart" aria-label="장바구니" className="text-ink">
+            <IconCart className="w-[20px] h-[20px]" />
+          </Link>
+        </div>
+      </header>
 
       <div className="max-w-[1280px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">라이브</h1>
