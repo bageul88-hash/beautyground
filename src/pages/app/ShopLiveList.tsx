@@ -5,6 +5,9 @@ import type { Live } from '../../lib/types'
 import AppHeader from '../../components/layout/AppHeader'
 import AppFrame from '../../components/layout/AppFrame'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
+import DesktopLiveList from '../../components/live/DesktopLiveList'
+import ViewModeToggle from '../../components/layout/ViewModeToggle'
+import { useViewMode } from '../../lib/viewMode'
 import { formatDateTime } from '../../lib/format'
 
 export default function ShopLiveList() {
@@ -12,6 +15,7 @@ export default function ShopLiveList() {
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<boolean>(true)
+  const { mode, isDesktop, toggle } = useViewMode()
 
   useEffect(() => {
     let active = true
@@ -60,8 +64,18 @@ export default function ShopLiveList() {
   const hero = lives.find((l) => l.status === 'live') ?? lives[0] ?? null
   const restLives = hero ? lives.filter((l) => l.id !== hero.id) : lives
 
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopLiveList loading={loading} hero={hero} restLives={restLives} replays={replays} hostNames={hostNames} />
+      </>
+    )
+  }
+
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <AppHeader />
 
       <main className="px-4 py-5">

@@ -1,0 +1,160 @@
+import { Link } from 'react-router-dom'
+import { IconHeart, IconCart } from '../common/Icon'
+import LiveStatusBadge from './LiveStatusBadge'
+import { formatDateTime } from '../../lib/format'
+import type { Live } from '../../lib/types'
+
+const NAV_LINKS = [
+  { href: '/app/category/all', label: '카테고리' },
+  { href: '/app/mypage', label: '마이페이지' },
+]
+
+interface Props {
+  loading: boolean
+  hero: Live | null
+  restLives: Live[]
+  replays: Live[]
+  hostNames: Record<string, string>
+}
+
+// PC 버전 — 라이브 목록. 모바일의 세로 스택(히어로 1개 + 카드 리스트)을 넓은 화면에서는
+// 큰 히어로 배너 + 3열 카드 그리드로 펼친다. 다시보기는 톤 낮춰 4열로 작게.
+export default function DesktopLiveList({ loading, hero, restLives, replays, hostNames }: Props) {
+  return (
+    <div className="bg-paper min-h-screen">
+      <header className="bg-paper border-b border-rule sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
+            뷰티그라운드
+          </Link>
+          <nav className="hidden md:flex items-center gap-8" aria-label="주요 메뉴">
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link key={href} to={href} className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
+                {label}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-4">
+            <Link to="/app/wishlist" aria-label="찜" className="text-ink">
+              <IconHeart className="w-[20px] h-[20px]" />
+            </Link>
+            <Link to="/app/cart" aria-label="장바구니" className="text-ink">
+              <IconCart className="w-[20px] h-[20px]" />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-[1280px] mx-auto px-6 py-10">
+        <h1 className="text-[22px] font-bold text-ink">라이브</h1>
+
+        {loading ? (
+          <p className="mt-16 text-center text-[13px] text-ink-faint">불러오는 중…</p>
+        ) : !hero ? (
+          <p className="mt-16 text-center text-[13px] text-ink-faint">진행 중이거나 예정된 라이브가 없습니다.</p>
+        ) : (
+          <>
+            <Link
+              to={`/app/live/${hero.id}`}
+              className="mt-6 block relative border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring group"
+            >
+              {hero.thumbnail_url ? (
+                <img
+                  src={hero.thumbnail_url}
+                  alt={hero.title}
+                  className="w-full h-[420px] object-cover transition-transform group-hover:scale-[1.02]"
+                />
+              ) : (
+                <div className="w-full h-[420px] bg-quiet flex items-center justify-center">
+                  <img src="/images/bg-logo-mark.png" alt="" className="w-16 h-16 object-contain opacity-60" />
+                </div>
+              )}
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 55%)' }}
+                aria-hidden="true"
+              />
+              <div className="absolute top-5 left-5 flex items-center gap-2">
+                <LiveStatusBadge live={hero} />
+                {hero.status === 'scheduled' && (
+                  <span className="inline-flex items-center rounded-control bg-black/50 text-paper text-[12px] font-bold px-2.5 py-1 tabular-nums">
+                    {formatDateTime(hero.scheduled_at)}
+                    {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
+                  </span>
+                )}
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-7">
+                <p className="text-paper text-[26px] font-bold leading-snug max-w-[640px]">{hero.title}</p>
+                {hero.host_id && hostNames[hero.host_id] && (
+                  <p className="text-paper/80 text-[13px] mt-1.5">{hostNames[hero.host_id]} 진행</p>
+                )}
+              </div>
+            </Link>
+
+            {restLives.length > 0 && (
+              <div className="mt-8 grid grid-cols-3 gap-5">
+                {restLives.map((live) => (
+                  <Link
+                    key={live.id}
+                    to={`/app/live/${live.id}`}
+                    className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                  >
+                    <div className="relative">
+                      {live.thumbnail_url ? (
+                        <img src={live.thumbnail_url} alt={live.title} className="w-full h-[200px] object-cover" />
+                      ) : (
+                        <div className="w-full h-[200px] bg-quiet flex items-center justify-center">
+                          <img src="/images/bg-logo-mark.png" alt="" className="w-12 h-12 object-contain opacity-50" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 left-3">
+                        <LiveStatusBadge live={live} />
+                      </div>
+                    </div>
+                    <div className="px-4 py-3.5">
+                      <p className="text-[14.5px] font-bold text-ink line-clamp-2">{live.title}</p>
+                      {live.host_id && hostNames[live.host_id] && (
+                        <p className="text-[12px] text-ink-soft mt-1">{hostNames[live.host_id]} 진행</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {!loading && replays.length > 0 && (
+          <>
+            <h2 className="text-[16px] font-bold text-ink mt-14 mb-5">다시보기</h2>
+            <div className="grid grid-cols-4 gap-4">
+              {replays.map((live) => (
+                <Link
+                  key={live.id}
+                  to={`/app/live/${live.id}`}
+                  className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="relative">
+                    {live.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt={live.title} className="w-full h-[140px] object-cover" />
+                    ) : (
+                      <div className="w-full h-[140px] bg-quiet flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
+                      </div>
+                    )}
+                    <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tracking-[0.04em]">
+                      REPLAY
+                    </span>
+                  </div>
+                  <div className="px-3.5 py-3">
+                    <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
