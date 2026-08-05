@@ -1,12 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { IconHeart, IconCart } from '../common/Icon'
+import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
+import DesktopHeader from '../layout/DesktopHeader'
 import type { ShopProduct, ShopSort } from '../../hooks/useShopProducts'
-
-const NAV_LINKS = [
-  { href: '/app/category/all', label: '카테고리' },
-  { href: '/app/mypage', label: '마이페이지' },
-]
 
 const SORT_OPTIONS: { label: string; value: ShopSort }[] = [
   { label: '최신순', value: 'latest' },
@@ -46,28 +41,7 @@ export default function DesktopCategoryDetail({
 
   return (
     <div className="bg-paper min-h-screen">
-      <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
-            뷰티그라운드
-          </Link>
-          <nav className="hidden md:flex items-center gap-8" aria-label="주요 메뉴">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} to={href} className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link to="/app/wishlist" aria-label="찜" className="text-ink">
-              <IconHeart className="w-[20px] h-[20px]" />
-            </Link>
-            <Link to="/app/cart" aria-label="장바구니" className="text-ink">
-              <IconCart className="w-[20px] h-[20px]" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <DesktopHeader />
 
       <div className="max-w-[1280px] mx-auto px-6 py-8">
         <h1 className="text-[22px] font-bold text-ink">{title}</h1>
