@@ -124,7 +124,8 @@ export default function DesktopHome({
                   type="button"
                   onClick={() => scrollRail(-1)}
                   aria-label="이전 배너"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-paper border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-paper text-[30px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                  style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))' }}
                 >
                   ‹
                 </button>
@@ -132,7 +133,8 @@ export default function DesktopHome({
                   type="button"
                   onClick={() => scrollRail(1)}
                   aria-label="다음 배너"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-paper border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-paper text-[30px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                  style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))' }}
                 >
                   ›
                 </button>
