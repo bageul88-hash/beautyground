@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import DesktopHeader from '../layout/DesktopHeader'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
@@ -33,6 +33,7 @@ export default function DesktopHome({
   onCategoryClick,
 }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
+  const pausedRef = useRef(false)
   const sideList = (recommended.length > 0 ? recommended : products).slice(0, 5)
   const gridProducts = products.length > 0 ? products : recommended
 
@@ -41,8 +42,23 @@ export default function DesktopHome({
     if (!el) return
     const tile = el.firstElementChild as HTMLElement | null
     const step = tile ? tile.getBoundingClientRect().width + 10 : el.clientWidth * 0.4
-    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    const atEnd = dir === 1 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 4
+    if (atEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' })
+    } else {
+      el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    }
   }
+
+  // 1초마다 자동으로 다음 배너로 — 마우스를 올리면 잠깐 멈춘다(읽거나 클릭하려는 중 방해 안 하려고).
+  useEffect(() => {
+    if (banners.length <= 1) return
+    const timer = setInterval(() => {
+      if (!pausedRef.current) scrollRail(1)
+    }, 1000)
+    return () => clearInterval(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [banners.length])
 
   return (
     <div className="bg-paper min-h-screen">
@@ -56,7 +72,11 @@ export default function DesktopHome({
             <ImagePlaceholder />
           </div>
         ) : (
-          <>
+          <div
+            className="relative"
+            onMouseEnter={() => { pausedRef.current = true }}
+            onMouseLeave={() => { pausedRef.current = false }}
+          >
             <div
               ref={railRef}
               className="flex gap-2.5 overflow-x-auto scrollbar-hide"
@@ -99,12 +119,12 @@ export default function DesktopHome({
             </div>
 
             {banners.length > 1 && (
-              <div className="flex items-center gap-2 mt-4">
+              <>
                 <button
                   type="button"
                   onClick={() => scrollRail(-1)}
                   aria-label="이전 배너"
-                  className="w-8 h-8 border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-paper border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
                 >
                   ‹
                 </button>
@@ -112,13 +132,13 @@ export default function DesktopHome({
                   type="button"
                   onClick={() => scrollRail(1)}
                   aria-label="다음 배너"
-                  className="w-8 h-8 border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-paper border border-rule flex items-center justify-center text-ink hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
                 >
                   ›
                 </button>
-              </div>
+              </>
             )}
-          </>
+          </div>
         )}
       </section>
 
