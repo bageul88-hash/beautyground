@@ -64,9 +64,10 @@ export default function DesktopHome({
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      {/* 히어로 배너 롤링 — 690:592 비율 타일을 10px 간격으로 이어붙여, 화면엔 2장 반 정도 보이고
-          다음 장이 살짝 걸쳐 보이게 한다(가로 스크롤+snap, 좌우 화살표로도 이동 가능). */}
-      <section className="max-w-[1280px] mx-auto px-6 pt-8 relative">
+      {/* 히어로 배너 롤링 — 690:592 비율 타일 3칸을 10px 간격으로 이어붙인다(가로 스크롤+snap,
+          좌우 화살표로도 이동 가능). 이 구획만 본문(1280px)보다 넓게(1600px) 잡아 큰 화면에서
+          좌우 여백이 지나치게 남지 않게 한다(실측: 1920px 화면 기준 여백 344px→160px로 축소). */}
+      <section className="max-w-[1600px] mx-auto px-6 pt-8 relative">
         {banners.length === 0 ? (
           <div className="aspect-[690/592] max-w-[500px] bg-quiet flex items-center justify-center mx-auto">
             <ImagePlaceholder />
