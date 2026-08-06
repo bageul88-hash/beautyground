@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import DesktopHeader from '../layout/DesktopHeader'
-import SignupBonusBar from './SignupBonusBar'
+import PromoBar from './PromoBar'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -63,7 +63,7 @@ export default function DesktopHome({
 
   return (
     <div className="bg-paper min-h-screen">
-      <SignupBonusBar />
+      <PromoBar />
       <DesktopHeader />
 
       {/* 히어로 배너 롤링 — 690:592 비율 타일 3칸을 10px 간격으로 이어붙인다(가로 스크롤+snap,

@@ -63,12 +63,22 @@ export default function ShopLiveList() {
   // 히어로: 진행중 라이브 우선, 없으면 가장 임박한 예정 라이브(scheduled_at asc 정렬의 첫 항목)
   const hero = lives.find((l) => l.status === 'live') ?? lives[0] ?? null
   const restLives = hero ? lives.filter((l) => l.id !== hero.id) : lives
+  // PC 전용 — "지금 라이브" 그리드(다른 진행중 방송)와 "예정된 방송"을 분리해서 보여준다.
+  const otherLiveNow = restLives.filter((l) => l.status === 'live')
+  const scheduledLives = restLives.filter((l) => l.status === 'scheduled')
 
   if (isDesktop) {
     return (
       <>
         <ViewModeToggle mode={mode} onToggle={toggle} />
-        <DesktopLiveList loading={loading} hero={hero} restLives={restLives} replays={replays} hostNames={hostNames} />
+        <DesktopLiveList
+          loading={loading}
+          hero={hero}
+          otherLiveNow={otherLiveNow}
+          scheduledLives={scheduledLives}
+          replays={replays}
+          hostNames={hostNames}
+        />
       </>
     )
   }

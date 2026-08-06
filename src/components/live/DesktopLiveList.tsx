@@ -2,14 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import LiveStatusBadge from './LiveStatusBadge'
 import { IconCart } from '../common/Icon'
-import SignupBonusBar from '../home/SignupBonusBar'
+import PromoBar from '../home/PromoBar'
 import { formatDateTime } from '../../lib/format'
 import type { Live } from '../../lib/types'
 
 interface Props {
   loading: boolean
   hero: Live | null
-  restLives: Live[]
+  otherLiveNow: Live[]
+  scheduledLives: Live[]
   replays: Live[]
   hostNames: Record<string, string>
 }
@@ -19,9 +20,14 @@ interface Props {
 // 헤더는 공용 DesktopHeader(카테고리탭 포함) 대신 전용 단순 헤더를 쓴다 — 온라인몰 전체 탐색과
 // 라이브커머스(지금 방송 중인 상품을 사러 오는 것)는 목적이 달라, 카테고리 탐색 UI가 안 맞는다
 // (2026-08-06, 결제·계정설정 페이지가 공용헤더를 안 쓰는 것과 같은 이유).
-export default function DesktopLiveList({ loading, hero, restLives, replays, hostNames }: Props) {
+// 구조(2026-08-06 확정): 지금 라이브 → 예정된 방송(정적, 스크롤 없음 — 다시보기 캐러셀과
+// 겹쳐서 화면 전체가 계속 움직이면 산만해지므로 의도적으로 고정 그리드 유지) → 다시보기
+// (조회수순 정렬 + 인기 배지, peak_viewers는 방송 중 실시간 갱신되는 실데이터라 신뢰 가능).
+export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduledLives, replays, hostNames }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const pausedRef = useRef(false)
+  const sortedReplays = [...replays].sort((a, b) => (b.peak_viewers ?? 0) - (a.peak_viewers ?? 0))
+  const topViewers = sortedReplays[0]?.peak_viewers ?? 0
 
   const scrollRail = (dir: 1 | -1) => {
     const el = railRef.current
@@ -48,7 +54,7 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
 
   return (
     <div className="bg-paper min-h-screen">
-      <SignupBonusBar />
+      <PromoBar />
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
@@ -106,9 +112,9 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
               </div>
             </Link>
 
-            {restLives.length > 0 && (
+            {otherLiveNow.length > 0 && (
               <div className="mt-8 grid grid-cols-3 gap-5">
-                {restLives.map((live) => (
+                {otherLiveNow.map((live) => (
                   <Link
                     key={live.id}
                     to={`/app/live/${live.id}`}
@@ -139,6 +145,43 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
           </>
         )}
 
+        {/* 예정된 방송 — 다시보기 캐러셀과 달리 의도적으로 정적 그리드(화면 전체가 계속
+            움직이면 산만해짐). 날짜·시간을 카드에 바로 명시해 "언제 뭐가 올라오는지" 한눈에. */}
+        {!loading && scheduledLives.length > 0 && (
+          <>
+            <h2 className="text-[16px] font-bold text-ink mt-14 mb-5">예정된 방송</h2>
+            <div className="grid grid-cols-3 gap-5">
+              {scheduledLives.map((live) => (
+                <Link
+                  key={live.id}
+                  to={`/app/live/${live.id}`}
+                  className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="relative">
+                    {live.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt={live.title} className="w-full h-[160px] object-cover" />
+                    ) : (
+                      <div className="w-full h-[160px] bg-quiet flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-11 h-11 object-contain opacity-50" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 left-3 inline-flex items-center rounded-control bg-ink text-paper text-[11px] font-bold px-2.5 py-1 tabular-nums">
+                      {formatDateTime(live.scheduled_at)}
+                      {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
+                    </span>
+                  </div>
+                  <div className="px-4 py-3.5">
+                    <p className="text-[14.5px] font-bold text-ink line-clamp-2">{live.title}</p>
+                    {live.host_id && hostNames[live.host_id] && (
+                      <p className="text-[12px] text-ink-soft mt-1">{hostNames[live.host_id]} 진행</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
         {!loading && replays.length > 0 && (
           <>
             <h2 className="text-[16px] font-bold text-ink mt-14 mb-5">다시보기</h2>
@@ -152,7 +195,7 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
                 className="flex gap-2.5 overflow-x-auto scrollbar-hide"
                 style={{ scrollSnapType: 'x mandatory' }}
               >
-                {replays.map((live) => (
+                {sortedReplays.map((live) => (
                   <Link
                     key={live.id}
                     to={`/app/live/${live.id}`}
@@ -170,6 +213,13 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
                       <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tracking-[0.04em]">
                         REPLAY
                       </span>
+                      {/* 인기 배지 — 조회수 0인데 1등이라고 붙이면 오히려 신뢰를 깎아먹으니 실제 시청자가
+                          있었던 것에만(topViewers>0) 붙인다. */}
+                      {topViewers > 0 && live.peak_viewers === topViewers && (
+                        <span className="absolute top-2.5 right-2.5 inline-flex items-center rounded-control bg-signal-red text-paper text-[10.5px] font-bold px-2 py-0.5 tracking-[0.04em]">
+                          인기
+                        </span>
+                      )}
                     </div>
                     <div className="px-3.5 py-3">
                       <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
