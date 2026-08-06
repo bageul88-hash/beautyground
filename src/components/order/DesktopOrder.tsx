@@ -3,6 +3,7 @@ import { COMPANY_INFO } from '../../lib/companyInfo'
 import type { Address } from '../../lib/addresses'
 import type { LiveCoupon } from '../../lib/types'
 import { couponLabel, couponSoldOut } from '../../lib/coupons'
+import type { ValidCoupon } from '../../lib/rewards'
 
 interface OrderItem {
   product_id: string
@@ -39,6 +40,15 @@ interface Props {
   onDeliveryMemo: (v: string) => void
   items: OrderItem[]
   couponPreview: number
+  myCoupons: ValidCoupon[]
+  selectedCouponId: string | null
+  onSelectCoupon: (id: string | null) => void
+  signupCouponPreview: number
+  pointsBalance: number
+  usePoints: boolean
+  onUsePoints: (v: boolean) => void
+  pointsPreview: number
+  subtotalForCoupon: number
   deliveryFee: number
   total: number
   message: string
@@ -72,6 +82,15 @@ export default function DesktopOrder({
   onDeliveryMemo,
   items,
   couponPreview,
+  myCoupons,
+  selectedCouponId,
+  onSelectCoupon,
+  signupCouponPreview,
+  pointsBalance,
+  usePoints,
+  onUsePoints,
+  pointsPreview,
+  subtotalForCoupon,
   deliveryFee,
   total,
   message,
@@ -232,6 +251,31 @@ export default function DesktopOrder({
 
         {/* 결제 요약 — 스크롤해도 고정 */}
         <div className="sticky top-24 border border-rule p-6">
+          {(myCoupons.length > 0 || pointsBalance > 0) && (
+            <div className="mb-5 pb-5 border-b border-rule space-y-3">
+              <h2 className="text-[15px] font-bold text-ink">쿠폰·적립금</h2>
+              {myCoupons.length > 0 && (
+                <select
+                  value={selectedCouponId ?? ''}
+                  onChange={(e) => onSelectCoupon(e.target.value || null)}
+                  className={field}
+                >
+                  <option value="">쿠폰 선택 안 함</option>
+                  {myCoupons.map((c) => (
+                    <option key={c.id} value={c.id} disabled={subtotalForCoupon < c.minOrderAmount}>
+                      {c.label}{subtotalForCoupon < c.minOrderAmount ? ` (${c.minOrderAmount.toLocaleString('ko-KR')}원 이상 구매 시)` : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {pointsBalance > 0 && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={usePoints} onChange={(e) => onUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
+                  <span className="text-[13px] text-ink-soft">보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용</span>
+                </label>
+              )}
+            </div>
+          )}
           <h2 className="text-[15px] font-bold text-ink mb-4">결제 금액</h2>
           <div className="space-y-2.5 text-[13px]">
             <div className="flex justify-between">
@@ -242,6 +286,18 @@ export default function DesktopOrder({
               <div className="flex justify-between">
                 <span className="text-signal-blue">라이브 쿠폰 할인</span>
                 <span className="text-signal-blue font-bold tabular-nums">-{couponPreview.toLocaleString('ko-KR')}원</span>
+              </div>
+            )}
+            {signupCouponPreview > 0 && (
+              <div className="flex justify-between">
+                <span className="text-signal-blue">쿠폰 할인</span>
+                <span className="text-signal-blue font-bold tabular-nums">-{signupCouponPreview.toLocaleString('ko-KR')}원</span>
+              </div>
+            )}
+            {pointsPreview > 0 && (
+              <div className="flex justify-between">
+                <span className="text-signal-blue">적립금 사용</span>
+                <span className="text-signal-blue font-bold tabular-nums">-{pointsPreview.toLocaleString('ko-KR')}원</span>
               </div>
             )}
             <div className="flex justify-between">

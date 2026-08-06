@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/layout/BottomNav'
 import AppFooter from '../components/layout/AppFooter'
 import KakaoPromoBar from '../components/home/KakaoPromoBar'
+import SignupBonusBar from '../components/home/SignupBonusBar'
 import HomeBody from '../components/home/HomeBody'
 import DesktopHome from '../components/home/DesktopHome'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
@@ -58,8 +59,9 @@ export default function AppHome() {
     <div className="min-h-screen bg-quiet md:py-6">
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border-x md:border-rule pb-24">
-        {/* 상단 카카오톡 채널 추가 배너 (직각·좌측 스크롤) */}
+        {/* 상단 카카오톡 채널 추가 배너 + 신규가입 혜택 배너 (직각·좌측 스크롤, 별개 캠페인) */}
         <KakaoPromoBar />
+        <SignupBonusBar />
         <HomeBody
           marqueeItems={[]}
           banners={banners}

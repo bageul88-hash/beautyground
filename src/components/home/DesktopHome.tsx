@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import DesktopHeader from '../layout/DesktopHeader'
+import SignupBonusBar from './SignupBonusBar'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -50,12 +51,12 @@ export default function DesktopHome({
     }
   }
 
-  // 1초마다 자동으로 다음 배너로 — 마우스를 올리면 잠깐 멈춘다(읽거나 클릭하려는 중 방해 안 하려고).
+  // 2초마다 자동으로 다음 배너로 — 마우스를 올리면 잠깐 멈춘다(읽거나 클릭하려는 중 방해 안 하려고).
   useEffect(() => {
     if (banners.length <= 1) return
     const timer = setInterval(() => {
       if (!pausedRef.current) scrollRail(1)
-    }, 1000)
+    }, 2000)
     return () => clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [banners.length])
@@ -63,6 +64,7 @@ export default function DesktopHome({
   return (
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
+      <SignupBonusBar />
 
       {/* 히어로 배너 롤링 — 690:592 비율 타일 3칸을 10px 간격으로 이어붙인다(가로 스크롤+snap,
           좌우 화살표로도 이동 가능). 이 구획만 본문(1280px)보다 넓게(1600px) 잡아 큰 화면에서

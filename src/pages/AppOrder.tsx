@@ -12,6 +12,10 @@ import { getAddresses, addAddress, type Address } from '../lib/addresses'
 import { searchAddress } from '../lib/daumPostcode'
 import type { LiveCoupon } from '../lib/types'
 import { couponDiscountAmount, couponEligible, couponLabel, couponSoldOut } from '../lib/coupons'
+import {
+  getMyPointsBalance, getMyValidCoupons, couponDiscountFor, redeemPoints, releasePoints,
+  redeemSignupCoupon, releaseSignupCoupon, type ValidCoupon,
+} from '../lib/rewards'
 
 interface OrderItem {
   product_id: string
@@ -91,6 +95,12 @@ export default function AppOrder() {
   const [doneOrder, setDoneOrder] = useState<{ orderName: string; amount: number } | null>(null)
   const [liveCoupon, setLiveCoupon] = useState<LiveCoupon | null>(null)
 
+  // 적립금·가입 쿠폰(첫구매 등 공용 혜택) — 라이브 쿠폰과 별개, 동시 사용 가능
+  const [pointsBalance, setPointsBalance] = useState(0)
+  const [usePoints, setUsePoints] = useState(false)
+  const [myCoupons, setMyCoupons] = useState<ValidCoupon[]>([])
+  const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null)
+
   const storeId = import.meta.env.VITE_PORTONE_STORE_ID as string | undefined
   const channelKey = import.meta.env.VITE_PORTONE_CHANNEL_KEY as string | undefined
   const paymentReady = Boolean(storeId && channelKey)
@@ -145,12 +155,16 @@ export default function AppOrder() {
         return
       }
       const meta = session.user.user_metadata as { name?: string; phone?: string } | undefined
-      const [addrs, reval] = await Promise.all([getAddresses(), revalidateItems(initialItems)])
+      const [addrs, reval, balance, coupons] = await Promise.all([
+        getAddresses(), revalidateItems(initialItems), getMyPointsBalance(), getMyValidCoupons(),
+      ])
       if (!active) return
       setItems(reval.items)
       setItemNotices(reval.notices)
       setBlockedNames(reval.blocked)
       setSavedAddresses(addrs)
+      setPointsBalance(balance)
+      setMyCoupons(coupons)
       const def = addrs.find((a) => a.is_default) ?? addrs[0]
       if (def) {
         setName(def.recipient_name)
@@ -237,10 +251,15 @@ export default function AppOrder() {
   }
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
-  const deliveryFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
-  // 결제 직전 실제 적용 여부는 handlePay 에서 서버(redeem_live_coupon)로 원자적으로 확정됨 — 이건 화면 미리보기용
+  const selectedCoupon = selectedCouponId ? myCoupons.find((c) => c.id === selectedCouponId) ?? null : null
+  const isFreeShipCoupon = selectedCoupon?.discountType === 'free_shipping'
+  const baseDeliveryFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
+  const deliveryFee = isFreeShipCoupon ? 0 : baseDeliveryFee
+  // 결제 직전 실제 적용 여부는 handlePay 에서 서버(redeem_live_coupon 등)로 원자적으로 확정됨 — 이건 화면 미리보기용
   const couponPreview = liveCoupon && couponEligible(liveCoupon, subtotal) ? couponDiscountAmount(liveCoupon, subtotal) : 0
-  const total = subtotal + deliveryFee - couponPreview
+  const signupCouponPreview = selectedCoupon ? couponDiscountFor(selectedCoupon, subtotal) : 0
+  const pointsPreview = usePoints ? Math.min(pointsBalance, subtotal - couponPreview - signupCouponPreview) : 0
+  const total = subtotal + deliveryFee - couponPreview - signupCouponPreview - pointsPreview
 
   const fullAddress = [address, addressDetail].map((s) => s.trim()).filter(Boolean).join(' ')
 
@@ -303,9 +322,33 @@ export default function AppOrder() {
         }
       }
     }
-    const finalTotal = subtotal + deliveryFee - couponDiscount
-
     const paymentId = `order_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
+
+    // 적립금·가입 쿠폰(라이브 쿠폰과 별개) 결제 직전 확정 — 실패하면 결제 진행 안 하고 안내 후 재시도 유도
+    let redeemedPoints = 0
+    let redeemedCouponId: string | null = null
+    if (usePoints && pointsPreview > 0) {
+      try {
+        await redeemPoints(pointsPreview, paymentId)
+        redeemedPoints = pointsPreview
+      } catch {
+        setStatus('idle')
+        setMessage('적립금 사용에 실패했어요(잔액이 바뀌었을 수 있어요). 다시 시도해 주세요.')
+        return
+      }
+    }
+    if (selectedCoupon) {
+      const ok = await redeemSignupCoupon(selectedCoupon.id, paymentId)
+      if (!ok) {
+        if (redeemedPoints > 0) await releasePoints(paymentId)
+        setStatus('idle')
+        setMessage('선택한 쿠폰을 사용할 수 없어요(이미 사용됐거나 만료됐을 수 있어요). 다시 시도해 주세요.')
+        return
+      }
+      redeemedCouponId = selectedCoupon.id
+    }
+    const signupDiscount = redeemedPoints + (redeemedCouponId ? signupCouponPreview : 0)
+    const finalTotal = subtotal + deliveryFee - couponDiscount - signupDiscount
     const orderName = items.length > 1 ? `${items[0].name} 외 ${items.length - 1}건` : items[0].name
 
     const memo = deliveryMemo.trim() || null
@@ -359,6 +402,40 @@ export default function AppOrder() {
         delivery_memo: memo,
       })
     }
+    if (redeemedPoints > 0) {
+      rows.push({
+        payment_id: paymentId,
+        order_name: '적립금 사용',
+        product_id: null as unknown as string,
+        partner_id: null,
+        live_id: liveId,
+        quantity: 1,
+        amount: -redeemedPoints,
+        buyer_name: name.trim(),
+        buyer_phone: phone.trim(),
+        buyer_email: user?.email ?? null,
+        status: 'pending',
+        user_id: user?.id ?? null,
+        delivery_memo: memo,
+      })
+    }
+    if (redeemedCouponId && signupCouponPreview > 0) {
+      rows.push({
+        payment_id: paymentId,
+        order_name: `쿠폰 할인 (${selectedCoupon?.label ?? ''})`,
+        product_id: null as unknown as string,
+        partner_id: null,
+        live_id: liveId,
+        quantity: 1,
+        amount: -signupCouponPreview,
+        buyer_name: name.trim(),
+        buyer_phone: phone.trim(),
+        buyer_email: user?.email ?? null,
+        status: 'pending',
+        user_id: user?.id ?? null,
+        delivery_memo: memo,
+      })
+    }
 
     let { error: insErr } = await supabase.from('orders').insert(rows)
     if (insErr && /delivery_memo/i.test(insErr.message)) {
@@ -388,6 +465,8 @@ export default function AppOrder() {
       await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
       // 결제창이 그 자리에서 닫힌 동기 실패 경로에 한해 쿠폰 반환(모바일 리다이렉트 흐름은 상태 유실로 반환 안 됨 — 알려진 한계)
       if (redeemedCoupon && liveId) await supabase.rpc('release_live_coupon', { p_live_id: liveId })
+      if (redeemedPoints > 0) await releasePoints(paymentId)
+      if (redeemedCouponId) await releaseSignupCoupon(paymentId)
       setStatus('error')
       setMessage(res.message || '결제가 취소되었거나 실패했습니다.')
       return
@@ -483,6 +562,15 @@ export default function AppOrder() {
         onDeliveryMemo={setDeliveryMemo}
         items={items}
         couponPreview={couponPreview}
+        myCoupons={myCoupons}
+        selectedCouponId={selectedCouponId}
+        onSelectCoupon={setSelectedCouponId}
+        signupCouponPreview={signupCouponPreview}
+        pointsBalance={pointsBalance}
+        usePoints={usePoints}
+        onUsePoints={setUsePoints}
+        pointsPreview={pointsPreview}
+        subtotalForCoupon={subtotal}
         deliveryFee={deliveryFee}
         total={total}
         message={message}
@@ -616,6 +704,36 @@ export default function AppOrder() {
         </div>
       </div>
 
+      {/* 쿠폰·적립금 */}
+      {(myCoupons.length > 0 || pointsBalance > 0) && (
+        <div className="bg-paper mt-2 px-5 py-5 space-y-3">
+          <h2 className="text-[15px] font-bold text-ink">쿠폰·적립금</h2>
+          {myCoupons.length > 0 && (
+            <div>
+              <label className="text-[12px] text-ink-soft block mb-1.5">쿠폰</label>
+              <select
+                value={selectedCouponId ?? ''}
+                onChange={(e) => setSelectedCouponId(e.target.value || null)}
+                className={field}
+              >
+                <option value="">쿠폰 선택 안 함</option>
+                {myCoupons.map((c) => (
+                  <option key={c.id} value={c.id} disabled={subtotal < c.minOrderAmount}>
+                    {c.label}{subtotal < c.minOrderAmount ? ` (${c.minOrderAmount.toLocaleString('ko-KR')}원 이상 구매 시)` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {pointsBalance > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
+              <span className="text-[13px] text-ink-soft">보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용</span>
+            </label>
+          )}
+        </div>
+      )}
+
       {/* 결제 금액 */}
       <div className="bg-paper mt-2 px-5 py-5">
         <h2 className="text-[15px] font-bold text-ink mb-3">결제 금액</h2>
@@ -628,6 +746,18 @@ export default function AppOrder() {
             <div className="flex justify-between">
               <span className="text-signal-blue">라이브 쿠폰 할인</span>
               <span className="text-signal-blue font-bold tabular-nums">-{couponPreview.toLocaleString('ko-KR')}원</span>
+            </div>
+          )}
+          {signupCouponPreview > 0 && (
+            <div className="flex justify-between">
+              <span className="text-signal-blue">쿠폰 할인</span>
+              <span className="text-signal-blue font-bold tabular-nums">-{signupCouponPreview.toLocaleString('ko-KR')}원</span>
+            </div>
+          )}
+          {pointsPreview > 0 && (
+            <div className="flex justify-between">
+              <span className="text-signal-blue">적립금 사용</span>
+              <span className="text-signal-blue font-bold tabular-nums">-{pointsPreview.toLocaleString('ko-KR')}원</span>
             </div>
           )}
           <div className="flex justify-between">
