@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
 import DesktopHeader from '../layout/DesktopHeader'
@@ -48,7 +48,20 @@ export default function DesktopCategoryDetail({
 }: Props) {
   const navigate = useNavigate()
   const [showBrand, setShowBrand] = useState(false)
+  const brandBoxRef = useRef<HTMLDivElement>(null)
   const selectedBrandName = brandId ? brands.find((b) => b.id === brandId)?.name ?? '브랜드' : '브랜드 전체'
+
+  // 드롭다운 바깥(다른 정렬·탭 버튼 포함)을 클릭하면 자동으로 접힌다.
+  useEffect(() => {
+    if (!showBrand) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (brandBoxRef.current && !brandBoxRef.current.contains(e.target as Node)) {
+        setShowBrand(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showBrand])
 
   return (
     <div className="bg-paper min-h-screen">
@@ -79,7 +92,7 @@ export default function DesktopCategoryDetail({
           <div className="flex items-center gap-4 shrink-0">
             <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
             {brands.length > 0 && (
-              <div className="relative">
+              <div className="relative" ref={brandBoxRef}>
                 <button
                   onClick={() => setShowBrand(!showBrand)}
                   className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"

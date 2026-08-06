@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
@@ -35,6 +35,20 @@ export default function AppCategoryDetail() {
   const [showSort, setShowSort] = useState(false)
   const [showBrand, setShowBrand] = useState(false)
   const [brandId, setBrandId] = useState<string | null>(null)
+  const sortBoxRef = useRef<HTMLDivElement>(null)
+  const brandBoxRef = useRef<HTMLDivElement>(null)
+
+  // 드롭다운 바깥(다른 버튼 포함)을 클릭하면 자동으로 접힌다.
+  useEffect(() => {
+    if (!showSort && !showBrand) return
+    const onClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (showSort && sortBoxRef.current && !sortBoxRef.current.contains(target)) setShowSort(false)
+      if (showBrand && brandBoxRef.current && !brandBoxRef.current.contains(target)) setShowBrand(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showSort, showBrand])
 
   // 탭: 전체 + 판매중 상품이 있는 실제 category 값 (0개 카테고리는 숨김)
   const { categories } = useShopCategories()
@@ -126,7 +140,7 @@ export default function AppCategoryDetail() {
         <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
         <div className="flex items-center gap-3">
           {brands.length > 0 && (
-            <div className="relative">
+            <div className="relative" ref={brandBoxRef}>
               <button
                 onClick={() => setShowBrand(!showBrand)}
                 className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
@@ -169,7 +183,7 @@ export default function AppCategoryDetail() {
               )}
             </div>
           )}
-          <div className="relative">
+          <div className="relative" ref={sortBoxRef}>
           <button
             onClick={() => setShowSort(!showSort)}
             className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
