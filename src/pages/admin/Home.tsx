@@ -5,7 +5,9 @@ import Button from '../../components/common/Button'
 import HomeBody from '../../components/home/HomeBody'
 import { useShopCategories } from '../../hooks/useShopCategories'
 import { useHomeProductSections } from '../../hooks/useHomeProductSections'
+import { useSaleProducts } from '../../hooks/useSaleProducts'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
+import { SEASONS, autoSeasonByMonth } from '../../lib/season'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
 
@@ -43,6 +45,11 @@ export default function AdminHome() {
   const [savingMarquee, setSavingMarquee] = useState(false)
   const [marqueeSaved, setMarqueeSaved] = useState(false)
 
+  // 지금 시즌 (계절 추천 기준 — 비워두면 달력 월 기준 자동)
+  const [activeSeasonSetting, setActiveSeasonSetting] = useState<string>('')
+  const [savingSeason, setSavingSeason] = useState(false)
+  const [seasonSaved, setSeasonSaved] = useState(false)
+
   // 히어로 배너 (액션 즉시 저장)
   const [banners, setBanners] = useState<BannerRow[]>([])
   const [products, setProducts] = useState<ProductOption[]>([])
@@ -61,8 +68,13 @@ export default function AdminHome() {
   // 실제 구매자 홈과 완전히 같은 로직(브랜드당 최대 2개, 신상품·추천 분리)으로 미리보기를 채운다.
   // 전엔 최신 10개를 두 레일에 그대로 중복 표시해서 실제로는 스크롤이 안 되는 상황에서도
   // 미리보기만 스크롤되는 것처럼 보였다 — 실제 화면과 다른 걸 보여주는 미리보기였음.
-  const { products: previewProducts, recommended: previewRecommended, loading: prodLoading } =
-    useHomeProductSections()
+  const {
+    products: previewProducts,
+    recommended: previewRecommended,
+    seasonLabel: previewSeasonLabel,
+    loading: prodLoading,
+  } = useHomeProductSections()
+  const { products: previewSaleProducts, loading: saleLoading } = useSaleProducts()
 
   const load = async () => {
     setLoading(true)
@@ -70,7 +82,7 @@ export default function AdminHome() {
       await Promise.all([
         supabase.from('hero_banners').select(BANNER_SELECT).order('sort_order', { ascending: true }),
         supabase.from('products').select('id,name,thumbnail_url').eq('status', 'on_sale').order('name', { ascending: true }),
-        supabase.from('home_settings').select('marquee_items').eq('id', 1).maybeSingle(),
+        supabase.from('home_settings').select('marquee_items, active_season').eq('id', 1).maybeSingle(),
         supabase.from('category_thumbnails').select('category,image_url,product_id'),
       ])
     setBanners((bannerData ?? []) as unknown as BannerRow[])
@@ -78,6 +90,7 @@ export default function AdminHome() {
     if (settingsData?.marquee_items && settingsData.marquee_items.length > 0) {
       setMarqueeItems(settingsData.marquee_items)
     }
+    setActiveSeasonSetting(settingsData?.active_season ?? '')
     const catMap: Record<string, string> = {}
     for (const row of (categoryData ?? []) as CategoryThumbRow[]) {
       if (row.image_url) catMap[row.category] = row.image_url
@@ -129,6 +142,21 @@ export default function AdminHome() {
       setMarqueeSaved(true)
     }
     setSavingMarquee(false)
+  }
+
+  // --- 지금 시즌 ---
+  const saveSeason = async (value: string) => {
+    setActiveSeasonSetting(value)
+    setSavingSeason(true)
+    setSeasonSaved(false)
+    setError('')
+    const { error: updErr } = await supabase
+      .from('home_settings')
+      .update({ active_season: value || null, updated_at: new Date().toISOString() })
+      .eq('id', 1)
+    setSavingSeason(false)
+    if (updErr) setError(`시즌 저장 실패: ${updErr.message}`)
+    else setSeasonSaved(true)
   }
 
   // --- 히어로 배너 ---
@@ -208,9 +236,9 @@ export default function AdminHome() {
       id: b.id,
       sort_order: b.sort_order,
       product: b.products,
-      custom: b.products
-        ? null
-        : { image_url: b.image_url, headline: b.headline, subcopy: b.subcopy, link_url: b.link_url },
+      // 상품 연결 배너도 headline/subcopy가 있으면 그대로 노출(useHeroBanners.ts와 동일 로직으로 맞춤 —
+      // 예전엔 여기만 따로 null 처리해서 미리보기가 실제 화면(마케팅 카피 노출)과 다르게 나왔었음, 2026-08-06)
+      custom: { image_url: b.image_url, headline: b.headline, subcopy: b.subcopy, link_url: b.link_url },
     }))
 
   const previewCategoryThumbnails: CategoryThumbnail[] = categories.map((c, i) => ({
@@ -303,6 +331,33 @@ export default function AdminHome() {
           <button onClick={addMarqueeLine} className="mt-3 text-[13px] text-ink font-medium underline">
             + 문구 추가
           </button>
+        </section>
+
+        {/* 1.5) 지금 시즌 — "지금 확인할 상품"에서 계절 태그가 붙은 상품을 우선 추천하는 기준 */}
+        <section className="bg-paper rounded-md border border-rule p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[15px] font-bold text-ink">지금 시즌</h2>
+            {savingSeason ? (
+              <span className="text-[12px] text-ink-faint">저장 중…</span>
+            ) : seasonSaved ? (
+              <span className="text-[12px] text-ink-faint">저장됨 ✓</span>
+            ) : null}
+          </div>
+          <select
+            value={activeSeasonSetting}
+            onChange={(e) => void saveSeason(e.target.value)}
+            className="w-full text-[14px] border border-rule rounded-md px-3 py-2 bg-paper"
+          >
+            <option value="">자동 (달력 기준 — 지금은 {autoSeasonByMonth(new Date().getMonth() + 1)})</option>
+            {SEASONS.map((s) => (
+              <option key={s} value={s}>{s} 고정</option>
+            ))}
+          </select>
+          <p className="text-[12px] text-ink-faint mt-2">
+            상품별 계절 태그는 「전체 상품 관리」에서 지정합니다. 이 태그와 여기서 고른 시즌이 겹치는 상품이
+            홈 "지금 확인할 상품"에 우선 노출됩니다. 추석·설처럼 달력으로 자동 계산할 수 없는 명절은 그 기간에만
+            수동으로 선택해뒀다가 지나면 다시 "자동"으로 돌려주세요.
+          </p>
         </section>
 
         {/* 2) 히어로 배너 */}
@@ -496,8 +551,11 @@ export default function AdminHome() {
                   categories={categories}
                   categoryThumbnails={previewCategoryThumbnails}
                   recommended={previewRecommended}
+                  seasonLabel={previewSeasonLabel}
                   products={previewProducts}
                   prodLoading={prodLoading}
+                  saleProducts={previewSaleProducts}
+                  saleLoading={saleLoading}
                   onProductClick={() => {}}
                   onCategoryClick={() => {}}
                 />

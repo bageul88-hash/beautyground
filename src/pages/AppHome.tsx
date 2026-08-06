@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/layout/BottomNav'
 import AppFooter from '../components/layout/AppFooter'
-import KakaoPromoBar from '../components/home/KakaoPromoBar'
+import PromoBar from '../components/home/PromoBar'
 import HomeBody from '../components/home/HomeBody'
 import DesktopHome from '../components/home/DesktopHome'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
@@ -10,6 +10,7 @@ import { useHomeProductSections } from '../hooks/useHomeProductSections'
 import { useShopCategories } from '../hooks/useShopCategories'
 import { useHeroBanners } from '../hooks/useHeroBanners'
 import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
+import { useSaleProducts } from '../hooks/useSaleProducts'
 
 // ── 방향 계약 (DESIGN.md「생방송 슬레이트」) ──
 // THESIS: 이 홈은 매장의 방송 편성표다. 카테고리가 늘 배송하는 "배너 캐러셀 + 상품 그리드"를
@@ -23,10 +24,11 @@ import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
 //   방송 자막(lower third) 구조를 택했다 — 이미지 위에 글자를 얹지 않고 아래 흰 면에 얹는다.
 export default function AppHome() {
   const navigate = useNavigate()
-  const { products, recommended, loading: prodLoading } = useHomeProductSections()
+  const { products, recommended, seasonLabel, loading: prodLoading } = useHomeProductSections()
   const { categories } = useShopCategories()
   const { banners } = useHeroBanners()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts()
   const { mode, isDesktop, toggle } = useViewMode()
 
   const goProduct = (id: string) => navigate(`/app/product/${id}`)
@@ -42,8 +44,11 @@ export default function AppHome() {
           categories={categories}
           categoryThumbnails={categoryThumbnails}
           recommended={recommended}
+          seasonLabel={seasonLabel}
           products={products}
           prodLoading={prodLoading}
+          saleProducts={saleProducts}
+          saleLoading={saleLoading}
           onProductClick={goProduct}
           onCategoryClick={goCategory}
         />
@@ -58,16 +63,19 @@ export default function AppHome() {
     <div className="min-h-screen bg-quiet md:py-6">
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border-x md:border-rule pb-24">
-        {/* 상단 카카오톡 채널 추가 배너 (직각·좌측 스크롤) */}
-        <KakaoPromoBar />
+        {/* 상단 프로모션 배너 — 카카오채널·회원가입 혜택 로테이션 */}
+        <PromoBar />
         <HomeBody
           marqueeItems={[]}
           banners={banners}
           categories={categories}
           categoryThumbnails={categoryThumbnails}
           recommended={recommended}
+          seasonLabel={seasonLabel}
           products={products}
           prodLoading={prodLoading}
+          saleProducts={saleProducts}
+          saleLoading={saleLoading}
           onProductClick={(id) => navigate(`/app/product/${id}`)}
           onCategoryClick={(cat) =>
             navigate(cat ? `/app/category/all?cat=${encodeURIComponent(cat)}` : '/app/category/all')

@@ -9,6 +9,9 @@ import { useStreamStatus } from '../../hooks/useStreamStatus'
 import { useLiveHearts } from '../../hooks/useLiveHearts'
 import { IconHeartFilled, IconSend2, IconUserCircle, IconBrandFacebook, IconBrandX, IconLink, IconBellPlus, IconBellFilled } from '@tabler/icons-react'
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
+import DesktopLiveWatch from '../../components/live/DesktopLiveWatch'
+import ViewModeToggle from '../../components/layout/ViewModeToggle'
+import { useViewMode } from '../../lib/viewMode'
 
 const statusLabel: Record<Live['status'], string> = {
   live: 'LIVE',
@@ -50,6 +53,7 @@ const nicknameColor = (nickname: string): string => {
 export default function ShopLiveWatch() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { mode, isDesktop, toggle } = useViewMode()
 
   const [live, setLive] = useState<Live | null>(null)
   const [hostName, setHostName] = useState<string | null>(null)
@@ -315,8 +319,45 @@ export default function ShopLiveWatch() {
 
   const recentMessages = messages.slice(-4)
 
+  if (isDesktop && live) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopLiveWatch
+          live={live}
+          hostName={hostName}
+          topBadge={topBadge}
+          onAir={onAir}
+          waitingForStream={waitingForStream}
+          streamSrc={streamSrc}
+          youtubeEmbedSrc={youtubeEmbedSrc(live.stream_url)}
+          liveCoupon={liveCoupon}
+          orderedProducts={orderedProducts}
+          highlightId={highlightId}
+          onBuy={openBuy}
+          hearts={hearts}
+          onHeart={tapHeart}
+          messages={messages}
+          chatLoading={chatLoading}
+          isLoggedIn={isLoggedIn}
+          chatInput={chatInput}
+          setChatInput={setChatInput}
+          sendChatMessage={sendChatMessage}
+          mentionUser={mentionUser}
+          onBack={() => navigate(-1)}
+          buyProduct={buyProduct}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          closeBuy={closeBuy}
+          goToOrder={goToOrder}
+        />
+      </>
+    )
+  }
+
   return (
     <div className="fixed inset-0 z-0 bg-black flex justify-center">
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="relative w-full h-full max-w-[480px] overflow-hidden">
         {loading ? (
           <div className="h-full flex items-center justify-center text-white/70 text-[14px]">불러오는 중…</div>

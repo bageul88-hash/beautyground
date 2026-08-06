@@ -7,10 +7,11 @@ import DesktopMyPage from '../components/mypage/DesktopMyPage'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
+import { getMyPointsBalance, getMyValidCoupons } from '../lib/rewards'
 import { IconUser } from '../components/common/Icon'
 import { useIsAdmin } from '../lib/useIsAdmin'
 
-// 실제 로그인 사용자 프로필 (포인트/쿠폰은 아직 적립·발급 시스템이 없어 0 — 가짜 숫자 금지)
+// 실제 로그인 사용자 프로필 (포인트/쿠폰은 supabase/signup_bonus.sql 적용 후 실제 지급값)
 interface RealUser {
   name: string
   email: string
@@ -65,7 +66,7 @@ export default function AppMyPage() {
     const name = meta?.name || authUser.email?.split('@')[0] || '고객'
 
     // 실제 주문 건수(같은 결제 1건 = payment_id 1개, 카트 다건이어도 중복집계 안 되게 dedupe)
-    const [{ data: orderRows }, { count: wishlistCount }, ms, tiersLoaded] = await Promise.all([
+    const [{ data: orderRows }, { count: wishlistCount }, ms, tiersLoaded, points, coupons] = await Promise.all([
       supabase
         .from('orders')
         .select('payment_id')
@@ -77,12 +78,14 @@ export default function AppMyPage() {
         .eq('user_id', authUser.id),
       getMyMembership(),
       getTiers(),
+      getMyPointsBalance(),
+      getMyValidCoupons(),
     ])
     const orderCount = new Set((orderRows ?? []).map((r) => (r as { payment_id: string | null }).payment_id)).size
 
     setMembership(ms)
     setTiers(tiersLoaded)
-    setUser({ name, email: authUser.email ?? '', points: 0, coupons: 0, orders: orderCount, wishlist: wishlistCount ?? 0 })
+    setUser({ name, email: authUser.email ?? '', points, coupons: coupons.length, orders: orderCount, wishlist: wishlistCount ?? 0 })
   }
 
   useEffect(() => {

@@ -114,7 +114,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const expectedAmount = authoritativeSubtotal + shippingFee - couponDiscount
+  // 4) 적립금 사용액 = 결제 직전 redeem_points RPC로 이미 원자 확정된 값을 그대로 신뢰(라이브쿠폰과 동일 관례 —
+  //    클라이언트가 만든 order 행이 아니라 point_transactions 원장 자체를 조회).
+  const { data: pointRows } = await supabase
+    .from('point_transactions')
+    .select('amount')
+    .eq('payment_id', paymentId)
+    .lt('amount', 0)
+  const pointsDiscount = (pointRows ?? []).reduce((s, r) => s + Math.abs((r as { amount: number }).amount), 0)
+
+  // 5) 가입 쿠폰(첫구매 등) 사용분 = user_coupons에서 이 결제로 확정된 쿠폰을 조회해 서버가 직접 재계산(클라이언트 금액 불신).
+  const { data: usedCoupon } = await supabase
+    .from('user_coupons')
+    .select('id, coupon_templates(discount_type, discount_value, max_discount, min_order_amount)')
+    .eq('payment_id', paymentId)
+    .not('used_at', 'is', null)
+    .maybeSingle()
+  type CouponTemplate = { discount_type: string; discount_value: number; max_discount: number | null; min_order_amount: number }
+  const ct = (usedCoupon as { coupon_templates?: CouponTemplate | null } | null)?.coupon_templates ?? null
+  let signupCouponDiscount = 0
+  let signupFreeShip = false
+  if (ct && authoritativeSubtotal >= ct.min_order_amount) {
+    if (ct.discount_type === 'free_shipping') {
+      signupFreeShip = true
+    } else if (ct.discount_type === 'percent') {
+      const raw = Math.round((authoritativeSubtotal * ct.discount_value) / 100)
+      signupCouponDiscount = Math.min(raw, ct.max_discount ?? raw, authoritativeSubtotal)
+    } else {
+      signupCouponDiscount = Math.min(ct.discount_value, authoritativeSubtotal)
+    }
+  }
+  const finalShippingFee = signupFreeShip ? 0 : shippingFee
+
+  const expectedAmount = authoritativeSubtotal + finalShippingFee - couponDiscount - pointsDiscount - signupCouponDiscount
+
+  // 결제 실패/금액불일치 시 적립금·쿠폰 사용을 되돌리는 헬퍼(사용자가 손해보지 않게)
+  const releaseRewards = async () => {
+    if (pointsDiscount > 0) await supabase.from('point_transactions').delete().eq('payment_id', paymentId).lt('amount', 0)
+    if (usedCoupon) await supabase.from('user_coupons').update({ used_at: null, payment_id: null }).eq('payment_id', paymentId)
+  }
 
   // 2) 포트원 실제 결제 조회
   let payment: {
@@ -148,11 +186,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 3) 검증: 결제완료 + 금액 일치 (위변조 방지, 여러 상품행의 합계와 비교)
   if (paidStatus !== 'PAID') {
     await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
+    await releaseRewards()
     res.status(200).json({ ok: false, reason: `결제 상태가 PAID 가 아닙니다. (${paidStatus ?? '알수없음'})` })
     return
   }
   if (paidAmount !== expectedAmount) {
     await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
+    await releaseRewards()
     res
       .status(200)
       .json({ ok: false, reason: `결제 금액 불일치 (기대 ${expectedAmount}, 실제 ${paidAmount})` })

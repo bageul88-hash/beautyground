@@ -74,11 +74,25 @@
       animation: none;
     }
   }
+  /* 상단 프로모션 배너(PromoBar) 문구 전환용 — 깜빡임 없이 부드럽게 */
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in {
+      animation: none;
+    }
+  }
 }
 
 @keyframes marquee-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes nolling {

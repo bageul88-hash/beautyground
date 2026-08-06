@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import ReviewSummary from './ReviewSummary'
+import ProductQnA from './ProductQnA'
 import CategoryTabBar from './CategoryTabBar'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../common/Icon'
 import { SHIPPING_NOTICE } from '../../constants'
@@ -144,6 +145,8 @@ export default function DesktopProductDetail({
               </div>
             </div>
           )}
+
+          {id && <ProductQnA productId={id} className="border-t border-rule" />}
         </div>
 
         {/* 구매 패널 — 스크롤해도 고정 */}

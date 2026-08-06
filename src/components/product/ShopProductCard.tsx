@@ -2,10 +2,12 @@ import type { ShopProduct } from '../../hooks/useShopProducts'
 import { comma } from '../../lib/format'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 
-// 소비자 상품 카드 — 정보 3개만: 썸네일 / 상품명 1줄 / 가격 1줄
+// 소비자 상품 카드 — 썸네일 / 상품명 2줄 / 리뷰(있으면) / 가격.
 // 「생방송 슬레이트」 월드: 면은 직각, 그림자 없음, 가격은 폭 고정(tabular) 숫자.
 // 그리드에서는 원색을 쓰지 않는다 — 빨강은 온에어·마감 같은 신호에만 남겨두고,
 // 카드에서 가장 화려한 요소는 상품 사진이어야 한다.
+// 이름을 1줄로 자르면 대부분 "..."로 뭉개져 무슨 상품인지 안 읽혔다(2026-08-06) — 2줄로 확장.
+// 리뷰(별점·건수)는 실제 2,600건+ 데이터가 있는데 홈 그리드엔 전혀 안 보이던 걸 노출.
 export default function ShopProductCard({ product }: { product: ShopProduct }) {
   const sell = product.sale_price ?? product.price
   const hasSale = product.sale_price != null && product.sale_price < product.price
@@ -33,8 +35,17 @@ export default function ShopProductCard({ product }: { product: ShopProduct }) {
         )}
       </div>
 
-      {/* 2) 상품명 1줄 */}
-      <p className="text-[14px] text-ink mt-2 line-clamp-1">{product.name}</p>
+      {/* 2) 상품명 2줄 */}
+      <p className="text-[14px] text-ink mt-2 line-clamp-2 leading-snug min-h-[2.6em]">{product.name}</p>
+
+      {/* 리뷰 — 데이터 있는 상품만 (없으면 자리 안 차지) */}
+      {product.reviewCount > 0 && (
+        <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-soft">
+          <span className="text-signal-yellow" aria-hidden="true">★</span>
+          <span className="tabular-nums">{product.reviewAvg?.toFixed(1) ?? '-'}</span>
+          <span className="text-ink-faint">({product.reviewCount.toLocaleString('ko-KR')})</span>
+        </p>
+      )}
 
       {/* 3) 가격 1줄 — 할인율·판매가 모두 굵은 잉크, 원가는 취소선 */}
       <div className="mt-1 flex items-baseline gap-1.5">

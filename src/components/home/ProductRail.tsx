@@ -112,7 +112,14 @@ export default function ProductRail({
                       </div>
                     )}
                   </div>
-                  <p className="text-[14px] text-ink mt-2 line-clamp-1">{product.name}</p>
+                  <p className="text-[14px] text-ink mt-2 line-clamp-2 leading-snug min-h-[2.6em]">{product.name}</p>
+                  {product.reviewCount > 0 && (
+                    <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-soft">
+                      <span className="text-signal-yellow" aria-hidden="true">★</span>
+                      <span className="tabular-nums">{product.reviewAvg?.toFixed(1) ?? '-'}</span>
+                      <span className="text-ink-faint">({product.reviewCount.toLocaleString('ko-KR')})</span>
+                    </p>
+                  )}
                   <div className="mt-1 flex items-baseline gap-1.5">
                     {hasSale && <span className="text-[15px] font-bold tabular-nums text-ink">{rate}%</span>}
                     <span className="text-[15px] font-bold tabular-nums text-ink">{comma(sell)}</span>

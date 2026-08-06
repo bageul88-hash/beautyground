@@ -1,12 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { IconHeart, IconCart } from '../common/Icon'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
+import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import type { ShopProduct, ShopSort } from '../../hooks/useShopProducts'
-
-const NAV_LINKS = [
-  { href: '/app/category/all', label: '카테고리' },
-  { href: '/app/mypage', label: '마이페이지' },
-]
+import type { ShopBrand } from '../../hooks/useShopBrands'
 
 const SORT_OPTIONS: { label: string; value: ShopSort }[] = [
   { label: '최신순', value: 'latest' },
@@ -19,6 +17,9 @@ interface Props {
   tabs: (string | null)[]
   selected: string | null
   onSelect: (t: string | null) => void
+  brands: ShopBrand[]
+  brandId: string | null
+  onSelectBrand: (id: string | null) => void
   sortIdx: number
   onSort: (i: number) => void
   products: ShopProduct[]
@@ -34,6 +35,9 @@ export default function DesktopCategoryDetail({
   tabs,
   selected,
   onSelect,
+  brands,
+  brandId,
+  onSelectBrand,
   sortIdx,
   onSort,
   products,
@@ -43,31 +47,25 @@ export default function DesktopCategoryDetail({
   onLoadMore,
 }: Props) {
   const navigate = useNavigate()
+  const [showBrand, setShowBrand] = useState(false)
+  const brandBoxRef = useRef<HTMLDivElement>(null)
+  const selectedBrandName = brandId ? brands.find((b) => b.id === brandId)?.name ?? '브랜드' : '브랜드 전체'
+
+  // 드롭다운 바깥(다른 정렬·탭 버튼 포함)을 클릭하면 자동으로 접힌다.
+  useEffect(() => {
+    if (!showBrand) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (brandBoxRef.current && !brandBoxRef.current.contains(e.target as Node)) {
+        setShowBrand(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showBrand])
 
   return (
     <div className="bg-paper min-h-screen">
-      <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
-            뷰티그라운드
-          </Link>
-          <nav className="hidden md:flex items-center gap-8" aria-label="주요 메뉴">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} to={href} className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link to="/app/wishlist" aria-label="찜" className="text-ink">
-              <IconHeart className="w-[20px] h-[20px]" />
-            </Link>
-            <Link to="/app/cart" aria-label="장바구니" className="text-ink">
-              <IconCart className="w-[20px] h-[20px]" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <DesktopHeader />
 
       <div className="max-w-[1280px] mx-auto px-6 py-8">
         <h1 className="text-[22px] font-bold text-ink">{title}</h1>
@@ -93,6 +91,50 @@ export default function DesktopCategoryDetail({
 
           <div className="flex items-center gap-4 shrink-0">
             <p className="text-[13px] text-ink-soft tabular-nums">전체 {products.length}개</p>
+            {brands.length > 0 && (
+              <div className="relative" ref={brandBoxRef}>
+                <button
+                  onClick={() => setShowBrand(!showBrand)}
+                  className="flex items-center gap-1.5 text-[13px] text-ink focus:outline-none focus-visible:shadow-ring"
+                  aria-haspopup="listbox"
+                  aria-expanded={showBrand}
+                >
+                  <span>{selectedBrandName}</span>
+                  <span aria-hidden="true">{showBrand ? '▲' : '▼'}</span>
+                </button>
+                {showBrand && (
+                  <div
+                    className="absolute right-0 top-full mt-1 bg-paper border border-rule overflow-y-auto z-20 min-w-[160px] max-h-[320px]"
+                    role="listbox"
+                    aria-label="브랜드 옵션"
+                  >
+                    <button
+                      role="option"
+                      aria-selected={brandId === null}
+                      onClick={() => { onSelectBrand(null); setShowBrand(false) }}
+                      className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                        brandId === null ? 'text-ink font-bold' : 'text-ink-soft'
+                      }`}
+                    >
+                      브랜드 전체
+                    </button>
+                    {brands.map((b) => (
+                      <button
+                        key={b.id}
+                        role="option"
+                        aria-selected={brandId === b.id}
+                        onClick={() => { onSelectBrand(b.id); setShowBrand(false) }}
+                        className={`block w-full px-4 py-2.5 text-[13px] text-left whitespace-nowrap focus:outline-none focus-visible:shadow-ring ${
+                          brandId === b.id ? 'text-ink font-bold' : 'text-ink-soft'
+                        }`}
+                      >
+                        {b.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex gap-1">
               {SORT_OPTIONS.map((opt, i) => (
                 <button
@@ -155,6 +197,8 @@ export default function DesktopCategoryDetail({
           </>
         )}
       </div>
+
+      <DesktopFooter />
     </div>
   )
 }

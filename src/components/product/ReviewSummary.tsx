@@ -30,9 +30,11 @@ export default function ReviewSummary({
 }) {
   const navigate = useNavigate()
   const [openIdx, setOpenIdx] = useState<number | null>(null)
-  if (!summary || !summary.count) return null
-  const { count, avg } = summary
-  const reviews = (summary.photos ?? []).map(toPhoto)
+  // 리뷰가 0건이어도 섹션 자체를 숨기지 않는다 — 있는 상품과 없는 상품의 폼(요약 박스)을
+  // 똑같이 보여주고 개수만 "0개"로 표시한다(전엔 여기서 return null 해서 섹션이 통째로 사라졌음).
+  const count = summary?.count ?? 0
+  const avg = summary?.avg ?? null
+  const reviews = (summary?.photos ?? []).map(toPhoto)
   const rating = avg ?? 0
   const active = openIdx != null ? reviews[openIdx] : null
 

@@ -1,15 +1,13 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { IconHeart, IconCart } from '../common/Icon'
+import { useEffect, useRef } from 'react'
+import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
+import PromoBar from './PromoBar'
+import TrustStrip from './TrustStrip'
+import CategoryRecommend from './CategoryRecommend'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
-
-const NAV_LINKS = [
-  { href: '/app/category/all', label: '카테고리' },
-  { href: '/app/mypage', label: '마이페이지' },
-]
 
 const won = (n: number) => n.toLocaleString('ko-KR')
 
@@ -18,134 +16,232 @@ interface Props {
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
+  seasonLabel: string | null
   products: ShopProduct[]
   prodLoading: boolean
+  saleProducts: ShopProduct[]
+  saleLoading: boolean
   onProductClick: (id: string) => void
   onCategoryClick: (category: string | null) => void
 }
 
 // PC 버전 — 「생방송 슬레이트」 기존 규칙 그대로(흰 배경+신호색 3개, 직각, 그림자 없음, tabular 숫자).
-// 넓은 화면을 "여러 정보가 동시에 보이는 편성판"으로 쓴다: 히어로 옆에 지금 확인할 상품을
-// 나란히 배치해, 모바일처럼 위→아래로 하나씩 내려보지 않고 한눈에 훑을 수 있게 한다.
-// 라이브 스트림은 이 화면과 당분간 분리하기로 한 결정(2026-07-29)을 그대로 따라 넣지 않는다.
+// 히어로는 대형몰(참고: 토니모리) 배너의 "가로로 여러 장 이어붙여 옆장이 살짝 보이는" 배치·크기만
+// 가져오되(실측 690:592 비율, 타일 간격 10px), 이미지·색·문구는 전부 우리 배너(hero_banners)
+// 그대로 사용한다 — 대표 브랜드 상품이 자연스럽게 롤링되는 효과(2026-08-05).
 export default function DesktopHome({
   banners,
   categories,
   categoryThumbnails,
   recommended,
+  seasonLabel,
   products,
   prodLoading,
+  saleProducts,
+  saleLoading,
   onProductClick,
   onCategoryClick,
 }: Props) {
-  const [heroIdx, setHeroIdx] = useState(0)
-  const hero = banners[heroIdx]
-  const heroCount = Math.max(banners.length, 1)
-  const sideList = (recommended.length > 0 ? recommended : products).slice(0, 5)
+  const railRef = useRef<HTMLDivElement>(null)
+  const pausedRef = useRef(false)
+  const sideList = (recommended.length > 0 ? recommended : products).slice(0, 4)
   const gridProducts = products.length > 0 ? products : recommended
 
-  const heroImage = hero?.custom?.image_url ?? hero?.product?.thumbnail_url ?? null
-  const heroTitle = hero?.custom?.headline ?? hero?.product?.name ?? '뷰티그라운드'
-  const heroSub = hero?.custom?.subcopy ?? null
+  const scrollRail = (dir: 1 | -1) => {
+    const el = railRef.current
+    if (!el) return
+    const tile = el.firstElementChild as HTMLElement | null
+    const step = tile ? tile.getBoundingClientRect().width + 10 : el.clientWidth * 0.4
+    const atEnd = dir === 1 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 4
+    if (atEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' })
+    } else {
+      el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    }
+  }
+
+  // 2초마다 자동으로 다음 배너로 — 마우스를 올리면 잠깐 멈춘다(읽거나 클릭하려는 중 방해 안 하려고).
+  useEffect(() => {
+    if (banners.length <= 1) return
+    const timer = setInterval(() => {
+      if (!pausedRef.current) scrollRail(1)
+    }, 2000)
+    return () => clearInterval(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [banners.length])
 
   return (
     <div className="bg-paper min-h-screen">
-      {/* 헤더 */}
-      <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
-            뷰티그라운드
-          </Link>
-          <nav className="hidden md:flex items-center gap-8" aria-label="주요 메뉴">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} to={href} className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link to="/app/wishlist" aria-label="찜" className="text-ink">
-              <IconHeart className="w-[20px] h-[20px]" />
-            </Link>
-            <Link to="/app/cart" aria-label="장바구니" className="text-ink">
-              <IconCart className="w-[20px] h-[20px]" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PromoBar />
+      <DesktopHeader />
 
-      {/* 히어로 + 지금 확인할 상품(나란히 배치) */}
-      <section className="max-w-[1280px] mx-auto px-6 py-8 grid grid-cols-[1.7fr_1fr] gap-8 items-stretch">
-        <button
-          onClick={() => {
-            if (banners.length > 1) setHeroIdx((i) => (i + 1) % banners.length)
-          }}
-          className="relative aspect-[16/9] bg-quiet overflow-hidden text-left"
-          aria-label="다음 배너"
-        >
-          {heroImage ? (
-            // object-contain: 브랜드 원본 배너 비율이 이 틀(16:9)과 달라도 상단 사은품 태그·프로모션
-            // 배지가 잘리지 않는다(HeroCarousel과 동일한 원칙).
-            <img src={heroImage} alt="" className="w-full h-full object-contain" />
-          ) : (
+      {/* 히어로 배너 롤링 — 690:592 비율 타일 3칸을 10px 간격으로 이어붙인다(가로 스크롤+snap,
+          좌우 화살표로도 이동 가능). 이 구획만 본문(1280px)보다 넓게(1600px) 잡아 큰 화면에서
+          좌우 여백이 지나치게 남지 않게 한다(실측: 1920px 화면 기준 여백 344px→160px로 축소). */}
+      <section className="max-w-[1600px] mx-auto px-6 pt-8 pb-16 relative">
+        {banners.length === 0 ? (
+          <div className="aspect-[690/592] max-w-[500px] bg-quiet flex items-center justify-center mx-auto">
             <ImagePlaceholder />
-          )}
-          <div className="absolute inset-x-0 bottom-0 bg-paper px-6 py-4 flex items-end justify-between border-t border-rule">
-            <div>
-              <h1 className="text-[20px] font-bold text-ink leading-tight">{heroTitle}</h1>
-              {heroSub && <p className="mt-1 text-[13px] text-ink-soft">{heroSub}</p>}
-            </div>
-            <div className="flex items-center gap-2 text-[12px] tabular-nums text-ink-faint shrink-0">
-              <span>{String(heroIdx + 1).padStart(2, '0')}</span>
-              <div className="w-14 h-px bg-rule relative">
-                <div className="absolute inset-y-0 left-0 bg-ink" style={{ width: `${((heroIdx + 1) / heroCount) * 100}%` }} />
-              </div>
-              <span>{String(heroCount).padStart(2, '0')}</span>
-            </div>
           </div>
-        </button>
-
-        <div className="border border-rule flex flex-col">
-          <p className="px-5 py-3 text-[12px] font-bold tracking-[0.08em] text-ink-faint border-b border-rule">지금 확인할 상품</p>
-          <ul className="flex-1 divide-y divide-rule overflow-y-auto">
-            {sideList.length === 0 ? (
-              <li className="px-5 py-6 text-[13px] text-ink-faint">등록된 상품이 없습니다</li>
-            ) : (
-              sideList.map((p) => {
-                const sell = p.sale_price ?? p.price
-                const hasDiscount = p.sale_price != null && p.sale_price < p.price
+        ) : (
+          <div
+            className="relative"
+            onMouseEnter={() => { pausedRef.current = true }}
+            onMouseLeave={() => { pausedRef.current = false }}
+          >
+            <div
+              ref={railRef}
+              className="flex gap-2.5 overflow-x-auto scrollbar-hide"
+              style={{ scrollSnapType: 'x mandatory' }}
+            >
+              {banners.map((b) => {
+                const image = b.custom?.image_url ?? b.product?.thumbnail_url ?? null
+                const title = b.custom?.headline ?? b.product?.name ?? '뷰티그라운드'
+                const sub = b.custom?.subcopy ?? null
                 return (
-                  <li key={p.id}>
-                    <button
-                      onClick={() => onProductClick(p.id)}
-                      className="w-full flex items-center gap-3 px-5 py-3 text-left focus:outline-none focus-visible:shadow-ring"
-                    >
-                      <div className="w-12 h-12 bg-quiet overflow-hidden shrink-0">
-                        {p.thumbnail_url ? (
-                          <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <ImagePlaceholder />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[13px] text-ink truncate">{p.name}</p>
-                        <p className="mt-0.5 text-[13px] font-bold tabular-nums text-ink">
-                          {hasDiscount && <span className="text-signal-red mr-1">할인</span>}
-                          {won(sell)}원
-                        </p>
-                      </div>
-                    </button>
-                  </li>
+                  <a
+                    key={b.id}
+                    href={b.custom?.link_url ?? (b.product ? `/app/product/${b.product.id}` : undefined)}
+                    onClick={(e) => {
+                      if (b.product && !b.custom?.link_url) {
+                        e.preventDefault()
+                        onProductClick(b.product.id)
+                      }
+                    }}
+                    className="relative shrink-0 w-[calc((100%-20px)/3)] min-w-[280px] aspect-[690/592] bg-quiet overflow-hidden"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    {image ? (
+                      <img src={image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 45%)' }}
+                      aria-hidden="true"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <p className="text-paper text-[19px] font-bold leading-snug whitespace-pre-line">{title}</p>
+                      {sub && <p className="mt-1.5 text-paper/80 text-[13px]">{sub}</p>}
+                    </div>
+                  </a>
                 )
-              })
+              })}
+            </div>
+
+            {banners.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => scrollRail(-1)}
+                  aria-label="이전 배너"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-paper text-[30px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                  style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))' }}
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollRail(1)}
+                  aria-label="다음 배너"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-paper text-[30px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                  style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.55))' }}
+                >
+                  ›
+                </button>
+              </>
             )}
-          </ul>
-        </div>
+          </div>
+        )}
+      </section>
+
+      <TrustStrip />
+
+      {/* 특가세일 — 지어낸 기획전 대신 실제 sale_price 걸린 상품을 할인율 높은 순으로 */}
+      {!saleLoading && saleProducts.length > 0 && (
+        <section className="max-w-[1280px] mx-auto px-6 py-16">
+          <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">특가세일</h2>
+          <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">
+            {saleProducts.slice(0, 4).map((p) => {
+              const rate = Math.round((1 - (p.sale_price ?? p.price) / p.price) * 100)
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onProductClick(p.id)}
+                  className="flex flex-col items-start gap-2 pt-4 text-left focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="w-full aspect-square bg-quiet overflow-hidden">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    {p.brand_name && <p className="text-[12px] text-ink-soft">{p.brand_name}</p>}
+                    <p className="mt-0.5 text-[13px] text-ink line-clamp-2 leading-snug min-h-[2.4em]">{p.name}</p>
+                    <p className="mt-1 text-[13px] font-bold tabular-nums text-ink">
+                      <span className="text-signal-red mr-1">{rate}%</span>
+                      {won(p.sale_price ?? p.price)}원
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 지금 확인할 상품 (계절/명절 태그 우선 추천) */}
+      <section className="max-w-[1280px] mx-auto px-6 py-16">
+        <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">
+          {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} 시즌` : '지금 확인할 상품'}
+        </p>
+        {sideList.length === 0 ? (
+          <p className="text-[13px] text-ink-faint">등록된 상품이 없습니다</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">
+            {sideList.map((p) => {
+              const sell = p.sale_price ?? p.price
+              const hasDiscount = p.sale_price != null && p.sale_price < p.price
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onProductClick(p.id)}
+                  className="flex flex-col items-start gap-2 pt-4 text-left focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="w-full aspect-square bg-quiet overflow-hidden">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="text-[13px] text-ink line-clamp-2 leading-snug min-h-[2.4em]">{p.name}</p>
+                    {p.reviewCount > 0 && (
+                      <p className="mt-1 flex items-center gap-1 text-[11.5px] text-ink-soft">
+                        <span className="text-signal-yellow" aria-hidden="true">★</span>
+                        <span className="tabular-nums">{p.reviewAvg?.toFixed(1) ?? '-'}</span>
+                        <span className="text-ink-faint">({p.reviewCount.toLocaleString('ko-KR')})</span>
+                      </p>
+                    )}
+                    <p className="mt-0.5 text-[13px] font-bold tabular-nums text-ink">
+                      {hasDiscount && <span className="text-signal-red mr-1">할인</span>}
+                      {won(sell)}원
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       {/* 카테고리 — 원형은 이 시스템에서 프로필/온에어 표시등에만 허용되므로 직각 타일 유지 */}
       {categories.length > 0 && (
-        <section className="max-w-[1280px] mx-auto px-6 pb-10">
+        <section className="max-w-[1280px] mx-auto px-6 py-14">
           <div className="flex gap-3 flex-wrap">
             {categories.map((category) => {
               const image = categoryThumbnails.find((t) => t.category === category)?.imageUrl ?? null
@@ -166,8 +262,11 @@ export default function DesktopHome({
         </section>
       )}
 
+      {/* 카테고리별 추천 — 탭으로 카테고리를 고르면 그 카테고리의 추천 상품을 바로 보여준다 */}
+      <CategoryRecommend categories={categories} onProductClick={onProductClick} />
+
       {/* 상품 그리드 */}
-      <section className="max-w-[1280px] mx-auto px-6 pb-16">
+      <section className="max-w-[1280px] mx-auto px-6 pt-6 pb-16">
         <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">신상품</h2>
         {prodLoading ? (
           <div className="grid grid-cols-4 gap-6">
@@ -192,7 +291,14 @@ export default function DesktopHome({
                     )}
                   </div>
                   {p.brand_name && <p className="mt-3 text-[12px] text-ink-soft">{p.brand_name}</p>}
-                  <p className="mt-0.5 text-[13.5px] text-ink line-clamp-1">{p.name}</p>
+                  <p className="mt-0.5 text-[13.5px] text-ink line-clamp-2 leading-snug min-h-[2.5em]">{p.name}</p>
+                  {p.reviewCount > 0 && (
+                    <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-soft">
+                      <span className="text-signal-yellow" aria-hidden="true">★</span>
+                      <span className="tabular-nums">{p.reviewAvg?.toFixed(1) ?? '-'}</span>
+                      <span className="text-ink-faint">({p.reviewCount.toLocaleString('ko-KR')})</span>
+                    </p>
+                  )}
                   <p className="mt-1 text-[14px] font-bold tabular-nums text-ink">
                     {hasDiscount && <span className="text-signal-red mr-1">할인</span>}
                     {won(sell)}원
@@ -203,6 +309,8 @@ export default function DesktopHome({
           </div>
         )}
       </section>
+
+      <DesktopFooter />
     </div>
   )
 }

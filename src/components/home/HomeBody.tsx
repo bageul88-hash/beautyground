@@ -1,6 +1,7 @@
 import AppHeader from '../layout/AppHeader'
 import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
+import TrustStrip from './TrustStrip'
 import CategoryShortcutGrid from './CategoryShortcutGrid'
 import ProductRail from './ProductRail'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
@@ -13,8 +14,11 @@ interface HomeBodyProps {
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
+  seasonLabel: string | null
   products: ShopProduct[]
   prodLoading: boolean
+  saleProducts: ShopProduct[]
+  saleLoading: boolean
   onProductClick: (id: string) => void
   onCategoryClick: (category: string | null) => void
 }
@@ -27,8 +31,11 @@ export default function HomeBody({
   categories,
   categoryThumbnails,
   recommended,
+  seasonLabel,
   products,
   prodLoading,
+  saleProducts,
+  saleLoading,
   onProductClick,
   onCategoryClick,
 }: HomeBodyProps) {
@@ -37,13 +44,23 @@ export default function HomeBody({
       <MarqueeBar items={marqueeItems} />
       <AppHeader />
       <HeroCarousel banners={banners} />
+      <TrustStrip />
       <CategoryShortcutGrid categories={categories} thumbnails={categoryThumbnails} onSelect={onCategoryClick} />
 
-      {/* 추천 상품·신상품은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
-          좌우 버튼 탐색이 두 섹션에서 항상 일치한다. */}
+      {/* 추천 상품·신상품·할인은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
+          좌우 버튼 탐색이 항상 일치한다. */}
+      {saleProducts.length > 0 && (
+        <ProductRail
+          id="home-sale"
+          title="특가세일"
+          products={saleProducts}
+          loading={saleLoading}
+          onProductClick={onProductClick}
+        />
+      )}
       <ProductRail
         id="home-recommended"
-        title="추천 상품"
+        title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
         products={recommended}
         onProductClick={onProductClick}
       />
