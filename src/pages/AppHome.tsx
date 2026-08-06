@@ -10,6 +10,7 @@ import { useHomeProductSections } from '../hooks/useHomeProductSections'
 import { useShopCategories } from '../hooks/useShopCategories'
 import { useHeroBanners } from '../hooks/useHeroBanners'
 import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
+import { useSaleProducts } from '../hooks/useSaleProducts'
 
 // ── 방향 계약 (DESIGN.md「생방송 슬레이트」) ──
 // THESIS: 이 홈은 매장의 방송 편성표다. 카테고리가 늘 배송하는 "배너 캐러셀 + 상품 그리드"를
@@ -27,6 +28,7 @@ export default function AppHome() {
   const { categories } = useShopCategories()
   const { banners } = useHeroBanners()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts()
   const { mode, isDesktop, toggle } = useViewMode()
 
   const goProduct = (id: string) => navigate(`/app/product/${id}`)
@@ -44,6 +46,8 @@ export default function AppHome() {
           recommended={recommended}
           products={products}
           prodLoading={prodLoading}
+          saleProducts={saleProducts}
+          saleLoading={saleLoading}
           onProductClick={goProduct}
           onCategoryClick={goCategory}
         />
@@ -68,6 +72,8 @@ export default function AppHome() {
           recommended={recommended}
           products={products}
           prodLoading={prodLoading}
+          saleProducts={saleProducts}
+          saleLoading={saleLoading}
           onProductClick={(id) => navigate(`/app/product/${id}`)}
           onCategoryClick={(cat) =>
             navigate(cat ? `/app/category/all?cat=${encodeURIComponent(cat)}` : '/app/category/all')

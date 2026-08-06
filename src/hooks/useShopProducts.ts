@@ -12,6 +12,8 @@ export interface ShopProduct {
   category: string | null
   brand_name: string | null
   status?: 'on_sale' | 'sold_out' | 'hidden'
+  reviewCount: number
+  reviewAvg: number | null
 }
 
 interface Options {
@@ -29,6 +31,7 @@ interface ProductRow {
   thumbnail_url: string | null
   category: string | null
   partner_id: string | null
+  review_summary: { count: number; avg: number | null } | null
 }
 
 // 소비자 앱: 판매중(on_sale) 상품 목록. 브랜드명은 partner_brands 뷰에서 매핑.
@@ -50,7 +53,7 @@ export function useShopProducts({ category, brand, sort = 'latest', pageSize = 2
       const runQuery = (priceCol: 'effective_price' | 'price') => {
         let q = supabase
           .from('products')
-          .select('id,name,price,sale_price,thumbnail_url,category,partner_id')
+          .select('id,name,price,sale_price,thumbnail_url,category,partner_id,review_summary')
           .eq('status', 'on_sale')
 
         if (category) q = q.eq('category', category)
@@ -96,6 +99,8 @@ export function useShopProducts({ category, brand, sort = 'latest', pageSize = 2
         thumbnail_url: r.thumbnail_url,
         category: r.category,
         brand_name: r.partner_id ? brandMap.get(r.partner_id) ?? null : null,
+        reviewCount: r.review_summary?.count ?? 0,
+        reviewAvg: r.review_summary?.avg ?? null,
       }))
 
       setHasMore(rows.length === pageSize)

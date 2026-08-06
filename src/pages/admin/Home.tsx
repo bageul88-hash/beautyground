@@ -5,6 +5,7 @@ import Button from '../../components/common/Button'
 import HomeBody from '../../components/home/HomeBody'
 import { useShopCategories } from '../../hooks/useShopCategories'
 import { useHomeProductSections } from '../../hooks/useHomeProductSections'
+import { useSaleProducts } from '../../hooks/useSaleProducts'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
@@ -63,6 +64,7 @@ export default function AdminHome() {
   // 미리보기만 스크롤되는 것처럼 보였다 — 실제 화면과 다른 걸 보여주는 미리보기였음.
   const { products: previewProducts, recommended: previewRecommended, loading: prodLoading } =
     useHomeProductSections()
+  const { products: previewSaleProducts, loading: saleLoading } = useSaleProducts()
 
   const load = async () => {
     setLoading(true)
@@ -208,9 +210,9 @@ export default function AdminHome() {
       id: b.id,
       sort_order: b.sort_order,
       product: b.products,
-      custom: b.products
-        ? null
-        : { image_url: b.image_url, headline: b.headline, subcopy: b.subcopy, link_url: b.link_url },
+      // 상품 연결 배너도 headline/subcopy가 있으면 그대로 노출(useHeroBanners.ts와 동일 로직으로 맞춤 —
+      // 예전엔 여기만 따로 null 처리해서 미리보기가 실제 화면(마케팅 카피 노출)과 다르게 나왔었음, 2026-08-06)
+      custom: { image_url: b.image_url, headline: b.headline, subcopy: b.subcopy, link_url: b.link_url },
     }))
 
   const previewCategoryThumbnails: CategoryThumbnail[] = categories.map((c, i) => ({
@@ -498,6 +500,8 @@ export default function AdminHome() {
                   recommended={previewRecommended}
                   products={previewProducts}
                   prodLoading={prodLoading}
+                  saleProducts={previewSaleProducts}
+                  saleLoading={saleLoading}
                   onProductClick={() => {}}
                   onCategoryClick={() => {}}
                 />

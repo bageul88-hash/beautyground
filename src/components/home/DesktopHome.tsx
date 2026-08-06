@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import DesktopHeader from '../layout/DesktopHeader'
 import PromoBar from './PromoBar'
+import TrustStrip from './TrustStrip'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -15,6 +16,8 @@ interface Props {
   recommended: ShopProduct[]
   products: ShopProduct[]
   prodLoading: boolean
+  saleProducts: ShopProduct[]
+  saleLoading: boolean
   onProductClick: (id: string) => void
   onCategoryClick: (category: string | null) => void
 }
@@ -30,6 +33,8 @@ export default function DesktopHome({
   recommended,
   products,
   prodLoading,
+  saleProducts,
+  saleLoading,
   onProductClick,
   onCategoryClick,
 }: Props) {
@@ -147,6 +152,43 @@ export default function DesktopHome({
         )}
       </section>
 
+      <TrustStrip />
+
+      {/* 지금 할인중 — 지어낸 기획전 대신 실제 sale_price 걸린 상품을 할인율 높은 순으로 */}
+      {!saleLoading && saleProducts.length > 0 && (
+        <section className="max-w-[1280px] mx-auto px-6 pt-8">
+          <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">지금 할인중</h2>
+          <div className="grid grid-cols-5 gap-4 border-t border-rule">
+            {saleProducts.slice(0, 5).map((p) => {
+              const rate = Math.round((1 - (p.sale_price ?? p.price) / p.price) * 100)
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onProductClick(p.id)}
+                  className="flex flex-col items-start gap-2 pt-4 text-left focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="w-full aspect-square bg-quiet overflow-hidden">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    {p.brand_name && <p className="text-[12px] text-ink-soft">{p.brand_name}</p>}
+                    <p className="mt-0.5 text-[13px] text-ink line-clamp-2 leading-snug min-h-[2.4em]">{p.name}</p>
+                    <p className="mt-1 text-[13px] font-bold tabular-nums text-ink">
+                      <span className="text-signal-red mr-1">{rate}%</span>
+                      {won(p.sale_price ?? p.price)}원
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       {/* 지금 확인할 상품 */}
       <section className="max-w-[1280px] mx-auto px-6 py-8">
         <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">지금 확인할 상품</p>
@@ -171,7 +213,14 @@ export default function DesktopHome({
                     )}
                   </div>
                   <div className="min-w-0 w-full">
-                    <p className="text-[13px] text-ink truncate">{p.name}</p>
+                    <p className="text-[13px] text-ink line-clamp-2 leading-snug min-h-[2.4em]">{p.name}</p>
+                    {p.reviewCount > 0 && (
+                      <p className="mt-1 flex items-center gap-1 text-[11.5px] text-ink-soft">
+                        <span className="text-signal-yellow" aria-hidden="true">★</span>
+                        <span className="tabular-nums">{p.reviewAvg?.toFixed(1) ?? '-'}</span>
+                        <span className="text-ink-faint">({p.reviewCount.toLocaleString('ko-KR')})</span>
+                      </p>
+                    )}
                     <p className="mt-0.5 text-[13px] font-bold tabular-nums text-ink">
                       {hasDiscount && <span className="text-signal-red mr-1">할인</span>}
                       {won(sell)}원
@@ -233,7 +282,14 @@ export default function DesktopHome({
                     )}
                   </div>
                   {p.brand_name && <p className="mt-3 text-[12px] text-ink-soft">{p.brand_name}</p>}
-                  <p className="mt-0.5 text-[13.5px] text-ink line-clamp-1">{p.name}</p>
+                  <p className="mt-0.5 text-[13.5px] text-ink line-clamp-2 leading-snug min-h-[2.5em]">{p.name}</p>
+                  {p.reviewCount > 0 && (
+                    <p className="mt-1 flex items-center gap-1 text-[12px] text-ink-soft">
+                      <span className="text-signal-yellow" aria-hidden="true">★</span>
+                      <span className="tabular-nums">{p.reviewAvg?.toFixed(1) ?? '-'}</span>
+                      <span className="text-ink-faint">({p.reviewCount.toLocaleString('ko-KR')})</span>
+                    </p>
+                  )}
                   <p className="mt-1 text-[14px] font-bold tabular-nums text-ink">
                     {hasDiscount && <span className="text-signal-red mr-1">할인</span>}
                     {won(sell)}원
