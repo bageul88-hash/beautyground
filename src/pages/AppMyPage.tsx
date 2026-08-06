@@ -8,6 +8,7 @@ import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
 import { IconUser } from '../components/common/Icon'
+import { useIsAdmin } from '../lib/useIsAdmin'
 
 // 실제 로그인 사용자 프로필 (포인트/쿠폰은 아직 적립·발급 시스템이 없어 0 — 가짜 숫자 금지)
 interface RealUser {
@@ -45,6 +46,7 @@ const EMPTY_USER: RealUser = { name: '게스트', email: '로그인이 필요해
 export default function AppMyPage() {
   const navigate = useNavigate()
   const { mode, isDesktop, toggle } = useViewMode()
+  const { isAdmin } = useIsAdmin()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
   const [tiers, setTiers] = useState<MembershipTier[]>([])
@@ -113,6 +115,7 @@ export default function AppMyPage() {
           onToggleTierGuide={() => setShowTierGuide((v) => !v)}
           loggedIn={loggedIn}
           onLogout={handleLogout}
+          isAdmin={isAdmin}
         />
         {toast && (
           <div className="fixed left-1/2 -translate-x-1/2 bottom-10 z-50 rounded-control bg-ink text-paper text-[13px] px-4 py-2.5" role="status">
@@ -275,6 +278,20 @@ export default function AppMyPage() {
           </button>
         ))}
       </div>
+
+      {/* 관리자 전용 바로가기 — 일반 고객에게는 노출 안 됨 */}
+      {isAdmin && (
+        <div className="mt-2 bg-paper">
+          <p className="px-5 py-3 text-[12px] font-bold text-ink-faint tracking-wide">관리자</p>
+          <button
+            onClick={() => navigate('/app/live')}
+            className="w-full flex items-center justify-between px-5 py-4 border-b border-rule last:border-0 focus:outline-none focus-visible:shadow-ring"
+          >
+            <span className="text-[14px] text-ink">라이브 관리</span>
+            <span className="text-ink-faint" aria-hidden="true">›</span>
+          </button>
+        </div>
+      )}
 
       <div className="px-5 py-6">
         {loggedIn === false ? (

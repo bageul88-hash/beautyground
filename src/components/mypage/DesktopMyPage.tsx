@@ -44,6 +44,7 @@ interface Props {
   onToggleTierGuide: () => void
   loggedIn: boolean | null
   onLogout: () => void
+  isAdmin?: boolean
 }
 
 // PC 버전 — 프로필/등급을 상단 넓은 배너로, 메뉴·설정은 2열로 나란히 배치.
@@ -55,6 +56,7 @@ export default function DesktopMyPage({
   onToggleTierGuide,
   loggedIn,
   onLogout,
+  isAdmin,
 }: Props) {
   const navigate = useNavigate()
 
@@ -212,6 +214,20 @@ export default function DesktopMyPage({
             ))}
           </div>
         </div>
+
+        {/* 관리자 전용 바로가기 — 일반 고객에게는 노출 안 됨 */}
+        {isAdmin && (
+          <div className="mt-6 border border-rule">
+            <p className="px-6 py-3 text-[12px] font-bold text-ink-faint tracking-wide border-b border-rule">관리자</p>
+            <button
+              onClick={() => navigate('/app/live')}
+              className="w-full flex items-center justify-between px-6 py-4 focus:outline-none focus-visible:shadow-ring"
+            >
+              <span className="text-[14px] text-ink">라이브 관리</span>
+              <span className="text-ink-faint" aria-hidden="true">›</span>
+            </button>
+          </div>
+        )}
 
         <div className="py-6">
           {loggedIn === false ? (
