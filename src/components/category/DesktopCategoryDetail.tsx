@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
 import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import type { ShopProduct, ShopSort } from '../../hooks/useShopProducts'
 import type { ShopBrand } from '../../hooks/useShopBrands'
 
@@ -183,6 +184,8 @@ export default function DesktopCategoryDetail({
           </>
         )}
       </div>
+
+      <DesktopFooter />
     </div>
   )
 }

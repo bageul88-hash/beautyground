@@ -1,6 +1,7 @@
 import ProductCard from '../product/ProductCard'
 import Badge from '../common/Badge'
 import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import type { BRANDS } from '../../constants'
 
 interface Props {
@@ -54,6 +55,8 @@ export default function DesktopBrandDetail({ brand, onProductClick }: Props) {
           </div>
         )}
       </div>
+
+      <DesktopFooter />
     </div>
   )
 }

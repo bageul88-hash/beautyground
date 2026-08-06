@@ -10,10 +10,18 @@ import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
 import { formatDateTime } from '../../lib/format'
 
+interface PrimaryProduct {
+  name: string
+  price: number
+  sale_price: number | null
+  thumbnail_url: string | null
+}
+
 export default function ShopLiveList() {
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
+  const [primaryProducts, setPrimaryProducts] = useState<Record<string, PrimaryProduct>>({})
   const [loading, setLoading] = useState<boolean>(true)
   const { mode, isDesktop, toggle } = useViewMode()
 
@@ -52,6 +60,32 @@ export default function ShopLiveList() {
           setHostNames(Object.fromEntries(hostsData.map((h) => [h.id, h.name])))
         }
       }
+
+      // 목록 카드에 "뭘 파는지" 미리 보여주기 위한 대표 상품(찜한 상품 지정 우선, 없으면 첫 상품).
+      // 클릭 전에는 상품 정보가 하나도 안 보여 구매 동기가 안 생기던 문제 대응(2026-08-06).
+      const allLives = [...liveList, ...(((endedData ?? []) as Live[]).filter((l) => l.stream_url || l.playback_url || l.stream_uid))]
+      const primaryIdByLive: Record<string, string> = {}
+      allLives.forEach((l) => {
+        const primaryId = l.highlight_product_id || l.product_ids?.[0]
+        if (primaryId) primaryIdByLive[l.id] = primaryId
+      })
+      const productIds = Array.from(new Set(Object.values(primaryIdByLive)))
+      if (productIds.length > 0) {
+        const { data: productsData } = await supabase
+          .from('products')
+          .select('id, name, price, sale_price, thumbnail_url')
+          .in('id', productIds)
+        if (active && productsData) {
+          const byId = Object.fromEntries(productsData.map((p) => [p.id, p]))
+          const map: Record<string, PrimaryProduct> = {}
+          Object.entries(primaryIdByLive).forEach(([liveId, productId]) => {
+            const p = byId[productId]
+            if (p) map[liveId] = { name: p.name, price: p.price, sale_price: p.sale_price, thumbnail_url: p.thumbnail_url }
+          })
+          setPrimaryProducts(map)
+        }
+      }
+
       setLoading(false)
     }
     void load()
@@ -78,6 +112,7 @@ export default function ShopLiveList() {
           scheduledLives={scheduledLives}
           replays={replays}
           hostNames={hostNames}
+          primaryProducts={primaryProducts}
         />
       </>
     )

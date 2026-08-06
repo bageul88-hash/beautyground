@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import PromoBar from './PromoBar'
 import TrustStrip from './TrustStrip'
 import ImagePlaceholder from '../common/ImagePlaceholder'
@@ -304,6 +305,8 @@ export default function DesktopHome({
           </div>
         )}
       </section>
+
+      <DesktopFooter />
     </div>
   )
 }

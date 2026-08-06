@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { IconCart, IconClose, IconMinus, IconPlus } from '../common/Icon'
 import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import { FREE_SHIPPING_THRESHOLD } from '../../constants'
 import type { CartLine } from '../../lib/cart'
 
@@ -192,6 +193,8 @@ export default function DesktopCart({
           </div>
         )}
       </div>
+
+      <DesktopFooter />
     </div>
   )
 }

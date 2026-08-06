@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import DesktopHeader from '../layout/DesktopHeader'
+import DesktopFooter from '../layout/DesktopFooter'
 import { CATEGORIES } from '../../constants'
 
 const DESCRIPTIONS: Record<string, string> = {
@@ -40,6 +41,8 @@ export default function DesktopCategory() {
           ))}
         </div>
       </div>
+
+      <DesktopFooter />
     </div>
   )
 }
