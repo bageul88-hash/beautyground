@@ -48,6 +48,7 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
 
   return (
     <div className="bg-paper min-h-screen">
+      <SignupBonusBar />
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
@@ -58,7 +59,6 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
           </Link>
         </div>
       </header>
-      <SignupBonusBar />
 
       <div className="max-w-[1280px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">라이브</h1>
