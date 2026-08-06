@@ -42,7 +42,7 @@ export default function DesktopHome({
 }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const pausedRef = useRef(false)
-  const sideList = (recommended.length > 0 ? recommended : products).slice(0, 5)
+  const sideList = (recommended.length > 0 ? recommended : products).slice(0, 4)
   const gridProducts = products.length > 0 ? products : recommended
 
   const scrollRail = (dir: 1 | -1) => {
@@ -160,8 +160,8 @@ export default function DesktopHome({
       {!saleLoading && saleProducts.length > 0 && (
         <section className="max-w-[1280px] mx-auto px-6 pt-8">
           <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">지금 할인중</h2>
-          <div className="grid grid-cols-5 gap-4 border-t border-rule">
-            {saleProducts.slice(0, 5).map((p) => {
+          <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">
+            {saleProducts.slice(0, 4).map((p) => {
               const rate = Math.round((1 - (p.sale_price ?? p.price) / p.price) * 100)
               return (
                 <button
@@ -199,7 +199,7 @@ export default function DesktopHome({
         {sideList.length === 0 ? (
           <p className="text-[13px] text-ink-faint">등록된 상품이 없습니다</p>
         ) : (
-          <div className="grid grid-cols-5 gap-4 border-t border-rule">
+          <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">
             {sideList.map((p) => {
               const sell = p.sale_price ?? p.price
               const hasDiscount = p.sale_price != null && p.sale_price < p.price
