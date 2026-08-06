@@ -110,23 +110,30 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                     )}
                   </div>
                   {/* 자막바: 이미지 아래 흰 면. 이름은 왼쪽, 숫자는 오른쪽 정렬 */}
-                  <div className="flex items-end justify-between gap-4 border-t border-rule px-4 py-4">
-                    <h2 className="min-w-0 flex-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
-                      {product.name}
-                    </h2>
-                    {/* 읽는 순서: 할인율 → 판매가 → (아래) 원가 취소선 */}
-                    <p className="shrink-0 text-right leading-none">
-                      <span className="text-[22px] font-bold tabular-nums text-ink">
-                        {hasSale && <span className="mr-1.5">{rate}%</span>}
-                        {comma(sell)}
-                      </span>
-                      <span className="ml-0.5 text-[13px] text-ink-faint">원</span>
-                      {hasSale && (
-                        <span className="mt-1.5 block text-[13px] tabular-nums text-ink-faint line-through">
-                          {comma(product.price)}원
+                  <div className="border-t border-rule px-4 py-4">
+                    {/* 관리자가 headline을 넣어두면 상품명 대신 마케팅 카피를 먼저 보여준다(2026-08-06) */}
+                    {custom?.headline && (
+                      <p className="mb-1 text-[13px] font-bold text-ink-soft">{custom.headline}</p>
+                    )}
+                    <div className="flex items-end justify-between gap-4">
+                      <h2 className="min-w-0 flex-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
+                        {product.name}
+                      </h2>
+                      {/* 읽는 순서: 할인율 → 판매가 → (아래) 원가 취소선 */}
+                      <p className="shrink-0 text-right leading-none">
+                        <span className="text-[22px] font-bold tabular-nums text-ink">
+                          {hasSale && <span className="mr-1.5">{rate}%</span>}
+                          {comma(sell)}
                         </span>
-                      )}
-                    </p>
+                        <span className="ml-0.5 text-[13px] text-ink-faint">원</span>
+                        {hasSale && (
+                          <span className="mt-1.5 block text-[13px] tabular-nums text-ink-faint line-through">
+                            {comma(product.price)}원
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {custom?.subcopy && <p className="mt-1.5 text-[13px] text-ink-faint">{custom.subcopy}</p>}
                   </div>
                 </button>
               )

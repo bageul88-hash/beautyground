@@ -43,9 +43,9 @@ function mapRow(r: BannerRow): HeroBanner {
     id: r.id,
     sort_order: r.sort_order,
     product: r.products,
-    custom: r.products
-      ? null
-      : { image_url: r.image_url, headline: r.headline, subcopy: r.subcopy, link_url: r.link_url },
+    // 상품 연결 배너도 headline/subcopy를 지정해두면(마케팅 카피) 상품명 그대로 노출 대신 그 문구를 씀 —
+    // 예전엔 product가 있으면 custom을 통째로 null 처리해 상품 연결 배너는 카피를 못 넣었음(2026-08-06 수정).
+    custom: { image_url: r.image_url, headline: r.headline, subcopy: r.subcopy, link_url: r.link_url },
   }
 }
 
