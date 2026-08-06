@@ -4,7 +4,7 @@ import LiveStatusBadge from './LiveStatusBadge'
 import { IconCart } from '../common/Icon'
 import PromoBar from '../home/PromoBar'
 import DesktopFooter from '../layout/DesktopFooter'
-import { formatDateTime } from '../../lib/format'
+import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
 import type { Live } from '../../lib/types'
 
 interface PrimaryProduct {
@@ -76,6 +76,19 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
   const sortedReplays = [...replays].sort((a, b) => (b.peak_viewers ?? 0) - (a.peak_viewers ?? 0))
   const topViewers = sortedReplays[0]?.peak_viewers ?? 0
 
+  // 예정된 방송 — 날짜별로 묶어서 "며칠에 뭐가 있는지" 한눈에 보이게(2026-08-06).
+  // scheduledLives는 이미 scheduled_at 오름차순으로 오므로 그룹 순서도 자연히 날짜순.
+  const scheduleGroups = (() => {
+    const order: string[] = []
+    const byDate = new Map<string, Live[]>()
+    for (const live of scheduledLives) {
+      const key = dateKey(live.scheduled_at)
+      if (!byDate.has(key)) { byDate.set(key, []); order.push(key) }
+      byDate.get(key)!.push(live)
+    }
+    return order.map((key) => ({ key, label: formatDateOnly(byDate.get(key)![0].scheduled_at), items: byDate.get(key)! }))
+  })()
+
   const scrollRail = (dir: 1 | -1) => {
     const el = railRef.current
     if (!el) return
@@ -130,10 +143,10 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
                 <img
                   src={hero.thumbnail_url}
                   alt={hero.title}
-                  className="w-full h-[420px] object-cover transition-transform group-hover:scale-[1.02]"
+                  className="w-full aspect-square object-cover transition-transform group-hover:scale-[1.02]"
                 />
               ) : (
-                <div className="w-full h-[420px] bg-quiet flex items-center justify-center">
+                <div className="w-full aspect-square bg-quiet flex items-center justify-center">
                   <img src="/images/bg-logo-mark.png" alt="" className="w-16 h-16 object-contain opacity-60" />
                 </div>
               )}
@@ -174,9 +187,9 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
                   >
                     <div className="relative">
                       {live.thumbnail_url ? (
-                        <img src={live.thumbnail_url} alt={live.title} className="w-full h-[200px] object-cover" />
+                        <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
                       ) : (
-                        <div className="w-full h-[200px] bg-quiet flex items-center justify-center">
+                        <div className="w-full aspect-square bg-quiet flex items-center justify-center">
                           <img src="/images/bg-logo-mark.png" alt="" className="w-12 h-12 object-contain opacity-50" />
                         </div>
                       )}
@@ -203,36 +216,41 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
         {!loading && scheduledLives.length > 0 && (
           <>
             <h2 className="text-[16px] font-bold text-ink mt-14 mb-5">예정된 방송</h2>
-            <div className="grid grid-cols-3 gap-5">
-              {scheduledLives.map((live) => (
-                <Link
-                  key={live.id}
-                  to={`/app/live/${live.id}`}
-                  className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
-                >
-                  <div className="relative">
-                    {live.thumbnail_url ? (
-                      <img src={live.thumbnail_url} alt={live.title} className="w-full h-[160px] object-cover" />
-                    ) : (
-                      <div className="w-full h-[160px] bg-quiet flex items-center justify-center">
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-11 h-11 object-contain opacity-50" />
+            {scheduleGroups.map((group) => (
+              <div key={group.key} className="mt-6 first:mt-0">
+                <p className="text-[13px] font-bold text-ink-soft mb-3 pb-2 border-b border-rule">{group.label}</p>
+                <div className="grid grid-cols-3 gap-5">
+                  {group.items.map((live) => (
+                    <Link
+                      key={live.id}
+                      to={`/app/live/${live.id}`}
+                      className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                    >
+                      <div className="relative">
+                        {live.thumbnail_url ? (
+                          <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
+                        ) : (
+                          <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                            <img src="/images/bg-logo-mark.png" alt="" className="w-11 h-11 object-contain opacity-50" />
+                          </div>
+                        )}
+                        <span className="absolute top-3 left-3 inline-flex items-center rounded-control bg-ink text-paper text-[11px] font-bold px-2.5 py-1 tabular-nums">
+                          {formatTimeOnly(live.scheduled_at)}
+                          {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
+                        </span>
                       </div>
-                    )}
-                    <span className="absolute top-3 left-3 inline-flex items-center rounded-control bg-ink text-paper text-[11px] font-bold px-2.5 py-1 tabular-nums">
-                      {formatDateTime(live.scheduled_at)}
-                      {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
-                    </span>
-                  </div>
-                  <div className="px-4 py-3.5">
-                    <p className="text-[14.5px] font-bold text-ink line-clamp-2">{live.title}</p>
-                    {live.host_id && hostNames[live.host_id] && (
-                      <p className="text-[12px] text-ink-soft mt-1">{hostNames[live.host_id]} 진행</p>
-                    )}
-                    {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
-                  </div>
-                </Link>
-              ))}
-            </div>
+                      <div className="px-4 py-3.5">
+                        <p className="text-[14.5px] font-bold text-ink line-clamp-2">{live.title}</p>
+                        {live.host_id && hostNames[live.host_id] && (
+                          <p className="text-[12px] text-ink-soft mt-1">{hostNames[live.host_id]} 진행</p>
+                        )}
+                        {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </>
         )}
 
@@ -258,9 +276,9 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
                   >
                     <div className="relative">
                       {live.thumbnail_url ? (
-                        <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-video object-cover" />
+                        <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
                       ) : (
-                        <div className="w-full aspect-video bg-quiet flex items-center justify-center">
+                        <div className="w-full aspect-square bg-quiet flex items-center justify-center">
                           <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
                         </div>
                       )}
