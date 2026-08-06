@@ -5,7 +5,6 @@ import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../../constants'
 const ITEMS = [
   { label: '무료배송', desc: `${FREE_SHIPPING_THRESHOLD.toLocaleString('ko-KR')}원 이상 구매 시 (미만 ${SHIPPING_FEE.toLocaleString('ko-KR')}원)` },
   { label: '신규가입 혜택', desc: '적립금 3,000원 + 첫구매 쿠폰 3종' },
-  { label: '정품 보장', desc: '입점 브랜드사 직접 공급' },
 ]
 
 export default function TrustStrip() {
