@@ -13,6 +13,7 @@ import { ALL_PRODUCTS, SHIPPING_NOTICE } from '../constants'
 import ProductInfoTable from '../components/product/ProductInfoTable'
 import CategoryTabBar from '../components/product/CategoryTabBar'
 import ReviewSummary from '../components/product/ReviewSummary'
+import ProductQnA from '../components/product/ProductQnA'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/Icon'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
 
@@ -414,6 +415,9 @@ export default function AppProductDetail() {
           </div>
         </div>
       )}
+
+      {/* 상품 문의(Q&A) */}
+      {id && <ProductQnA productId={id} className="border-t border-rule" />}
 
       {/* 하단 sticky 구매 바 (하단 네비 바로 위에 쌓임, 모든 화면 폭에서 동일) */}
       <div

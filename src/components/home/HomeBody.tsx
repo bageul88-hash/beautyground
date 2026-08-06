@@ -52,7 +52,7 @@ export default function HomeBody({
       {saleProducts.length > 0 && (
         <ProductRail
           id="home-sale"
-          title="지금 할인중"
+          title="특가세일"
           products={saleProducts}
           loading={saleLoading}
           onProductClick={onProductClick}
