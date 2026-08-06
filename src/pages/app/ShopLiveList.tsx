@@ -95,11 +95,24 @@ export default function ShopLiveList() {
   }, [])
 
   // 히어로: 진행중 라이브 우선, 없으면 가장 임박한 예정 라이브(scheduled_at asc 정렬의 첫 항목)
-  const hero = lives.find((l) => l.status === 'live') ?? lives[0] ?? null
-  const restLives = hero ? lives.filter((l) => l.id !== hero.id) : lives
+  const realHero = lives.find((l) => l.status === 'live') ?? lives[0] ?? null
+  const restLives = realHero ? lives.filter((l) => l.id !== realHero.id) : lives
   // PC 전용 — "지금 라이브" 그리드(다른 진행중 방송)와 "예정된 방송"을 분리해서 보여준다.
-  const otherLiveNow = restLives.filter((l) => l.status === 'live')
+  const otherLiveNowReal = restLives.filter((l) => l.status === 'live')
   const scheduledLives = restLives.filter((l) => l.status === 'scheduled')
+
+  // 진행중/예정 라이브가 하나도 없을 때 — 화면을 비워두지 않고 기존 다시보기 자료로 채운다
+  // (대표님 지시 2026-08-06: 오픈 전에도 "이미 운영 중인 느낌"이 나야 함). LiveStatusBadge가
+  // ended 상태를 "종료"로 정직하게 표시하므로 라이브인 척 속이는 게 아니라 "인기 다시보기"
+  // 느낌으로 자연스럽게 채워짐. 조회수(peak_viewers) 높은 순으로 히어로·그리드에 우선 배정.
+  const usingReplayFallback = !realHero
+  const sortedForFallback = usingReplayFallback
+    ? [...replays].sort((a, b) => (b.peak_viewers ?? 0) - (a.peak_viewers ?? 0))
+    : []
+  const hero = realHero ?? sortedForFallback[0] ?? null
+  const otherLiveNow = usingReplayFallback ? sortedForFallback.slice(1, 4) : otherLiveNowReal
+  const usedReplayIds = new Set([hero?.id, ...otherLiveNow.map((l) => l.id)].filter(Boolean) as string[])
+  const displayReplays = usingReplayFallback ? replays.filter((l) => !usedReplayIds.has(l.id)) : replays
 
   if (isDesktop) {
     return (
@@ -110,7 +123,7 @@ export default function ShopLiveList() {
           hero={hero}
           otherLiveNow={otherLiveNow}
           scheduledLives={scheduledLives}
-          replays={replays}
+          replays={displayReplays}
           hostNames={hostNames}
           primaryProducts={primaryProducts}
         />
