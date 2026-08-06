@@ -143,7 +143,7 @@ export default function ShopLiveList() {
           <div className="py-20 text-center text-[14px] text-text-hint">
             불러오는 중…
           </div>
-        ) : lives.length === 0 ? (
+        ) : !hero ? (
           <div className="py-10 text-center text-[14px] text-text-hint">
             진행 중이거나 예정된 라이브가 없습니다.
           </div>
@@ -152,45 +152,43 @@ export default function ShopLiveList() {
             {hero && (
               <Link
                 to={`/app/live/${hero.id}`}
-                className="block relative rounded-md overflow-hidden mb-5 focus:outline-none focus:shadow-focus"
+                className="block bg-white rounded-md border overflow-hidden mb-5 focus:outline-none focus:shadow-focus"
+                style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
               >
-                {hero.thumbnail_url ? (
-                  <img
-                    src={hero.thumbnail_url}
-                    alt={hero.title}
-                    className="w-full h-[220px] object-cover"
-                  />
-                ) : (
-                  <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[220px] object-cover" />
-                )}
-                <div
-                  className="absolute inset-0"
-                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 55%)' }}
-                  aria-hidden="true"
-                />
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                  <LiveStatusBadge live={hero} />
-                  {hero.status === 'scheduled' && (
-                    <span className="inline-flex items-center rounded-pill bg-black/50 text-white text-[11px] font-medium px-2.5 py-1">
-                      {formatDateTime(hero.scheduled_at)}
-                      {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
-                    </span>
+                <div className="relative">
+                  {hero.thumbnail_url ? (
+                    <img
+                      src={hero.thumbnail_url}
+                      alt={hero.title}
+                      className="w-full aspect-square object-cover"
+                    />
+                  ) : (
+                    <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
                   )}
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <LiveStatusBadge live={hero} />
+                    {hero.status === 'scheduled' && (
+                      <span className="inline-flex items-center rounded-pill bg-black/50 text-white text-[11px] font-medium px-2.5 py-1">
+                        {formatDateTime(hero.scheduled_at)}
+                        {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-white text-[17px] font-bold leading-snug line-clamp-2">
+                <div className="px-4 py-3">
+                  <p className="text-[17px] font-bold text-text leading-snug line-clamp-2">
                     {hero.title}
                   </p>
                   {hero.host_id && hostNames[hero.host_id] && (
-                    <p className="text-white/80 text-[12px] mt-1">{hostNames[hero.host_id]} 진행</p>
+                    <p className="text-[12px] text-text-sub mt-1">{hostNames[hero.host_id]} 진행</p>
                   )}
                 </div>
               </Link>
             )}
 
-            {restLives.length > 0 && (
+            {otherLiveNow.length > 0 && (
               <div className="flex flex-col gap-4">
-                {restLives.map((live) => (
+                {otherLiveNow.map((live) => (
                   <Link
                     key={live.id}
                     to={`/app/live/${live.id}`}
@@ -202,10 +200,10 @@ export default function ShopLiveList() {
                         <img
                           src={live.thumbnail_url}
                           alt={live.title}
-                          className="w-full h-[160px] object-cover"
+                          className="w-full aspect-square object-cover"
                         />
                       ) : (
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[160px] object-cover" />
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
                       )}
 
                       <div className="absolute top-3 left-3">
@@ -228,12 +226,12 @@ export default function ShopLiveList() {
           </>
         )}
 
-        {/* 다시보기 — 종료된 방송 중 영상이 있는 것 */}
-        {!loading && replays.length > 0 && (
+        {/* 다시보기 — 종료된 방송 중 영상이 있는 것(히어로·위 목록에 이미 쓰인 건 제외) */}
+        {!loading && displayReplays.length > 0 && (
           <>
             <h2 className="text-[17px] font-bold text-text mt-8 mb-4">다시보기</h2>
             <div className="grid grid-cols-2 gap-3">
-              {replays.map((live) => (
+              {displayReplays.map((live) => (
                 <Link
                   key={live.id}
                   to={`/app/live/${live.id}`}
@@ -245,10 +243,10 @@ export default function ShopLiveList() {
                       <img
                         src={live.thumbnail_url}
                         alt={live.title}
-                        className="w-full h-[110px] object-cover"
+                        className="w-full aspect-square object-cover"
                       />
                     ) : (
-                      <img src="/images/bg-logo-mark.png" alt="" className="w-full h-[110px] object-cover" />
+                      <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
                     )}
                     <span className="absolute top-2 left-2 inline-flex items-center rounded-pill bg-black/60 text-white text-[10px] font-bold px-2.5 py-0.5">
                       REPLAY

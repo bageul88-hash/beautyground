@@ -137,41 +137,38 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
           <>
             <Link
               to={`/app/live/${hero.id}`}
-              className="mt-6 block relative border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring group"
+              className="mt-6 block max-w-[520px] border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring group"
             >
-              {hero.thumbnail_url ? (
-                <img
-                  src={hero.thumbnail_url}
-                  alt={hero.title}
-                  className="w-full aspect-square object-cover transition-transform group-hover:scale-[1.02]"
-                />
-              ) : (
-                <div className="w-full aspect-square bg-quiet flex items-center justify-center">
-                  <img src="/images/bg-logo-mark.png" alt="" className="w-16 h-16 object-contain opacity-60" />
-                </div>
-              )}
-              <div
-                className="absolute inset-0"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 55%)' }}
-                aria-hidden="true"
-              />
-              <div className="absolute top-5 left-5 flex items-center gap-2">
-                <LiveStatusBadge live={hero} />
-                {hero.status === 'scheduled' && (
-                  <span className="inline-flex items-center rounded-control bg-black/50 text-paper text-[12px] font-bold px-2.5 py-1 tabular-nums">
-                    {formatDateTime(hero.scheduled_at)}
-                    {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
-                  </span>
+              <div className="relative">
+                {hero.thumbnail_url ? (
+                  <img
+                    src={hero.thumbnail_url}
+                    alt={hero.title}
+                    className="w-full aspect-square object-cover transition-transform group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                    <img src="/images/bg-logo-mark.png" alt="" className="w-16 h-16 object-contain opacity-60" />
+                  </div>
                 )}
+                <div className="absolute top-5 left-5 flex items-center gap-2">
+                  <LiveStatusBadge live={hero} />
+                  {hero.status === 'scheduled' && (
+                    <span className="inline-flex items-center rounded-control bg-black/50 text-paper text-[12px] font-bold px-2.5 py-1 tabular-nums">
+                      {formatDateTime(hero.scheduled_at)}
+                      {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-7">
-                <p className="text-paper text-[26px] font-bold leading-snug max-w-[640px]">{hero.title}</p>
+              <div className="p-7">
+                <p className="text-ink text-[26px] font-bold leading-snug max-w-[640px]">{hero.title}</p>
                 {hero.host_id && hostNames[hero.host_id] && (
-                  <p className="text-paper/80 text-[13px] mt-1.5">{hostNames[hero.host_id]} 진행</p>
+                  <p className="text-ink-soft text-[13px] mt-1.5">{hostNames[hero.host_id]} 진행</p>
                 )}
                 {primaryProducts[hero.id] && (
                   <div className="mt-3">
-                    <ProductPeek product={primaryProducts[hero.id]} variant="onImage" />
+                    <ProductPeek product={primaryProducts[hero.id]} variant="inline" />
                   </div>
                 )}
               </div>
