@@ -14,6 +14,7 @@ interface HomeBodyProps {
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
+  seasonLabel: string | null
   products: ShopProduct[]
   prodLoading: boolean
   saleProducts: ShopProduct[]
@@ -30,6 +31,7 @@ export default function HomeBody({
   categories,
   categoryThumbnails,
   recommended,
+  seasonLabel,
   products,
   prodLoading,
   saleProducts,
@@ -58,7 +60,7 @@ export default function HomeBody({
       )}
       <ProductRail
         id="home-recommended"
-        title="추천 상품"
+        title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
         products={recommended}
         onProductClick={onProductClick}
       />

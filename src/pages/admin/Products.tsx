@@ -3,6 +3,7 @@ import { IconSearch, IconX } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import type { Product, ScrapedReview } from '../../lib/types'
 import { won } from '../../lib/format'
+import { SEASONS } from '../../lib/season'
 import Button from '../../components/common/Button'
 
 type Filter = Product['status'] | 'all'
@@ -31,6 +32,7 @@ export default function AdminProducts() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [reviewTarget, setReviewTarget] = useState<ProductRow | null>(null)
+  const [seasonTarget, setSeasonTarget] = useState<ProductRow | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -142,6 +144,7 @@ export default function AdminProducts() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">가격</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">재고</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">리뷰</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">계절</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
@@ -162,6 +165,11 @@ export default function AdminProducts() {
                         ) : (
                           <span className="text-ink-faint text-[12px]">0건</span>
                         )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <button onClick={() => setSeasonTarget(p)} className="text-[12px] text-ink-soft underline hover:text-ink">
+                          {p.season_tags && p.season_tags.length > 0 ? p.season_tags.join(', ') : '미지정'}
+                        </button>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${badge.className}`}>{badge.label}</span>
@@ -194,7 +202,72 @@ export default function AdminProducts() {
           }}
         />
       )}
+
+      {seasonTarget && (
+        <SeasonModal
+          product={seasonTarget}
+          onClose={() => setSeasonTarget(null)}
+          onChanged={(tags) => {
+            setProducts((prev) => prev.map((p) => (p.id === seasonTarget.id ? { ...p, season_tags: tags } : p)))
+            setSeasonTarget((prev) => (prev ? { ...prev, season_tags: tags } : prev))
+          }}
+        />
+      )}
     </>
+  )
+}
+
+function SeasonModal({
+  product, onClose, onChanged,
+}: { product: ProductRow; onClose: () => void; onChanged: (tags: string[]) => void }) {
+  const [tags, setTags] = useState<string[]>(product.season_tags ?? [])
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  const toggle = (tag: string) => {
+    setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }
+
+  const save = async () => {
+    setBusy(true)
+    setError('')
+    const { error: err } = await supabase.from('products').update({ season_tags: tags }).eq('id', product.id)
+    setBusy(false)
+    if (err) { setError(`저장 실패: ${err.message}`); return }
+    onChanged(tags)
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
+      <div className="bg-paper rounded-md w-full max-w-[360px]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-rule">
+          <p className="text-[15px] font-bold text-ink truncate">계절 태그 — {product.name}</p>
+          <button onClick={onClose} className="shrink-0 text-ink-faint hover:text-ink"><IconX size={18} /></button>
+        </div>
+        <div className="px-5 py-4 space-y-3">
+          {error && <div className="bg-red-50 border border-red-200 text-red-600 text-[12px] rounded-md px-3 py-2">{error}</div>}
+          <div className="flex flex-wrap gap-2">
+            {SEASONS.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => toggle(tag)}
+                className={`px-3.5 py-2 rounded-pill text-[13px] border transition-colors ${
+                  tags.includes(tag) ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink-soft border-rule hover:border-ink-faint'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+          <p className="text-[12px] text-ink-faint">체크된 태그와 홈의 "지금 시즌"이 겹치면 이 상품이 우선 추천됩니다. 아무것도 선택하지 않으면 계절 구분 없이 노출됩니다.</p>
+        </div>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-rule">
+          <Button variant="inkOutline" size="sm" label="취소" onClick={onClose} disabled={busy} />
+          <Button variant="ink" size="sm" label={busy ? '저장 중…' : '저장'} onClick={() => void save()} disabled={busy} />
+        </div>
+      </div>
+    </div>
   )
 }
 

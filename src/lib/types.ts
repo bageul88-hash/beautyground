@@ -54,6 +54,7 @@ export interface Product {
   scraped_reviews: ScrapedReview[] | null
   review_summary: ReviewSummaryData | null // 리뷰 요약(수/평균평점/사진) — 간단 리뷰 위젯용
   source_url: string | null // 스크랩 원본 상품 페이지 URL(후기 재수집용)
+  season_tags: string[] // 계절/명절 추천 태그(봄·여름·가을·겨울·추석·설) — 홈 "지금 확인할 상품" 큐레이션에 사용
   created_at: string
 }
 

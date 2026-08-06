@@ -14,6 +14,7 @@ interface Props {
   categories: string[]
   categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
+  seasonLabel: string | null
   products: ShopProduct[]
   prodLoading: boolean
   saleProducts: ShopProduct[]
@@ -31,6 +32,7 @@ export default function DesktopHome({
   categories,
   categoryThumbnails,
   recommended,
+  seasonLabel,
   products,
   prodLoading,
   saleProducts,
@@ -191,7 +193,9 @@ export default function DesktopHome({
 
       {/* 지금 확인할 상품 */}
       <section className="max-w-[1280px] mx-auto px-6 py-8">
-        <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">지금 확인할 상품</p>
+        <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">
+          {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} 시즌` : '지금 확인할 상품'}
+        </p>
         {sideList.length === 0 ? (
           <p className="text-[13px] text-ink-faint">등록된 상품이 없습니다</p>
         ) : (

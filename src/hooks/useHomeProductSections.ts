@@ -1,5 +1,10 @@
 import { useMemo } from 'react'
 import { useShopProducts, type ShopProduct } from './useShopProducts'
+import { useHomeSettings } from './useHomeSettings'
+
+// "지금 확인할 상품"에 계절 태그가 붙은 상품이 이만큼 이상 있어야 계절 추천으로 노출한다.
+// 너무 적으면(1~2개) "추천"이라 부르기 민망해서 그냥 평소 큐레이션으로 대체한다.
+const MIN_SEASONAL_FOR_LABEL = 4
 
 // 홈의 "신상품"·"추천 상품" 두 레일을 채우는 로직 — 실제 구매자 화면(AppHome)과
 // 관리자 미리보기(admin/Home)가 반드시 같은 결과를 내야 하므로 한 곳에 둔다.
@@ -82,14 +87,31 @@ function curate(pool: ShopProduct[], targetCount: number): ShopProduct[] {
 
 export function useHomeProductSections() {
   const { products: latestProducts, loading } = useShopProducts({ sort: 'latest', pageSize: 60 })
+  const { activeSeason } = useHomeSettings()
 
   const products = useMemo(() => curate(latestProducts, 10), [latestProducts])
 
-  // 추천 상품: 신상품에 이미 나온 상품과 겹치지 않게 나머지 풀에서 동일한 카테고리×브랜드 로직으로 큐레이션
-  const recommended = useMemo(() => {
+  // 추천 상품: 신상품에 이미 나온 상품과 겹치지 않는 나머지 풀에서 우선 계절 태그가 맞는 상품을
+  // 큐레이션하고, 부족한 자리만 평소 로직(카테고리×브랜드 큐레이션)으로 채운다.
+  // 계절 태그가 없는 상품이 대다수라 태그된 게 너무 적으면(신뢰 있는 "추천"이 아니라) 조용히
+  // 평소 로직으로 대체한다 — season 라벨이 null이면 화면에도 "계절 추천"이라 안 붙인다.
+  const { recommended, seasonLabel } = useMemo(() => {
     const shown = new Set(products.map((p) => p.id))
-    return curate(latestProducts.filter((p) => !shown.has(p.id)), 10)
-  }, [latestProducts, products])
+    const pool = latestProducts.filter((p) => !shown.has(p.id))
+    const seasonal = pool.filter((p) => p.seasonTags.includes(activeSeason))
 
-  return { products, recommended, loading }
+    if (seasonal.length < MIN_SEASONAL_FOR_LABEL) {
+      return { recommended: curate(pool, 10), seasonLabel: null as string | null }
+    }
+
+    const curatedSeasonal = curate(seasonal, 10)
+    if (curatedSeasonal.length >= 10) {
+      return { recommended: curatedSeasonal, seasonLabel: activeSeason as string | null }
+    }
+    const seasonalIds = new Set(curatedSeasonal.map((p) => p.id))
+    const fill = curate(pool.filter((p) => !seasonalIds.has(p.id)), 10 - curatedSeasonal.length)
+    return { recommended: [...curatedSeasonal, ...fill], seasonLabel: activeSeason as string | null }
+  }, [latestProducts, products, activeSeason])
+
+  return { products, recommended, seasonLabel, loading }
 }

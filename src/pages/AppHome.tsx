@@ -24,7 +24,7 @@ import { useSaleProducts } from '../hooks/useSaleProducts'
 //   방송 자막(lower third) 구조를 택했다 — 이미지 위에 글자를 얹지 않고 아래 흰 면에 얹는다.
 export default function AppHome() {
   const navigate = useNavigate()
-  const { products, recommended, loading: prodLoading } = useHomeProductSections()
+  const { products, recommended, seasonLabel, loading: prodLoading } = useHomeProductSections()
   const { categories } = useShopCategories()
   const { banners } = useHeroBanners()
   const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
@@ -44,6 +44,7 @@ export default function AppHome() {
           categories={categories}
           categoryThumbnails={categoryThumbnails}
           recommended={recommended}
+          seasonLabel={seasonLabel}
           products={products}
           prodLoading={prodLoading}
           saleProducts={saleProducts}
@@ -70,6 +71,7 @@ export default function AppHome() {
           categories={categories}
           categoryThumbnails={categoryThumbnails}
           recommended={recommended}
+          seasonLabel={seasonLabel}
           products={products}
           prodLoading={prodLoading}
           saleProducts={saleProducts}

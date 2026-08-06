@@ -11,6 +11,7 @@ interface Row {
   category: string | null
   partner_id: string | null
   review_summary: { count: number; avg: number | null } | null
+  season_tags: string[] | null
 }
 
 // 홈 "지금 할인중" 레일 — 실제 sale_price가 걸린 상품을 할인율 높은 순으로.
@@ -25,7 +26,7 @@ export function useSaleProducts(limit = 10) {
     ;(async () => {
       const { data } = await supabase
         .from('products')
-        .select('id,name,price,sale_price,thumbnail_url,category,partner_id,review_summary')
+        .select('id,name,price,sale_price,thumbnail_url,category,partner_id,review_summary,season_tags')
         .eq('status', 'on_sale')
         .not('sale_price', 'is', null)
         .order('created_at', { ascending: false })
@@ -55,6 +56,7 @@ export function useSaleProducts(limit = 10) {
             brand_name: r.partner_id ? brandMap.get(r.partner_id) ?? null : null,
             reviewCount: r.review_summary?.count ?? 0,
             reviewAvg: r.review_summary?.avg ?? null,
+            seasonTags: r.season_tags ?? [],
           } as ShopProduct,
         }))
         .sort((a, b) => b.rate - a.rate)
