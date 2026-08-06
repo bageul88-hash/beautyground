@@ -9,13 +9,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.headers.authorization !== `Bearer ${TEMP_SECRET}`) { res.status(401).json({}); return }
   if (!SERVICE_ROLE) { res.status(500).json({ error: 'no service role' }); return }
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
-  const templates = await supabase.from('coupon_templates').select('*')
-  const rls1 = await supabase.rpc('pg_catalog_noop').then(()=>null).catch(()=>null)
-  const points = await supabase.from('point_transactions').select('*').limit(5)
-  const coupons = await supabase.from('user_coupons').select('*').limit(5)
-  res.status(200).json({
-    templates: templates.data, templatesError: templates.error?.message,
-    points: points.data, pointsError: points.error?.message,
-    coupons: coupons.data, couponsError: coupons.error?.message,
-  })
+  const userId = (req.query.deleteUserId as string) || (req.body as { deleteUserId?: string } | null)?.deleteUserId
+  if (userId) {
+    const { error } = await supabase.auth.admin.deleteUser(userId)
+    res.status(200).json({ deleted: !error, error: error?.message })
+    return
+  }
+  res.status(400).json({ error: 'deleteUserId required' })
 }
