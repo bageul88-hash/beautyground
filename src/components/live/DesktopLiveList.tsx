@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import LiveStatusBadge from './LiveStatusBadge'
 import { IconCart } from '../common/Icon'
+import SignupBonusBar from '../home/SignupBonusBar'
 import { formatDateTime } from '../../lib/format'
 import type { Live } from '../../lib/types'
 
@@ -18,6 +20,32 @@ interface Props {
 // 라이브커머스(지금 방송 중인 상품을 사러 오는 것)는 목적이 달라, 카테고리 탐색 UI가 안 맞는다
 // (2026-08-06, 결제·계정설정 페이지가 공용헤더를 안 쓰는 것과 같은 이유).
 export default function DesktopLiveList({ loading, hero, restLives, replays, hostNames }: Props) {
+  const railRef = useRef<HTMLDivElement>(null)
+  const pausedRef = useRef(false)
+
+  const scrollRail = (dir: 1 | -1) => {
+    const el = railRef.current
+    if (!el) return
+    const tile = el.firstElementChild as HTMLElement | null
+    const step = tile ? tile.getBoundingClientRect().width + 10 : el.clientWidth * 0.4
+    const atEnd = dir === 1 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 4
+    if (atEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' })
+    } else {
+      el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    }
+  }
+
+  // 다시보기도 홈 히어로와 동일하게 2초마다 자동으로 한 칸씩 좌측 이동, 호버 시 정지.
+  useEffect(() => {
+    if (replays.length <= 1) return
+    const timer = setInterval(() => {
+      if (!pausedRef.current) scrollRail(1)
+    }, 2000)
+    return () => clearInterval(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replays.length])
+
   return (
     <div className="bg-paper min-h-screen">
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
@@ -30,6 +58,7 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
           </Link>
         </div>
       </header>
+      <SignupBonusBar />
 
       <div className="max-w-[1280px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">라이브</h1>
@@ -113,30 +142,64 @@ export default function DesktopLiveList({ loading, hero, restLives, replays, hos
         {!loading && replays.length > 0 && (
           <>
             <h2 className="text-[16px] font-bold text-ink mt-14 mb-5">다시보기</h2>
-            <div className="grid grid-cols-4 gap-4">
-              {replays.map((live) => (
-                <Link
-                  key={live.id}
-                  to={`/app/live/${live.id}`}
-                  className="block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
-                >
-                  <div className="relative">
-                    {live.thumbnail_url ? (
-                      <img src={live.thumbnail_url} alt={live.title} className="w-full h-[140px] object-cover" />
-                    ) : (
-                      <div className="w-full h-[140px] bg-quiet flex items-center justify-center">
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
-                      </div>
-                    )}
-                    <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tracking-[0.04em]">
-                      REPLAY
-                    </span>
-                  </div>
-                  <div className="px-3.5 py-3">
-                    <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
-                  </div>
-                </Link>
-              ))}
+            <div
+              className="relative"
+              onMouseEnter={() => { pausedRef.current = true }}
+              onMouseLeave={() => { pausedRef.current = false }}
+            >
+              <div
+                ref={railRef}
+                className="flex gap-2.5 overflow-x-auto scrollbar-hide"
+                style={{ scrollSnapType: 'x mandatory' }}
+              >
+                {replays.map((live) => (
+                  <Link
+                    key={live.id}
+                    to={`/app/live/${live.id}`}
+                    className="relative shrink-0 w-[calc((100%-20px)/3)] min-w-[280px] block bg-paper border border-rule overflow-hidden hover:border-ink transition-colors focus:outline-none focus-visible:shadow-ring"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    <div className="relative">
+                      {live.thumbnail_url ? (
+                        <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-video object-cover" />
+                      ) : (
+                        <div className="w-full aspect-video bg-quiet flex items-center justify-center">
+                          <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
+                        </div>
+                      )}
+                      <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tracking-[0.04em]">
+                        REPLAY
+                      </span>
+                    </div>
+                    <div className="px-3.5 py-3">
+                      <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {replays.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => scrollRail(-1)}
+                    aria-label="이전 다시보기"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center text-ink text-[26px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                    style={{ filter: 'drop-shadow(0 1px 3px rgba(255,255,255,0.9))' }}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollRail(1)}
+                    aria-label="다음 다시보기"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center text-ink text-[26px] leading-none hover:opacity-70 transition-opacity focus:outline-none focus-visible:shadow-ring"
+                    style={{ filter: 'drop-shadow(0 1px 3px rgba(255,255,255,0.9))' }}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
             </div>
           </>
         )}
