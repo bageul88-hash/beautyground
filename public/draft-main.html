@@ -403,14 +403,14 @@ const comma = n => n.toLocaleString('ko-KR');
 
 /* ── 메인 상품 레일 ── */
 function cardHtml(p, i){
-  return '<button class="pcard" data-pd="'+p.id+'">'
+  return '<div class="pcard" data-pd="'+p.id+'" role="button" tabindex="0">'
     + (i===0?'<span class="lim ed">LIMITED EDITION</span>':'')
     + '<button class="wish'+(i===1?' on':'')+'" data-wish="'+p.id+'" aria-label="찜">'+(i===1?'♥':'♡')+'</button>'
     + '<div class="ph"><img src="'+p.thumb+'" alt="" loading="lazy"></div>'
     + '<p class="br">'+(p.brand||'뷰티그라운드')+'</p>'
     + '<p class="nm">'+p.name+'</p>'
     + '<div class="ft"><span class="pr">'+comma(p.sale||p.price)+'원</span><button class="add" data-add="'+p.id+'" aria-label="담기">+</button></div>'
-    + '</button>';
+    + '</div>';
 }
 document.getElementById('railNew').innerHTML = DATA.rail.map(cardHtml).join('');
 document.getElementById('heroImg1').src = DATA.detail.thumbBig;
