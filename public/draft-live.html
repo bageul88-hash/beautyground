@@ -3,469 +3,369 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>뷰티그라운드몰 라이브커머스 시안</title>
+<meta name="robots" content="noindex,nofollow">
+<title>뷰티그라운드몰 라이브커머스 시안 — 모바일 시청 화면</title>
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     레퍼런스: Downloads/라이브커머스1.jpg (736×736) 픽셀 실측 팔레트
+     LIVE 대형 배지 그라데이션 : #7C2F75 → #B22D66 → #CE4C58
+     구매 CTA / 가격바          : #FF2D54
+     하트 리액션                : #F0377F
+     팔로우 하트(오렌지)        : #F8A464
+     미니 LIVE 배지(옐로우골드) : #FFE075 → #E5AE37 (중심 #F0B334)
+     채팅 닉네임(크림 옐로우)   : #FCF2D9
+     채팅 버블                  : rgba(30,32,30,.55)
+     상품 카드                  : #FFFFFF~#F1F2F4, 긴급문구 레드
+     코멘트바                   : 반투명 화이트 rgba(255,255,255,.28)
+     ═══════════════════════════════════════════════════════════ */
   :root {
-    --ac1: #6db33f;
-    --ac2: #94d64f;
-    --ac-ink: #1d3a0e;
-    --ac-chip: #e8f5db;
-    --radius: 18px;
-    --tw: 700;
-    --page: #eceeea;
-    --ink: #1a1a1a;
-    --sub: #666666;
-    --btn-bg: #f5f5f5;
-    --card: #ffffff;
-    --gold: #c9a96a;
-    --live: #e5484d;
+    --g1: #7C2F75; --g2: #B22D66; --g3: #CE4C58;   /* LIVE 배지 그라데이션 */
+    --cta: #FF2D54;                                 /* 가격바·구매 CTA */
+    --heart: #F0377F;                               /* 하트 리액션 */
+    --follow: #F8A464;                              /* 팔로우 하트 */
+    --mlive1: #FFE075; --mlive2: #E5AE37;           /* 미니 LIVE 배지 */
+    --nick: #FCF2D9;                                /* 채팅 닉네임 */
+    --bubble: rgba(30,32,30,.55);
+    --ribbon: #E03131;                              /* 카드 상단 리본 */
   }
-  * { box-sizing: border-box; margin: 0; }
-  body { background: var(--page); font-family: Pretendard, -apple-system, 'Malgun Gothic', sans-serif; min-height: 100vh; padding: 18px 14px 50px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #17181c; color: #e8e8ea; min-height: 100vh;
+    font-family: Pretendard, -apple-system, 'Malgun Gothic', sans-serif;
+    display: flex; flex-direction: column; align-items: center; padding: 16px 12px 60px;
+  }
 
-  .ctrl { position: sticky; top: 10px; z-index: 50; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 8px 30px rgba(20,25,15,.12); display: flex; align-items: center; gap: 18px; flex-wrap: wrap; max-width: 1160px; margin: 0 auto 18px; }
-  .ctrl .t { font-size: 12px; font-weight: 800; color: #565b63; margin-right: 2px; }
+  /* ── 상단 컨트롤 바 ── */
+  .ctrl {
+    position: sticky; top: 10px; z-index: 90; width: min(720px, 100%);
+    background: #24252b; border: 1px solid #34353d; border-radius: 14px;
+    padding: 11px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    box-shadow: 0 10px 34px rgba(0,0,0,.45); margin-bottom: 16px;
+  }
+  .ctrl .t { font-size: 12px; font-weight: 800; color: #b9bac2; }
   .ctrl .grp { display: flex; align-items: center; gap: 6px; }
-  .cbtn { width: 30px; height: 30px; border-radius: 9px; border: 2px solid transparent; cursor: pointer; color: #fff; font-size: 9px; font-weight: 800; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1px; }
-  .cbtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); }
-  .obtn { height: 30px; border-radius: 9px; border: 2px solid #e4e6ec; background: #f6f7f4; color: #1a1a1a; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; padding: 0 10px; }
-  .obtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); background: #fff; }
+  .mbtn {
+    height: 30px; padding: 0 12px; border-radius: 9px; cursor: pointer;
+    border: 2px solid #3c3d46; background: #2c2d34; color: #e8e8ea;
+    font-size: 11.5px; font-weight: 700; font-family: inherit;
+  }
+  .mbtn.on { border-color: #c9a96a; box-shadow: 0 0 0 2px rgba(201,169,106,.25); background: #33343c; }
+  .mbtn .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .note {
+    width: min(720px, 100%); font-size: 11px; color: #8f909a; line-height: 1.6;
+    margin-bottom: 14px; padding: 0 4px;
+  }
+  .note b { color: #c9a96a; }
 
-  .browser { max-width: 1160px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(20,25,15,.22); background: var(--card); }
-  .bbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #e9ebe6; }
-  .bbar .dot { width: 11px; height: 11px; border-radius: 50%; }
-  .bbar .url { flex: 1; max-width: 420px; margin: 0 auto; background: #fff; border-radius: 999px; font-size: 11.5px; color: #8a8f98; text-align: center; padding: 5px 12px; }
-  .site { background: #fafbf8; }
+  /* ── 폰 프레임 ── */
+  .phone {
+    width: min(400px, 100%); border-radius: 44px; background: #000;
+    padding: 10px; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px #2c2d34;
+  }
+  .screen {
+    position: relative; border-radius: 36px; overflow: hidden;
+    aspect-ratio: 390 / 800; background: #26232b; isolation: isolate;
+  }
 
-  .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 34px; background: var(--card); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
-  .nav .logo { font-size: 19px; font-weight: 800; letter-spacing: .06em; color: var(--ink); }
-  .nav .logo em { font-style: normal; color: var(--gold); }
-  .nav .menu { display: flex; gap: 4px; flex: 1; justify-content: center; }
-  .nav .menu a { padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
-  .nav .menu a.on { background: var(--btn-bg); }
-  .nav .ic { display: flex; gap: 8px; }
-  .nav .ic span { width: 36px; height: 36px; border-radius: 50%; background: var(--btn-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  /* 영상 영역(실방송 시 송출 화면) — 실제 몰 상품 갤러리 이미지를 배경으로 사용 */
+  .video { position: absolute; inset: 0; z-index: 0; }
+  .video img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.92); }
+  .video .hint {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-size: 10px; letter-spacing: .12em; color: rgba(255,255,255,.55);
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.22);
+    padding: 5px 11px; border-radius: 999px; white-space: nowrap; backdrop-filter: blur(2px);
+  }
+  .scrim-top { position: absolute; inset: 0 0 auto 0; height: 26%; z-index: 1;
+    background: linear-gradient(180deg, rgba(0,0,0,.5), transparent); }
+  .scrim-bot { position: absolute; inset: auto 0 0 0; height: 42%; z-index: 1;
+    background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 55%, transparent 100%); }
 
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 26px 30px 44px; }
+  .ui { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; padding: 14px 12px 12px; }
 
-  /* 라이브 플레이어 + 채팅 */
-  .live-row { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
-  .player { border-radius: calc(var(--radius) + 6px); overflow: hidden; position: relative; min-height: 380px;
-    background: linear-gradient(135deg, #23262b 0%, #383e46 55%, #23262b 100%); color: #fff; display: flex; align-items: center; justify-content: center; }
-  .player .play { width: 74px; height: 74px; border-radius: 50%; background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; font-size: 26px; }
-  .player .badge { position: absolute; top: 16px; left: 16px; background: var(--live); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; }
-  .player .badge i { width: 7px; height: 7px; border-radius: 50%; background: #fff; display: block; }
-  .player .views { position: absolute; top: 16px; left: 110px; background: rgba(0,0,0,.45); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
-  .player .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 16px; background: linear-gradient(180deg, transparent, rgba(0,0,0,.65)); }
-  .player .cap .tt { font-size: 19px; font-weight: var(--tw); }
-  .player .cap .hn { font-size: 12.5px; opacity: .85; margin-top: 4px; }
+  /* ── 상단: 프로필 칩 + 시청자 ── */
+  .toprow { display: flex; align-items: flex-start; gap: 8px; }
+  .hostchip { display: flex; align-items: center; background: #fff; border-radius: 999px; padding: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+  .hostchip .ava {
+    width: 38px; height: 38px; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, #F0AEB8, #E7A8B1 55%, #D9B2C5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px; font-weight: 800;
+    border: 2px solid #fff; outline: 2px solid #F0AEB8;
+  }
+  .hostchip .nm { padding: 0 10px 0 8px; }
+  .hostchip .nm b { display: block; font-size: 12.5px; color: #1c1c1e; font-weight: 800; letter-spacing: -.2px; }
+  .hostchip .nm i { display: block; font-style: normal; font-size: 9.5px; color: #8e8e96; margin-top: 1px; }
+  .followbtn {
+    width: 34px; height: 34px; border-radius: 50%; background: #fff; flex: none;
+    display: flex; align-items: center; justify-content: center; position: relative;
+    box-shadow: -4px 0 6px rgba(0,0,0,.06);
+  }
+  .followbtn svg { width: 19px; height: 19px; }
+  .followbtn .plus {
+    position: absolute; right: 2px; bottom: 2px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--follow); color: #fff; font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff;
+  }
+  .topright { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .viewers { display: flex; }
+  .viewers .v {
+    width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 800; margin-left: -8px; position: relative;
+  }
+  .viewers .v:first-child { margin-left: 0; }
+  .viewers .v.a { background: linear-gradient(135deg,#e78fb3,#b76fd4); }
+  .viewers .v.b { background: linear-gradient(135deg,#6fa8dc,#4a7bbf); }
+  .viewers .v.c { background: linear-gradient(135deg,#f0b26e,#d98a4a); }
+  .viewers .mini {
+    position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
+    background: linear-gradient(180deg, var(--mlive1), var(--mlive2));
+    color: #5a4200; font-size: 6.5px; font-weight: 900; letter-spacing: .04em;
+    padding: 1.5px 5px; border-radius: 999px; border: 1px solid #fff;
+  }
+  .vcount { background: #fff; color: #1c1c1e; font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 6px 11px; }
+  .closebtn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 19px; font-weight: 300; }
 
-  .chat { background: var(--card); border-radius: calc(var(--radius) + 6px); box-shadow: 0 3px 14px rgba(20,25,15,.07); display: flex; flex-direction: column; overflow: hidden; }
-  .chat .hd { padding: 14px 16px; font-size: 13.5px; font-weight: 800; color: var(--ink); border-bottom: 1px solid #eee; }
-  .chat .msgs { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-  .chat .m { font-size: 12.5px; color: var(--ink); line-height: 1.5; }
-  .chat .m b { color: var(--ac-ink); background: var(--ac-chip); border-radius: 6px; padding: 1px 6px; margin-right: 6px; font-size: 11.5px; }
-  .chat .in { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #eee; }
-  .chat .in .f { flex: 1; background: var(--btn-bg); border-radius: 999px; font-size: 12.5px; color: #9aa0a8; padding: 10px 14px; }
-  .chat .in .s { width: 38px; height: 38px; border-radius: 50%; background: var(--ac1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  /* ── 상단 채팅 버블 ── */
+  .livechat-label { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #fff; margin: 12px 0 8px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  .bubbles { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .bub {
+    background: var(--bubble); backdrop-filter: blur(3px);
+    border-radius: 999px; padding: 6px 13px; font-size: 11.5px; color: #fff; line-height: 1.35;
+    max-width: 78%;
+  }
+  .bub b { color: var(--nick); font-weight: 800; margin-right: 4px; }
 
-  .sec { display: flex; align-items: center; justify-content: space-between; padding: 30px 2px 14px; }
-  .sec .t2 { font-size: 21px; font-weight: var(--tw); color: var(--ink); letter-spacing: -.3px; }
-  .sec .t2 .lv { color: var(--live); }
-  .sec .all { font-size: 13px; color: var(--sub); font-weight: 600; }
+  /* ── 하단 스택 ── */
+  .spacer { flex: 1; }
+  .botgrid { display: flex; align-items: flex-end; gap: 10px; }
+  .botleft { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 
-  /* 방송 상품 */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
-  .good { background: var(--card); border-radius: var(--radius); padding: 16px; position: relative; box-shadow: 0 3px 14px rgba(20,25,15,.07); }
-  .good .tag { position: absolute; top: 12px; left: 12px; background: var(--live); color: #fff; font-size: 10.5px; font-weight: 800; padding: 4px 9px; border-radius: 999px; }
-  .good .pic { height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-  .good .bd { font-size: 12px; color: var(--sub); font-weight: 600; }
-  .good .nm { font-size: 14.5px; color: var(--ink); font-weight: var(--tw); letter-spacing: -.2px; margin: 3px 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .good .rw { display: flex; align-items: center; justify-content: space-between; }
-  .good .pr { background: var(--btn-bg); border-radius: 999px; font-size: 13px; font-weight: 800; color: var(--ink); padding: 8px 14px; font-variant-numeric: tabular-nums; }
-  .good .pr em { font-style: normal; color: var(--live); margin-right: 5px; }
-  .good .add { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; cursor: pointer; }
+  .chatlist { display: flex; flex-direction: column; gap: 8px; }
+  .cl { display: flex; gap: 7px; align-items: flex-start; }
+  .cl .cava {
+    width: 26px; height: 26px; border-radius: 50%; flex: none; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 800;
+  }
+  .cl .cava.heart { background: #fff; }
+  .cl .cava.heart svg { width: 15px; height: 15px; }
+  .cl .cava.g1 { background: linear-gradient(135deg,#9aa4b2,#6d7686); }
+  .cl .cava.g2 { background: linear-gradient(135deg,#b7a6d9,#8a72b8); }
+  .cl .cava.g3 { background: linear-gradient(135deg,#a8c8a0,#6f9a68); }
+  .cl .txt { min-width: 0; }
+  .cl .txt b { display: block; font-size: 11px; font-weight: 800; color: var(--nick); text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  .cl .txt span { display: block; font-size: 11.5px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); margin-top: 1px; }
 
-  /* 방송 예정 */
-  .sched { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  .sc { background: var(--card); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 2px 10px rgba(20,25,15,.05); display: flex; gap: 14px; align-items: center; }
-  .sc .d { min-width: 64px; text-align: center; background: var(--ac-chip); color: var(--ac-ink); border-radius: 12px; padding: 10px 8px; }
-  .sc .d .dd { font-size: 15px; font-weight: 800; }
-  .sc .d .tt2 { font-size: 11px; font-weight: 700; margin-top: 2px; }
-  .sc .k { font-size: 13.5px; font-weight: 800; color: var(--ink); }
-  .sc .v { font-size: 12px; color: var(--sub); margin-top: 3px; }
-  .sc .al { margin-left: auto; background: var(--btn-bg); border-radius: 999px; font-size: 11.5px; font-weight: 700; color: var(--ink); padding: 8px 12px; white-space: nowrap; }
+  .livebadge {
+    align-self: flex-start;
+    background: linear-gradient(100deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
+    border: 2px solid rgba(255,255,255,.65); border-radius: 13px;
+    color: #fff; font-size: 25px; font-weight: 900; letter-spacing: .1em;
+    padding: 7px 22px 9px; box-shadow: 0 6px 22px rgba(178,45,102,.45);
+  }
 
+  /* ── 상품 미니카드 (실데이터) ── */
+  .prodcard {
+    width: 138px; flex: none; background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .prodcard .ribbon {
+    background: var(--ribbon); color: #fff; font-size: 9px; font-weight: 800;
+    padding: 4px 8px; display: flex; align-items: center; gap: 4px;
+  }
+  .prodcard .pimg { width: 100%; height: 92px; object-fit: cover; display: block; background: #F1F2F4; }
+  .prodcard .pbody { padding: 7px 9px 8px; }
+  .prodcard .pname { font-size: 10.5px; font-weight: 700; color: #3a3a40; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .prodcard .pstock { font-size: 9px; color: #8e8e96; margin-top: 4px; }
+  .prodcard .purgent { font-size: 10.5px; font-weight: 800; color: var(--ribbon); margin-top: 1px; }
+  .prodcard .pricebar {
+    display: flex; align-items: stretch; background: var(--cta); color: #fff;
+  }
+  .prodcard .pricebar .pr { flex: 1; padding: 7px 9px; font-weight: 900; font-size: 12.5px; letter-spacing: -.2px; }
+  .prodcard .pricebar .pr s { display: block; font-size: 8.5px; font-weight: 600; opacity: .75; }
+  .prodcard .pricebar .cart {
+    width: 30px; display: flex; align-items: center; justify-content: center;
+    border-left: 1px solid rgba(255,255,255,.35);
+  }
+  .prodcard .pricebar .cart svg { width: 14px; height: 14px; }
+
+  /* ── 최하단: 코멘트바 + 리액션 ── */
+  .bottombar { display: flex; align-items: center; gap: 8px; margin-top: 11px; }
+  .cmt {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.28); backdrop-filter: blur(3px);
+    border-radius: 999px; padding: 9px 14px; color: #fff; font-size: 12px;
+  }
+  .cmt .mic { margin-left: auto; }
+  .cmt .mic svg { width: 14px; height: 14px; display: block; }
+  .ricon {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.28); backdrop-filter: blur(3px);
+  }
+  .ricon svg { width: 17px; height: 17px; }
+  .ricon.grad { background: conic-gradient(from 200deg, #FC7DD4, #BF50AC, #7B91E0, #FC7DD4); }
+  .ricon.heartbg { background: #fff; }
+  .ricon.bag { background: linear-gradient(135deg, var(--heart), var(--cta)); }
+
+  /* ── 편집 모드 ── */
   .ed { white-space: pre-line; }
-  body.editing .ed { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: 2px; cursor: text; border-radius: 4px; }
-  body.editing .ed:focus { outline: 2px solid var(--gold); background: rgba(255,255,255,.65); }
-  body.arranging [data-k] { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: -1px; cursor: move; }
-  body.arranging [data-k].dragging { opacity: .45; }
-  body.arranging .ed { pointer-events: none; }
+  body.editing .ed { outline: 1.5px dashed rgba(201,169,106,.95); outline-offset: 2px; cursor: text; border-radius: 4px; }
+  body.editing .ed:focus { outline: 2px solid #c9a96a; }
+
+  @media (max-width: 430px) {
+    body { padding: 10px 6px 40px; }
+    .phone { border-radius: 34px; padding: 7px; }
+    .screen { border-radius: 28px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="ctrl">
-  <span class="t">📺 라이브커머스 시안</span>
-  <span class="grp" id="colorGrp"><span class="t">포인트 컬러</span>
-    <button class="cbtn on" style="background:#6db33f" data-a1="#6db33f" data-a2="#94d64f" data-ink="#1d3a0e" data-chip="#e8f5db">1</button>
-    <button class="cbtn" style="background:#151734" data-a1="#151734" data-a2="#3d4a95" data-ink="#f4e9d2" data-chip="#e9e6f2">2</button>
-    <button class="cbtn" style="background:#c9a96a" data-a1="#b8925a" data-a2="#e2c98f" data-ink="#3a2c12" data-chip="#f5ecd9">3</button>
-    <button class="cbtn" style="background:#d97795;color:#5a1f31" data-a1="#d97795" data-a2="#f2aec2" data-ink="#5a1f31" data-chip="#fbe7ed">4</button>
-    <button class="cbtn" style="background:#6a5fe0" data-a1="#6a5fe0" data-a2="#9c93f5" data-ink="#f0eeff" data-chip="#e9e6fc">5</button>
-  </span>
+  <span class="t">📱 라이브 시청 화면 시안 v2</span>
   <span class="grp">
-    <input id="hexInput" placeholder="#E5484D" maxlength="7"
-      style="width:86px;height:30px;border:2px solid #e4e6ec;border-radius:9px;padding:0 8px;font-size:12px;font-family:inherit;font-weight:700">
-    <button class="obtn" id="hexAdd">색 추가</button>
+    <span class="t">컬러</span>
+    <button class="mbtn on" data-mode="ref"><span class="sw" style="background:linear-gradient(90deg,#7C2F75,#CE4C58)"></span>레퍼런스 실측</button>
+    <button class="mbtn" data-mode="gold"><span class="sw" style="background:linear-gradient(90deg,#7A5A22,#E2C98F)"></span>BG 골드</button>
+    <button class="mbtn" data-mode="mix"><span class="sw" style="background:linear-gradient(90deg,#7A5A22,#FF2D54)"></span>골드+핑크 혼합</button>
   </span>
-  <span class="grp"><span class="t">라운드</span>
-    <button class="obtn" data-r="10px">각지게</button>
-    <button class="obtn on" data-r="18px">보통</button>
-    <button class="obtn" data-r="26px">둥글게</button>
-  </span>
-  <span class="grp"><span class="t">제목 굵기</span>
-    <button class="obtn" data-w="600">600</button>
-    <button class="obtn on" data-w="700">700</button>
-    <button class="obtn" data-w="800">800</button>
-  </span>
-  <button class="obtn" id="editToggle">✏️ 편집 모드 켜기</button>
-  <button class="obtn" id="arrangeToggle">🧩 배치 모드 켜기</button>
+  <button class="mbtn" id="editToggle">✏️ 편집 모드</button>
 </div>
 
-<div class="browser">
-  <div class="bbar">
-    <span class="dot" style="background:#f26d5f"></span>
-    <span class="dot" style="background:#f5be4f"></span>
-    <span class="dot" style="background:#59c76f"></span>
-    <span class="url">beautyground.co.kr/live</span>
-  </div>
-  <div class="site">
-    <nav class="nav">
-      <span class="logo ed">BEAUTY <em>GROUND</em></span>
-      <span class="menu">
-        <a class="ed">홈</a>
-        <a class="ed">카테고리</a>
-        <a class="on ed">라이브</a>
-        <a class="ed">브랜드</a>
-        <a class="ed">이벤트</a>
-      </span>
-      <span class="ic">
-        <span>🔍</span>
-        <span>🛍</span>
-        <span>👤</span>
-      </span>
-    </nav>
+<div class="note">
+  레퍼런스 <b>라이브커머스1.jpg</b> 픽셀 실측 복제 시안 · 상품/가격/재고/판매수는 <b>실제 몰 DB 실데이터</b>(2026-08-08 조회: 쁘띠페 카카오 에너자이징 아이패치 23,000→20,700원·재고 100·쁘띠페 판매중 19종) ·
+  시청자 수와 채팅 문구는 <b>시안 연출용 예시</b>입니다(실서비스에선 실시간 데이터로 대체). 리뷰·별점은 표시하지 않았습니다.
+</div>
 
-    <div class="wrap" data-box data-cid="wrap" data-dir="v">
-      <section data-k="live">
-        <div class="live-row">
-          <div class="player">
-            <span class="badge"><i></i><span class="ed">LIVE</span></span>
-            <span class="views ed">👀 1,248명 시청 중</span>
-            <span class="play">▶</span>
-            <div class="cap">
-              <div class="tt ed">올리오 여름 수분템 특집 — 오늘만 최대 40%</div>
-              <div class="hn ed">진행 김뷰티 · 뷰티그라운드 스튜디오</div>
+<div class="phone">
+  <div class="screen">
+
+    <div class="video">
+      <!-- 실방송 시 Cloudflare Stream 송출 화면 자리 — 시안에선 실제 몰 상품 갤러리 이미지 사용 -->
+      <img src="https://www.petitfee.com/web/product/extra/big/201810/9efd71c19565b519335e0fd5c53440a6.jpg" alt="라이브 영상 영역">
+      <span class="hint ed">LIVE 영상 영역 · 실방송 송출 화면</span>
+    </div>
+    <div class="scrim-top"></div>
+    <div class="scrim-bot"></div>
+
+    <div class="ui">
+
+      <!-- 상단: 진행자 칩 + 시청자 + 닫기 -->
+      <div class="toprow">
+        <div class="hostchip">
+          <span class="ava ed">쁘</span>
+          <span class="nm"><b class="ed">쁘띠페 공식</b><i class="ed">뷰티그라운드 스튜디오</i></span>
+          <span class="followbtn">
+            <svg viewBox="0 0 24 24" fill="var(--follow)"><path d="M12 21s-7.5-4.9-10-9.5C.6 8 2.4 4.5 6 4.5c2.1 0 3.6 1.2 6 3.6 2.4-2.4 3.9-3.6 6-3.6 3.6 0 5.4 3.5 4 7-2.5 4.6-10 9.5-10 9.5z"/></svg>
+            <span class="plus">+</span>
+          </span>
+        </div>
+        <div class="topright">
+          <span class="viewers">
+            <span class="v a">K<span class="mini">LIVE</span></span>
+            <span class="v b">M</span>
+            <span class="v c">J</span>
+          </span>
+          <span class="vcount ed">1,421</span>
+          <span class="closebtn">✕</span>
+        </div>
+      </div>
+
+      <!-- 상단 채팅 버블 -->
+      <div class="livechat-label"><span>🔥</span><span class="ed">실시간 채팅</span></div>
+      <div class="bubbles">
+        <span class="bub ed"><b>@지은맘:</b> 한 통에 몇 매 들어있나요?</span>
+        <span class="bub ed"><b>@뷰티러버:</b> 민감성 피부도 쓸 수 있어요?</span>
+        <span class="bub ed"><b>@소윤:</b> 붙이고 몇 분 두면 되나요?</span>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- 하단: 채팅 리스트 + LIVE 배지 | 상품 카드 -->
+      <div class="botgrid">
+        <div class="botleft">
+          <div class="chatlist">
+            <div class="cl">
+              <span class="cava heart"><svg viewBox="0 0 24 24" fill="var(--heart)"><path d="M12 21s-7.5-4.9-10-9.5C.6 8 2.4 4.5 6 4.5c2.1 0 3.6 1.2 6 3.6 2.4-2.4 3.9-3.6 6-3.6 3.6 0 5.4 3.5 4 7-2.5 4.6-10 9.5-10 9.5z"/></svg></span>
+              <span class="txt"><b class="ed">지은맘</b><span class="ed">한 통에 몇 매 들어있나요?</span></span>
+            </div>
+            <div class="cl">
+              <span class="cava g1">뷰</span>
+              <span class="txt"><b class="ed">@뷰티러버</b><span class="ed">민감성 피부도 괜찮아요?</span></span>
+            </div>
+            <div class="cl">
+              <span class="cava g2">소</span>
+              <span class="txt"><b class="ed">@소윤</b><span class="ed">지금 주문하면 언제 와요?</span></span>
+            </div>
+            <div class="cl">
+              <span class="cava g3">하</span>
+              <span class="txt"><b class="ed">하늘하늘</b><span class="ed">색 너무 예뻐요!</span></span>
             </div>
           </div>
-          <div class="chat">
-            <div class="hd ed">실시간 채팅</div>
-            <div class="msgs">
-              <div class="m ed"><b>지은</b>수분크림 재입고 언제 되나요?</div>
-              <div class="m ed"><b>혜림</b>방금 주문했어요! 배송 기대돼요 💕</div>
-              <div class="m ed"><b>매니저</b>지금 구매하시면 사은품 증정!</div>
-              <div class="m ed"><b>수아</b>토너랑 같이 쓰면 되나요?</div>
-              <div class="m ed"><b>진행자</b>네! 토너 → 세럼 → 크림 순서예요 😊</div>
-            </div>
-            <div class="in"><span class="f ed">응원 메시지를 남겨보세요…</span><span class="s">➤</span></div>
+          <span class="livebadge ed">LIVE</span>
+        </div>
+
+        <!-- 상품 미니카드 — 실제 몰 DB 상품 (products 테이블, 2026-08-08 조회) -->
+        <div class="prodcard">
+          <div class="ribbon"><span>🛍</span><span class="ed">라이브 특가 10%</span></div>
+          <img class="pimg" src="https://www.petitfee.com/web/product/big/202205/512b4ec213fc589818fb430281cda664.jpg" alt="카카오 에너자이징 아이패치">
+          <div class="pbody">
+            <div class="pname ed">쁘띠페 카카오 에너자이징 아이패치</div>
+            <div class="pstock ed">쁘띠페 판매중 19종 · 재고 100개</div>
+            <div class="purgent ed">라이브 방송가 적용 중!</div>
+          </div>
+          <div class="pricebar">
+            <span class="pr"><s class="ed">23,000원</s><span class="ed">20,700원</span></span>
+            <span class="cart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 7h12l-1.2 11a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 7z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></span>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section data-k="goods">
-        <div class="sec"><span class="t2"><span class="lv ed">● 방송 중</span> <span class="ed">단독 특가</span></span><span class="all ed">전체 보기</span></div>
-        <div class="grid" data-box data-cid="grid" data-dir="h">
-          <div class="good" data-k="g1">
-            <span class="tag ed">40%</span>
-            <div class="pic">
-              <svg width="90" height="104" viewBox="0 0 84 100">
-                <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
-                <rect x="16" y="26" width="52" height="66" rx="12" fill="#bfe3f5"/>
-                <rect x="16" y="26" width="52" height="30" rx="12" fill="#a5d5ee"/>
-                <rect x="30" y="12" width="24" height="18" rx="4" fill="#e9eef2"/>
-                <rect x="22" y="52" width="40" height="26" rx="4" fill="#fff"/>
-                <text x="42" y="65" text-anchor="middle" font-size="8" font-weight="800" fill="#28536b">AQUA</text>
-              </svg>
-            </div>
-            <div class="bd ed">올리오</div>
-            <div class="nm ed">수분 아쿠아 크림 50ml</div>
-            <div class="rw"><span class="pr"><em class="ed">40%</em><span class="ed">15,000원</span></span><span class="add">+</span></div>
-          </div>
-          <div class="good" data-k="g2">
-            <span class="tag ed">30%</span>
-            <div class="pic">
-              <svg width="64" height="106" viewBox="0 0 60 102">
-                <ellipse cx="30" cy="97" rx="22" ry="4" fill="rgba(0,0,0,.08)"/>
-                <rect x="14" y="26" width="32" height="68" rx="8" fill="#f2f3ef"/>
-                <rect x="24" y="4" width="12" height="26" rx="3" fill="#d8dad4"/>
-                <rect x="18" y="46" width="24" height="34" rx="3" fill="#fff"/>
-                <text x="30" y="60" text-anchor="middle" font-size="7" font-weight="800" fill="#555">7.5%</text>
-              </svg>
-            </div>
-            <div class="bd ed">닥터랩</div>
-            <div class="nm ed">글리콜릭 앰플 30ml</div>
-            <div class="rw"><span class="pr"><em class="ed">30%</em><span class="ed">22,400원</span></span><span class="add">+</span></div>
-          </div>
-          <div class="good" data-k="g3">
-            <span class="tag ed">특가</span>
-            <div class="pic">
-              <svg width="62" height="104" viewBox="0 0 58 100">
-                <ellipse cx="29" cy="95" rx="20" ry="4" fill="rgba(0,0,0,.08)"/>
-                <rect x="12" y="30" width="34" height="62" rx="8" fill="var(--ac-chip)"/>
-                <rect x="22" y="10" width="14" height="24" rx="3" fill="#c9ccc4"/>
-                <rect x="17" y="48" width="24" height="30" rx="3" fill="#fff"/>
-                <text x="29" y="62" text-anchor="middle" font-size="7" font-weight="800" fill="var(--ac-ink)">VITA</text>
-              </svg>
-            </div>
-            <div class="bd ed">오디크</div>
-            <div class="nm ed">비타 토닝 세럼 30ml</div>
-            <div class="rw"><span class="pr"><em class="ed">사은품</em><span class="ed">38,000원</span></span><span class="add">+</span></div>
-          </div>
-          <div class="good" data-k="g4">
-            <span class="tag ed">20%</span>
-            <div class="pic">
-              <svg width="86" height="100" viewBox="0 0 84 100">
-                <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
-                <rect x="20" y="34" width="44" height="58" rx="10" fill="#f7e8ce"/>
-                <rect x="32" y="16" width="20" height="20" rx="4" fill="#d9cbb1"/>
-                <rect x="26" y="54" width="32" height="24" rx="4" fill="#fff"/>
-                <text x="42" y="67" text-anchor="middle" font-size="7" font-weight="800" fill="#7a5c22">GOLD</text>
-              </svg>
-            </div>
-            <div class="bd ed">쁘띠페</div>
-            <div class="nm ed">골드 콜라겐 크림 50ml</div>
-            <div class="rw"><span class="pr"><em class="ed">20%</em><span class="ed">23,200원</span></span><span class="add">+</span></div>
-          </div>
-        </div>
-      </section>
+      <!-- 최하단: 코멘트 입력 + 리액션 아이콘 -->
+      <div class="bottombar">
+        <span class="cmt"><span class="ed">댓글을 입력하세요…</span>
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        </span>
+        <span class="ricon grad"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></span>
+        <span class="ricon heartbg"><svg viewBox="0 0 24 24" fill="var(--heart)"><path d="M12 21s-7.5-4.9-10-9.5C.6 8 2.4 4.5 6 4.5c2.1 0 3.6 1.2 6 3.6 2.4-2.4 3.9-3.6 6-3.6 3.6 0 5.4 3.5 4 7-2.5 4.6-10 9.5-10 9.5z"/></svg></span>
+        <span class="ricon bag"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg></span>
+      </div>
 
-      <section data-k="sched">
-        <div class="sec"><span class="t2 ed">방송 예정</span><span class="all ed">전체 편성표</span></div>
-        <div class="sched" data-box data-cid="sched" data-dir="h">
-          <div class="sc" data-k="sc1">
-            <span class="d"><span class="dd ed">8/9</span><span class="tt2 ed">토 20:00</span></span>
-            <span><div class="k ed">쁘띠페 신상 런칭</div><div class="v ed">골드 콜라겐 라인 첫 공개</div></span>
-            <span class="al ed">🔔 알림받기</span>
-          </div>
-          <div class="sc" data-k="sc2">
-            <span class="d"><span class="dd ed">8/12</span><span class="tt2 ed">수 19:30</span></span>
-            <span><div class="k ed">닥터랩 피부고민 상담</div><div class="v ed">전문가와 함께하는 Q&A</div></span>
-            <span class="al ed">🔔 알림받기</span>
-          </div>
-          <div class="sc" data-k="sc3">
-            <span class="d"><span class="dd ed">8/15</span><span class="tt2 ed">토 20:00</span></span>
-            <span><div class="k ed">광복절 특집 세일</div><div class="v ed">전 브랜드 최대 50%</div></span>
-            <span class="al ed">🔔 알림받기</span>
-          </div>
-        </div>
-      </section>
     </div>
   </div>
 </div>
 
 <script>
   const root = document.documentElement;
-  document.querySelectorAll('.cbtn').forEach((b) => b.addEventListener('click', () => {
-    root.style.setProperty('--ac1', b.dataset.a1);
-    root.style.setProperty('--ac2', b.dataset.a2);
-    root.style.setProperty('--ac-ink', b.dataset.ink);
-    root.style.setProperty('--ac-chip', b.dataset.chip);
-    document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
-    b.classList.add('on');
-  }));
-  document.querySelectorAll('.obtn[data-r]').forEach((b) => b.addEventListener('click', () => {
-    root.style.setProperty('--radius', b.dataset.r);
-    document.querySelectorAll('.obtn[data-r]').forEach((x) => x.classList.remove('on'));
-    b.classList.add('on');
-  }));
-  document.querySelectorAll('.obtn[data-w]').forEach((b) => b.addEventListener('click', () => {
-    root.style.setProperty('--tw', b.dataset.w);
-    document.querySelectorAll('.obtn[data-w]').forEach((x) => x.classList.remove('on'));
+
+  /* 컬러 모드: 레퍼런스 실측 / BG 골드 / 골드+핑크 혼합 */
+  const MODES = {
+    ref:  { g1:'#7C2F75', g2:'#B22D66', g3:'#CE4C58', cta:'#FF2D54', heart:'#F0377F', follow:'#F8A464', ribbon:'#E03131', nick:'#FCF2D9' },
+    gold: { g1:'#7A5A22', g2:'#B8925A', g3:'#E2C98F', cta:'#C9A96A', heart:'#C9A96A', follow:'#C9A96A', ribbon:'#B8925A', nick:'#F4E9D2' },
+    mix:  { g1:'#7A5A22', g2:'#B8925A', g3:'#E2C98F', cta:'#FF2D54', heart:'#F0377F', follow:'#F8A464', ribbon:'#E03131', nick:'#F4E9D2' },
+  };
+  document.querySelectorAll('.mbtn[data-mode]').forEach((b) => b.addEventListener('click', () => {
+    const m = MODES[b.dataset.mode];
+    root.style.setProperty('--g1', m.g1); root.style.setProperty('--g2', m.g2); root.style.setProperty('--g3', m.g3);
+    root.style.setProperty('--cta', m.cta); root.style.setProperty('--heart', m.heart);
+    root.style.setProperty('--follow', m.follow); root.style.setProperty('--ribbon', m.ribbon);
+    root.style.setProperty('--nick', m.nick);
+    document.querySelectorAll('.mbtn[data-mode]').forEach((x) => x.classList.remove('on'));
     b.classList.add('on');
   }));
 
+  /* 편집 모드 */
   const et = document.getElementById('editToggle');
-  const at = document.getElementById('arrangeToggle');
-  function setEditing(on) {
+  et.addEventListener('click', () => {
+    const on = !document.body.classList.contains('editing');
     document.body.classList.toggle('editing', on);
     document.querySelectorAll('.ed').forEach((el) => el.setAttribute('contenteditable', on ? 'true' : 'false'));
-    et.textContent = on ? '✅ 편집 끝내기' : '✏️ 편집 모드 켜기';
+    et.textContent = on ? '✅ 편집 끝내기' : '✏️ 편집 모드';
     et.classList.toggle('on', on);
-    if (on) setArranging(false);
-  }
-  function setArranging(on) {
-    document.body.classList.toggle('arranging', on);
-    document.querySelectorAll('[data-k]').forEach((el) => el.setAttribute('draggable', on ? 'true' : 'false'));
-    at.textContent = on ? '✅ 배치 끝내기' : '🧩 배치 모드 켜기';
-    at.classList.toggle('on', on);
-    if (on) setEditing(false);
-  }
-  et.addEventListener('click', () => setEditing(!document.body.classList.contains('editing')));
-  at.addEventListener('click', () => setArranging(!document.body.classList.contains('arranging')));
-
-  let dragEl = null;
-  document.addEventListener('dragstart', (e) => {
-    if (!document.body.classList.contains('arranging')) { e.preventDefault(); return; }
-    const t = e.target.closest('[data-k]');
-    if (!t) { e.preventDefault(); return; }
-    dragEl = t;
-    t.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    try { e.dataTransfer.setData('text/plain', t.dataset.k); } catch (err) { /* 무시 */ }
   });
-  document.addEventListener('dragover', (e) => {
-    if (!dragEl) return;
-    e.preventDefault();
-    let t = e.target.closest('[data-k]');
-    while (t && t !== dragEl && t.parentElement !== dragEl.parentElement) t = t.parentElement.closest('[data-k]');
-    if (!t || t === dragEl) return;
-    const r = t.getBoundingClientRect();
-    const dir = (t.parentElement.dataset.dir || 'v');
-    const before = dir === 'v' ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
-    t.parentElement.insertBefore(dragEl, before ? t : t.nextSibling);
-  });
-  document.addEventListener('dragend', () => {
-    if (dragEl) dragEl.classList.remove('dragging');
-    dragEl = null;
-    broadcast();
-  });
-
-  const hexInput = document.getElementById('hexInput');
-  const colorGrp = document.getElementById('colorGrp');
-  function h2r(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-  function r2h(r, g, b) { return '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
-  function mix(hex, target, ratio) { const a = h2r(hex); const t = h2r(target); return r2h(a[0] + (t[0] - a[0]) * ratio, a[1] + (t[1] - a[1]) * ratio, a[2] + (t[2] - a[2]) * ratio); }
-  function lum(hex) { const [r, g, b] = h2r(hex); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
-  function makePalette(base) {
-    return {
-      a1: base,
-      a2: mix(base, '#ffffff', 0.28),
-      ink: lum(base) > 0.6 ? mix(base, '#000000', 0.72) : mix(base, '#ffffff', 0.88),
-      chip: mix(base, '#ffffff', 0.86),
-    };
-  }
-  function addSwatch(p, select) {
-    const b = document.createElement('button');
-    b.className = 'cbtn';
-    b.style.background = p.a1;
-    b.dataset.a1 = p.a1; b.dataset.a2 = p.a2; b.dataset.ink = p.ink; b.dataset.chip = p.chip;
-    b.textContent = String(colorGrp.querySelectorAll('.cbtn').length + 1);
-    b.addEventListener('click', () => {
-      root.style.setProperty('--ac1', b.dataset.a1);
-      root.style.setProperty('--ac2', b.dataset.a2);
-      root.style.setProperty('--ac-ink', b.dataset.ink);
-      root.style.setProperty('--ac-chip', b.dataset.chip);
-      document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
-      b.classList.add('on');
-    });
-    colorGrp.appendChild(b);
-    if (select) b.click();
-    return b;
-  }
-  document.getElementById('hexAdd').addEventListener('click', () => {
-    let v = hexInput.value.trim();
-    if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
-    if (!/^#[0-9a-fA-F]{6}$/.test(v)) { hexInput.style.borderColor = '#e05555'; return; }
-    hexInput.style.borderColor = '#e4e6ec';
-    addSwatch(makePalette(v.toLowerCase()), true);
-    hexInput.value = '';
-    setTimeout(broadcast, 0);
-  });
-  hexInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('hexAdd').click(); });
-
-  /* ── 서버 연동 (저장 위치: theme.draftLive) ── */
-  const SB_URL = 'https://bjqtuklkskrqzbuxdwxm.supabase.co';
-  const SB_KEY = 'sb_publishable_nuBbC2D1_S_eV0fA9OAjhQ_ntsloX0Q';
-  const eds = () => Array.from(document.querySelectorAll('.ed'));
-
-  function currentCfg() {
-    const c = document.querySelector('.cbtn.on');
-    const r = document.querySelector('.obtn[data-r].on');
-    const w = document.querySelector('.obtn[data-w].on');
-    const layout = {};
-    document.querySelectorAll('[data-cid]').forEach((box) => {
-      layout[box.dataset.cid] = Array.from(box.children).filter((ch) => ch.dataset && ch.dataset.k).map((ch) => ch.dataset.k);
-    });
-    return {
-      color: c ? { a1: c.dataset.a1, a2: c.dataset.a2, ink: c.dataset.ink, chip: c.dataset.chip } : null,
-      radius: r ? r.dataset.r : null,
-      w: w ? w.dataset.w : null,
-      layout,
-      texts: eds().map((e) => e.innerText),
-    };
-  }
-  function broadcast() {
-    try { parent.postMessage({ type: 'bgDraftLiveCfg', cfg: currentCfg() }, location.origin); } catch (e) { /* 무시 */ }
-  }
-  function applyCfg(c) {
-    if (!c) return;
-    if (c.color && c.color.a1) {
-      root.style.setProperty('--ac1', c.color.a1);
-      root.style.setProperty('--ac2', c.color.a2);
-      root.style.setProperty('--ac-ink', c.color.ink);
-      root.style.setProperty('--ac-chip', c.color.chip);
-      if (!Array.from(document.querySelectorAll('.cbtn')).some((b) => b.dataset.a1 === c.color.a1)) {
-        addSwatch(c.color, false);
-      }
-      document.querySelectorAll('.cbtn').forEach((b) => b.classList.toggle('on', b.dataset.a1 === c.color.a1));
-    }
-    if (c.layout) {
-      Object.keys(c.layout).forEach((cid) => {
-        const box = document.querySelector(`[data-cid="${cid}"]`);
-        if (!box) return;
-        c.layout[cid].forEach((k) => {
-          const el = Array.from(box.children).find((ch) => ch.dataset && ch.dataset.k === k);
-          if (el) box.appendChild(el);
-        });
-      });
-    }
-    if (c.radius) {
-      root.style.setProperty('--radius', c.radius);
-      document.querySelectorAll('.obtn[data-r]').forEach((b) => b.classList.toggle('on', b.dataset.r === c.radius));
-    }
-    if (c.w) {
-      root.style.setProperty('--tw', c.w);
-      document.querySelectorAll('.obtn[data-w]').forEach((b) => b.classList.toggle('on', b.dataset.w === c.w));
-    }
-    if (Array.isArray(c.texts)) {
-      eds().forEach((e, i) => {
-        if (typeof c.texts[i] === 'string' && c.texts[i] !== e.innerText) e.textContent = c.texts[i];
-      });
-    }
-  }
-  document.addEventListener('click', (e) => { if (e.target.closest('.cbtn, .obtn')) setTimeout(broadcast, 0); });
-  document.addEventListener('input', (e) => { if (e.target.closest && e.target.closest('.ed')) broadcast(); });
-
-  (function initFromServer() {
-    const raw = new URLSearchParams(location.search).get('cfg');
-    if (raw) {
-      try { applyCfg(JSON.parse(raw)); } catch (e) { /* 무시 */ }
-      setTimeout(broadcast, 0);
-      return;
-    }
-    fetch(`${SB_URL}/rest/v1/home_settings?id=eq.1&select=theme`, {
-      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
-    })
-      .then((r) => r.json())
-      .then((rows) => {
-        const d = rows && rows[0] && rows[0].theme && rows[0].theme.draftLive;
-        if (d) applyCfg(d);
-        setTimeout(broadcast, 0);
-      })
-      .catch(() => {});
-  })();
 </script>
 </body>
 </html>
