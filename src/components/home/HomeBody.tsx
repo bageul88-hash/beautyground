@@ -6,13 +6,11 @@ import CategoryShortcutGrid from './CategoryShortcutGrid'
 import ProductRail from './ProductRail'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
-import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
 
 interface HomeBodyProps {
   marqueeItems: string[]
   banners: HeroBanner[]
   categories: string[]
-  categoryThumbnails: CategoryThumbnail[]
   recommended: ShopProduct[]
   seasonLabel: string | null
   products: ShopProduct[]
@@ -29,7 +27,6 @@ export default function HomeBody({
   marqueeItems,
   banners,
   categories,
-  categoryThumbnails,
   recommended,
   seasonLabel,
   products,
@@ -45,7 +42,7 @@ export default function HomeBody({
       <AppHeader />
       <HeroCarousel banners={banners} />
       <TrustStrip />
-      <CategoryShortcutGrid categories={categories} thumbnails={categoryThumbnails} onSelect={onCategoryClick} />
+      <CategoryShortcutGrid categories={categories} onSelect={onCategoryClick} />
 
       {/* 추천 상품·신상품·할인은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
           좌우 버튼 탐색이 항상 일치한다. */}

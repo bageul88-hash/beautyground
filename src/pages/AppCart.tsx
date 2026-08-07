@@ -148,7 +148,7 @@ export default function AppCart() {
           <p className="text-[13px] text-ink-soft mb-6">마음에 드는 상품을 담아보세요</p>
           <button
             onClick={() => navigate('/app/home')}
-            className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3 focus:outline-none focus-visible:shadow-ring"
+            className="rounded-pill bg-ink text-paper font-bold text-[14px] px-8 py-3 focus:outline-none focus-visible:shadow-ring"
           >
             쇼핑 계속하기
           </button>
@@ -161,7 +161,7 @@ export default function AppCart() {
               id="select-all"
               checked={selectableLines.length > 0 && selected.size === selectableLines.length}
               onChange={toggleAll}
-              className="w-4 h-4 accent-ink"
+              className="w-4 h-4 accent-accent"
               aria-label="전체 선택"
             />
             <label htmlFor="select-all" className="text-[13px] text-ink cursor-pointer">
@@ -177,8 +177,8 @@ export default function AppCart() {
               return (
                 <div
                   key={line.id}
-                  className={`bg-paper p-4 border ${
-                    unavailable ? 'border-rule opacity-60' : selected.has(line.id) ? 'border-ink' : 'border-rule'
+                  className={`bg-paper p-4 rounded-card shadow-card border ${
+                    unavailable ? 'border-rule opacity-60' : selected.has(line.id) ? 'border-accent' : 'border-rule'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -187,10 +187,10 @@ export default function AppCart() {
                       checked={selected.has(line.id)}
                       onChange={() => toggleSelect(line.id)}
                       disabled={unavailable}
-                      className="w-4 h-4 accent-ink mt-1 flex-shrink-0 disabled:opacity-40"
+                      className="w-4 h-4 accent-accent mt-1 flex-shrink-0 disabled:opacity-40"
                       aria-label={`${line.product.name} 선택`}
                     />
-                    <div className="w-16 h-16 overflow-hidden bg-quiet flex-shrink-0 relative">
+                    <div className="w-16 h-16 rounded-md overflow-hidden bg-quiet flex-shrink-0 relative">
                       {line.product.thumbnail_url ? (
                         <img src={line.product.thumbnail_url} alt="" className="w-full h-full object-cover" />
                       ) : null}
@@ -217,7 +217,7 @@ export default function AppCart() {
                             <p className="text-[11px] text-signal-red mt-1">재고 {stock}개 남음</p>
                           )}
                           <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center gap-2 rounded-control border border-rule">
+                            <div className="flex items-center gap-2 rounded-pill border border-rule">
                               <button
                                 onClick={() => updateQty(line, -1)}
                                 className="w-7 h-7 flex items-center justify-center text-ink-soft disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
@@ -251,7 +251,7 @@ export default function AppCart() {
             })}
           </div>
 
-          <div className="mx-4 mt-3 bg-paper p-4 border border-rule">
+          <div className="mx-4 mt-3 bg-paper p-4 rounded-card shadow-card border border-rule">
             <h2 className="text-[14px] font-bold text-ink mb-3">주문 요약</h2>
             <div className="space-y-2 text-[13px]">
               <div className="flex justify-between">
@@ -288,7 +288,7 @@ export default function AppCart() {
             <button
               onClick={goOrder}
               disabled={selected.size === 0}
-              className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
+              className="w-full rounded-card bg-ink text-paper font-bold text-[15px] py-4 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-ring"
             >
               {selected.size > 0 ? `선택 상품 주문 (${total.toLocaleString('ko-KR')}원)` : '상품을 선택해주세요'}
             </button>

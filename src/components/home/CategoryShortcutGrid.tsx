@@ -1,46 +1,29 @@
-import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
-import ImagePlaceholder from '../common/ImagePlaceholder'
-
 interface CategoryShortcutGridProps {
   categories: string[]
-  thumbnails: CategoryThumbnail[]
   onSelect: (category: string) => void
 }
 
 // 홈 화면 카테고리 바로가기 — 상품이 있는 카테고리만 노출.
-// 「생방송 슬레이트」 월드: 원형은 프로필과 온에어 표시등에만 허용되므로
-// 카테고리 썸네일은 직각 타일로 두고, 격자 자체가 화면의 뼈대가 되게 한다.
-export default function CategoryShortcutGrid({ categories, thumbnails, onSelect }: CategoryShortcutGridProps) {
-  const imageOf = (category: string) => thumbnails.find((t) => t.category === category)?.imageUrl ?? null
-
+// 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측: 이미지 타일 대신
+// 테두리 알약 칩 한 줄(가로 스크롤)로 — 레퍼런스의 Fragrance/Makeup/Hair/Skincare와 동일 형태.
+export default function CategoryShortcutGrid({ categories, onSelect }: CategoryShortcutGridProps) {
   if (categories.length === 0) return null
 
   return (
-    <section className="pt-8 px-4" aria-labelledby="home-category-grid">
+    <section className="pt-6" aria-labelledby="home-category-grid">
       <h2 id="home-category-grid" className="sr-only">
         카테고리
       </h2>
-      <div className="grid grid-cols-4 gap-x-2 gap-y-4">
-        {categories.map((category) => {
-          const image = imageOf(category)
-          return (
-            <button
-              key={category}
-              onClick={() => onSelect(category)}
-              className="flex flex-col items-center gap-2 focus:outline-none focus-visible:shadow-ring"
-              aria-label={category}
-            >
-              <div className="w-full aspect-square overflow-hidden bg-quiet">
-                {image ? (
-                  <img src={image} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <ImagePlaceholder />
-                )}
-              </div>
-              <span className="text-[12px] font-bold text-ink truncate max-w-full">{category}</span>
-            </button>
-          )
-        })}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => onSelect(category)}
+            className="shrink-0 rounded-pill border border-rule px-4 py-2.5 text-[13px] font-bold text-ink focus:outline-none focus-visible:shadow-ring"
+          >
+            {category}
+          </button>
+        ))}
       </div>
     </section>
   )

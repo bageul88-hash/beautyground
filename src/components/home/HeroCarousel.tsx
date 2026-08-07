@@ -4,10 +4,9 @@ import type { HeroBanner } from '../../hooks/useHeroBanners'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 
-// 홈 히어로 배너: 관리자가 고른 상품을 이미지 + 하단 정보바로 노출.
-// 「생방송 슬레이트」 월드 — 방송 자막(lower third)의 구조를 그대로 쓴다:
-// 이미지 위에 글자를 얹지 않고, 이미지 아래 흰 면에 정보를 얹는다.
-// (그래서 그라데이션 스크림이 필요 없다 — 이 월드는 그라데이션을 쓰지 않는다.)
+// 홈 히어로 배너: 관리자가 고른 상품을 그린 그라데이션 카드로 노출.
+// 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측 적용 — 카드 배경 그라데이션
+// #6DB33F→#94D64F, 이미지는 카드 우하단에 걸치고, 좌하단 흰 알약이 CTA를 대신한다.
 export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
@@ -66,13 +65,13 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
   return (
     <section
-      className="relative select-none border-b border-rule bg-paper"
+      className="relative select-none px-4 pt-4 pb-1"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       aria-roledescription="carousel"
       aria-label="추천 배너"
     >
-      <div className="overflow-hidden">
+      <div className="overflow-hidden rounded-card">
         <div
           className={`flex ${reduceMotion ? '' : 'transition-transform duration-500 ease-out'}`}
           style={{ transform: `translateX(-${current * 100}%)` }}
@@ -85,53 +84,44 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
             if (product) {
               const hasSale = product.sale_price != null && product.sale_price < product.price
               const rate = hasSale ? Math.round((1 - product.sale_price! / product.price) * 100) : 0
-              // 히어로는 가격 대신 큐레이션 성격을 보여준다(2026-08-08 대표님 지시):
-              // 할인 중 → 특가세일, 최근 45일 내 등록 → 신상품, 그 외 → 추천상품
+              // 큐레이션 문구: 할인 중이면 퍼센트, 최근 45일 내 등록이면 NEW, 그 외 BUY NOW만
               const isNew =
                 product.created_at != null &&
                 Date.now() - new Date(product.created_at).getTime() < 1000 * 60 * 60 * 24 * 45
-              const tag = hasSale
-                ? { label: `특가세일 -${rate}%`, className: 'bg-signal-red text-paper' }
-                : isNew
-                  ? { label: '신상품', className: 'bg-signal-blue text-paper' }
-                  : { label: '추천상품', className: 'bg-ink text-paper' }
+              const ctaLabel = hasSale ? `${rate}% OFF | BUY NOW` : isNew ? 'NEW | BUY NOW' : 'BUY NOW'
               return (
                 <button
                   key={banner.id}
                   onClick={() => navigate(`/app/product/${product.id}`)}
                   tabIndex={hidden ? -1 : 0}
                   aria-hidden={hidden}
-                  className="w-full flex-shrink-0 text-left focus:outline-none focus-visible:shadow-ring"
+                  className="relative min-h-[220px] w-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-hero-1 to-hero-2 p-5 text-left focus:outline-none focus-visible:shadow-ring"
                   aria-label={product.name}
                 >
-                  {/* object-contain: 브랜드 원본 비율이 배너 틀과 달라도 사은품 태그·프로모션 배지가 잘리지 않음 */}
-                  <div className="aspect-square bg-quiet">
+                  <div className="relative z-10 max-w-[62%]">
+                    {product.brand ? (
+                      <span className="text-[12px] font-bold text-paper/90">{product.brand}</span>
+                    ) : null}
+                    <h2 className="mt-1.5 text-[20px] font-bold leading-tight tracking-[-0.02em] text-paper line-clamp-2">
+                      {custom?.headline || product.name}
+                    </h2>
+                    {custom?.subcopy && <p className="mt-2 text-[12px] leading-relaxed text-paper/90 line-clamp-2">{custom.subcopy}</p>}
+                    <span className="mt-4 inline-block rounded-pill bg-paper/95 px-3.5 py-2 text-[11px] font-bold text-accent-ink">
+                      {ctaLabel}
+                    </span>
+                  </div>
+                  {/* 상품 이미지 — 카드 우하단에 걸쳐서, 브랜드 원본 비율 유지 */}
+                  <div className="pointer-events-none absolute bottom-0 right-0 h-[85%] w-[44%]">
                     {product.thumbnail_url ? (
                       <img
                         src={product.thumbnail_url}
-                        alt={product.name}
+                        alt=""
                         loading={i === 0 ? 'eager' : 'lazy'}
-                        className="h-full w-full object-contain"
+                        className="h-full w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.25)]"
                       />
                     ) : (
-                      <ImagePlaceholder />
+                      <ImagePlaceholder className="h-full w-full" />
                     )}
-                  </div>
-                  {/* 자막바: 이미지 아래 흰 면. 가격 숫자 대신 큐레이션 배지 + 상품명 */}
-                  <div className="border-t border-rule px-4 py-4">
-                    <span
-                      className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums ${tag.className}`}
-                    >
-                      {tag.label}
-                    </span>
-                    {/* 관리자가 headline을 넣어두면 마케팅 카피를 함께 보여준다(2026-08-06) */}
-                    {custom?.headline && (
-                      <p className="mt-2 text-[13px] font-bold text-ink-soft">{custom.headline}</p>
-                    )}
-                    <h2 className="mt-1.5 text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
-                      {product.name}
-                    </h2>
-                    {custom?.subcopy && <p className="mt-1.5 text-[13px] text-ink-faint">{custom.subcopy}</p>}
                   </div>
                 </button>
               )
@@ -165,7 +155,7 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                     ) : null}
                   </div>
                   {(custom.headline || custom.subcopy) && (
-                    <div className="border-t border-rule px-4 py-4">
+                    <div className="bg-paper px-4 py-4">
                       {custom.headline && (
                         <h2 className="text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
                           {custom.headline}
@@ -188,7 +178,7 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
           <button
             onClick={() => goTo(current - 1)}
             aria-label="이전 배너"
-            className="absolute left-3 top-[calc(50%-2.5rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-control border border-rule bg-paper text-ink focus:outline-none focus-visible:shadow-ring"
+            className="absolute left-6 top-[calc(50%-0.75rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-pill bg-paper/90 text-ink shadow-card focus:outline-none focus-visible:shadow-ring"
           >
             <span aria-hidden="true" className="text-base font-bold leading-none">
               ‹
@@ -197,22 +187,22 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
           <button
             onClick={() => goTo(current + 1)}
             aria-label="다음 배너"
-            className="absolute right-3 top-[calc(50%-2.5rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-control border border-rule bg-paper text-ink focus:outline-none focus-visible:shadow-ring"
+            className="absolute right-6 top-[calc(50%-0.75rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-pill bg-paper/90 text-ink shadow-card focus:outline-none focus-visible:shadow-ring"
           >
             <span aria-hidden="true" className="text-base font-bold leading-none">
               ›
             </span>
           </button>
-          {/* 진행 표시 — 원형 점 대신 방송 눈금처럼 납작한 막대 */}
-          <div className="flex justify-center gap-1.5 px-4 pb-4">
+          {/* 진행 표시 */}
+          <div className="flex justify-center gap-1.5 py-3">
             {banners.map((b, i) => (
               <button
                 key={b.id}
                 onClick={() => goTo(i)}
                 aria-label={`${i + 1}번째 배너로 이동`}
                 aria-current={current === i ? 'true' : undefined}
-                className={`h-[3px] transition-all duration-300 focus:outline-none focus-visible:shadow-ring ${
-                  current === i ? 'w-7 bg-ink' : 'w-3 bg-rule'
+                className={`h-[6px] rounded-pill transition-all duration-300 focus:outline-none focus-visible:shadow-ring ${
+                  current === i ? 'w-6 bg-accent' : 'w-[6px] bg-rule'
                 }`}
               />
             ))}

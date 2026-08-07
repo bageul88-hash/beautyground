@@ -267,7 +267,7 @@ export default function AppProductDetail() {
         rightElement={
           <div className="flex items-center gap-3 text-ink">
             <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
-              <IconHeart filled={wished} />
+              <IconHeart filled={wished} className={`w-[22px] h-[22px] ${wished ? 'text-accent' : ''}`} />
             </button>
             <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="focus:outline-none focus-visible:shadow-ring">
               <IconCart />
@@ -281,8 +281,8 @@ export default function AppProductDetail() {
 
       {/* 다른 /app/* 페이지와 동일하게 항상 480px 단일 컬럼 (데스크톱 전용 2컬럼 레이아웃 폐기) */}
       {view.images.length > 0 ? (
-        <div>
-          <div className="aspect-square max-h-[560px] bg-quiet flex items-center justify-center overflow-hidden">
+        <div className="px-4 pt-4">
+          <div className="aspect-square max-h-[560px] rounded-card bg-quiet flex items-center justify-center overflow-hidden">
             <img
               src={view.images[Math.min(activeImg, view.images.length - 1)]}
               alt={view.name}
@@ -290,22 +290,20 @@ export default function AppProductDetail() {
             />
           </div>
           {view.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
-              {view.images.map((url, i) => (
+            <div className="flex justify-center gap-1.5 pt-3">
+              {view.images.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  className={`shrink-0 w-14 h-14 overflow-hidden border-2 focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'border-ink' : 'border-rule'}`}
+                  className={`h-[6px] rounded-pill transition-all focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'w-6 bg-accent' : 'w-[6px] bg-rule'}`}
                   aria-label={`${i + 1}번째 이미지`}
-                >
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                </button>
+                />
               ))}
             </div>
           )}
         </div>
       ) : (
-        <ImagePlaceholder className="aspect-square w-full" />
+        <ImagePlaceholder className="aspect-square w-full rounded-card" />
       )}
 
       <div className="px-4 pt-5 pb-4">
@@ -313,16 +311,18 @@ export default function AppProductDetail() {
         <h1 className="text-[18px] font-bold text-ink mt-1 leading-tight">{view.name}</h1>
 
         {/* 가격 */}
-        <div className="flex items-end gap-2 mt-3">
-          {discountRate > 0 && (
-            <span className="text-[22px] font-bold tabular-nums text-ink">{discountRate}%</span>
-          )}
+        <div className="flex items-center gap-2 mt-3">
           <span className="text-[24px] font-bold tabular-nums text-ink">
             {view.price.toLocaleString('ko-KR')}원
           </span>
           {view.originalPrice && (
-            <span className="text-ink-faint text-[15px] tabular-nums line-through pb-0.5">
+            <span className="text-ink-faint text-[15px] tabular-nums line-through">
               {view.originalPrice.toLocaleString('ko-KR')}원
+            </span>
+          )}
+          {discountRate > 0 && (
+            <span className="rounded-pill bg-accent-lite px-2 py-0.5 text-[13px] font-bold tabular-nums text-accent-ink">
+              -{discountRate}%
             </span>
           )}
         </div>
@@ -348,7 +348,7 @@ export default function AppProductDetail() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-9 h-9 rounded-control border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+              className="w-9 h-9 rounded-pill border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="수량 감소"
               disabled={quantity <= 1 || view.soldOut}
             >
@@ -359,7 +359,7 @@ export default function AppProductDetail() {
             </span>
             <button
               onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
-              className="w-9 h-9 rounded-control border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+              className="w-9 h-9 rounded-pill border border-rule flex items-center justify-center text-ink disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="수량 증가"
               disabled={quantity >= maxQty || view.soldOut}
             >
@@ -433,7 +433,7 @@ export default function AppProductDetail() {
             <button
               onClick={onAddToCart}
               disabled={view.soldOut}
-              className="shrink-0 rounded-control border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+              className="shrink-0 rounded-pill border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="장바구니 담기"
             >
               <IconCart className="w-5 h-5" />
@@ -441,7 +441,7 @@ export default function AppProductDetail() {
             <button
               onClick={onBuy}
               disabled={view.soldOut}
-              className="flex-1 rounded-control bg-ink text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
+              className="flex-1 rounded-pill bg-accent text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             >
               {view.soldOut ? '일시 품절' : '구매하기'}
             </button>

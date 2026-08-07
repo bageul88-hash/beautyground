@@ -99,11 +99,10 @@ export default function ProductRail({
             const isWished = wished.has(product.id)
             return (
               // 카드 전체(이미지+이름+가격)를 하나의 외곽선 안에 — 이미지만 테두리, 텍스트는 밖이었던
-              // 구조를 레퍼런스처럼 한 장의 사각 카드로 통합.
+              // 구조를 레퍼런스처럼 한 장의 둥근 카드로 통합(2026-08-08 피그마 레퍼런스 라운드+그림자 적용).
               <div
                 key={product.id}
-                className="relative w-[42%] flex-shrink-0 snap-start rounded-control overflow-hidden border"
-                style={{ borderColor: '#C8CACE' }}
+                className="relative w-[42%] flex-shrink-0 snap-start rounded-card overflow-hidden bg-paper shadow-card"
               >
                 {/* 이미지 박스 — position: relative 기준점. 담기 버튼이 이 박스의 -bottom 오프셋으로
                     붙어서, 화면 크기가 바뀌어도(카드 폭 42%는 반응형) 항상 이미지 하단 경계에 정확히 걸친다. */}
@@ -137,9 +136,9 @@ export default function ProductRail({
                     type="button"
                     onClick={(e) => void toggleWish(e, product.id)}
                     aria-label={isWished ? '찜 해제' : '찜하기'}
-                    className="absolute top-2 right-2 h-8 px-2.5 rounded-control bg-paper flex items-center gap-1 focus:outline-none focus-visible:shadow-ring"
+                    className="absolute top-2 right-2 h-8 px-2.5 rounded-pill bg-paper flex items-center gap-1 shadow-card focus:outline-none focus-visible:shadow-ring"
                   >
-                    <IconHeart filled={isWished} className={`w-4 h-4 ${isWished ? 'text-signal-red' : 'text-ink'}`} />
+                    <IconHeart filled={isWished} className={`w-4 h-4 ${isWished ? 'text-accent' : 'text-ink'}`} />
                     <span className="text-[12px] font-bold text-ink">찜</span>
                   </button>
 
@@ -149,7 +148,7 @@ export default function ProductRail({
                       type="button"
                       onClick={(e) => void quickAdd(e, product.id)}
                       aria-label="장바구니 담기"
-                      className="absolute -bottom-4 right-2.5 h-8 px-2.5 rounded-control bg-ink flex items-center gap-1 shadow-[0_2px_6px_rgba(0,0,0,0.25)] focus:outline-none focus-visible:shadow-ring"
+                      className="absolute -bottom-4 right-2.5 h-8 px-2.5 rounded-pill bg-ink flex items-center gap-1 shadow-[0_2px_6px_rgba(0,0,0,0.25)] focus:outline-none focus-visible:shadow-ring"
                     >
                       {addedId === product.id ? (
                         <span className="text-paper text-[12px] font-bold">담았어요</span>
@@ -173,7 +172,7 @@ export default function ProductRail({
                     </p>
                   )}
                   <div className="mt-1.5 flex items-baseline gap-1.5 pr-9">
-                    {hasSale && <span className="text-[16px] font-bold tabular-nums text-signal-red">{rate}%</span>}
+                    {hasSale && <span className="text-[16px] font-bold tabular-nums text-accent-deep">{rate}%</span>}
                     <span className="text-[17px] font-bold tabular-nums text-ink">{comma(sell)}</span>
                     <span className="text-[13px] text-ink-faint">원</span>
                   </div>

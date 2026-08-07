@@ -10,6 +10,7 @@ export interface HeroBanner {
     price: number
     sale_price: number | null
     thumbnail_url: string | null
+    brand: string | null
     // 히어로 큐레이션 배지(신상품 판별)용 — 관리자 미리보기처럼 안 채우는 곳도 있어 옵셔널
     created_at?: string | null
   } | null
@@ -35,11 +36,12 @@ interface BannerRow {
     price: number
     sale_price: number | null
     thumbnail_url: string | null
+    brand: string | null
     created_at: string | null
   } | null
 }
 
-const BANNER_SELECT = 'id,sort_order,image_url,headline,subcopy,link_url,products(id,name,price,sale_price,thumbnail_url,created_at)'
+const BANNER_SELECT = 'id,sort_order,image_url,headline,subcopy,link_url,products(id,name,price,sale_price,thumbnail_url,brand,created_at)'
 
 function mapRow(r: BannerRow): HeroBanner {
   return {

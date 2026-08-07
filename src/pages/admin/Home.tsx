@@ -9,7 +9,6 @@ import { useSaleProducts } from '../../hooks/useSaleProducts'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
 import { SEASONS, autoSeasonByMonth } from '../../lib/season'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
-import type { CategoryThumbnail } from '../../hooks/useCategoryThumbnails'
 
 interface BannerRow {
   id: string
@@ -20,7 +19,15 @@ interface BannerRow {
   headline: string | null
   subcopy: string | null
   link_url: string | null
-  products: { id: string; name: string; price: number; sale_price: number | null; thumbnail_url: string | null } | null
+  products: {
+    id: string
+    name: string
+    price: number
+    sale_price: number | null
+    thumbnail_url: string | null
+    brand: string | null
+    created_at: string | null
+  } | null
 }
 
 interface ProductOption {
@@ -36,7 +43,7 @@ interface CategoryThumbRow {
 }
 
 const BANNER_SELECT =
-  'id,sort_order,active,product_id,image_url,headline,subcopy,link_url,products(id,name,price,sale_price,thumbnail_url)'
+  'id,sort_order,active,product_id,image_url,headline,subcopy,link_url,products(id,name,price,sale_price,thumbnail_url,brand,created_at)'
 
 export default function AdminHome() {
   // 마퀴 문구 (draft → 저장)
@@ -240,12 +247,6 @@ export default function AdminHome() {
       // 예전엔 여기만 따로 null 처리해서 미리보기가 실제 화면(마케팅 카피 노출)과 다르게 나왔었음, 2026-08-06)
       custom: { image_url: b.image_url, headline: b.headline, subcopy: b.subcopy, link_url: b.link_url },
     }))
-
-  const previewCategoryThumbnails: CategoryThumbnail[] = categories.map((c, i) => ({
-    category: c,
-    imageUrl: categoryImages[c] ?? null,
-    sortOrder: i,
-  }))
 
   // --- 카테고리 대표 이미지 ---
   const saveCategoryImage = async (category: string) => {
@@ -549,7 +550,6 @@ export default function AdminHome() {
                   marqueeItems={marqueeItems.filter((t) => t.trim())}
                   banners={previewBanners}
                   categories={categories}
-                  categoryThumbnails={previewCategoryThumbnails}
                   recommended={previewRecommended}
                   seasonLabel={previewSeasonLabel}
                   products={previewProducts}

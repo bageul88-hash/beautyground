@@ -38,7 +38,7 @@ export default function AppHeader() {
       <Link
         to="/app/category/all"
         aria-label="검색·카테고리 탐색"
-        className="w-10 h-10 rounded-control bg-quiet flex items-center justify-center text-ink focus:outline-none focus-visible:shadow-ring"
+        className="w-10 h-10 rounded-pill border border-rule flex items-center justify-center text-ink focus:outline-none focus-visible:shadow-ring"
       >
         <IconSearch className="w-[18px] h-[18px]" />
       </Link>

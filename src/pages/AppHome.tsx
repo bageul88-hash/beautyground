@@ -69,7 +69,6 @@ export default function AppHome() {
           marqueeItems={[]}
           banners={banners}
           categories={categories}
-          categoryThumbnails={categoryThumbnails}
           recommended={recommended}
           seasonLabel={seasonLabel}
           products={products}
