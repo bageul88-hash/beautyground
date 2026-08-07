@@ -226,24 +226,8 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
       {count > 1 && (
         <>
-          <button
-            onClick={() => goTo(current - 1)}
-            aria-label="이전 배너"
-            className="absolute left-6 top-[calc(50%-0.75rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-pill bg-paper/90 text-ink shadow-card focus:outline-none focus-visible:shadow-ring"
-          >
-            <span aria-hidden="true" className="text-base font-bold leading-none">
-              ‹
-            </span>
-          </button>
-          <button
-            onClick={() => goTo(current + 1)}
-            aria-label="다음 배너"
-            className="absolute right-6 top-[calc(50%-0.75rem)] z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-pill bg-paper/90 text-ink shadow-card focus:outline-none focus-visible:shadow-ring"
-          >
-            <span aria-hidden="true" className="text-base font-bold leading-none">
-              ›
-            </span>
-          </button>
+          {/* 좌우 화살표 버튼은 카드 텍스트(좌측 정렬)와 겹쳐 가리는 문제가 있었고(2026-08-08 대표님 지적),
+              레퍼런스(쇼핑몰예시.jpg)에도 화살표 없이 점만 있다 — 이미 손가락 스와이프가 되므로 제거. */}
           {/* 진행 표시 */}
           <div className="flex justify-center gap-1.5 py-3">
             {banners.map((b, i) => (

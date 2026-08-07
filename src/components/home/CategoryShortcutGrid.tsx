@@ -14,12 +14,13 @@ export default function CategoryShortcutGrid({ categories, onSelect }: CategoryS
       <h2 id="home-category-grid" className="sr-only">
         카테고리
       </h2>
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4">
+      {/* 상품 레일(ProductRail)과 동일한 스와이프 느낌 — 스크롤이 부드럽고 칩 경계에서 스냅된다(2026-08-08 대표님 지시). */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth px-4">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => onSelect(category)}
-            className="shrink-0 rounded-pill border border-rule px-4 py-2.5 text-[13px] font-bold text-ink focus:outline-none focus-visible:shadow-ring"
+            className="shrink-0 snap-start rounded-pill border border-rule px-4 py-2.5 text-[13px] font-bold text-ink focus:outline-none focus-visible:shadow-ring"
           >
             {category}
           </button>
