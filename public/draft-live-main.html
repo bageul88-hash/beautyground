@@ -15,7 +15,7 @@
   body {
     /* ─── 시안 토큰 (라이브커머스메인페이지예시.png 픽셀 실측) ─── */
     --bg:#000000; --ink:#FFFFFF; --sub:#9C9C9C; --faint:#6E6E6E;
-    --live:#E8402F;             /* LIVE 배지 레드 (실측 군집) */
+    --live:#E8402F; --live-ink:#fff;   /* LIVE 배지 레드 (실측 군집) */
     --acc1:#E8B810;             /* 채널 액센트 골드 (실측) */
     --acc2:#A84868;             /* 채널 액센트 로즈 (실측) */
     --acc3:#A8C838;             /* 채널 액센트 라임 */
@@ -27,6 +27,19 @@
     min-height:100vh; padding:40px 16px 80px;
     display:flex; justify-content:center; gap:36px; flex-wrap:wrap;
   }
+  body.theme-gold     { --live:#C9A96A; --acc1:#C9A96A; --acc2:#E8C888; --acc3:#B08F4C; }
+  body.theme-rosegold { --live:#D68A6C; --acc1:#D68A6C; --acc2:#E8B8A0; --acc3:#C97850; }
+  body.theme-mono     { --live:#FFFFFF; --live-ink:#111; --acc1:#CFCFCF; --acc2:#8A8A8A; --acc3:#5C5C5C; }
+
+  /* PC 풀스크린 보기 (draft-main.html과 동일 방식) */
+  body.pc-view .phone {
+    width:calc(100% - 306px); max-width:none;
+    height:min(960px, calc(100dvh - 48px)); min-height:640px;
+    border-radius:16px;
+  }
+  body.pc-view .scr { width:420px; left:calc(50% - 210px); right:auto; border-left:1px solid var(--line); border-right:1px solid var(--line); }
+  @media (max-width:760px){ body.pc-view .phone { width:100%; } }
+
   .page-head { width:100%; max-width:880px; text-align:center; margin-bottom:6px; }
   .page-head .eyebrow { font-size:12px; font-weight:700; letter-spacing:.18em; color:var(--panel-soft); text-transform:uppercase; }
   .page-head h1 { font-size:24px; font-weight:700; color:var(--panel-ink); margin-top:8px; }
@@ -56,11 +69,11 @@
   .lcard .frame img.bgimg { width:100%; height:100%; object-fit:cover; display:block; }
   .badge {
     position:absolute; top:10px; left:10px; display:flex; align-items:center; gap:5px;
-    background:var(--live); color:#fff; font-size:calc(10.5px*var(--s)); font-weight:800;
+    background:var(--live); color:var(--live-ink); font-size:calc(10.5px*var(--s)); font-weight:800;
     letter-spacing:.04em; border-radius:7px; padding:4px 8px;
   }
   .badge .waves { display:flex; align-items:flex-end; gap:1.5px; height:9px; }
-  .badge .waves i { width:2px; background:#fff; border-radius:1px; animation:eq 1s ease-in-out infinite; }
+  .badge .waves i { width:2px; background:var(--live-ink); border-radius:1px; animation:eq 1s ease-in-out infinite; }
   .badge .waves i:nth-child(1){ height:5px; } .badge .waves i:nth-child(2){ height:9px; animation-delay:.2s; } .badge .waves i:nth-child(3){ height:6px; animation-delay:.4s; }
   @keyframes eq { 0%,100%{transform:scaleY(.5)} 50%{transform:scaleY(1)} }
   @media (prefers-reduced-motion: reduce){ .badge .waves i { animation:none; } }
@@ -106,6 +119,8 @@
   .grp .row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
   .opt { border:1.5px solid var(--panel-line); background:none; color:var(--panel-ink); border-radius:10px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
   .opt.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,169,106,.28); }
+  .sw { width:38px; height:38px; border-radius:11px; border:2px solid transparent; cursor:pointer; padding:0; }
+  .sw.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,169,106,.3); }
   .slider-row { display:flex; align-items:center; gap:10px; }
   .slider-row input { flex:1; accent-color:var(--gold); }
   .slider-row .val { font-size:12px; font-weight:700; min-width:44px; text-align:right; font-variant-numeric:tabular-nums; }
@@ -150,16 +165,40 @@
 
 <aside class="ctrl">
   <h2>시안 옵션</h2>
-  <p class="d">예시 이미지 픽셀 실측(배경 #000 · LIVE #E8402F · 액센트 골드/로즈) · 실데이터.</p>
+  <p class="d">예시 이미지 픽셀 실측(배경 #000 · LIVE #E8402F · 액센트 골드/로즈) · 실데이터. draft-main.html과 동일한 기능(PC 보기·포인트 컬러·글자 크기·수정 모드) 지원.</p>
+
+  <div class="grp">
+    <p class="t">기기 화면</p>
+    <div class="row">
+      <button class="opt on" data-device="mobile">📱 모바일</button>
+      <button class="opt" data-device="desktop">🖥 PC 꽉찬 화면</button>
+    </div>
+  </div>
 
   <div class="grp">
     <p class="t">텍스트 수정</p>
     <div class="row"><button class="opt" id="editToggle">수정 모드 켜기</button></div>
+    <p class="d">켜면 탭·제목·예고 문구를 클릭해 직접 수정할 수 있습니다. 새로고침하면 원래대로.</p>
+  </div>
+
+  <div class="grp">
+    <p class="t">포인트 컬러</p>
+    <div class="row">
+      <button class="sw on" data-set="theme" data-val="" style="background:linear-gradient(135deg,#E8402F,#E8B810)" aria-label="실측 (기본)"></button>
+      <button class="sw" data-set="theme" data-val="theme-gold" style="background:linear-gradient(135deg,#C9A96A,#E8C888)" aria-label="뷰티그라운드 골드"></button>
+      <button class="sw" data-set="theme" data-val="theme-rosegold" style="background:linear-gradient(135deg,#D68A6C,#E8B8A0)" aria-label="로즈골드"></button>
+      <button class="sw" data-set="theme" data-val="theme-mono" style="background:linear-gradient(135deg,#fff,#8A8A8A)" aria-label="미니멀 모노"></button>
+    </div>
+    <p class="d">LIVE 배지·채널명 액센트 색만 바뀝니다. 브랜드 골드 정체성을 살릴지 실측 레드를 쓸지 비교용.</p>
   </div>
 
   <div class="grp">
     <p class="t">전체 글자 크기</p>
     <div class="slider-row"><input type="range" id="sAll" min="0.85" max="1.25" step="0.01" value="1"><span class="val" id="sAllV">100%</span></div>
+  </div>
+  <div class="grp">
+    <p class="t">제목 크기</p>
+    <div class="slider-row"><input type="range" id="sHead" min="0.85" max="1.3" step="0.01" value="1"><span class="val" id="sHeadV">100%</span></div>
   </div>
   <div class="grp">
     <p class="t">제목 굵기</p>
@@ -233,12 +272,24 @@ document.getElementById('phone').addEventListener('click', e=>{
   if((t=e.target.closest('[data-watch]'))){ window.open('/draft-live.html','_blank'); return; }
 });
 
+document.querySelectorAll('[data-device]').forEach(b=>b.addEventListener('click',()=>{
+  document.body.classList.toggle('pc-view', b.dataset.device==='desktop');
+  document.querySelectorAll('[data-device]').forEach(x=>x.classList.toggle('on',x===b));
+}));
+
+document.querySelectorAll('[data-set="theme"]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-set="theme"]').forEach(x=>{ if(x.dataset.val) document.body.classList.remove(x.dataset.val); x.classList.toggle('on',x===b); });
+  if(b.dataset.val) document.body.classList.add(b.dataset.val);
+}));
+
 document.querySelectorAll('[data-var]').forEach(b=>b.addEventListener('click',()=>{
   document.body.style.setProperty(b.dataset.var,b.dataset.val);
   document.querySelectorAll('[data-var="'+b.dataset.var+'"]').forEach(x=>x.classList.toggle('on',x===b));
 }));
 const sAll=document.getElementById('sAll'),sAllV=document.getElementById('sAllV');
 sAll.addEventListener('input',()=>{document.body.style.setProperty('--s',sAll.value);sAllV.textContent=Math.round(sAll.value*100)+'%';});
+const sHead=document.getElementById('sHead'),sHeadV=document.getElementById('sHeadV');
+sHead.addEventListener('input',()=>{document.body.style.setProperty('--sh',sHead.value);sHeadV.textContent=Math.round(sHead.value*100)+'%';});
 document.getElementById('editToggle').addEventListener('click',function(){
   editOn=!editOn;
   document.body.classList.toggle('edit-mode',editOn);
