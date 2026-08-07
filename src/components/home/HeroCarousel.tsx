@@ -4,12 +4,12 @@ import type { HeroBanner } from '../../hooks/useHeroBanners'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 
-// 홈 히어로 배너: 관리자가 고른 상품을 그린 그라데이션 카드로 노출.
-// 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측 적용 — 카드 배경 그라데이션
-// #6DB33F→#94D64F, 이미지는 카드 우하단에 걸치고, 좌하단 흰 알약이 CTA를 대신한다.
+// 홈 히어로 배너: 관리자가 고른 상품을 화이트 카드로 노출(흰 배경+검정 텍스트+검정 CTA 알약).
+// 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측으로 그린 그라데이션 카드를 만들었다가,
+// 같은 날 대표님 지시로 그린을 걷어내고 사이트 나머지와 같은 화이트+블랙 톤으로 되돌림.
 // 레퍼런스가 다음 카드를 살짝 걸쳐 보여주는 이유는 "옆으로 밀 수 있다"는 걸 손으로 말하기 위함이라
 // 카드 폭을 100%가 아닌 86%로 두고(다음 카드가 우측에 자연히 피크), 네이티브 스크롤 스냅으로
-// 실제 손가락 드래그가 되게 한다 — 2026-08-08 대표님 재지적.
+// 실제 손가락 드래그가 되게 한다.
 export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
@@ -37,14 +37,14 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const resetInterval = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     if (count <= 1 || reduceMotion) return
-    // 2초에 한 번 좌측(다음 카드)으로 자동 이동 — 대표님 지시(2026-08-08)
+    // 3초에 한 번 좌측(다음 카드)으로 자동 이동 — 대표님 지시(2026-08-08, 2초→3초 조정)
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => {
         const next = (prev + 1) % count
         scrollToIndex(next)
         return next
       })
-    }, 2000)
+    }, 3000)
   }, [count, reduceMotion, scrollToIndex])
 
   useEffect(() => {
@@ -131,24 +131,24 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                   itemRefs.current[i] = el
                 }}
                 onClick={() => navigate(`/app/product/${product.id}`)}
-                className="relative min-h-[220px] w-[86%] flex-shrink-0 snap-start overflow-hidden rounded-card bg-gradient-to-br from-hero-1 to-hero-2 p-5 text-left focus:outline-none focus-visible:shadow-ring"
+                className="relative min-h-[220px] w-[86%] flex-shrink-0 snap-start overflow-hidden rounded-card border border-rule bg-paper p-5 text-left shadow-card focus:outline-none focus-visible:shadow-ring"
                 aria-label={product.name}
               >
                 <div className="relative z-10 max-w-[62%]">
                   {product.brand ? (
-                    <span className="text-[12px] font-bold text-paper/90">{product.brand}</span>
+                    <span className="text-[12px] font-bold text-ink-soft">{product.brand}</span>
                   ) : null}
-                  <h2 className="mt-1.5 text-[20px] font-bold leading-tight tracking-[-0.02em] text-paper line-clamp-2">
+                  <h2 className="mt-1.5 text-[20px] font-bold leading-tight tracking-[-0.02em] text-ink line-clamp-2">
                     {custom?.headline || product.name}
                   </h2>
-                  {custom?.subcopy && <p className="mt-2 text-[12px] leading-relaxed text-paper/90 line-clamp-2">{custom.subcopy}</p>}
-                  <span className="mt-4 inline-block rounded-pill bg-paper/95 px-3.5 py-2 text-[11px] font-bold text-accent-ink">
+                  {custom?.subcopy && <p className="mt-2 text-[12px] leading-relaxed text-ink-soft line-clamp-2">{custom.subcopy}</p>}
+                  <span className="mt-4 inline-block rounded-pill bg-ink px-3.5 py-2 text-[11px] font-bold text-paper">
                     {ctaLabel}
                   </span>
                 </div>
                 {/* 상품 이미지 — 카드 우하단에 걸쳐서, 브랜드 원본 비율 유지.
-                    상품컷 자체의 흰/회색 스튜디오 배경이 그린 카드와 사각형 경계로 부딪히는 문제(2026-08-08 대표님 지적) —
-                    우하단(카드 모서리에 실제로 걸치는 쪽)은 그대로 두고, 상단·좌측 가장자리만 마스크로 자연스럽게 페이드아웃. */}
+                    카드가 화이트로 바뀐 뒤에도, 사진마다 스튜디오 배경 톤(회색 등)이 제각각이라
+                    우하단(카드 모서리에 실제로 걸치는 쪽)은 그대로 두고 상단·좌측 가장자리만 마스크로 자연스럽게 페이드아웃. */}
                 <div className="pointer-events-none absolute bottom-0 right-0 h-[85%] w-[44%]">
                   {product.thumbnail_url ? (
                     <img
@@ -253,7 +253,7 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 aria-label={`${i + 1}번째 배너로 이동`}
                 aria-current={current === i ? 'true' : undefined}
                 className={`h-[6px] rounded-pill transition-all duration-300 focus:outline-none focus-visible:shadow-ring ${
-                  current === i ? 'w-6 bg-accent' : 'w-[6px] bg-rule'
+                  current === i ? 'w-6 bg-ink' : 'w-[6px] bg-rule'
                 }`}
               />
             ))}
