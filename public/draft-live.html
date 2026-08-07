@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>뷰티그라운드몰 라이브커머스 시안</title>
+<style>
+  :root {
+    --ac1: #6db33f;
+    --ac2: #94d64f;
+    --ac-ink: #1d3a0e;
+    --ac-chip: #e8f5db;
+    --radius: 18px;
+    --tw: 700;
+    --page: #eceeea;
+    --ink: #1a1a1a;
+    --sub: #666666;
+    --btn-bg: #f5f5f5;
+    --card: #ffffff;
+    --gold: #c9a96a;
+    --live: #e5484d;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--page); font-family: Pretendard, -apple-system, 'Malgun Gothic', sans-serif; min-height: 100vh; padding: 18px 14px 50px; }
+
+  .ctrl { position: sticky; top: 10px; z-index: 50; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 8px 30px rgba(20,25,15,.12); display: flex; align-items: center; gap: 18px; flex-wrap: wrap; max-width: 1160px; margin: 0 auto 18px; }
+  .ctrl .t { font-size: 12px; font-weight: 800; color: #565b63; margin-right: 2px; }
+  .ctrl .grp { display: flex; align-items: center; gap: 6px; }
+  .cbtn { width: 30px; height: 30px; border-radius: 9px; border: 2px solid transparent; cursor: pointer; color: #fff; font-size: 9px; font-weight: 800; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1px; }
+  .cbtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); }
+  .obtn { height: 30px; border-radius: 9px; border: 2px solid #e4e6ec; background: #f6f7f4; color: #1a1a1a; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; padding: 0 10px; }
+  .obtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); background: #fff; }
+
+  .browser { max-width: 1160px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(20,25,15,.22); background: var(--card); }
+  .bbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #e9ebe6; }
+  .bbar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .bbar .url { flex: 1; max-width: 420px; margin: 0 auto; background: #fff; border-radius: 999px; font-size: 11.5px; color: #8a8f98; text-align: center; padding: 5px 12px; }
+  .site { background: #fafbf8; }
+
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 34px; background: var(--card); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .nav .logo { font-size: 19px; font-weight: 800; letter-spacing: .06em; color: var(--ink); }
+  .nav .logo em { font-style: normal; color: var(--gold); }
+  .nav .menu { display: flex; gap: 4px; flex: 1; justify-content: center; }
+  .nav .menu a { padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .nav .menu a.on { background: var(--btn-bg); }
+  .nav .ic { display: flex; gap: 8px; }
+  .nav .ic span { width: 36px; height: 36px; border-radius: 50%; background: var(--btn-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 26px 30px 44px; }
+
+  /* 라이브 플레이어 + 채팅 */
+  .live-row { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+  .player { border-radius: calc(var(--radius) + 6px); overflow: hidden; position: relative; min-height: 380px;
+    background: linear-gradient(135deg, #23262b 0%, #383e46 55%, #23262b 100%); color: #fff; display: flex; align-items: center; justify-content: center; }
+  .player .play { width: 74px; height: 74px; border-radius: 50%; background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .player .badge { position: absolute; top: 16px; left: 16px; background: var(--live); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; }
+  .player .badge i { width: 7px; height: 7px; border-radius: 50%; background: #fff; display: block; }
+  .player .views { position: absolute; top: 16px; left: 110px; background: rgba(0,0,0,.45); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
+  .player .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 16px; background: linear-gradient(180deg, transparent, rgba(0,0,0,.65)); }
+  .player .cap .tt { font-size: 19px; font-weight: var(--tw); }
+  .player .cap .hn { font-size: 12.5px; opacity: .85; margin-top: 4px; }
+
+  .chat { background: var(--card); border-radius: calc(var(--radius) + 6px); box-shadow: 0 3px 14px rgba(20,25,15,.07); display: flex; flex-direction: column; overflow: hidden; }
+  .chat .hd { padding: 14px 16px; font-size: 13.5px; font-weight: 800; color: var(--ink); border-bottom: 1px solid #eee; }
+  .chat .msgs { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+  .chat .m { font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+  .chat .m b { color: var(--ac-ink); background: var(--ac-chip); border-radius: 6px; padding: 1px 6px; margin-right: 6px; font-size: 11.5px; }
+  .chat .in { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #eee; }
+  .chat .in .f { flex: 1; background: var(--btn-bg); border-radius: 999px; font-size: 12.5px; color: #9aa0a8; padding: 10px 14px; }
+  .chat .in .s { width: 38px; height: 38px; border-radius: 50%; background: var(--ac1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+  .sec { display: flex; align-items: center; justify-content: space-between; padding: 30px 2px 14px; }
+  .sec .t2 { font-size: 21px; font-weight: var(--tw); color: var(--ink); letter-spacing: -.3px; }
+  .sec .t2 .lv { color: var(--live); }
+  .sec .all { font-size: 13px; color: var(--sub); font-weight: 600; }
+
+  /* 방송 상품 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .good { background: var(--card); border-radius: var(--radius); padding: 16px; position: relative; box-shadow: 0 3px 14px rgba(20,25,15,.07); }
+  .good .tag { position: absolute; top: 12px; left: 12px; background: var(--live); color: #fff; font-size: 10.5px; font-weight: 800; padding: 4px 9px; border-radius: 999px; }
+  .good .pic { height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .good .bd { font-size: 12px; color: var(--sub); font-weight: 600; }
+  .good .nm { font-size: 14.5px; color: var(--ink); font-weight: var(--tw); letter-spacing: -.2px; margin: 3px 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .good .rw { display: flex; align-items: center; justify-content: space-between; }
+  .good .pr { background: var(--btn-bg); border-radius: 999px; font-size: 13px; font-weight: 800; color: var(--ink); padding: 8px 14px; font-variant-numeric: tabular-nums; }
+  .good .pr em { font-style: normal; color: var(--live); margin-right: 5px; }
+  .good .add { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; cursor: pointer; }
+
+  /* 방송 예정 */
+  .sched { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .sc { background: var(--card); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 2px 10px rgba(20,25,15,.05); display: flex; gap: 14px; align-items: center; }
+  .sc .d { min-width: 64px; text-align: center; background: var(--ac-chip); color: var(--ac-ink); border-radius: 12px; padding: 10px 8px; }
+  .sc .d .dd { font-size: 15px; font-weight: 800; }
+  .sc .d .tt2 { font-size: 11px; font-weight: 700; margin-top: 2px; }
+  .sc .k { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+  .sc .v { font-size: 12px; color: var(--sub); margin-top: 3px; }
+  .sc .al { margin-left: auto; background: var(--btn-bg); border-radius: 999px; font-size: 11.5px; font-weight: 700; color: var(--ink); padding: 8px 12px; white-space: nowrap; }
+
+  .ed { white-space: pre-line; }
+  body.editing .ed { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: 2px; cursor: text; border-radius: 4px; }
+  body.editing .ed:focus { outline: 2px solid var(--gold); background: rgba(255,255,255,.65); }
+  body.arranging [data-k] { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: -1px; cursor: move; }
+  body.arranging [data-k].dragging { opacity: .45; }
+  body.arranging .ed { pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="ctrl">
+  <span class="t">📺 라이브커머스 시안</span>
+  <span class="grp" id="colorGrp"><span class="t">포인트 컬러</span>
+    <button class="cbtn on" style="background:#6db33f" data-a1="#6db33f" data-a2="#94d64f" data-ink="#1d3a0e" data-chip="#e8f5db">1</button>
+    <button class="cbtn" style="background:#151734" data-a1="#151734" data-a2="#3d4a95" data-ink="#f4e9d2" data-chip="#e9e6f2">2</button>
+    <button class="cbtn" style="background:#c9a96a" data-a1="#b8925a" data-a2="#e2c98f" data-ink="#3a2c12" data-chip="#f5ecd9">3</button>
+    <button class="cbtn" style="background:#d97795;color:#5a1f31" data-a1="#d97795" data-a2="#f2aec2" data-ink="#5a1f31" data-chip="#fbe7ed">4</button>
+    <button class="cbtn" style="background:#6a5fe0" data-a1="#6a5fe0" data-a2="#9c93f5" data-ink="#f0eeff" data-chip="#e9e6fc">5</button>
+  </span>
+  <span class="grp">
+    <input id="hexInput" placeholder="#E5484D" maxlength="7"
+      style="width:86px;height:30px;border:2px solid #e4e6ec;border-radius:9px;padding:0 8px;font-size:12px;font-family:inherit;font-weight:700">
+    <button class="obtn" id="hexAdd">색 추가</button>
+  </span>
+  <span class="grp"><span class="t">라운드</span>
+    <button class="obtn" data-r="10px">각지게</button>
+    <button class="obtn on" data-r="18px">보통</button>
+    <button class="obtn" data-r="26px">둥글게</button>
+  </span>
+  <span class="grp"><span class="t">제목 굵기</span>
+    <button class="obtn" data-w="600">600</button>
+    <button class="obtn on" data-w="700">700</button>
+    <button class="obtn" data-w="800">800</button>
+  </span>
+  <button class="obtn" id="editToggle">✏️ 편집 모드 켜기</button>
+  <button class="obtn" id="arrangeToggle">🧩 배치 모드 켜기</button>
+</div>
+
+<div class="browser">
+  <div class="bbar">
+    <span class="dot" style="background:#f26d5f"></span>
+    <span class="dot" style="background:#f5be4f"></span>
+    <span class="dot" style="background:#59c76f"></span>
+    <span class="url">beautyground.co.kr/live</span>
+  </div>
+  <div class="site">
+    <nav class="nav">
+      <span class="logo ed">BEAUTY <em>GROUND</em></span>
+      <span class="menu">
+        <a class="ed">홈</a>
+        <a class="ed">카테고리</a>
+        <a class="on ed">라이브</a>
+        <a class="ed">브랜드</a>
+        <a class="ed">이벤트</a>
+      </span>
+      <span class="ic">
+        <span>🔍</span>
+        <span>🛍</span>
+        <span>👤</span>
+      </span>
+    </nav>
+
+    <div class="wrap" data-box data-cid="wrap" data-dir="v">
+      <section data-k="live">
+        <div class="live-row">
+          <div class="player">
+            <span class="badge"><i></i><span class="ed">LIVE</span></span>
+            <span class="views ed">👀 1,248명 시청 중</span>
+            <span class="play">▶</span>
+            <div class="cap">
+              <div class="tt ed">올리오 여름 수분템 특집 — 오늘만 최대 40%</div>
+              <div class="hn ed">진행 김뷰티 · 뷰티그라운드 스튜디오</div>
+            </div>
+          </div>
+          <div class="chat">
+            <div class="hd ed">실시간 채팅</div>
+            <div class="msgs">
+              <div class="m ed"><b>지은</b>수분크림 재입고 언제 되나요?</div>
+              <div class="m ed"><b>혜림</b>방금 주문했어요! 배송 기대돼요 💕</div>
+              <div class="m ed"><b>매니저</b>지금 구매하시면 사은품 증정!</div>
+              <div class="m ed"><b>수아</b>토너랑 같이 쓰면 되나요?</div>
+              <div class="m ed"><b>진행자</b>네! 토너 → 세럼 → 크림 순서예요 😊</div>
+            </div>
+            <div class="in"><span class="f ed">응원 메시지를 남겨보세요…</span><span class="s">➤</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section data-k="goods">
+        <div class="sec"><span class="t2"><span class="lv ed">● 방송 중</span> <span class="ed">단독 특가</span></span><span class="all ed">전체 보기</span></div>
+        <div class="grid" data-box data-cid="grid" data-dir="h">
+          <div class="good" data-k="g1">
+            <span class="tag ed">40%</span>
+            <div class="pic">
+              <svg width="90" height="104" viewBox="0 0 84 100">
+                <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
+                <rect x="16" y="26" width="52" height="66" rx="12" fill="#bfe3f5"/>
+                <rect x="16" y="26" width="52" height="30" rx="12" fill="#a5d5ee"/>
+                <rect x="30" y="12" width="24" height="18" rx="4" fill="#e9eef2"/>
+                <rect x="22" y="52" width="40" height="26" rx="4" fill="#fff"/>
+                <text x="42" y="65" text-anchor="middle" font-size="8" font-weight="800" fill="#28536b">AQUA</text>
+              </svg>
+            </div>
+            <div class="bd ed">올리오</div>
+            <div class="nm ed">수분 아쿠아 크림 50ml</div>
+            <div class="rw"><span class="pr"><em class="ed">40%</em><span class="ed">15,000원</span></span><span class="add">+</span></div>
+          </div>
+          <div class="good" data-k="g2">
+            <span class="tag ed">30%</span>
+            <div class="pic">
+              <svg width="64" height="106" viewBox="0 0 60 102">
+                <ellipse cx="30" cy="97" rx="22" ry="4" fill="rgba(0,0,0,.08)"/>
+                <rect x="14" y="26" width="32" height="68" rx="8" fill="#f2f3ef"/>
+                <rect x="24" y="4" width="12" height="26" rx="3" fill="#d8dad4"/>
+                <rect x="18" y="46" width="24" height="34" rx="3" fill="#fff"/>
+                <text x="30" y="60" text-anchor="middle" font-size="7" font-weight="800" fill="#555">7.5%</text>
+              </svg>
+            </div>
+            <div class="bd ed">닥터랩</div>
+            <div class="nm ed">글리콜릭 앰플 30ml</div>
+            <div class="rw"><span class="pr"><em class="ed">30%</em><span class="ed">22,400원</span></span><span class="add">+</span></div>
+          </div>
+          <div class="good" data-k="g3">
+            <span class="tag ed">특가</span>
+            <div class="pic">
+              <svg width="62" height="104" viewBox="0 0 58 100">
+                <ellipse cx="29" cy="95" rx="20" ry="4" fill="rgba(0,0,0,.08)"/>
+                <rect x="12" y="30" width="34" height="62" rx="8" fill="var(--ac-chip)"/>
+                <rect x="22" y="10" width="14" height="24" rx="3" fill="#c9ccc4"/>
+                <rect x="17" y="48" width="24" height="30" rx="3" fill="#fff"/>
+                <text x="29" y="62" text-anchor="middle" font-size="7" font-weight="800" fill="var(--ac-ink)">VITA</text>
+              </svg>
+            </div>
+            <div class="bd ed">오디크</div>
+            <div class="nm ed">비타 토닝 세럼 30ml</div>
+            <div class="rw"><span class="pr"><em class="ed">사은품</em><span class="ed">38,000원</span></span><span class="add">+</span></div>
+          </div>
+          <div class="good" data-k="g4">
+            <span class="tag ed">20%</span>
+            <div class="pic">
+              <svg width="86" height="100" viewBox="0 0 84 100">
+                <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
+                <rect x="20" y="34" width="44" height="58" rx="10" fill="#f7e8ce"/>
+                <rect x="32" y="16" width="20" height="20" rx="4" fill="#d9cbb1"/>
+                <rect x="26" y="54" width="32" height="24" rx="4" fill="#fff"/>
+                <text x="42" y="67" text-anchor="middle" font-size="7" font-weight="800" fill="#7a5c22">GOLD</text>
+              </svg>
+            </div>
+            <div class="bd ed">쁘띠페</div>
+            <div class="nm ed">골드 콜라겐 크림 50ml</div>
+            <div class="rw"><span class="pr"><em class="ed">20%</em><span class="ed">23,200원</span></span><span class="add">+</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section data-k="sched">
+        <div class="sec"><span class="t2 ed">방송 예정</span><span class="all ed">전체 편성표</span></div>
+        <div class="sched" data-box data-cid="sched" data-dir="h">
+          <div class="sc" data-k="sc1">
+            <span class="d"><span class="dd ed">8/9</span><span class="tt2 ed">토 20:00</span></span>
+            <span><div class="k ed">쁘띠페 신상 런칭</div><div class="v ed">골드 콜라겐 라인 첫 공개</div></span>
+            <span class="al ed">🔔 알림받기</span>
+          </div>
+          <div class="sc" data-k="sc2">
+            <span class="d"><span class="dd ed">8/12</span><span class="tt2 ed">수 19:30</span></span>
+            <span><div class="k ed">닥터랩 피부고민 상담</div><div class="v ed">전문가와 함께하는 Q&A</div></span>
+            <span class="al ed">🔔 알림받기</span>
+          </div>
+          <div class="sc" data-k="sc3">
+            <span class="d"><span class="dd ed">8/15</span><span class="tt2 ed">토 20:00</span></span>
+            <span><div class="k ed">광복절 특집 세일</div><div class="v ed">전 브랜드 최대 50%</div></span>
+            <span class="al ed">🔔 알림받기</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  const root = document.documentElement;
+  document.querySelectorAll('.cbtn').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--ac1', b.dataset.a1);
+    root.style.setProperty('--ac2', b.dataset.a2);
+    root.style.setProperty('--ac-ink', b.dataset.ink);
+    root.style.setProperty('--ac-chip', b.dataset.chip);
+    document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.querySelectorAll('.obtn[data-r]').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--radius', b.dataset.r);
+    document.querySelectorAll('.obtn[data-r]').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.querySelectorAll('.obtn[data-w]').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--tw', b.dataset.w);
+    document.querySelectorAll('.obtn[data-w]').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+
+  const et = document.getElementById('editToggle');
+  const at = document.getElementById('arrangeToggle');
+  function setEditing(on) {
+    document.body.classList.toggle('editing', on);
+    document.querySelectorAll('.ed').forEach((el) => el.setAttribute('contenteditable', on ? 'true' : 'false'));
+    et.textContent = on ? '✅ 편집 끝내기' : '✏️ 편집 모드 켜기';
+    et.classList.toggle('on', on);
+    if (on) setArranging(false);
+  }
+  function setArranging(on) {
+    document.body.classList.toggle('arranging', on);
+    document.querySelectorAll('[data-k]').forEach((el) => el.setAttribute('draggable', on ? 'true' : 'false'));
+    at.textContent = on ? '✅ 배치 끝내기' : '🧩 배치 모드 켜기';
+    at.classList.toggle('on', on);
+    if (on) setEditing(false);
+  }
+  et.addEventListener('click', () => setEditing(!document.body.classList.contains('editing')));
+  at.addEventListener('click', () => setArranging(!document.body.classList.contains('arranging')));
+
+  let dragEl = null;
+  document.addEventListener('dragstart', (e) => {
+    if (!document.body.classList.contains('arranging')) { e.preventDefault(); return; }
+    const t = e.target.closest('[data-k]');
+    if (!t) { e.preventDefault(); return; }
+    dragEl = t;
+    t.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', t.dataset.k); } catch (err) { /* 무시 */ }
+  });
+  document.addEventListener('dragover', (e) => {
+    if (!dragEl) return;
+    e.preventDefault();
+    let t = e.target.closest('[data-k]');
+    while (t && t !== dragEl && t.parentElement !== dragEl.parentElement) t = t.parentElement.closest('[data-k]');
+    if (!t || t === dragEl) return;
+    const r = t.getBoundingClientRect();
+    const dir = (t.parentElement.dataset.dir || 'v');
+    const before = dir === 'v' ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
+    t.parentElement.insertBefore(dragEl, before ? t : t.nextSibling);
+  });
+  document.addEventListener('dragend', () => {
+    if (dragEl) dragEl.classList.remove('dragging');
+    dragEl = null;
+    broadcast();
+  });
+
+  const hexInput = document.getElementById('hexInput');
+  const colorGrp = document.getElementById('colorGrp');
+  function h2r(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function r2h(r, g, b) { return '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+  function mix(hex, target, ratio) { const a = h2r(hex); const t = h2r(target); return r2h(a[0] + (t[0] - a[0]) * ratio, a[1] + (t[1] - a[1]) * ratio, a[2] + (t[2] - a[2]) * ratio); }
+  function lum(hex) { const [r, g, b] = h2r(hex); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+  function makePalette(base) {
+    return {
+      a1: base,
+      a2: mix(base, '#ffffff', 0.28),
+      ink: lum(base) > 0.6 ? mix(base, '#000000', 0.72) : mix(base, '#ffffff', 0.88),
+      chip: mix(base, '#ffffff', 0.86),
+    };
+  }
+  function addSwatch(p, select) {
+    const b = document.createElement('button');
+    b.className = 'cbtn';
+    b.style.background = p.a1;
+    b.dataset.a1 = p.a1; b.dataset.a2 = p.a2; b.dataset.ink = p.ink; b.dataset.chip = p.chip;
+    b.textContent = String(colorGrp.querySelectorAll('.cbtn').length + 1);
+    b.addEventListener('click', () => {
+      root.style.setProperty('--ac1', b.dataset.a1);
+      root.style.setProperty('--ac2', b.dataset.a2);
+      root.style.setProperty('--ac-ink', b.dataset.ink);
+      root.style.setProperty('--ac-chip', b.dataset.chip);
+      document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+    colorGrp.appendChild(b);
+    if (select) b.click();
+    return b;
+  }
+  document.getElementById('hexAdd').addEventListener('click', () => {
+    let v = hexInput.value.trim();
+    if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
+    if (!/^#[0-9a-fA-F]{6}$/.test(v)) { hexInput.style.borderColor = '#e05555'; return; }
+    hexInput.style.borderColor = '#e4e6ec';
+    addSwatch(makePalette(v.toLowerCase()), true);
+    hexInput.value = '';
+    setTimeout(broadcast, 0);
+  });
+  hexInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('hexAdd').click(); });
+
+  /* ── 서버 연동 (저장 위치: theme.draftLive) ── */
+  const SB_URL = 'https://bjqtuklkskrqzbuxdwxm.supabase.co';
+  const SB_KEY = 'sb_publishable_nuBbC2D1_S_eV0fA9OAjhQ_ntsloX0Q';
+  const eds = () => Array.from(document.querySelectorAll('.ed'));
+
+  function currentCfg() {
+    const c = document.querySelector('.cbtn.on');
+    const r = document.querySelector('.obtn[data-r].on');
+    const w = document.querySelector('.obtn[data-w].on');
+    const layout = {};
+    document.querySelectorAll('[data-cid]').forEach((box) => {
+      layout[box.dataset.cid] = Array.from(box.children).filter((ch) => ch.dataset && ch.dataset.k).map((ch) => ch.dataset.k);
+    });
+    return {
+      color: c ? { a1: c.dataset.a1, a2: c.dataset.a2, ink: c.dataset.ink, chip: c.dataset.chip } : null,
+      radius: r ? r.dataset.r : null,
+      w: w ? w.dataset.w : null,
+      layout,
+      texts: eds().map((e) => e.innerText),
+    };
+  }
+  function broadcast() {
+    try { parent.postMessage({ type: 'bgDraftLiveCfg', cfg: currentCfg() }, location.origin); } catch (e) { /* 무시 */ }
+  }
+  function applyCfg(c) {
+    if (!c) return;
+    if (c.color && c.color.a1) {
+      root.style.setProperty('--ac1', c.color.a1);
+      root.style.setProperty('--ac2', c.color.a2);
+      root.style.setProperty('--ac-ink', c.color.ink);
+      root.style.setProperty('--ac-chip', c.color.chip);
+      if (!Array.from(document.querySelectorAll('.cbtn')).some((b) => b.dataset.a1 === c.color.a1)) {
+        addSwatch(c.color, false);
+      }
+      document.querySelectorAll('.cbtn').forEach((b) => b.classList.toggle('on', b.dataset.a1 === c.color.a1));
+    }
+    if (c.layout) {
+      Object.keys(c.layout).forEach((cid) => {
+        const box = document.querySelector(`[data-cid="${cid}"]`);
+        if (!box) return;
+        c.layout[cid].forEach((k) => {
+          const el = Array.from(box.children).find((ch) => ch.dataset && ch.dataset.k === k);
+          if (el) box.appendChild(el);
+        });
+      });
+    }
+    if (c.radius) {
+      root.style.setProperty('--radius', c.radius);
+      document.querySelectorAll('.obtn[data-r]').forEach((b) => b.classList.toggle('on', b.dataset.r === c.radius));
+    }
+    if (c.w) {
+      root.style.setProperty('--tw', c.w);
+      document.querySelectorAll('.obtn[data-w]').forEach((b) => b.classList.toggle('on', b.dataset.w === c.w));
+    }
+    if (Array.isArray(c.texts)) {
+      eds().forEach((e, i) => {
+        if (typeof c.texts[i] === 'string' && c.texts[i] !== e.innerText) e.textContent = c.texts[i];
+      });
+    }
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest('.cbtn, .obtn')) setTimeout(broadcast, 0); });
+  document.addEventListener('input', (e) => { if (e.target.closest && e.target.closest('.ed')) broadcast(); });
+
+  (function initFromServer() {
+    const raw = new URLSearchParams(location.search).get('cfg');
+    if (raw) {
+      try { applyCfg(JSON.parse(raw)); } catch (e) { /* 무시 */ }
+      setTimeout(broadcast, 0);
+      return;
+    }
+    fetch(`${SB_URL}/rest/v1/home_settings?id=eq.1&select=theme`, {
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+    })
+      .then((r) => r.json())
+      .then((rows) => {
+        const d = rows && rows[0] && rows[0].theme && rows[0].theme.draftLive;
+        if (d) applyCfg(d);
+        setTimeout(broadcast, 0);
+      })
+      .catch(() => {});
+  })();
+</script>
+</body>
+</html>

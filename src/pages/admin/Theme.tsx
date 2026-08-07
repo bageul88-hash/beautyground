@@ -17,6 +17,7 @@ type DraftCfg = {
   color: { a1: string; a2: string; ink: string; chip: string } | null
   radius: string | null
   w: string | null
+  layout?: Record<string, string[]>
   texts: string[]
 }
 
@@ -35,6 +36,13 @@ export default function AdminTheme() {
   const [draftSaving, setDraftSaving] = useState(false)
   const [draftMsg, setDraftMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
 
+  // PC 연습장(draftPc)
+  const liveDraftPcRef = useRef<DraftCfg | null>(null)
+  const savedDraftPcRef = useRef<DraftCfg | null>(null)
+  const [draftPcDirty, setDraftPcDirty] = useState(false)
+  const [draftPcSaving, setDraftPcSaving] = useState(false)
+  const [draftPcMsg, setDraftPcMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+
   useEffect(() => {
     void (async () => {
       const { data, error } = await supabase
@@ -43,10 +51,11 @@ export default function AdminTheme() {
         .eq('id', 1)
         .maybeSingle()
       if (!error && data?.theme) {
-        const saved = data.theme as MallTheme & { draft?: DraftCfg }
+        const saved = data.theme as MallTheme & { draft?: DraftCfg; draftPc?: DraftCfg }
         setTheme({ ...DEFAULT_THEME, ...saved })
         setPreviewTheme({ ...DEFAULT_THEME, ...saved })
         if (saved.draft) savedDraftRef.current = saved.draft
+        if (saved.draftPc) savedDraftPcRef.current = saved.draftPc
       }
       if (error) {
         setMessage({
@@ -68,6 +77,11 @@ export default function AdminTheme() {
         liveDraftRef.current = d.cfg
         if (changed && JSON.stringify(savedDraftRef.current) !== JSON.stringify(d.cfg)) setDraftDirty(true)
       }
+      if (d?.type === 'bgDraftPcCfg' && d.cfg) {
+        const changed = JSON.stringify(liveDraftPcRef.current) !== JSON.stringify(d.cfg)
+        liveDraftPcRef.current = d.cfg
+        if (changed && JSON.stringify(savedDraftPcRef.current) !== JSON.stringify(d.cfg)) setDraftPcDirty(true)
+      }
     }
     window.addEventListener('message', onMsg)
     return () => window.removeEventListener('message', onMsg)
@@ -88,8 +102,8 @@ export default function AdminTheme() {
     theme.signalBlue === DEFAULT_THEME.signalBlue &&
     theme.signalYellow === DEFAULT_THEME.signalYellow
 
-  // 시그널 색 + draft를 합쳐 theme jsonb 페이로드 구성 (서로를 지우지 않게 항상 병합)
-  const buildPayload = (draft: DraftCfg | null) => {
+  // 시그널 색 + draft(모바일) + draftPc(PC)를 합쳐 theme jsonb 페이로드 구성 (서로를 지우지 않게 항상 병합)
+  const buildPayload = (draft: DraftCfg | null, draftPc: DraftCfg | null) => {
     const base: Record<string, unknown> = {}
     if (!isDefault) {
       base.signalRed = theme.signalRed
@@ -97,6 +111,7 @@ export default function AdminTheme() {
       base.signalYellow = theme.signalYellow
     }
     if (draft) base.draft = draft
+    if (draftPc) base.draftPc = draftPc
     return Object.keys(base).length > 0 ? base : null
   }
 
@@ -105,7 +120,7 @@ export default function AdminTheme() {
     setMessage(null)
     const { error } = await supabase
       .from('home_settings')
-      .update({ theme: buildPayload(savedDraftRef.current), updated_at: new Date().toISOString() })
+      .update({ theme: buildPayload(savedDraftRef.current, savedDraftPcRef.current), updated_at: new Date().toISOString() })
       .eq('id', 1)
     setSaving(false)
     if (error) {
@@ -125,7 +140,7 @@ export default function AdminTheme() {
     setDraftMsg(null)
     const { error } = await supabase
       .from('home_settings')
-      .update({ theme: buildPayload(draft), updated_at: new Date().toISOString() })
+      .update({ theme: buildPayload(draft, savedDraftPcRef.current), updated_at: new Date().toISOString() })
       .eq('id', 1)
     setDraftSaving(false)
     if (error) {
@@ -137,6 +152,28 @@ export default function AdminTheme() {
       savedDraftRef.current = draft
       setDraftDirty(false)
       setDraftMsg({ kind: 'ok', text: '시안을 서버에 저장했습니다. 이제 /draft.html을 어디서 열어도 이 상태로 보입니다.' })
+    }
+  }
+
+  const saveDraftPc = async () => {
+    const draftPc = liveDraftPcRef.current
+    if (!draftPc) return
+    setDraftPcSaving(true)
+    setDraftPcMsg(null)
+    const { error } = await supabase
+      .from('home_settings')
+      .update({ theme: buildPayload(savedDraftRef.current, draftPc), updated_at: new Date().toISOString() })
+      .eq('id', 1)
+    setDraftPcSaving(false)
+    if (error) {
+      setDraftPcMsg({
+        kind: 'err',
+        text: `PC 시안 저장 실패: ${error.message} — theme 컬럼이 없다면 supabase/home_theme.sql을 먼저 실행해 주세요.`,
+      })
+    } else {
+      savedDraftPcRef.current = draftPc
+      setDraftPcDirty(false)
+      setDraftPcMsg({ kind: 'ok', text: 'PC 시안을 서버에 저장했습니다. 이제 /draft-pc.html을 어디서 열어도 이 상태로 보입니다.' })
     }
   }
 
@@ -261,6 +298,45 @@ export default function AdminTheme() {
             </div>
           )}
           <iframe title="모바일 시안 연습장" src="/draft.html" className="block w-full h-[920px] bg-paper" />
+        </section>
+      </div>
+
+      {/* PC(웹) 시안 연습장 — 드래그 배치·색 추가·문구 수정 후 서버 저장 */}
+      <div className="mt-10">
+        <section className="border border-rule">
+          <div className="px-5 py-4 border-b border-rule flex items-center justify-between gap-6 flex-wrap">
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold text-ink">PC(웹) 시안 연습장</p>
+              <p className="text-[12px] text-ink-soft mt-0.5">
+                웹 페이지 기준 시안입니다. 🧩 배치 모드로 박스·버튼을 드래그해 공간 구성을 바꾸고,
+                # 헥스 코드로 포인트 컬러를 추가할 수 있습니다. [PC 시안 저장]하면 서버에 기록됩니다.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => void saveDraftPc()}
+                disabled={draftPcSaving || !draftPcDirty}
+                className="rounded-control bg-ink text-paper text-[13px] font-bold px-5 py-2.5 disabled:opacity-40"
+              >
+                {draftPcSaving ? '저장 중…' : draftPcDirty ? 'PC 시안 저장' : 'PC 시안 저장됨'}
+              </button>
+              <a href="/draft-pc.html" target="_blank" rel="noreferrer" className="text-[12px] text-signal-blue">
+                새 탭에서 크게 보기
+              </a>
+            </div>
+          </div>
+          {draftPcMsg && (
+            <div
+              className={`border-b px-5 py-2.5 text-[12.5px] ${
+                draftPcMsg.kind === 'ok'
+                  ? 'border-rule bg-signal-blue/5 text-signal-blue'
+                  : 'border-rule bg-signal-red/5 text-signal-red'
+              }`}
+            >
+              {draftPcMsg.text}
+            </div>
+          )}
+          <iframe title="PC 시안 연습장" src="/draft-pc.html" className="block w-full h-[980px] bg-paper" />
         </section>
       </div>
     </div>

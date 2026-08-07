@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>뷰티그라운드몰 PC 시안</title>
+<style>
+  :root {
+    /* 포인트 컬러 (기본 = 모바일 시안과 동일한 그린) */
+    --ac1: #6db33f;
+    --ac2: #94d64f;
+    --ac-ink: #1d3a0e;
+    --ac-chip: #e8f5db;
+    --radius: 18px;
+    --tw: 700;
+    --page: #eceeea;
+    --ink: #1a1a1a;       /* PC 스펙: 텍스트 #1A1A1A */
+    --sub: #666666;
+    --btn-bg: #f5f5f5;    /* PC 스펙: 버튼 배경 #F5F5F5 */
+    --card: #ffffff;
+    --gold: #c9a96a;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--page); font-family: Pretendard, -apple-system, 'Malgun Gothic', sans-serif; min-height: 100vh; padding: 18px 14px 50px; }
+
+  /* ── 상단 컨트롤 바 ── */
+  .ctrl { position: sticky; top: 10px; z-index: 50; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 8px 30px rgba(20,25,15,.12); display: flex; align-items: center; gap: 18px; flex-wrap: wrap; max-width: 1160px; margin: 0 auto 18px; }
+  .ctrl .t { font-size: 12px; font-weight: 800; color: #565b63; margin-right: 2px; }
+  .ctrl .grp { display: flex; align-items: center; gap: 6px; }
+  .cbtn { width: 30px; height: 30px; border-radius: 9px; border: 2px solid transparent; cursor: pointer; color: #fff; font-size: 9px; font-weight: 800; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1px; }
+  .cbtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); }
+  .obtn { height: 30px; border-radius: 9px; border: 2px solid #e4e6ec; background: #f6f7f4; color: #1a1a1a; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; padding: 0 10px; }
+  .obtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); background: #fff; }
+
+  /* ── 브라우저 프레임 ── */
+  .browser { max-width: 1160px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(20,25,15,.22); background: var(--card); }
+  .bbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #e9ebe6; }
+  .bbar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .bbar .url { flex: 1; max-width: 420px; margin: 0 auto; background: #fff; border-radius: 999px; font-size: 11.5px; color: #8a8f98; text-align: center; padding: 5px 12px; }
+
+  .site { background: #fafbf8; }
+
+  /* 헤더 */
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 34px; background: var(--card); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .nav .logo { font-size: 19px; font-weight: 800; letter-spacing: .06em; color: var(--ink); }
+  .nav .logo em { font-style: normal; color: var(--gold); }
+  .nav .menu { display: flex; gap: 4px; flex: 1; justify-content: center; }
+  .nav .menu a { padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .nav .menu a.on { background: var(--btn-bg); }
+  .nav .ic { display: flex; gap: 8px; }
+  .nav .ic span { width: 36px; height: 36px; border-radius: 50%; background: var(--btn-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; }
+  .nav .ic .dot2 { position: absolute; top: -2px; right: -2px; width: 15px; height: 15px; border-radius: 50%; background: var(--ac1); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 26px 30px 44px; }
+
+  /* 히어로 배너 */
+  .hero { border-radius: calc(var(--radius) + 8px); padding: 38px 44px; color: var(--ac-ink); position: relative; overflow: hidden; min-height: 240px;
+    background: radial-gradient(120% 160% at 88% 10%, var(--ac2) 0%, var(--ac1) 72%); }
+  .hero .brand { font-size: 14px; font-weight: 700; opacity: .85; margin-bottom: 10px; }
+  .hero h2 { font-size: 34px; font-weight: var(--tw); line-height: 1.28; letter-spacing: -.4px; max-width: 430px; margin-bottom: 12px; }
+  .hero p { font-size: 14px; line-height: 1.6; opacity: .8; max-width: 380px; margin-bottom: 26px; }
+  .hero .cta { display: inline-block; background: rgba(255,255,255,.93); color: #23400f; font-size: 14px; font-weight: 800; padding: 11px 20px; border-radius: 999px; }
+  .hero .jar { position: absolute; right: 46px; bottom: 18px; width: 190px; height: 205px; }
+
+  /* 섹션 */
+  .sec { display: flex; align-items: center; justify-content: space-between; padding: 30px 2px 14px; }
+  .sec .t2 { font-size: 21px; font-weight: var(--tw); color: var(--ink); letter-spacing: -.3px; }
+  .sec .all { font-size: 13px; color: var(--sub); font-weight: 600; }
+
+  /* 카테고리 필 (PC 스펙: 외곽선 없음, #F5F5F5, 완전 캡슐) */
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { padding: 11px 22px; border-radius: 999px; background: var(--btn-bg); font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
+  .chip.on { background: var(--ac-chip); color: var(--ac-ink); }
+
+  /* 상품 그리드 (보더리스 + 그림자) */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .good { background: var(--card); border-radius: var(--radius); padding: 16px; position: relative; box-shadow: 0 3px 14px rgba(20,25,15,.07); }
+  .good .fav { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .good .fav.on { background: var(--ac-chip); }
+  .good .pic { height: 130px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .good .bd { font-size: 12px; color: var(--sub); font-weight: 600; }
+  .good .nm { font-size: 14.5px; color: var(--ink); font-weight: var(--tw); letter-spacing: -.2px; margin: 3px 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .good .rw { display: flex; align-items: center; justify-content: space-between; }
+  .good .pr { background: var(--btn-bg); border-radius: 999px; font-size: 13px; font-weight: 800; color: var(--ink); padding: 8px 14px; font-variant-numeric: tabular-nums; }
+  .good .add { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; cursor: pointer; }
+
+  /* 혜택 스트립 */
+  .strip { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .strip .s { background: var(--card); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 2px 10px rgba(20,25,15,.05); display: flex; gap: 12px; align-items: center; }
+  .strip .s .e { width: 40px; height: 40px; border-radius: 12px; background: var(--ac-chip); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .strip .s .k { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+  .strip .s .v { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+  /* 텍스트 편집 모드 */
+  .ed { white-space: pre-line; }
+  body.editing .ed { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: 2px; cursor: text; border-radius: 4px; }
+  body.editing .ed:focus { outline: 2px solid var(--gold); background: rgba(255,255,255,.65); }
+
+  /* 배치(드래그 이동) 모드 */
+  body.arranging [data-k] { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: -1px; cursor: move; }
+  body.arranging [data-k].dragging { opacity: .45; }
+  body.arranging .ed { pointer-events: none; }
+  body.arranging [data-k] .ed { pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="ctrl">
+  <span class="t">🖥️ PC 시안</span>
+  <span class="grp" id="colorGrp"><span class="t">포인트 컬러</span>
+    <button class="cbtn on" style="background:#6db33f" data-a1="#6db33f" data-a2="#94d64f" data-ink="#1d3a0e" data-chip="#e8f5db">1</button>
+    <button class="cbtn" style="background:#151734" data-a1="#151734" data-a2="#3d4a95" data-ink="#f4e9d2" data-chip="#e9e6f2">2</button>
+    <button class="cbtn" style="background:#c9a96a" data-a1="#b8925a" data-a2="#e2c98f" data-ink="#3a2c12" data-chip="#f5ecd9">3</button>
+    <button class="cbtn" style="background:#d97795;color:#5a1f31" data-a1="#d97795" data-a2="#f2aec2" data-ink="#5a1f31" data-chip="#fbe7ed">4</button>
+    <button class="cbtn" style="background:#6a5fe0" data-a1="#6a5fe0" data-a2="#9c93f5" data-ink="#f0eeff" data-chip="#e9e6fc">5</button>
+  </span>
+  <span class="grp">
+    <input id="hexInput" placeholder="#4CAF50" maxlength="7"
+      style="width:86px;height:30px;border:2px solid #e4e6ec;border-radius:9px;padding:0 8px;font-size:12px;font-family:inherit;font-weight:700">
+    <button class="obtn" id="hexAdd">색 추가</button>
+  </span>
+  <span class="grp"><span class="t">라운드</span>
+    <button class="obtn" data-r="10px">각지게</button>
+    <button class="obtn on" data-r="18px">보통</button>
+    <button class="obtn" data-r="26px">둥글게</button>
+  </span>
+  <span class="grp"><span class="t">제목 굵기</span>
+    <button class="obtn" data-w="600">600</button>
+    <button class="obtn on" data-w="700">700</button>
+    <button class="obtn" data-w="800">800</button>
+  </span>
+  <button class="obtn" id="editToggle">✏️ 편집 모드 켜기</button>
+  <button class="obtn" id="arrangeToggle">🧩 배치 모드 켜기</button>
+</div>
+
+<div class="browser">
+  <div class="bbar">
+    <span class="dot" style="background:#f26d5f"></span>
+    <span class="dot" style="background:#f5be4f"></span>
+    <span class="dot" style="background:#59c76f"></span>
+    <span class="url">beautyground.co.kr</span>
+  </div>
+  <div class="site">
+    <nav class="nav">
+      <span class="logo ed">BEAUTY <em>GROUND</em></span>
+      <span class="menu">
+        <a class="on ed">홈</a>
+        <a class="ed">카테고리</a>
+        <a class="ed">라이브</a>
+        <a class="ed">브랜드</a>
+        <a class="ed">이벤트</a>
+      </span>
+      <span class="ic">
+        <span>🔍</span>
+        <span>🛍<span class="dot2">2</span></span>
+        <span>👤</span>
+      </span>
+    </nav>
+
+    <div class="wrap" data-box data-cid="wrap" data-dir="v">
+      <div class="hero" data-k="hero">
+        <div class="brand ed">BEAUTY GROUND</div>
+        <h2 class="ed">수분 진정 나이트 크림
+여름 피부를 위한 저자극 라인</h2>
+        <p class="ed">건조해진 여름 피부를 위한 저자극 진정 라인. 이번 주 단독 특가로 만나보세요.</p>
+        <span class="cta ed">20% OFF ⚡ 이번 주</span>
+        <svg class="jar" viewBox="0 0 110 120">
+          <ellipse cx="55" cy="112" rx="40" ry="6" fill="rgba(0,0,0,.15)"/>
+          <rect x="22" y="46" width="66" height="62" rx="14" fill="rgba(255,255,255,.85)"/>
+          <rect x="22" y="46" width="66" height="26" rx="12" fill="rgba(255,255,255,.6)"/>
+          <rect x="18" y="30" width="74" height="20" rx="9" fill="#3c4438"/>
+          <rect x="30" y="76" width="50" height="22" rx="6" fill="var(--ac-chip)"/>
+          <text x="55" y="91" text-anchor="middle" font-size="9" font-weight="800" fill="var(--ac-ink)">CREAM</text>
+        </svg>
+      </div>
+
+      <section data-k="cat">
+        <div class="sec"><span class="t2 ed">카테고리</span><span class="all ed">전체 보기</span></div>
+        <div class="chips" data-box data-cid="chips" data-dir="h">
+          <span class="chip ed" data-k="c1">프래그런스</span>
+          <span class="chip ed" data-k="c2">메이크업</span>
+          <span class="chip ed" data-k="c3">헤어</span>
+          <span class="chip on ed" data-k="c4">스킨케어</span>
+          <span class="chip ed" data-k="c5">바디</span>
+          <span class="chip ed" data-k="c6">이너뷰티</span>
+        </div>
+      </section>
+
+      <section data-k="new">
+        <div class="sec"><span class="t2 ed">신상품</span><span class="all ed">전체 보기</span></div>
+        <div class="grid" data-box data-cid="grid" data-dir="h">
+        <div class="good" data-k="g1">
+          <div class="fav">🤍</div>
+          <div class="pic">
+            <svg width="90" height="108" viewBox="0 0 84 100">
+              <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
+              <rect x="16" y="26" width="52" height="66" rx="12" fill="#bfe3f5"/>
+              <rect x="16" y="26" width="52" height="30" rx="12" fill="#a5d5ee"/>
+              <rect x="30" y="12" width="24" height="18" rx="4" fill="#e9eef2"/>
+              <rect x="22" y="52" width="40" height="26" rx="4" fill="#fff"/>
+              <text x="42" y="65" text-anchor="middle" font-size="8" font-weight="800" fill="#28536b">AQUA</text>
+            </svg>
+          </div>
+          <div class="bd ed">뷰티그라운드</div>
+          <div class="nm ed">수분 아쿠아 크림 50ml</div>
+          <div class="rw"><span class="pr ed">25,000원</span><span class="add">+</span></div>
+        </div>
+        <div class="good" data-k="g2">
+          <div class="fav on">💚</div>
+          <div class="pic">
+            <svg width="64" height="110" viewBox="0 0 60 102">
+              <ellipse cx="30" cy="97" rx="22" ry="4" fill="rgba(0,0,0,.08)"/>
+              <rect x="14" y="26" width="32" height="68" rx="8" fill="#f2f3ef"/>
+              <rect x="24" y="4" width="12" height="26" rx="3" fill="#d8dad4"/>
+              <rect x="18" y="46" width="24" height="34" rx="3" fill="#fff"/>
+              <text x="30" y="60" text-anchor="middle" font-size="7" font-weight="800" fill="#555">7.5%</text>
+            </svg>
+          </div>
+          <div class="bd ed">닥터랩</div>
+          <div class="nm ed">글리콜릭 앰플 30ml</div>
+          <div class="rw"><span class="pr ed">32,000원</span><span class="add">+</span></div>
+        </div>
+        <div class="good" data-k="g3">
+          <div class="fav">🤍</div>
+          <div class="pic">
+            <svg width="62" height="108" viewBox="0 0 58 100">
+              <ellipse cx="29" cy="95" rx="20" ry="4" fill="rgba(0,0,0,.08)"/>
+              <rect x="12" y="30" width="34" height="62" rx="8" fill="var(--ac-chip)"/>
+              <rect x="22" y="10" width="14" height="24" rx="3" fill="#c9ccc4"/>
+              <rect x="17" y="48" width="24" height="30" rx="3" fill="#fff"/>
+              <text x="29" y="62" text-anchor="middle" font-size="7" font-weight="800" fill="var(--ac-ink)">VITA</text>
+            </svg>
+          </div>
+          <div class="bd ed">오디크</div>
+          <div class="nm ed">비타 토닝 세럼 30ml</div>
+          <div class="rw"><span class="pr ed">38,000원</span><span class="add">+</span></div>
+        </div>
+        <div class="good" data-k="g4">
+          <div class="fav">🤍</div>
+          <div class="pic">
+            <svg width="86" height="104" viewBox="0 0 84 100">
+              <ellipse cx="42" cy="95" rx="30" ry="4" fill="rgba(0,0,0,.08)"/>
+              <rect x="20" y="34" width="44" height="58" rx="10" fill="#f7e8ce"/>
+              <rect x="32" y="16" width="20" height="20" rx="4" fill="#d9cbb1"/>
+              <rect x="26" y="54" width="32" height="24" rx="4" fill="#fff"/>
+              <text x="42" y="67" text-anchor="middle" font-size="7" font-weight="800" fill="#7a5c22">GOLD</text>
+            </svg>
+          </div>
+          <div class="bd ed">쁘띠페</div>
+          <div class="nm ed">골드 콜라겐 크림 50ml</div>
+          <div class="rw"><span class="pr ed">29,000원</span><span class="add">+</span></div>
+        </div>
+        </div>
+      </section>
+
+      <div class="strip" data-k="strip" data-box data-cid="strip" data-dir="h">
+        <div class="s" data-k="s1"><span class="e">🚚</span><span><div class="k ed">무료배송</div><div class="v ed">3만원 이상 구매 시</div></span></div>
+        <div class="s" data-k="s2"><span class="e">🎁</span><span><div class="k ed">신규회원 혜택</div><div class="v ed">가입 즉시 쿠폰 지급</div></span></div>
+        <div class="s" data-k="s3"><span class="e">📺</span><span><div class="k ed">라이브 방송</div><div class="v ed">방송 중 단독 특가</div></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const root = document.documentElement;
+  document.querySelectorAll('.cbtn').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--ac1', b.dataset.a1);
+    root.style.setProperty('--ac2', b.dataset.a2);
+    root.style.setProperty('--ac-ink', b.dataset.ink);
+    root.style.setProperty('--ac-chip', b.dataset.chip);
+    document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.querySelectorAll('.obtn[data-r]').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--radius', b.dataset.r);
+    document.querySelectorAll('.obtn[data-r]').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.querySelectorAll('.obtn[data-w]').forEach((b) => b.addEventListener('click', () => {
+    root.style.setProperty('--tw', b.dataset.w);
+    document.querySelectorAll('.obtn[data-w]').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  const et = document.getElementById('editToggle');
+  const at = document.getElementById('arrangeToggle');
+
+  function setEditing(on) {
+    document.body.classList.toggle('editing', on);
+    document.querySelectorAll('.ed').forEach((el) => el.setAttribute('contenteditable', on ? 'true' : 'false'));
+    et.textContent = on ? '✅ 편집 끝내기' : '✏️ 편집 모드 켜기';
+    et.classList.toggle('on', on);
+    if (on) setArranging(false);
+  }
+  function setArranging(on) {
+    document.body.classList.toggle('arranging', on);
+    document.querySelectorAll('[data-k]').forEach((el) => el.setAttribute('draggable', on ? 'true' : 'false'));
+    at.textContent = on ? '✅ 배치 끝내기' : '🧩 배치 모드 켜기';
+    at.classList.toggle('on', on);
+    if (on) setEditing(false);
+  }
+  et.addEventListener('click', () => setEditing(!document.body.classList.contains('editing')));
+  at.addEventListener('click', () => setArranging(!document.body.classList.contains('arranging')));
+
+  /* 드래그로 박스·버튼 위치 이동 (같은 묶음 안에서 순서 변경) */
+  let dragEl = null;
+  document.addEventListener('dragstart', (e) => {
+    if (!document.body.classList.contains('arranging')) { e.preventDefault(); return; }
+    const t = e.target.closest('[data-k]');
+    if (!t) { e.preventDefault(); return; }
+    dragEl = t;
+    t.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', t.dataset.k); } catch (err) { /* 무시 */ }
+  });
+  document.addEventListener('dragover', (e) => {
+    if (!dragEl) return;
+    e.preventDefault();
+    let t = e.target.closest('[data-k]');
+    // 드래그 중인 요소와 같은 묶음(부모)의 형제를 찾을 때까지 위로 올라간다
+    while (t && t !== dragEl && t.parentElement !== dragEl.parentElement) t = t.parentElement.closest('[data-k]');
+    if (!t || t === dragEl) return;
+    const r = t.getBoundingClientRect();
+    const dir = (t.parentElement.dataset.dir || 'v');
+    const before = dir === 'v' ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
+    t.parentElement.insertBefore(dragEl, before ? t : t.nextSibling);
+  });
+  document.addEventListener('dragend', () => {
+    if (dragEl) dragEl.classList.remove('dragging');
+    dragEl = null;
+    broadcast();
+  });
+
+  /* # 헥스 코드로 포인트 컬러 추가 */
+  const hexInput = document.getElementById('hexInput');
+  const colorGrp = document.getElementById('colorGrp');
+  function h2r(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function r2h(r, g, b) { return '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+  function mix(hex, target, ratio) { const a = h2r(hex); const t = h2r(target); return r2h(a[0] + (t[0] - a[0]) * ratio, a[1] + (t[1] - a[1]) * ratio, a[2] + (t[2] - a[2]) * ratio); }
+  function lum(hex) { const [r, g, b] = h2r(hex); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+  function makePalette(base) {
+    return {
+      a1: base,
+      a2: mix(base, '#ffffff', 0.28),
+      ink: lum(base) > 0.6 ? mix(base, '#000000', 0.72) : mix(base, '#ffffff', 0.88),
+      chip: mix(base, '#ffffff', 0.86),
+    };
+  }
+  function addSwatch(p, select) {
+    const b = document.createElement('button');
+    b.className = 'cbtn';
+    b.style.background = p.a1;
+    b.dataset.a1 = p.a1; b.dataset.a2 = p.a2; b.dataset.ink = p.ink; b.dataset.chip = p.chip;
+    b.textContent = String(colorGrp.querySelectorAll('.cbtn').length + 1);
+    b.addEventListener('click', () => {
+      root.style.setProperty('--ac1', b.dataset.a1);
+      root.style.setProperty('--ac2', b.dataset.a2);
+      root.style.setProperty('--ac-ink', b.dataset.ink);
+      root.style.setProperty('--ac-chip', b.dataset.chip);
+      document.querySelectorAll('.cbtn').forEach((x) => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+    colorGrp.appendChild(b);
+    if (select) b.click();
+    return b;
+  }
+  document.getElementById('hexAdd').addEventListener('click', () => {
+    let v = hexInput.value.trim();
+    if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
+    if (!/^#[0-9a-fA-F]{6}$/.test(v)) { hexInput.style.borderColor = '#e05555'; return; }
+    hexInput.style.borderColor = '#e4e6ec';
+    addSwatch(makePalette(v.toLowerCase()), true);
+    hexInput.value = '';
+    setTimeout(broadcast, 0);
+  });
+  hexInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('hexAdd').click(); });
+
+  /* ── 서버 연동 (모바일 draft.html과 동일 방식, 저장 위치만 theme.draftPc) ── */
+  const SB_URL = 'https://bjqtuklkskrqzbuxdwxm.supabase.co';
+  const SB_KEY = 'sb_publishable_nuBbC2D1_S_eV0fA9OAjhQ_ntsloX0Q';
+  const eds = () => Array.from(document.querySelectorAll('.ed'));
+
+  function currentCfg() {
+    const c = document.querySelector('.cbtn.on');
+    const r = document.querySelector('.obtn[data-r].on');
+    const w = document.querySelector('.obtn[data-w].on');
+    const layout = {};
+    document.querySelectorAll('[data-cid]').forEach((box) => {
+      layout[box.dataset.cid] = Array.from(box.children).filter((ch) => ch.dataset && ch.dataset.k).map((ch) => ch.dataset.k);
+    });
+    return {
+      color: c ? { a1: c.dataset.a1, a2: c.dataset.a2, ink: c.dataset.ink, chip: c.dataset.chip } : null,
+      radius: r ? r.dataset.r : null,
+      w: w ? w.dataset.w : null,
+      layout,
+      texts: eds().map((e) => e.innerText),
+    };
+  }
+  function broadcast() {
+    try { parent.postMessage({ type: 'bgDraftPcCfg', cfg: currentCfg() }, location.origin); } catch (e) { /* 무시 */ }
+  }
+  function applyCfg(c) {
+    if (!c) return;
+    if (c.color && c.color.a1) {
+      root.style.setProperty('--ac1', c.color.a1);
+      root.style.setProperty('--ac2', c.color.a2);
+      root.style.setProperty('--ac-ink', c.color.ink);
+      root.style.setProperty('--ac-chip', c.color.chip);
+      // 저장된 커스텀 색이 스와치에 없으면 추가해서 선택 표시
+      if (!Array.from(document.querySelectorAll('.cbtn')).some((b) => b.dataset.a1 === c.color.a1)) {
+        addSwatch(c.color, false);
+      }
+      document.querySelectorAll('.cbtn').forEach((b) => b.classList.toggle('on', b.dataset.a1 === c.color.a1));
+    }
+    if (c.layout) {
+      Object.keys(c.layout).forEach((cid) => {
+        const box = document.querySelector(`[data-cid="${cid}"]`);
+        if (!box) return;
+        c.layout[cid].forEach((k) => {
+          const el = Array.from(box.children).find((ch) => ch.dataset && ch.dataset.k === k);
+          if (el) box.appendChild(el);
+        });
+      });
+    }
+    if (c.radius) {
+      root.style.setProperty('--radius', c.radius);
+      document.querySelectorAll('.obtn[data-r]').forEach((b) => b.classList.toggle('on', b.dataset.r === c.radius));
+    }
+    if (c.w) {
+      root.style.setProperty('--tw', c.w);
+      document.querySelectorAll('.obtn[data-w]').forEach((b) => b.classList.toggle('on', b.dataset.w === c.w));
+    }
+    if (Array.isArray(c.texts)) {
+      eds().forEach((e, i) => {
+        if (typeof c.texts[i] === 'string' && c.texts[i] !== e.innerText) e.textContent = c.texts[i];
+      });
+    }
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest('.cbtn, .obtn')) setTimeout(broadcast, 0); });
+  document.addEventListener('input', (e) => { if (e.target.closest && e.target.closest('.ed')) broadcast(); });
+
+  (function initFromServer() {
+    const raw = new URLSearchParams(location.search).get('cfg');
+    if (raw) {
+      try { applyCfg(JSON.parse(raw)); } catch (e) { /* 무시 */ }
+      setTimeout(broadcast, 0);
+      return;
+    }
+    fetch(`${SB_URL}/rest/v1/home_settings?id=eq.1&select=theme`, {
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+    })
+      .then((r) => r.json())
+      .then((rows) => {
+        const d = rows && rows[0] && rows[0].theme && rows[0].theme.draftPc;
+        if (d) applyCfg(d);
+        setTimeout(broadcast, 0);
+      })
+      .catch(() => {});
+  })();
+</script>
+</body>
+</html>
