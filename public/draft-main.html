@@ -51,6 +51,18 @@
   .real-home { width:100%; height:100%; border:0; display:block; background:#fff; }
   .phone.home-live .nav { display:none; }
 
+  /* PC 보기: 폰 프레임 대신 화면 꽉 찬 데스크톱 프레임 (패널 270px는 우측 유지) */
+  body.pc-view .phone {
+    width:calc(100% - 306px); max-width:none;
+    height:min(960px, calc(100dvh - 48px)); min-height:640px;
+    border-radius:16px;
+  }
+  /* PC 프레임에서 ②구매·③장바구니 목업은 폰 폭으로 중앙 정렬 */
+  body.pc-view .scr[data-scr="product"], body.pc-view .scr[data-scr="cart"],
+  body.pc-view .nav { width:420px; left:calc(50% - 210px); right:auto; }
+  body.pc-view .scr[data-scr="product"], body.pc-view .scr[data-scr="cart"] { border-left:1px solid var(--line); border-right:1px solid var(--line); }
+  @media (max-width:760px){ body.pc-view .phone { width:100%; } }
+
   /* ═══ 화면 1: 메인 ═══ */
   .m-head { display:flex; align-items:center; justify-content:space-between; padding:22px 20px 14px; }
   .m-head .t small { display:block; font-size:calc(12.5px*var(--s)); font-weight:var(--wb); color:var(--sub); }
@@ -220,7 +232,7 @@
   <!-- ═══ 메인 = 실제 쇼핑몰 메인페이지 전체 임베드 (themePreview 연동) ═══ -->
   <section class="scr on" data-scr="home">
     <iframe id="realHome" class="real-home" title="쇼핑몰 메인 (실페이지)"
-      src="/?themePreview=%7B%22signalRed%22%3A%22%23E60012%22%2C%22signalBlue%22%3A%22%230047FF%22%2C%22signalYellow%22%3A%22%23FFD400%22%7D"></iframe>
+      src="/?themePreview=%7B%22signalRed%22%3A%22%23E60012%22%2C%22signalBlue%22%3A%22%230047FF%22%2C%22signalYellow%22%3A%22%23FFD400%22%7D&view=mobile"></iframe>
   </section>
 
   <!-- ═══ 구매(상세) ═══ -->
@@ -336,6 +348,15 @@
   </div>
 
   <div class="grp">
+    <p class="t">기기 화면 (① 메인)</p>
+    <div class="row">
+      <button class="opt on" data-device="mobile">📱 모바일</button>
+      <button class="opt" data-device="desktop">🖥 PC 꽉찬 화면</button>
+    </div>
+    <p class="d">실페이지 안의 "PC버전/모바일" 버튼을 눌러도 프레임이 자동으로 맞춰집니다.</p>
+  </div>
+
+  <div class="grp">
     <p class="t">메인 시그널 3색 (실페이지 즉시 적용)</p>
     <div class="row" style="align-items:center">
       <label style="font-size:12px;display:flex;align-items:center;gap:5px">빨강 <input type="color" data-signal="signalRed" value="#E60012" style="width:34px;height:26px;border:none;padding:0;background:none;cursor:pointer"></label>
@@ -349,7 +370,7 @@
   <div class="grp">
     <p class="t">텍스트 수정</p>
     <div class="row"><button class="opt" id="editToggle">수정 모드 켜기</button></div>
-    <p class="d">점선 문구 클릭 = 직접 수정 (②구매·③장바구니 화면에만 적용). 새로고침하면 원래대로.</p>
+    <p class="d">켜면 ①메인(실페이지 포함)·②구매·③장바구니 모두 문구를 클릭해 직접 수정할 수 있습니다. 새로고침하면 원래대로.</p>
   </div>
 
   <div class="grp">
@@ -393,9 +414,28 @@ let editOn=false; // 수정모드 플래그 — 초기 렌더보다 먼저 선�
 /* ── 메인 = 실제 몰 메인페이지 임베드 (themePreview 시그널 3색 연동) ── */
 const SIGNAL_DEFAULT={signalRed:'#E60012',signalBlue:'#0047FF',signalYellow:'#FFD400'};
 const signal={...SIGNAL_DEFAULT};
+let deviceMode='mobile';
 function reloadRealHome(){
-  document.getElementById('realHome').src='/?themePreview='+encodeURIComponent(JSON.stringify(signal));
+  document.getElementById('realHome').src='/?themePreview='+encodeURIComponent(JSON.stringify(signal))
+    +'&view='+(deviceMode==='desktop'?'desktop':'mobile');
 }
+
+/* ── 기기 화면 전환: 패널 버튼 or 실페이지 안 "PC버전" 버튼 → 프레임 크기 동기화 ── */
+function setDevice(m, reload){
+  deviceMode=m;
+  document.body.classList.toggle('pc-view', m==='desktop');
+  document.querySelectorAll('[data-device]').forEach(b=>b.classList.toggle('on', b.dataset.device===m));
+  if(reload) reloadRealHome();
+}
+document.querySelectorAll('[data-device]').forEach(b=>b.addEventListener('click',()=>setDevice(b.dataset.device,true)));
+/* 실페이지가 스스로 모드를 바꾸면(bg_view_mode) 프레임만 따라 넓힌다 — 리로드 불필요 */
+setInterval(()=>{
+  try{
+    const w=document.getElementById('realHome').contentWindow;
+    const m=w&&w.localStorage.getItem('bg_view_mode');
+    if(m&&m!==deviceMode) setDevice(m,false);
+  }catch(e){/* 무시 */}
+},600);
 document.querySelectorAll('[data-signal]').forEach(inp=>{
   inp.value=signal[inp.dataset.signal];
   inp.addEventListener('change',()=>{ signal[inp.dataset.signal]=inp.value; reloadRealHome(); });
@@ -520,11 +560,16 @@ sAll.addEventListener('input',()=>{document.body.style.setProperty('--s',sAll.va
 sHead.addEventListener('input',()=>{document.body.style.setProperty('--sh',sHead.value);sHeadV.textContent=Math.round(sHead.value*100)+'%';});
 
 function refreshEditable(){ document.querySelectorAll('.ed').forEach(el=>{ el.setAttribute('contenteditable',editOn?'true':'false'); if(editOn)el.setAttribute('spellcheck','false'); }); }
+/* 수정 모드는 임베드된 실페이지(① 메인)에도 적용 — designMode로 문구 직접 수정 */
+function applyEmbedEdit(){
+  try{ const d=document.getElementById('realHome').contentDocument; if(d) d.designMode=editOn?'on':'off'; }catch(e){/* 무시 */}
+}
+document.getElementById('realHome').addEventListener('load',applyEmbedEdit);
 document.getElementById('editToggle').addEventListener('click',function(){
   editOn=!editOn; state.edit=editOn?'edit-mode':'';
   this.textContent=editOn?'수정 모드 끄기':'수정 모드 켜기';
   this.classList.toggle('on',editOn);
-  refreshEditable(); apply();
+  refreshEditable(); applyEmbedEdit(); apply();
 });
 
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{
