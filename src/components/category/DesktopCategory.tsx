@@ -20,7 +20,7 @@ export default function DesktopCategory() {
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      <div className="max-w-[1280px] mx-auto px-6 py-10">
+      <div className="max-w-[1920px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">카테고리</h1>
         <p className="text-[13px] text-ink-soft mt-1">원하는 카테고리를 선택하세요</p>
 

@@ -34,7 +34,7 @@ export default function CategoryTabBar({
 
   return (
     <nav className={`sticky ${stickyTop} z-40 bg-paper border-b border-rule`}>
-      <div className="max-w-[1280px] mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2.5">
+      <div className="max-w-[1920px] mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2.5">
         {chip('전체', active == null, () => go(null))}
         {categories.map((cat) => chip(cat, active === cat, () => go(cat)))}
       </div>

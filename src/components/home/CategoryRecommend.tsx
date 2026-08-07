@@ -20,7 +20,7 @@ export default function CategoryRecommend({
   const items = byCategory[activeCategory] ?? []
 
   return (
-    <section className="max-w-[1280px] mx-auto px-6 py-12">
+    <section className="max-w-[1920px] mx-auto px-6 py-12">
       <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">카테고리별 추천</h2>
       <div className="flex gap-2 border-b border-rule mb-6">
         {categories.map((cat) => (

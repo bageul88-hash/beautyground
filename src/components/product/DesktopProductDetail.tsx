@@ -61,7 +61,7 @@ export default function DesktopProductDetail({
   return (
     <div className="bg-quiet min-h-screen">
       <div className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-[13px] font-bold text-ink-soft hover:text-ink">← 뒤로</button>
           <div className="flex items-center gap-4 text-ink">
             <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
@@ -76,7 +76,7 @@ export default function DesktopProductDetail({
 
       <CategoryTabBar active={view.category} stickyTop="top-16" />
 
-      <div className="max-w-[1280px] mx-auto px-6 py-10 grid grid-cols-[1.4fr_1fr] gap-12 items-start">
+      <div className="max-w-[1920px] mx-auto px-6 py-10 grid grid-cols-[1.4fr_1fr] gap-12 items-start">
         {/* 콘텐츠 영역 */}
         <div className="min-w-0 bg-paper border border-rule">
           {view.images.length > 0 ? (

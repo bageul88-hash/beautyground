@@ -78,7 +78,7 @@ export default function DesktopHome({
       {/* 히어로 배너 롤링 — 690:592 비율 타일 3칸을 10px 간격으로 이어붙인다(가로 스크롤+snap,
           좌우 화살표로도 이동 가능). 이 구획만 본문(1280px)보다 넓게(1600px) 잡아 큰 화면에서
           좌우 여백이 지나치게 남지 않게 한다(실측: 1920px 화면 기준 여백 344px→160px로 축소). */}
-      <section className="max-w-[1600px] mx-auto px-6 pt-8 pb-16 relative">
+      <section className="max-w-[1920px] mx-auto px-6 pt-8 pb-16 relative">
         {banners.length === 0 ? (
           <div className="aspect-[690/592] max-w-[500px] bg-quiet flex items-center justify-center mx-auto">
             <ImagePlaceholder />
@@ -160,7 +160,7 @@ export default function DesktopHome({
 
       {/* 특가세일 — 지어낸 기획전 대신 실제 sale_price 걸린 상품을 할인율 높은 순으로 */}
       {!saleLoading && saleProducts.length > 0 && (
-        <section className="max-w-[1280px] mx-auto px-6 py-16">
+        <section className="max-w-[1920px] mx-auto px-6 py-16">
           <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">특가세일</h2>
           <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">
             {saleProducts.slice(0, 4).map((p) => {
@@ -194,7 +194,7 @@ export default function DesktopHome({
       )}
 
       {/* 지금 확인할 상품 (계절/명절 태그 우선 추천) */}
-      <section className="max-w-[1280px] mx-auto px-6 py-16">
+      <section className="max-w-[1920px] mx-auto px-6 py-16">
         <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">
           {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} 시즌` : '지금 확인할 상품'}
         </p>
@@ -241,7 +241,7 @@ export default function DesktopHome({
 
       {/* 카테고리 — 원형은 이 시스템에서 프로필/온에어 표시등에만 허용되므로 직각 타일 유지 */}
       {categories.length > 0 && (
-        <section className="max-w-[1280px] mx-auto px-6 py-14">
+        <section className="max-w-[1920px] mx-auto px-6 py-14">
           <div className="flex gap-3 flex-wrap">
             {categories.map((category) => {
               const image = categoryThumbnails.find((t) => t.category === category)?.imageUrl ?? null
@@ -266,7 +266,7 @@ export default function DesktopHome({
       <CategoryRecommend categories={categories} onProductClick={onProductClick} />
 
       {/* 상품 그리드 */}
-      <section className="max-w-[1280px] mx-auto px-6 pt-6 pb-16">
+      <section className="max-w-[1920px] mx-auto px-6 pt-6 pb-16">
         <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink-faint mb-6">신상품</h2>
         {prodLoading ? (
           <div className="grid grid-cols-4 gap-6">

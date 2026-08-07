@@ -82,7 +82,7 @@ export default function DesktopLiveWatch({
   return (
     <div className="bg-quiet min-h-screen">
       <div className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={onBack} className="text-[13px] font-bold text-ink-soft hover:text-ink">← 뒤로</button>
           <div className="flex-1 min-w-0 mx-6 text-center">
             <p className="text-[14px] font-bold text-ink truncate">{live.title}</p>
@@ -94,7 +94,7 @@ export default function DesktopLiveWatch({
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8 grid grid-cols-[1.4fr_1fr] gap-8 items-start">
+      <div className="max-w-[1920px] mx-auto px-6 py-8 grid grid-cols-[1.4fr_1fr] gap-8 items-start">
         {/* 영상 */}
         <div className="min-w-0">
           <div className="relative w-full aspect-video bg-[#14120e] border border-rule overflow-hidden">

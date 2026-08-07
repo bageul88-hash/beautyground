@@ -18,7 +18,7 @@ export default function DesktopWishlist({ loggedIn, lines, onRemove }: Props) {
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      <div className="max-w-[1280px] mx-auto px-6 py-10">
+      <div className="max-w-[1920px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink mb-8">찜 목록</h1>
 
         {!loggedIn ? (

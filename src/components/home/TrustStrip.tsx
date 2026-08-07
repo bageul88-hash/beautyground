@@ -10,7 +10,7 @@ const ITEMS = [
 export default function TrustStrip() {
   return (
     <div className="border-y border-rule bg-quiet/40">
-      <div className="max-w-[1280px] mx-auto px-4 md:px-6 py-3 flex flex-wrap gap-x-6 gap-y-1.5 justify-center md:justify-start">
+      <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-3 flex flex-wrap gap-x-6 gap-y-1.5 justify-center md:justify-start">
         {ITEMS.map((item) => (
           <p key={item.label} className="text-[12px] text-ink-soft whitespace-nowrap">
             <span className="font-bold text-ink">{item.label}</span>
