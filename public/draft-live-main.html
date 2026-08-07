@@ -13,13 +13,13 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    /* ─── 시안 토큰 (라이브커머스메인페이지예시.png 픽셀 실측) ─── */
-    --bg:#000000; --ink:#FFFFFF; --sub:#9C9C9C; --faint:#6E6E6E;
-    --live:#E8402F; --live-ink:#fff;   /* LIVE 배지 레드 (실측 군집) */
-    --acc1:#E8B810;             /* 채널 액센트 골드 (실측) */
-    --acc2:#A84868;             /* 채널 액센트 로즈 (실측) */
-    --acc3:#A8C838;             /* 채널 액센트 라임 */
-    --card:#141414; --line:#242424;
+    /* ─── 시안 토큰 (배경 화이트로 변경 — 액센트는 화이트 배경 가독성 기준 보정) ─── */
+    --bg:#FFFFFF; --ink:#15171B; --sub:#6B6F76; --faint:#9BA0A8;
+    --live:#E8402F; --live-ink:#fff;   /* LIVE 배지 레드 */
+    --acc1:#A67C00;             /* 채널 액센트 골드 (화이트 배경 가독 보정) */
+    --acc2:#8F3A56;             /* 채널 액센트 로즈 (화이트 배경 가독 보정) */
+    --acc3:#6E8B1C;             /* 채널 액센트 올리브그린 (화이트 배경 가독 보정) */
+    --card:#F1F1F1; --line:#E6E6E6;
     --s:1; --sh:1; --wh:700; --wn:600; --wb:400;
 
     background:var(--page);
@@ -27,9 +27,9 @@
     min-height:100vh; padding:40px 16px 80px;
     display:flex; justify-content:center; gap:36px; flex-wrap:wrap;
   }
-  body.theme-gold     { --live:#C9A96A; --acc1:#C9A96A; --acc2:#E8C888; --acc3:#B08F4C; }
-  body.theme-rosegold { --live:#D68A6C; --acc1:#D68A6C; --acc2:#E8B8A0; --acc3:#C97850; }
-  body.theme-mono     { --live:#FFFFFF; --live-ink:#111; --acc1:#CFCFCF; --acc2:#8A8A8A; --acc3:#5C5C5C; }
+  body.theme-gold     { --live:#8A6C2F; --acc1:#8A6C2F; --acc2:#B08F4C; --acc3:#6B5322; }
+  body.theme-rosegold { --live:#B0654A; --acc1:#B0654A; --acc2:#C97850; --acc3:#8A4632; }
+  body.theme-mono     { --live:#1A1A1A; --live-ink:#fff; --acc1:#4A4A4A; --acc2:#767676; --acc3:#2E2E2E; }
 
   /* PC 풀스크린 보기 (draft-main.html과 동일 방식) */
   body.pc-view .phone {
@@ -105,7 +105,7 @@
 
   .foot-pad { height:30px; }
 
-  .toast { position:absolute; left:50%; bottom:26px; transform:translateX(-50%) translateY(8px); background:rgba(255,255,255,.92); color:#111; font-size:12.5px; font-weight:600; border-radius:999px; padding:10px 18px; opacity:0; pointer-events:none; transition:.25s; z-index:20; white-space:nowrap; }
+  .toast { position:absolute; left:50%; bottom:26px; transform:translateX(-50%) translateY(8px); background:rgba(23,24,28,.92); color:#fff; font-size:12.5px; font-weight:600; border-radius:999px; padding:10px 18px; opacity:0; pointer-events:none; transition:.25s; z-index:20; white-space:nowrap; }
   .toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
 
   body.edit-mode .ed { outline:1.5px dashed var(--gold); outline-offset:2px; border-radius:4px; cursor:text; }
@@ -165,7 +165,7 @@
 
 <aside class="ctrl">
   <h2>시안 옵션</h2>
-  <p class="d">예시 이미지 픽셀 실측(배경 #000 · LIVE #E8402F · 액센트 골드/로즈) · 실데이터. draft-main.html과 동일한 기능(PC 보기·포인트 컬러·글자 크기·수정 모드) 지원.</p>
+  <p class="d">배경은 화이트로 변경(원본 예시는 다크 배경) · LIVE #E8402F · 실데이터. draft-main.html과 동일한 기능(PC 보기·포인트 컬러·글자 크기·수정 모드) 지원.</p>
 
   <div class="grp">
     <p class="t">기기 화면</p>
@@ -184,10 +184,10 @@
   <div class="grp">
     <p class="t">포인트 컬러</p>
     <div class="row">
-      <button class="sw on" data-set="theme" data-val="" style="background:linear-gradient(135deg,#E8402F,#E8B810)" aria-label="실측 (기본)"></button>
-      <button class="sw" data-set="theme" data-val="theme-gold" style="background:linear-gradient(135deg,#C9A96A,#E8C888)" aria-label="뷰티그라운드 골드"></button>
-      <button class="sw" data-set="theme" data-val="theme-rosegold" style="background:linear-gradient(135deg,#D68A6C,#E8B8A0)" aria-label="로즈골드"></button>
-      <button class="sw" data-set="theme" data-val="theme-mono" style="background:linear-gradient(135deg,#fff,#8A8A8A)" aria-label="미니멀 모노"></button>
+      <button class="sw on" data-set="theme" data-val="" style="background:linear-gradient(135deg,#E8402F,#A67C00)" aria-label="실측 (기본)"></button>
+      <button class="sw" data-set="theme" data-val="theme-gold" style="background:linear-gradient(135deg,#8A6C2F,#B08F4C)" aria-label="뷰티그라운드 골드"></button>
+      <button class="sw" data-set="theme" data-val="theme-rosegold" style="background:linear-gradient(135deg,#B0654A,#C97850)" aria-label="로즈골드"></button>
+      <button class="sw" data-set="theme" data-val="theme-mono" style="background:linear-gradient(135deg,#1A1A1A,#767676)" aria-label="미니멀 모노"></button>
     </div>
     <p class="d">LIVE 배지·채널명 액센트 색만 바뀝니다. 브랜드 골드 정체성을 살릴지 실측 레드를 쓸지 비교용.</p>
   </div>
