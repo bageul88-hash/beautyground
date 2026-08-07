@@ -4,7 +4,7 @@ import { IconChevronRight, IconVideo } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyHost } from '../../lib/host'
 import type { CommissionTier, Host, HostSaleRow, Live } from '../../lib/types'
-import StatsCard from '../../components/partner/StatsCard'
+import StatsCard from '../../components/host/StatsCard'
 
 const LIVE_STATUS_MAP: Record<Live['status'], { label: string; bg: string; text: string }> = {
   scheduled: { label: '예정',  bg: 'bg-[#FAEEDA]', text: 'text-[#633806]' },

@@ -1,6 +1,3 @@
-import { Link } from 'react-router-dom'
-import Button from '../common/Button'
-
 const STEPS = [
   {
     step: '01',
@@ -84,11 +81,6 @@ export default function JoinSection() {
           </ul>
         </div>
 
-        <div className="text-center mt-10">
-          <Link to="/partner/register" className="inline-block">
-            <Button variant="gold" size="lg" label="입점 신청하기" />
-          </Link>
-        </div>
       </div>
     </section>
   )

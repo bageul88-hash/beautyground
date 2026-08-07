@@ -1,20 +1,13 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   IconHome,
-  IconClipboardCheck,
   IconLogout,
   IconUsers,
   IconAward,
   IconCashBanknote,
-  IconPackage,
-  IconVideo,
-  IconShoppingCart,
-  IconCash,
   IconAddressBook,
   IconShoppingBag,
   IconBox,
-  IconBuildingStore,
-  IconReceipt2,
   IconBroadcast,
   IconTicket,
   IconPalette,
@@ -23,7 +16,8 @@ import {
 import { supabase } from '../../lib/supabase'
 
 // 온라인몰과 라이브커머스를 당분간 분리 운영하기로 한 방침(2026-07-31)을 관리자 메뉴에도 그대로
-// 반영 — 평평한 15개 목록 대신 채널별로 묶어서 한눈에 훑을 수 있게 소제목으로 나눈다(2026-08-08).
+// 반영 — 채널별로 묶어서 한눈에 훑을 수 있게 소제목으로 나눈다(2026-08-08).
+// 매입 후 직접 판매하는 구조라 브랜드사가 직접 로그인하는 파트너센터/파트너 관리 메뉴는 없음(2026-08-08 폐지).
 const NAV_GROUPS = [
   {
     title: '쇼핑몰',
@@ -46,22 +40,11 @@ const NAV_GROUPS = [
     ],
   },
   {
-    title: '회원·파트너',
+    title: '회원',
     items: [
       { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
-      { label: '파트너 관리', to: '/admin/partners', icon: IconBuildingStore },
-      { label: '파트너 정산 관리', to: '/admin/settlements', icon: IconReceipt2 },
-      { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
     ],
   },
-]
-
-// 판매자 센터(상품/주문/정산)로 바로 이동 — 관리자도 상품 업로드 등을 한 곳에서 오갈 수 있게
-const SELLER_NAV_ITEMS = [
-  { label: '상품 관리', to: '/partner/products', icon: IconPackage },
-  { label: '라이브 관리', to: '/partner/live', icon: IconVideo },
-  { label: '주문 관리', to: '/partner/orders', icon: IconShoppingCart },
-  { label: '정산 관리', to: '/partner/settlement', icon: IconCash },
 ]
 
 export default function AdminLayout() {
@@ -69,7 +52,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    navigate('/partner/login')
+    navigate('/app/home')
   }
 
   return (
@@ -107,27 +90,6 @@ export default function AdminLayout() {
               ))}
             </div>
           ))}
-
-          {/* 판매자 센터 바로가기 */}
-          <div className="mt-3 pt-3 border-t border-rule">
-            <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-ink-faint">판매자 관리</p>
-            {SELLER_NAV_ITEMS.map(({ label, to, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
-                    isActive
-                      ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
-                      : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
-                  }`
-                }
-              >
-                <Icon size={18} />
-                {label}
-              </NavLink>
-            ))}
-          </div>
         </nav>
 
         <div className="px-6 py-6 border-t border-rule">

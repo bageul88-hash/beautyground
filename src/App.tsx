@@ -30,31 +30,9 @@ import Terms from './pages/legal/Terms'
 import Privacy from './pages/legal/Privacy'
 import Company from './pages/legal/Company'
 
-// 파트너 인증/입점
-import PartnerRegister from './pages/partner/Register'
-import PartnerLogin from './pages/partner/Login'
-import PartnerApply from './pages/partner/Apply'
-import PartnerApplyComplete from './pages/partner/ApplyComplete'
-
-// 파트너 전용 (RequireAuth + RequirePartner + PartnerLayout)
-import RequireAuth from './components/partner/RequireAuth'
-import RequirePartner from './components/partner/RequirePartner'
-import PartnerLayout from './components/partner/PartnerLayout'
-import PartnerDashboard from './pages/partner/Dashboard'
-import PartnerProducts from './pages/partner/Products'
-import ProductDetail from './pages/partner/ProductDetail'
-import ProductForm from './pages/partner/ProductForm'
-import PartnerLives from './pages/partner/Lives'
-import LiveForm from './pages/partner/LiveForm'
-import LiveDetail from './pages/partner/LiveDetail'
-import PartnerOrders from './pages/partner/Orders'
-import PartnerSettlement from './pages/partner/Settlement'
-import PartnerProfile from './pages/partner/Profile'
-
-// 관리자
+// 관리자 — 매입 후 직접 판매하는 구조라 브랜드사가 직접 관리하는 파트너센터는 없음(2026-08-08 폐지)
 import RequireAdmin from './components/admin/RequireAdmin'
 import AdminLayout from './components/admin/AdminLayout'
-import AdminApplications from './pages/admin/Applications'
 import AdminHome from './pages/admin/Home'
 import AdminHosts from './pages/admin/Hosts'
 import AdminCommissionTiers from './pages/admin/CommissionTiers'
@@ -62,8 +40,6 @@ import AdminHostSettlements from './pages/admin/HostSettlements'
 import AdminMembers from './pages/admin/Members'
 import AdminOrders from './pages/admin/Orders'
 import AdminProducts from './pages/admin/Products'
-import AdminPartners from './pages/admin/Partners'
-import AdminSettlements from './pages/admin/Settlements'
 import AdminLives from './pages/admin/Lives'
 import AdminCoupons from './pages/admin/Coupons'
 import AdminMarketing from './pages/admin/Marketing'
@@ -122,51 +98,20 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about" element={<Company />} />
 
-        {/* 입점(신규 브랜드 모집)도 온라인몰과 분리해 비노출(2026-07-31) — 신청 관련 3개는
-            관리자 전용으로 막고, 이미 입점된 브랜드가 계속 써야 하는 로그인만 열어둠 */}
-        <Route path="/partner/register" element={<LiveGate><PartnerRegister /></LiveGate>} />
-        <Route path="/partner/login" element={<PartnerLogin />} />
-        <Route path="/partner/apply" element={<LiveGate><PartnerApply /></LiveGate>} />
-        <Route path="/partner/apply/complete" element={<LiveGate><PartnerApplyComplete /></LiveGate>} />
-
-        {/* 파트너 전용 + 관리자 (로그인 필요) */}
-        <Route element={<RequireAuth />}>
-          {/* RequirePartner: 로그인만으로는 일반 고객도 URL 직접입력으로 페이지 껍데기가 열렸기에,
-              partners 테이블에 실제 본인 레코드가 있는지 한 번 더 확인 (2026-08-03 추가) */}
-          <Route element={<RequirePartner />}>
-            <Route element={<PartnerLayout />}>
-              <Route path="/partner/dashboard" element={<PartnerDashboard />} />
-              <Route path="/partner/products" element={<PartnerProducts />} />
-              <Route path="/partner/products/new" element={<ProductForm />} />
-              <Route path="/partner/products/:id" element={<ProductDetail />} />
-              <Route path="/partner/products/:id/edit" element={<ProductForm />} />
-              <Route path="/partner/live" element={<PartnerLives />} />
-              <Route path="/partner/live/new" element={<LiveForm />} />
-              <Route path="/partner/live/:id/edit" element={<LiveForm />} />
-              <Route path="/partner/live/:id" element={<LiveDetail />} />
-              <Route path="/partner/orders" element={<PartnerOrders />} />
-              <Route path="/partner/settlement" element={<PartnerSettlement />} />
-              <Route path="/partner/profile" element={<PartnerProfile />} />
-            </Route>
-          </Route>
-          {/* 관리자 라우트: 로그인(RequireAuth) 위에 is_admin() 검사(RequireAdmin)를 한 겹 더 */}
-          <Route element={<RequireAdmin />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/applications" element={<AdminApplications />} />
-              <Route path="/admin/home" element={<AdminHome />} />
-              <Route path="/admin/hosts" element={<AdminHosts />} />
-              <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
-              <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
-              <Route path="/admin/members" element={<AdminMembers />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/partners" element={<AdminPartners />} />
-              <Route path="/admin/settlements" element={<AdminSettlements />} />
-              <Route path="/admin/lives" element={<AdminLives />} />
-              <Route path="/admin/coupons" element={<AdminCoupons />} />
-              <Route path="/admin/marketing" element={<AdminMarketing />} />
-              <Route path="/admin/theme" element={<AdminTheme />} />
-            </Route>
+        {/* 관리자 (매입 후 직접 판매 구조라 브랜드사가 직접 로그인하는 파트너센터는 없음 — 2026-08-08 폐지) */}
+        <Route element={<RequireAdmin />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/home" element={<AdminHome />} />
+            <Route path="/admin/hosts" element={<AdminHosts />} />
+            <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
+            <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
+            <Route path="/admin/members" element={<AdminMembers />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/lives" element={<AdminLives />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/marketing" element={<AdminMarketing />} />
+            <Route path="/admin/theme" element={<AdminTheme />} />
           </Route>
         </Route>
 

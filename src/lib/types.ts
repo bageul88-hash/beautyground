@@ -1,33 +1,5 @@
 // Supabase 테이블 타입 (STEP 0 SQL 스키마와 일치)
 
-export interface PartnerApplication {
-  id: string
-  created_at: string
-  user_id: string | null
-  brand_name: string
-  company_name: string | null
-  biz_number: string | null
-  owner_name: string | null
-  phone: string
-  email: string
-  category: string[] | null // text[] (ARRAY)
-  message: string | null
-  doc_url: string | null
-  status: 'pending' | 'approved' | 'rejected'
-  privacy_agreed: boolean | null
-  terms_agreed: boolean | null
-  agreed_at: string | null
-}
-
-export interface Partner {
-  id: string
-  user_id: string | null
-  brand_name: string
-  status: 'active' | 'suspended'
-  commission_rate: number
-  created_at: string
-}
-
 // 업체 리뷰 게시판에서 수집한 리뷰 1건 (scrape-reviews 응답 및 products.scraped_reviews 저장 형태)
 export interface ScrapedReview {
   rating: number | null
@@ -124,22 +96,11 @@ export interface Order {
   buyer_phone: string | null
   quantity: number
   amount: number
-  // pending/failed = 결제 시도 단계, cancel_requested = 고객 취소요청(파트너 승인 시 cancelled)
+  // pending/failed = 결제 시도 단계, cancel_requested = 고객 취소요청(관리자 승인 시 cancelled)
   status: 'pending' | 'failed' | 'paid' | 'shipped' | 'done' | 'cancelled' | 'cancel_requested'
   delivery_memo?: string | null
   tracking_number?: string | null
   tracking_carrier?: string | null
-  created_at: string
-}
-
-export interface Settlement {
-  id: string
-  partner_id: string | null
-  period: string | null
-  total_sales: number
-  commission: number
-  payout_amount: number
-  status: 'pending' | 'paid'
   created_at: string
 }
 
@@ -183,11 +144,6 @@ export interface HostSettlement {
 // admin_list_host_settlements() RPC 반환 행 — 호스트 이름 조인 포함
 export interface HostSettlementRow extends HostSettlement {
   host_name: string
-}
-
-// admin_list_partner_settlements() RPC 반환 행 — 브랜드명 조인 포함
-export interface PartnerSettlementRow extends Settlement {
-  brand_name: string
 }
 
 // host_sales_view 조회 결과 행 — 구매자 PII(이름/연락처)는 의도적으로 포함하지 않음
