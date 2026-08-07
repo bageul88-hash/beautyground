@@ -61,10 +61,9 @@
   .tabs button.on { color:var(--ink); font-weight:var(--wh); }
   .tabs button.on::after { content:''; position:absolute; left:0; right:0; bottom:0; height:2.5px; background:var(--ink); border-radius:999px; }
 
-  /* ── LIVE 진행 카드 (2열 대형, 옆 카드 살짝) ── */
-  .live-rail { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:14px 20px 0; }
-  .live-rail::-webkit-scrollbar { display:none; }
-  .lcard { flex:0 0 62%; scroll-snap-align:start; cursor:pointer; }
+  /* ── LIVE 진행 카드 (2열, 둘 다 완전히 보이게) ── */
+  .live-rail { display:flex; gap:10px; padding:14px 20px 0; }
+  .lcard { flex:1 1 0; min-width:0; cursor:pointer; }
   .lcard .frame { position:relative; aspect-ratio:9/13; border-radius:14px; overflow:hidden; background:var(--card); }
   .lcard .frame img.bgimg { width:100%; height:100%; object-fit:cover; display:block; }
   .badge {
@@ -90,7 +89,7 @@
   .lcard .ch .vw { color:var(--faint); display:flex; align-items:center; gap:3px; }
   .lcard .ch svg { width:12px; height:12px; }
 
-  /* ── LIVE 예고 ── */
+  /* ── 지난 라이브 / LIVE 예고 (같은 행 스타일 공유) ── */
   .sec-t { font-size:calc(17px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); padding:26px 20px 4px; }
   .up { display:flex; gap:12px; align-items:center; padding:12px 20px; cursor:pointer; }
   .up .th { width:86px; height:64px; border-radius:10px; overflow:hidden; background:var(--card); flex-shrink:0; }
@@ -99,8 +98,8 @@
   .up .tm { font-size:calc(13.5px*var(--s)); font-weight:var(--wh); color:var(--ink); }
   .up .chn { font-size:calc(11px*var(--s)); font-weight:var(--wn); margin-top:3px; }
   .up .ds { font-size:calc(12px*var(--s)); font-weight:var(--wb); color:var(--sub); margin-top:3px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
-  .up .bell { border:1px solid var(--line); background:none; color:var(--sub); width:34px; height:34px; border-radius:50%; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-  .up .bell svg { width:15px; height:15px; }
+  .up .bell, .up .play { border:1px solid var(--line); background:none; color:var(--sub); width:34px; height:34px; border-radius:50%; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .up .bell svg, .up .play svg { width:15px; height:15px; }
   .up .bell.on { color:var(--acc1); border-color:var(--acc1); }
 
   .foot-pad { height:30px; }
@@ -154,6 +153,9 @@
     </nav>
 
     <div class="live-rail" id="liveRail"></div>
+
+    <h2 class="sec-t ed">지난 라이브</h2>
+    <div id="pastList"></div>
 
     <h2 class="sec-t ed">LIVE 예고</h2>
     <div id="upList"></div>
@@ -210,9 +212,10 @@
   </div>
 
   <div class="foot">
-    방송 제목·채널·썸네일·상품·가격은 <b>실제 등록 데이터</b>(쁘띠페·키위글로우·바이리뮤 다시보기)입니다.<br><br>
-    ⚠️ 지금 진행 중인 실방송이 없어 <b>LIVE 배지는 디자인 연출</b>이며, 예고 시간은 해당 방송의 실제 편성 시각입니다.<br><br>
-    LIVE 카드 클릭 → 시청 화면 시안(draft-live.html)으로 연결. 확정하시면 실제 /app/live에 반영합니다.
+    <b>지난 라이브</b>는 실제로 방송됐던 다시보기(쁘띠페·키위글로우·바이리뮤)이고, 시각도 그때 편성됐던 실제 시각입니다.<br><br>
+    <b>LIVE 예고</b>는 아직 확정된 편성이 없어 <b>9월 예시 일정</b>으로 채운 것입니다(상품은 실제 등록 데이터, 방송 일정만 예시). 실제 편성이 잡히면 그 데이터로 교체합니다.<br><br>
+    ⚠️ 지금 진행 중인 실방송이 없어 상단 <b>LIVE 배지는 디자인 연출</b>입니다.<br><br>
+    지난 라이브 클릭 → 시청 화면 시안(draft-live.html)으로 연결. 확정하시면 실제 /app/live에 반영합니다.
   </div>
 </aside>
 
@@ -244,10 +247,30 @@ rail.innerHTML = LIVES.slice(0,2).map((l,i)=>
   + '</div>'
 ).join('');
 
-/* LIVE 예고 리스트 (실데이터 3건 — 시간은 실제 편성 시각) */
 const ACC=['var(--acc1)','var(--acc2)','var(--acc3)'];
-document.getElementById('upList').innerHTML = LIVES.slice(2,5).map((l,i)=>
+const playSvg='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 6.3v11.4c0 .8.9 1.3 1.6.9l9-5.7c.7-.4.7-1.5 0-1.9l-9-5.7c-.7-.4-1.6.1-1.6.9Z"/></svg>';
+
+/* 지난 라이브 (실데이터 3건 — 실제로 방송됐던 지난 라이브, 시각도 그때 편성 시각) */
+document.getElementById('pastList').innerHTML = LIVES.slice(2,5).map((l,i)=>
   '<div class="up" role="button" tabindex="0" data-watch="1">'
+  + '<span class="th"><img src="'+l.thumb+'" alt=""></span>'
+  + '<span class="inf">'
+  +   '<span class="tm ed" style="display:block">'+fmt(l.at)+'</span>'
+  +   '<span class="chn ed" style="display:block;color:'+ACC[i%3]+'">'+chOf(l.title)+'</span>'
+  +   '<span class="ds ed" style="display:block">'+l.title+'</span>'
+  + '</span>'
+  + '<span class="play" aria-hidden="true">'+playSvg+'</span>'
+  + '</div>'
+).join('');
+
+/* LIVE 예고 (⚠️ 확정된 실편성이 아직 없어, 9월 예시 일정 — 상품은 실제 등록 데이터) */
+const UPCOMING=[
+  {title:"오디크 — 오 드 퍼퓸 라인업 첫 공개",at:"2026-09-03T10:00:00+00:00",thumb:"https://cdn.imweb.me/thumbnail/20260406/c74193b83b05e.png"},
+  {title:"더나은 — 겨울·가을 마스크 신상 라이브",at:"2026-09-10T05:00:00+00:00",thumb:"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-winter.jpg"},
+  {title:"다비 — 차량용 디퓨저 향 비교 라이브",at:"2026-09-17T11:00:00+00:00",thumb:"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"}
+];
+document.getElementById('upList').innerHTML = UPCOMING.map((l,i)=>
+  '<div class="up" role="button" tabindex="0" data-toast="방송 시작 전입니다 — 알림을 신청해보세요">'
   + '<span class="th"><img src="'+l.thumb+'" alt=""></span>'
   + '<span class="inf">'
   +   '<span class="tm ed" style="display:block">'+fmt(l.at)+'</span>'
