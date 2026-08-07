@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>뷰티그라운드몰 시안 — 메인·구매·장바구니</title>
+<style>
+  /* ─── 페이지 크롬 ─── */
+  :root { --page:#ececea; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; --gold:#c9a96a; }
+  @media (prefers-color-scheme: dark){ :root{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; } }
+  :root[data-theme="dark"]{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; }
+  :root[data-theme="light"]{ --page:#ececea; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    /* ─── 시안 토큰 (쇼핑몰예시.jpg 픽셀 실측) ─── */
+    --bg:#FFFFFF; --chip:#F4F4F4; --line:#ECECEA;
+    --ink:#17181C; --sub:#8A8F98; --faint:#B9BDC4;
+    --green:#81D14C; --green-deep:#5FB82E; --green-lite:#E7F6D9; --green-ink:#2E7D0F;
+    --hero1:#6DB33F; --hero2:#94D64F;
+    --black:#1A1A1A;
+    --s:1; --sh:1; --wh:700; --wn:600; --wb:400;
+
+    background:var(--page);
+    font-family:Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    min-height:100vh; padding:40px 16px 80px;
+    display:flex; justify-content:center; gap:36px; flex-wrap:wrap;
+  }
+  body.theme-black { --green:#2B2B2B; --green-deep:#111; --green-lite:#EDEDED; --green-ink:#333; --hero1:#3A3A3A; --hero2:#6B6B6B; }
+  body.theme-pink  { --green:#F27DA0; --green-deep:#E05583; --green-lite:#FCE4EC; --green-ink:#B03060; --hero1:#E05583; --hero2:#F8A5C0; }
+  body.theme-gold  { --green:#C9A96A; --green-deep:#B08F4C; --green-lite:#F5EDDC; --green-ink:#8A6C2F; --hero1:#B08F4C; --hero2:#DCC08D; }
+
+  .page-head { width:100%; max-width:880px; text-align:center; margin-bottom:6px; }
+  .page-head .eyebrow { font-size:12px; font-weight:700; letter-spacing:.18em; color:var(--panel-soft); text-transform:uppercase; }
+  .page-head h1 { font-size:24px; font-weight:700; color:var(--panel-ink); margin-top:8px; }
+  .page-head p { font-size:13.5px; color:var(--panel-soft); margin-top:8px; }
+
+  /* ─── 폰 프레임 ─── */
+  .phone {
+    width:420px; height:880px; flex-shrink:0; position:relative; overflow:hidden;
+    border-radius:28px; background:var(--bg);
+    box-shadow:0 24px 70px rgba(20,20,18,.20), 0 0 0 1px var(--panel-line);
+  }
+  .phone button, .phone input { font-family:inherit; }
+  .scr { position:absolute; inset:0 0 64px 0; overflow-y:auto; scrollbar-width:none; display:none; background:var(--bg); }
+  .scr::-webkit-scrollbar { display:none; }
+  .scr.on { display:block; }
+
+  /* ═══ 화면 1: 메인 ═══ */
+  .m-head { display:flex; align-items:center; justify-content:space-between; padding:22px 20px 14px; }
+  .m-head .t small { display:block; font-size:calc(12.5px*var(--s)); font-weight:var(--wb); color:var(--sub); }
+  .m-head .t b { display:block; font-size:calc(19px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); margin-top:2px; }
+  .icon-circle { width:42px; height:42px; border-radius:50%; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--ink); cursor:pointer; flex-shrink:0; }
+  .icon-circle svg { width:18px; height:18px; }
+
+  .hero-rail { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:2px 20px 0; }
+  .hero-rail::-webkit-scrollbar { display:none; }
+  .hero {
+    flex:0 0 88%; scroll-snap-align:start; position:relative; overflow:hidden;
+    border-radius:18px; padding:18px; min-height:196px; cursor:pointer; border:none; text-align:left;
+    background:linear-gradient(120deg,var(--hero1) 0%,var(--hero2) 100%); color:#fff;
+    display:flex; flex-direction:column; align-items:flex-start;
+  }
+  .hero .brand { font-size:calc(12px*var(--s)); font-weight:var(--wn); opacity:.92; }
+  .hero h2 { font-size:calc(20px*var(--s)*var(--sh)); font-weight:var(--wh); line-height:1.25; margin-top:6px; max-width:60%; }
+  .hero p { font-size:calc(10.5px*var(--s)); font-weight:var(--wb); line-height:1.45; opacity:.9; margin-top:8px; max-width:56%; }
+  .hero .cta { margin-top:auto; background:rgba(255,255,255,.92); color:var(--green-ink); border-radius:999px; padding:8px 14px; font-size:calc(10.5px*var(--s)); font-weight:700; letter-spacing:.02em; }
+  .hero img { position:absolute; right:-6px; bottom:-4px; width:46%; max-height:78%; object-fit:contain; filter:drop-shadow(0 10px 18px rgba(0,0,0,.25)); }
+
+  .sec { display:flex; align-items:baseline; justify-content:space-between; padding:20px 20px 10px; }
+  .sec h3 { font-size:calc(15.5px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); }
+  .sec button { border:none; background:none; font-size:calc(12px*var(--s)); color:var(--sub); cursor:pointer; }
+
+  .cat-row { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding:0 20px; }
+  .cat-row::-webkit-scrollbar { display:none; }
+  .cat { flex-shrink:0; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:999px; padding:9px 16px; font-size:calc(12.5px*var(--s)); font-weight:var(--wn); cursor:pointer; }
+  .cat.on { background:var(--black); color:#fff; border-color:var(--black); }
+
+  .prod-rail { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:2px 20px 8px; }
+  .prod-rail::-webkit-scrollbar { display:none; }
+  .pcard {
+    flex:0 0 46%; scroll-snap-align:start; position:relative;
+    background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:10px; cursor:pointer; text-align:left;
+  }
+  .pcard .lim { position:absolute; left:10px; top:10px; z-index:2; background:var(--black); color:#fff; font-size:8px; font-weight:700; letter-spacing:.06em; border-radius:999px; padding:3px 7px; text-transform:uppercase; }
+  .pcard .wish { position:absolute; right:8px; top:8px; z-index:2; width:26px; height:26px; border:none; border-radius:50%; background:var(--bg); cursor:pointer; font-size:13px; line-height:1; color:var(--faint); }
+  .pcard .wish.on { color:var(--green); }
+  .pcard .ph { aspect-ratio:1; border-radius:10px; overflow:hidden; background:var(--chip); display:flex; align-items:center; justify-content:center; }
+  .pcard .ph img { width:100%; height:100%; object-fit:cover; }
+  .pcard .br { font-size:calc(10px*var(--s)); color:var(--sub); margin-top:8px; }
+  .pcard .nm { font-size:calc(12px*var(--s)); font-weight:var(--wn); color:var(--ink); margin-top:2px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+  .pcard .ft { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+  .pcard .pr { font-size:calc(12.5px*var(--s)); font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .pcard .add { width:24px; height:24px; border:none; border-radius:50%; background:var(--black); color:#fff; font-size:14px; line-height:1; cursor:pointer; }
+
+  /* ═══ 화면 2: 구매(상세) ═══ */
+  .d-head { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 6px; position:sticky; top:0; background:var(--bg); z-index:5; }
+  .d-head .back { border:none; background:none; font-size:20px; color:var(--ink); cursor:pointer; }
+  .d-gallery { position:relative; padding:6px 20px 0; }
+  .d-gallery .frame { aspect-ratio:1.05; border-radius:16px; overflow:hidden; background:var(--chip); display:flex; align-items:center; justify-content:center; }
+  .d-gallery img { width:100%; height:100%; object-fit:cover; }
+  .dots { display:flex; justify-content:center; gap:5px; padding:12px 0 4px; }
+  .dots i { width:6px; height:6px; border-radius:50%; background:var(--line); }
+  .dots i.on { background:var(--ink); }
+  .d-body { padding:6px 22px 0; }
+  .d-body .br { font-size:calc(11px*var(--s)); letter-spacing:.08em; color:var(--sub); text-transform:uppercase; }
+  .d-body h2 { font-size:calc(17px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); margin-top:4px; line-height:1.35; }
+  .d-body .rate { font-size:calc(12px*var(--s)); color:var(--ink); margin-top:6px; }
+  .d-body .rate b { color:var(--green-deep); }
+  .d-price { display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .d-price .now { font-size:calc(18px*var(--s)); font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .d-price s { font-size:calc(13px*var(--s)); color:var(--faint); font-variant-numeric:tabular-nums; }
+  .d-price .off { background:var(--green-lite); color:var(--green-ink); font-size:calc(11px*var(--s)); font-weight:700; border-radius:999px; padding:3px 8px; }
+  .d-opts { display:flex; gap:8px; margin-top:12px; }
+  .d-opts button { border:1.5px solid var(--line); background:var(--bg); color:var(--ink); border-radius:999px; padding:7px 16px; font-size:calc(12px*var(--s)); font-weight:var(--wn); cursor:pointer; }
+  .d-opts button.on { border-color:var(--black); }
+  .d-flags { margin-top:14px; display:flex; flex-direction:column; gap:7px; }
+  .d-flags span { font-size:calc(11.5px*var(--s)); color:var(--sub); display:flex; align-items:center; gap:7px; }
+  .d-flags .ok { color:var(--green-deep); font-weight:600; }
+  .d-flags svg { width:14px; height:14px; flex-shrink:0; }
+  .d-desc { font-size:calc(12.5px*var(--s)); font-weight:var(--wb); color:var(--sub); line-height:1.65; margin-top:12px; }
+  .d-sec { margin-top:22px; padding:0 22px; }
+  .d-sec h4 { font-size:calc(14.5px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); padding-bottom:10px; }
+  .d-detailimgs img { width:100%; border-radius:12px; display:block; margin-bottom:8px; }
+  .rv { border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:9px; }
+  .rv .st { color:var(--green-deep); font-size:calc(11px*var(--s)); }
+  .rv p { font-size:calc(12px*var(--s)); color:var(--ink); line-height:1.6; margin-top:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .rv .au { font-size:calc(10.5px*var(--s)); color:var(--faint); margin-top:6px; }
+  .qa-empty { border:1px dashed var(--line); border-radius:14px; padding:22px; text-align:center; font-size:calc(12px*var(--s)); color:var(--sub); }
+  .qa-empty button { margin-top:10px; border:1.5px solid var(--black); background:var(--bg); border-radius:999px; padding:8px 18px; font-size:calc(12px*var(--s)); font-weight:600; cursor:pointer; color:var(--ink); }
+  .buy-bar { position:sticky; bottom:0; display:flex; gap:10px; padding:12px 20px 16px; background:linear-gradient(transparent,var(--bg) 30%); }
+  .buy-bar .wishbig { width:52px; height:48px; border:1.5px solid var(--line); border-radius:14px; background:var(--bg); font-size:18px; cursor:pointer; color:var(--ink); }
+  .buy-bar .wishbig.on { color:var(--green); }
+  .buy-bar .addcart { flex:1; border:none; border-radius:14px; background:linear-gradient(120deg,var(--green) 0%,var(--green-deep) 130%); color:#fff; font-size:calc(14px*var(--s)); font-weight:700; cursor:pointer; }
+
+  /* ═══ 화면 3: 장바구니 ═══ */
+  .c-head { display:flex; align-items:center; padding:18px 20px 8px; position:sticky; top:0; background:var(--bg); z-index:5; }
+  .c-head .back { border:none; background:none; font-size:20px; color:var(--ink); cursor:pointer; }
+  .c-head h2 { flex:1; text-align:center; font-size:calc(14.5px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); margin-right:20px; }
+  .c-item { display:flex; gap:12px; align-items:center; padding:14px 20px; border-bottom:1.5px dashed var(--line); }
+  .c-item .ph { width:58px; height:58px; border-radius:10px; background:var(--chip); overflow:hidden; flex-shrink:0; }
+  .c-item .ph img { width:100%; height:100%; object-fit:cover; }
+  .c-item .inf { flex:1; min-width:0; }
+  .c-item .nm { font-size:calc(12px*var(--s)); font-weight:var(--wn); color:var(--ink); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .c-item .sp { font-size:calc(10.5px*var(--s)); color:var(--faint); margin-top:2px; }
+  .c-item .pr { font-size:calc(12px*var(--s)); font-weight:700; color:var(--ink); margin-top:4px; font-variant-numeric:tabular-nums; }
+  .c-item .pr s { color:var(--faint); font-weight:400; font-size:calc(10.5px*var(--s)); margin-right:5px; }
+  .c-item .qty { display:flex; align-items:center; gap:7px; }
+  .c-item .qty button { width:24px; height:24px; border:1px solid var(--line); border-radius:50%; background:var(--bg); cursor:pointer; font-size:13px; line-height:1; color:var(--ink); }
+  .c-item .qty b { font-size:calc(12px*var(--s)); min-width:14px; text-align:center; font-variant-numeric:tabular-nums; }
+  .c-item .rm { border:none; background:none; color:var(--faint); font-size:14px; cursor:pointer; align-self:flex-start; margin-top:2px; }
+  .coupon { margin:14px 20px 0; display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:var(--chip); border-radius:999px; padding:11px 15px; }
+  .coupon svg { width:16px; height:16px; color:var(--sub); flex-shrink:0; }
+  .coupon input { flex:1; border:none; background:none; outline:none; font-size:calc(12px*var(--s)); color:var(--ink); min-width:0; }
+  .coupon .pct { background:var(--green); color:#fff; font-size:calc(10.5px*var(--s)); font-weight:700; border-radius:999px; padding:4px 9px; }
+  .totals { padding:16px 22px 0; }
+  .totals .row { display:flex; justify-content:space-between; align-items:baseline; }
+  .totals .row .lb { font-size:calc(13.5px*var(--s)); font-weight:700; color:var(--ink); }
+  .totals .row .vl { font-size:calc(16px*var(--s)); font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .totals .hint { display:flex; justify-content:space-between; font-size:calc(10.5px*var(--s)); color:var(--faint); margin-top:4px; }
+  .checkout { display:block; width:calc(100% - 40px); margin:14px 20px 0; border:none; border-radius:14px; background:var(--black); color:#fff; padding:15px 0; font-size:calc(13.5px*var(--s)); font-weight:700; cursor:pointer; }
+  .empty { text-align:center; color:var(--faint); font-size:calc(13px*var(--s)); padding:60px 20px; }
+
+  /* ─── 하단 네비 (원본 아이콘 그대로: 홈·리스트·AI·백·프로필) ─── */
+  .nav { position:absolute; left:0; right:0; bottom:0; height:64px; background:var(--bg); border-top:1px solid var(--line); display:flex; z-index:10; }
+  .nav button { flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#9AA0A8; position:relative; }
+  .nav button svg { width:21px; height:21px; }
+  .nav button .ai { width:22px; height:22px; border:1.7px solid currentColor; border-radius:6px; font-size:8.5px; font-weight:800; display:flex; align-items:center; justify-content:center; letter-spacing:.02em; }
+  .nav button.on { color:var(--ink); }
+  .nav button .bar { width:14px; height:2.5px; border-radius:999px; background:transparent; }
+  .nav button.on .bar { background:var(--ink); }
+  .nav .bdg { position:absolute; top:10px; right:calc(50% - 19px); min-width:15px; height:15px; border-radius:999px; background:var(--green); color:#fff; font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 3px; }
+
+  .toast { position:absolute; left:50%; bottom:80px; transform:translateX(-50%) translateY(8px); background:rgba(23,24,28,.92); color:#fff; font-size:12.5px; font-weight:600; border-radius:999px; padding:10px 18px; opacity:0; pointer-events:none; transition:.25s; z-index:20; white-space:nowrap; }
+  .toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* 수정 모드 */
+  body.edit-mode .ed { outline:1.5px dashed var(--gold); outline-offset:2px; border-radius:4px; cursor:text; }
+  body.edit-mode .ed:focus { outline-style:solid; background:rgba(201,169,106,.1); }
+
+  /* ─── 컨트롤 패널 ─── */
+  .ctrl { width:270px; flex-shrink:0; align-self:flex-start; position:sticky; top:18px; max-height:calc(100vh - 36px); overflow-y:auto; background:var(--panel); border-radius:18px; padding:20px; box-shadow:0 8px 30px rgba(20,20,18,.12); color:var(--panel-ink); }
+  .ctrl h2 { font-size:15px; font-weight:700; }
+  .ctrl .d { font-size:12px; color:var(--panel-soft); margin-top:5px; line-height:1.55; }
+  .grp { margin-top:16px; }
+  .grp .t { font-size:11.5px; font-weight:700; letter-spacing:.08em; color:var(--panel-soft); margin-bottom:8px; text-transform:uppercase; }
+  .grp .row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+  .opt { border:1.5px solid var(--panel-line); background:none; color:var(--panel-ink); border-radius:10px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .opt.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,169,106,.28); }
+  .sw { width:38px; height:38px; border-radius:11px; border:2px solid transparent; cursor:pointer; padding:0; }
+  .sw.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,169,106,.3); }
+  .slider-row { display:flex; align-items:center; gap:10px; }
+  .slider-row input { flex:1; accent-color:var(--gold); }
+  .slider-row .val { font-size:12px; font-weight:700; min-width:44px; text-align:right; font-variant-numeric:tabular-nums; }
+  .ctrl .foot { margin-top:18px; padding-top:14px; border-top:1px solid var(--panel-line); font-size:11.5px; color:var(--panel-soft); line-height:1.6; }
+  .ctrl .foot b { color:var(--gold); }
+
+  @media (max-width:760px){
+    body{ padding:14px 8px 50px; gap:16px; }
+    .ctrl{ position:static; width:100%; max-width:440px; order:2; max-height:none; }
+    .phone{ width:100%; max-width:440px; height:calc(100dvh - 120px); min-height:640px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <p class="eyebrow">BeautyGround Mall · Draft</p>
+  <h1>뷰티그라운드몰 시안 — 메인 · 구매 · 장바구니</h1>
+  <p>쇼핑몰예시 이미지의 UI·박스·텍스트·아이콘을 그대로 복제했습니다 (실상품 데이터). 버튼·탭은 실제로 동작하고, 수정 모드에서 문구를 고칠 수 있습니다.</p>
+</div>
+
+<div class="phone" id="phone">
+
+  <!-- ═══ 메인 ═══ -->
+  <section class="scr on" data-scr="home">
+    <header class="m-head">
+      <div class="t">
+        <small class="ed">Welcome back,</small>
+        <b class="ed">Beauty Ground</b>
+      </div>
+      <button class="icon-circle" data-go="home" aria-label="검색">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4 4"/></svg>
+      </button>
+    </header>
+
+    <div class="hero-rail">
+      <button class="hero" data-pd="p1">
+        <span class="brand ed">마이스킨솔루닉</span>
+        <h2 class="ed">세라로지 모이스트<br>인 트리트먼트 토너</h2>
+        <p class="ed">화잘먹 깐달걀 스킨 — 피부 장벽을 지키는 데일리 토너. 각질·속건조 케어.</p>
+        <span class="cta ed">21% OFF | BUY NOW</span>
+        <img id="heroImg1" alt="">
+      </button>
+      <button class="hero" style="background:linear-gradient(120deg,#8a8f98,#b9bdc4)" data-pd="p2">
+        <span class="brand ed">닥터랩</span>
+        <h2 class="ed">데일리 포어<br>딥 클렌저</h2>
+        <p class="ed">모공 속까지 순하게, 매일의 딥 클렌징.</p>
+        <span class="cta ed" style="color:#555">BUY NOW</span>
+        <img id="heroImg2" alt="">
+      </button>
+    </div>
+
+    <div class="sec"><h3 class="ed">Categories</h3><button class="ed" data-toast="카테고리 전체는 실제 몰에서 연결됩니다">See all</button></div>
+    <div class="cat-row">
+      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">향수</button>
+      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">메이크업</button>
+      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">헤어</button>
+      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">스킨케어</button>
+    </div>
+
+    <div class="sec"><h3 class="ed">New arrivals</h3><button class="ed" data-toast="실제 몰에서 전체 상품으로 연결됩니다">See all</button></div>
+    <div class="prod-rail" id="railNew"></div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- ═══ 구매(상세) ═══ -->
+  <section class="scr" data-scr="product">
+    <div class="d-head">
+      <button class="back" data-go="home" aria-label="뒤로">←</button>
+      <button class="icon-circle" data-go="cart" id="dCartBtn" aria-label="장바구니">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7.5h12l-1 12H7l-1-12Z"/><path d="M9 10V6.7a3 3 0 0 1 6 0V10"/></svg>
+      </button>
+    </div>
+    <div class="d-gallery">
+      <div class="frame"><img id="pdImg" alt=""></div>
+      <div class="dots" id="pdDots"></div>
+    </div>
+    <div class="d-body">
+      <p class="br ed" id="pdBrand"></p>
+      <h2 class="ed" id="pdName"></h2>
+      <p class="rate ed" id="pdRate"></p>
+      <div class="d-price">
+        <span class="now" id="pdNow"></span><s id="pdWas"></s><span class="off" id="pdOff"></span>
+      </div>
+      <div class="d-opts" id="pdOpts"></div>
+      <div class="d-flags">
+        <span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span class="ed">In stock</span></span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg><span class="ed">Free delivery (3만원 이상)</span></span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5-6.5-10a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21Z"/><circle cx="12" cy="11" r="2.3"/></svg><span class="ed">Available in the nearest store</span></span>
+      </div>
+      <p class="d-desc ed" id="pdDesc"></p>
+    </div>
+
+    <div class="d-sec">
+      <h4 class="ed">상세정보</h4>
+      <div class="d-detailimgs" id="pdDetails"></div>
+    </div>
+
+    <div class="d-sec">
+      <h4 class="ed" id="rvTitle">Reviews</h4>
+      <div id="pdReviews"></div>
+    </div>
+
+    <div class="d-sec" style="padding-bottom:8px">
+      <h4 class="ed">Q&amp;A</h4>
+      <div class="qa-empty">
+        <span class="ed">아직 등록된 문의가 없습니다.<br>궁금한 점을 남겨주세요.</span><br>
+        <button data-toast="문의 작성은 실제 몰에서 연결됩니다" class="ed">문의하기</button>
+      </div>
+    </div>
+
+    <div class="buy-bar">
+      <button class="wishbig" id="pdWish" aria-label="찜">♡</button>
+      <button class="addcart ed" id="pdAdd">Add to Cart</button>
+    </div>
+  </section>
+
+  <!-- ═══ 장바구니 ═══ -->
+  <section class="scr" data-scr="cart">
+    <div class="c-head">
+      <button class="back" data-go="back" aria-label="뒤로">←</button>
+      <h2 class="ed">Shopping Cart</h2>
+    </div>
+    <div id="cartList"></div>
+    <div class="coupon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 6v12" stroke-dasharray="2.5 3"/></svg>
+      <input placeholder="Add coupon code" aria-label="쿠폰 코드">
+      <span class="pct" data-toast="쿠폰은 실제 몰에서 적용됩니다">적용</span>
+    </div>
+    <div class="totals">
+      <div class="row"><span class="lb ed">Total:</span><span class="vl" id="cartTotal">0원</span></div>
+      <div class="hint"><span id="cartPoints"></span><span id="cartShip"></span></div>
+    </div>
+    <button class="checkout ed" id="btnCheckout">Proceed to Checkout</button>
+    <div style="height:24px"></div>
+  </section>
+
+  <!-- 하단 네비: 원본 아이콘(홈·리스트·AI·백·프로필) 그대로 -->
+  <nav class="nav" aria-label="하단 메뉴">
+    <button class="on" data-go="home" aria-label="홈">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.5v10h13v-10"/></svg>
+      <span class="bar"></span>
+    </button>
+    <button data-toast="카테고리 목록은 실제 몰에서 연결됩니다" aria-label="목록">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6.5h12M8 12h12M8 17.5h12"/><circle cx="4.2" cy="6.5" r="1"/><circle cx="4.2" cy="12" r="1"/><circle cx="4.2" cy="17.5" r="1"/></svg>
+      <span class="bar"></span>
+    </button>
+    <button data-toast="AI 기능은 추후 기획입니다" aria-label="AI">
+      <span class="ai">AI</span>
+      <span class="bar"></span>
+    </button>
+    <button data-go="cart" id="navCart" aria-label="장바구니">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7.5h12l-1 12H7l-1-12Z"/><path d="M9 10V6.7a3 3 0 0 1 6 0V10"/></svg>
+      <span class="bar"></span>
+    </button>
+    <button data-toast="마이페이지는 실제 몰에서 연결됩니다" aria-label="마이">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20c.6-3.7 3.6-5.8 7.2-5.8s6.6 2.1 7.2 5.8"/></svg>
+      <span class="bar"></span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<aside class="ctrl">
+  <h2>시안 옵션</h2>
+  <p class="d">쇼핑몰예시 이미지 픽셀 실측 기반 · 실상품 데이터. 조합 확정 후 실몰에 반영합니다.</p>
+
+  <div class="grp">
+    <p class="t">텍스트 수정</p>
+    <div class="row"><button class="opt" id="editToggle">수정 모드 켜기</button></div>
+    <p class="d">점선 문구 클릭 = 직접 수정. 새로고침하면 원래대로.</p>
+  </div>
+
+  <div class="grp">
+    <p class="t">포인트 컬러</p>
+    <div class="row">
+      <button class="sw on" data-set="theme" data-val="" style="background:linear-gradient(135deg,#6DB33F,#94D64F)" aria-label="그린 (원본)"></button>
+      <button class="sw" data-set="theme" data-val="theme-gold" style="background:linear-gradient(135deg,#B08F4C,#DCC08D)" aria-label="뷰티그라운드 골드"></button>
+      <button class="sw" data-set="theme" data-val="theme-pink" style="background:linear-gradient(135deg,#E05583,#F8A5C0)" aria-label="핑크"></button>
+      <button class="sw" data-set="theme" data-val="theme-black" style="background:linear-gradient(135deg,#111,#6B6B6B)" aria-label="블랙"></button>
+    </div>
+  </div>
+
+  <div class="grp">
+    <p class="t">전체 글자 크기</p>
+    <div class="slider-row"><input type="range" id="sAll" min="0.85" max="1.25" step="0.01" value="1"><span class="val" id="sAllV">100%</span></div>
+  </div>
+  <div class="grp">
+    <p class="t">제목 크기</p>
+    <div class="slider-row"><input type="range" id="sHead" min="0.85" max="1.3" step="0.01" value="1"><span class="val" id="sHeadV">100%</span></div>
+  </div>
+  <div class="grp">
+    <p class="t">제목 굵기</p>
+    <div class="row">
+      <button class="opt" data-var="--wh" data-val="600" style="padding:7px 10px">600</button>
+      <button class="opt on" data-var="--wh" data-val="700" style="padding:7px 10px">700</button>
+      <button class="opt" data-var="--wh" data-val="800" style="padding:7px 10px">800</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    상품·가격·리뷰(50건, 평점 4.9)·상세이미지는 <b>뷰티그라운드몰 실데이터</b>입니다. 담기·수량·화면 이동 실동작(결제 제외).<br><br>
+    기존 몰 페이지는 건드리지 않은 별도 시안입니다. 확정하시면 실몰에 반영합니다.
+  </div>
+</aside>
+
+<script>
+const DATA = {"rail":[{"id":"p1","name":"오 드 퍼퓸 15ml 오 솝 : clean pe","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/c74193b83b05e.png"},{"id":"p2","name":"오 드 퍼퓸 15ml 오디너리 머스크 : cle","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/153be9ecf3988.png"},{"id":"p3","name":"나는 겨울 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-winter.jpg"},{"id":"p4","name":"나는 가을 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-autumn.jpg"},{"id":"p5","name":"다비 차량용 왕볼 디퓨저 50ml 프리미엄자몽","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"},{"id":"p6","name":"다비 차량용 왕볼 디퓨저 50ml 사려니숲길","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"}],"detail":{"name":"마이스킨솔루닉 세라로지  모이스트 인 트리트먼트 피부 장벽 토너 150ml","brand":"마이스킨솔루닉","price":24000,"sale":18900,"gallery":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/big/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"details":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/small/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"reviews":[{"rating":5,"text":"마이스킨솔루닉 깐보스킨 세라로지 모이스트 인 트리트먼트  \n일단 이 제품을 쓰고 다른 스킨들과 다르게 가장 눈에 띄게 좋았던점은 바로 \n각질 정","author":"카카오스타일 - 지그재그 구****"},{"rating":5,"text":"🎀마이스킨솔루닉 깐보스킨🎀\n\n✔️피부타입:건성\n✔️속건조가 심한 건성타입입니다\n용량도 크고 패키지가 고급스럽고예뻐요 \n스킨인데 완전물같은제형","author":"카카오스타일 - 지그재그 구****"},{"rating":4,"text":"진짜 너무 만족스럽씀다 일단 개봉할때부터 포장이 매우 기분 좋아서 좋아써요 ㅎㅋ 크기는 조금 아쉬운듯해요 대용량이 아니다보니!! 그래도 기대감을","author":"카카오스타일 - 지그재그 구****"}],"rvCount":50,"rvAvg":"4.9","thumbBig":"https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg"}};
+const comma = n => n.toLocaleString('ko-KR');
+
+/* ── 메인 상품 레일 ── */
+function cardHtml(p, i){
+  return '<button class="pcard" data-pd="'+p.id+'">'
+    + (i===0?'<span class="lim ed">LIMITED EDITION</span>':'')
+    + '<button class="wish'+(i===1?' on':'')+'" data-wish="'+p.id+'" aria-label="찜">'+(i===1?'♥':'♡')+'</button>'
+    + '<div class="ph"><img src="'+p.thumb+'" alt="" loading="lazy"></div>'
+    + '<p class="br">'+(p.brand||'뷰티그라운드')+'</p>'
+    + '<p class="nm">'+p.name+'</p>'
+    + '<div class="ft"><span class="pr">'+comma(p.sale||p.price)+'원</span><button class="add" data-add="'+p.id+'" aria-label="담기">+</button></div>'
+    + '</button>';
+}
+document.getElementById('railNew').innerHTML = DATA.rail.map(cardHtml).join('');
+document.getElementById('heroImg1').src = DATA.detail.thumbBig;
+document.getElementById('heroImg2').src = DATA.rail.find(p=>p.id==='p2') ? DATA.rail.find(p=>p.id==='p2').thumb : '';
+
+/* ── 라우터 ── */
+const scrs=document.querySelectorAll('.scr');
+let backTo='home';
+function show(name){
+  if(name!=='product') backTo=name==='cart'?'home':name;
+  scrs.forEach(s=>s.classList.toggle('on', s.dataset.scr===name));
+  document.querySelectorAll('.nav > button').forEach((b,i)=>b.classList.toggle('on',(name==='home'&&i===0)||(name==='cart'&&i===3)));
+  const sc=document.querySelector('.scr.on'); if(sc) sc.scrollTop=0;
+}
+
+/* ── 상세 렌더 ── */
+function renderProduct(){
+  const d=DATA.detail;
+  document.getElementById('pdImg').src=d.gallery[0]||d.thumbBig;
+  document.getElementById('pdDots').innerHTML=d.gallery.map((g,i)=>'<i class="'+(i===0?'on':'')+'"></i>').join('');
+  document.getElementById('pdBrand').textContent=d.brand;
+  document.getElementById('pdName').textContent=d.name;
+  document.getElementById('pdRate').innerHTML='<b>★ '+d.rvAvg+'</b> ('+d.rvCount+' Reviews)';
+  document.getElementById('pdNow').textContent=comma(d.sale)+'원';
+  document.getElementById('pdWas').textContent=comma(d.price)+'원';
+  document.getElementById('pdOff').textContent='-'+Math.round((1-d.sale/d.price)*100)+'%';
+  document.getElementById('pdOpts').innerHTML='<button class="on ed">150ml</button>';
+  document.getElementById('pdDesc').textContent='피부 장벽을 지키는 수분 트리트먼트 토너. 각질 결 정돈과 속건조 케어를 한 번에 — 물처럼 가벼운 제형으로 화장 잘 먹는 피부로.';
+  document.getElementById('pdDetails').innerHTML=d.details.map(u=>'<img src="'+u+'" loading="lazy" alt="상세 이미지">').join('');
+  document.getElementById('rvTitle').textContent='Reviews ('+d.rvCount+')';
+  document.getElementById('pdReviews').innerHTML=d.reviews.map(r=>
+    '<div class="rv"><span class="st">'+'★'.repeat(Math.round(r.rating))+'☆'.repeat(5-Math.round(r.rating))+'</span><p>'+r.text.replace(/\n/g,' ')+'</p><span class="au">'+r.author+'</span></div>'
+  ).join('') + '<div style="text-align:center;padding:4px 0 2px"><button data-toast="리뷰 전체는 실제 몰에서 연결됩니다" style="border:none;background:none;color:#8A8F98;font-size:12px;cursor:pointer">리뷰 '+d.rvCount+'개 전체보기 →</button></div>';
+  refreshEditable();
+}
+renderProduct();
+
+/* ── 장바구니 ── */
+const cart=new Map();
+const ALL=[...DATA.rail, {id:'pd', name:DATA.detail.name, brand:DATA.detail.brand, price:DATA.detail.price, sale:DATA.detail.sale, thumb:DATA.detail.gallery[0]||DATA.detail.thumbBig}];
+function findP(id){ return ALL.find(p=>p.id===id); }
+function cartCount(){ let n=0; cart.forEach(q=>n+=q); return n; }
+function renderBadge(){
+  const b1=document.getElementById('navCart');
+  let b=b1.querySelector('.bdg'); const n=cartCount();
+  if(!b){ b=document.createElement('span'); b.className='bdg'; b1.appendChild(b); }
+  b.textContent=n; // 원본처럼 0도 표시
+}
+function renderCart(){
+  const w=document.getElementById('cartList');
+  if(cart.size===0){ w.innerHTML='<p class="empty">장바구니가 비어 있습니다.<br>상품의 + 버튼이나 Add to Cart로 담아보세요.</p>'; }
+  else{
+    let html='';
+    cart.forEach((q,id)=>{
+      const p=findP(id); if(!p)return;
+      const hasSale=p.sale&&p.sale<p.price;
+      html+='<div class="c-item"><div class="ph"><img src="'+p.thumb+'" alt=""></div>'
+        +'<div class="inf"><p class="nm">'+p.name+'</p><p class="sp">'+(p.brand||'뷰티그라운드')+'</p>'
+        +'<p class="pr">'+(hasSale?'<s>'+comma(p.price)+'원</s>':'')+comma((p.sale||p.price)*q)+'원</p></div>'
+        +'<div class="qty"><button data-qm="'+id+'" aria-label="수량 줄이기">−</button><b>'+q+'</b><button data-qp="'+id+'" aria-label="수량 늘리기">+</button></div>'
+        +'<button class="rm" data-rm="'+id+'" aria-label="삭제">✕</button></div>';
+    });
+    w.innerHTML=html;
+  }
+  let sum=0; cart.forEach((q,id)=>{ const p=findP(id); if(p) sum+=(p.sale||p.price)*q; });
+  const free=sum>=30000, ship=free||sum===0?0:3100;
+  document.getElementById('cartTotal').textContent=comma(sum+ship)+'원';
+  document.getElementById('cartPoints').textContent=sum>0?'Order and get '+comma(Math.round(sum*0.03))+' points':'';
+  document.getElementById('cartShip').textContent=sum===0?'':(free?'Free shipping':'배송비 3,100원 (3만원 이상 무료)');
+  refreshEditable();
+}
+function addCart(id){ cart.set(id,(cart.get(id)||0)+1); renderBadge(); toast('장바구니에 담았습니다'); }
+
+/* ── 토스트 ── */
+let tt=null;
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1600); }
+
+/* ── 클릭 위임 ── */
+document.getElementById('phone').addEventListener('click', e=>{
+  if(document.body.classList.contains('edit-mode')&&e.target.closest('.ed'))return;
+  let t;
+  if((t=e.target.closest('[data-wish]'))){ const on=t.classList.toggle('on'); t.textContent=on?'♥':'♡'; if(on)toast('찜 목록에 담았습니다'); e.stopPropagation(); return; }
+  if((t=e.target.closest('[data-add]'))){ addCart(t.dataset.add); e.stopPropagation(); return; }
+  if((t=e.target.closest('[data-qp]'))){ cart.set(t.dataset.qp,cart.get(t.dataset.qp)+1); renderCart(); renderBadge(); return; }
+  if((t=e.target.closest('[data-qm]'))){ const q=cart.get(t.dataset.qm)-1; if(q<=0)cart.delete(t.dataset.qm); else cart.set(t.dataset.qm,q); renderCart(); renderBadge(); return; }
+  if((t=e.target.closest('[data-rm]'))){ cart.delete(t.dataset.rm); renderCart(); renderBadge(); return; }
+  if((t=e.target.closest('[data-pd]'))){ show('product'); return; }
+  if((t=e.target.closest('[data-go]'))){
+    const g=t.dataset.go;
+    if(g==='back'){ show(backTo); return; }
+    if(g==='cart') renderCart();
+    show(g); return;
+  }
+  if((t=e.target.closest('[data-toast]'))){ toast(t.dataset.toast); return; }
+  if(e.target.closest('#pdWish')){ const b=document.getElementById('pdWish'); const on=b.classList.toggle('on'); b.textContent=on?'♥':'♡'; if(on)toast('찜 목록에 담았습니다'); return; }
+  if(e.target.closest('#pdAdd')){ addCart('pd'); return; }
+  if(e.target.closest('#btnCheckout')){ toast('결제는 실제 몰에서 연결됩니다'); return; }
+});
+
+/* ── 패널 ── */
+const state={theme:'',edit:''};
+function apply(){ document.body.className=Object.values(state).filter(Boolean).join(' '); }
+document.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>{
+  state[b.dataset.set]=b.dataset.val;
+  document.querySelectorAll('[data-set="'+b.dataset.set+'"]').forEach(x=>x.classList.toggle('on',x===b));
+  apply();
+}));
+const phone=document.getElementById('phone');
+document.querySelectorAll('[data-var]').forEach(b=>b.addEventListener('click',()=>{
+  document.body.style.setProperty(b.dataset.var,b.dataset.val);
+  document.querySelectorAll('[data-var="'+b.dataset.var+'"]').forEach(x=>x.classList.toggle('on',x===b));
+}));
+const sAll=document.getElementById('sAll'),sAllV=document.getElementById('sAllV');
+const sHead=document.getElementById('sHead'),sHeadV=document.getElementById('sHeadV');
+sAll.addEventListener('input',()=>{document.body.style.setProperty('--s',sAll.value);sAllV.textContent=Math.round(sAll.value*100)+'%';});
+sHead.addEventListener('input',()=>{document.body.style.setProperty('--sh',sHead.value);sHeadV.textContent=Math.round(sHead.value*100)+'%';});
+
+let editOn=false;
+function refreshEditable(){ document.querySelectorAll('.ed').forEach(el=>{ el.setAttribute('contenteditable',editOn?'true':'false'); if(editOn)el.setAttribute('spellcheck','false'); }); }
+document.getElementById('editToggle').addEventListener('click',function(){
+  editOn=!editOn; state.edit=editOn?'edit-mode':'';
+  this.textContent=editOn?'수정 모드 끄기':'수정 모드 켜기';
+  this.classList.toggle('on',editOn);
+  refreshEditable(); apply();
+});
+
+renderBadge(); renderCart(); refreshEditable();
+</script>
+</body>
+</html>
