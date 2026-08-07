@@ -46,6 +46,10 @@
   .scr { position:absolute; inset:0 0 64px 0; overflow-y:auto; scrollbar-width:none; display:none; background:var(--bg); }
   .scr::-webkit-scrollbar { display:none; }
   .scr.on { display:block; }
+  /* 메인 = 실제 몰 페이지 임베드: 하단 네비까지 실페이지 것을 쓰므로 풀블리드 */
+  .scr[data-scr="home"] { inset:0; overflow:hidden; }
+  .real-home { width:100%; height:100%; border:0; display:block; background:#fff; }
+  .phone.home-live .nav { display:none; }
 
   /* ═══ 화면 1: 메인 ═══ */
   .m-head { display:flex; align-items:center; justify-content:space-between; padding:22px 20px 14px; }
@@ -208,51 +212,15 @@
 <div class="page-head">
   <p class="eyebrow">BeautyGround Mall · Draft</p>
   <h1>뷰티그라운드몰 시안 — 메인 · 구매 · 장바구니</h1>
-  <p>쇼핑몰예시 이미지의 UI·박스·텍스트·아이콘을 그대로 복제했습니다 (실상품 데이터). 버튼·탭은 실제로 동작하고, 수정 모드에서 문구를 고칠 수 있습니다.</p>
+  <p>① 메인 = <b>실제 쇼핑몰 메인페이지 전체 임베드</b>(시그널 3색 미리보기 연동) · ② 구매 · ③ 장바구니 = 쇼핑몰예시 픽셀 실측 시안(실상품 데이터, 수정 모드 지원).</p>
 </div>
 
-<div class="phone" id="phone">
+<div class="phone home-live" id="phone">
 
-  <!-- ═══ 메인 ═══ -->
+  <!-- ═══ 메인 = 실제 쇼핑몰 메인페이지 전체 임베드 (themePreview 연동) ═══ -->
   <section class="scr on" data-scr="home">
-    <header class="m-head">
-      <div class="t">
-        <small class="ed">Welcome back,</small>
-        <b class="ed">Beauty Ground</b>
-      </div>
-      <button class="icon-circle" data-go="home" aria-label="검색">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4 4"/></svg>
-      </button>
-    </header>
-
-    <div class="hero-rail">
-      <button class="hero" data-pd="p1">
-        <span class="brand ed">마이스킨솔루닉</span>
-        <h2 class="ed">세라로지 모이스트<br>인 트리트먼트 토너</h2>
-        <p class="ed">화잘먹 깐달걀 스킨 — 피부 장벽을 지키는 데일리 토너. 각질·속건조 케어.</p>
-        <span class="cta ed">21% OFF | BUY NOW</span>
-        <img id="heroImg1" alt="">
-      </button>
-      <button class="hero" style="background:linear-gradient(120deg,#8a8f98,#b9bdc4)" data-pd="p2">
-        <span class="brand ed">닥터랩</span>
-        <h2 class="ed">데일리 포어<br>딥 클렌저</h2>
-        <p class="ed">모공 속까지 순하게, 매일의 딥 클렌징.</p>
-        <span class="cta ed" style="color:#555">BUY NOW</span>
-        <img id="heroImg2" alt="">
-      </button>
-    </div>
-
-    <div class="sec"><h3 class="ed">Categories</h3><button class="ed" data-toast="카테고리 전체는 실제 몰에서 연결됩니다">See all</button></div>
-    <div class="cat-row">
-      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">향수</button>
-      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">메이크업</button>
-      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">헤어</button>
-      <button class="cat ed" data-toast="실제 몰에서 카테고리로 연결됩니다">스킨케어</button>
-    </div>
-
-    <div class="sec"><h3 class="ed">New arrivals</h3><button class="ed" data-toast="실제 몰에서 전체 상품으로 연결됩니다">See all</button></div>
-    <div class="prod-rail" id="railNew"></div>
-    <div style="height:20px"></div>
+    <iframe id="realHome" class="real-home" title="쇼핑몰 메인 (실페이지)"
+      src="/?themePreview=%7B%22signalRed%22%3A%22%23E60012%22%2C%22signalBlue%22%3A%22%230047FF%22%2C%22signalYellow%22%3A%22%23FFD400%22%7D"></iframe>
   </section>
 
   <!-- ═══ 구매(상세) ═══ -->
@@ -368,9 +336,20 @@
   </div>
 
   <div class="grp">
+    <p class="t">메인 시그널 3색 (실페이지 즉시 적용)</p>
+    <div class="row" style="align-items:center">
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px">빨강 <input type="color" data-signal="signalRed" value="#E60012" style="width:34px;height:26px;border:none;padding:0;background:none;cursor:pointer"></label>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px">파랑 <input type="color" data-signal="signalBlue" value="#0047FF" style="width:34px;height:26px;border:none;padding:0;background:none;cursor:pointer"></label>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px">노랑 <input type="color" data-signal="signalYellow" value="#FFD400" style="width:34px;height:26px;border:none;padding:0;background:none;cursor:pointer"></label>
+    </div>
+    <div class="row"><button class="opt" id="signalReset">기본값 복원</button></div>
+    <p class="d">① 메인은 실제 쇼핑몰 메인페이지 전체를 그대로 불러옵니다(스크롤·이동 실동작). 색을 바꾸면 실페이지에 미리보기로 적용됩니다 — 실몰 저장은 /admin/theme에서.</p>
+  </div>
+
+  <div class="grp">
     <p class="t">텍스트 수정</p>
     <div class="row"><button class="opt" id="editToggle">수정 모드 켜기</button></div>
-    <p class="d">점선 문구 클릭 = 직접 수정. 새로고침하면 원래대로.</p>
+    <p class="d">점선 문구 클릭 = 직접 수정 (②구매·③장바구니 화면에만 적용). 새로고침하면 원래대로.</p>
   </div>
 
   <div class="grp">
@@ -407,24 +386,25 @@
 </aside>
 
 <script>
-const DATA = {"rail":[{"id":"p1","name":"오 드 퍼퓸 15ml 오 솝 : clean pe","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/c74193b83b05e.png"},{"id":"p2","name":"오 드 퍼퓸 15ml 오디너리 머스크 : cle","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/153be9ecf3988.png"},{"id":"p3","name":"나는 겨울 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-winter.jpg"},{"id":"p4","name":"나는 가을 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-autumn.jpg"},{"id":"p5","name":"다비 차량용 왕볼 디퓨저 50ml 프리미엄자몽","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"},{"id":"p6","name":"다비 차량용 왕볼 디퓨저 50ml 사려니숲길","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"}],"detail":{"name":"마이스킨솔루닉 세라로지  모이스트 인 트리트먼트 피부 장벽 토너 150ml","brand":"마이스킨솔루닉","price":24000,"sale":18900,"gallery":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/big/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"details":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/small/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"reviews":[{"rating":5,"text":"마이스킨솔루닉 깐보스킨 세라로지 모이스트 인 트리트먼트  \n일단 이 제품을 쓰고 다른 스킨들과 다르게 가장 눈에 띄게 좋았던점은 바로 \n각질 정","author":"카카오스타일 - 지그재그 구****"},{"rating":5,"text":"🎀마이스킨솔루닉 깐보스킨🎀\n\n✔️피부타입:건성\n✔️속건조가 심한 건성타입입니다\n용량도 크고 패키지가 고급스럽고예뻐요 \n스킨인데 완전물같은제형","author":"카카오스타일 - 지그재그 구****"},{"rating":4,"text":"진짜 너무 만족스럽씀다 일단 개봉할때부터 포장이 매우 기분 좋아서 좋아써요 ㅎㅋ 크기는 조금 아쉬운듯해요 대용량이 아니다보니!! 그래도 기대감을","author":"카카오스타일 - 지그재그 구****"}],"rvCount":50,"rvAvg":"4.9","thumbBig":"https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg"}};
+const DATA = {"rail":[{"id":"p1","name":"오 드 퍼퓸 15ml 오 솝 : clean pe","brand":"오디크","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/c74193b83b05e.png"},{"id":"p2","name":"오 드 퍼퓸 15ml 오디너리 머스크 : cle","brand":"오디크","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/153be9ecf3988.png"},{"id":"p3","name":"나는 겨울 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-winter.jpg"},{"id":"p4","name":"나는 가을 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-autumn.jpg"},{"id":"p5","name":"다비 차량용 왕볼 디퓨저 50ml 프리미엄자몽","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"},{"id":"p6","name":"다비 차량용 왕볼 디퓨저 50ml 사려니숲길","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"}],"detail":{"name":"마이스킨솔루닉 세라로지  모이스트 인 트리트먼트 피부 장벽 토너 150ml","brand":"마이스킨솔루닉","price":24000,"sale":18900,"gallery":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/big/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"details":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/small/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"reviews":[{"rating":5,"text":"마이스킨솔루닉 깐보스킨 세라로지 모이스트 인 트리트먼트  \n일단 이 제품을 쓰고 다른 스킨들과 다르게 가장 눈에 띄게 좋았던점은 바로 \n각질 정","author":"카카오스타일 - 지그재그 구****"},{"rating":5,"text":"🎀마이스킨솔루닉 깐보스킨🎀\n\n✔️피부타입:건성\n✔️속건조가 심한 건성타입입니다\n용량도 크고 패키지가 고급스럽고예뻐요 \n스킨인데 완전물같은제형","author":"카카오스타일 - 지그재그 구****"},{"rating":4,"text":"진짜 너무 만족스럽씀다 일단 개봉할때부터 포장이 매우 기분 좋아서 좋아써요 ㅎㅋ 크기는 조금 아쉬운듯해요 대용량이 아니다보니!! 그래도 기대감을","author":"카카오스타일 - 지그재그 구****"}],"rvCount":50,"rvAvg":"4.9","thumbBig":"https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg"}};
 const comma = n => n.toLocaleString('ko-KR');
 let editOn=false; // 수정모드 플래그 — 초기 렌더보다 먼저 선언(TDZ 오류 방지)
 
-/* ── 메인 상품 레일 ── */
-function cardHtml(p, i){
-  return '<div class="pcard" data-pd="'+p.id+'" role="button" tabindex="0">'
-    + (i===0?'<span class="lim ed">LIMITED EDITION</span>':'')
-    + '<button class="wish'+(i===1?' on':'')+'" data-wish="'+p.id+'" aria-label="찜">'+(i===1?'♥':'♡')+'</button>'
-    + '<div class="ph"><img src="'+p.thumb+'" alt="" loading="lazy"></div>'
-    + '<p class="br">'+(p.brand||'뷰티그라운드')+'</p>'
-    + '<p class="nm">'+p.name+'</p>'
-    + '<div class="ft"><span class="pr">'+comma(p.sale||p.price)+'원</span><button class="add" data-add="'+p.id+'" aria-label="담기">+</button></div>'
-    + '</div>';
+/* ── 메인 = 실제 몰 메인페이지 임베드 (themePreview 시그널 3색 연동) ── */
+const SIGNAL_DEFAULT={signalRed:'#E60012',signalBlue:'#0047FF',signalYellow:'#FFD400'};
+const signal={...SIGNAL_DEFAULT};
+function reloadRealHome(){
+  document.getElementById('realHome').src='/?themePreview='+encodeURIComponent(JSON.stringify(signal));
 }
-document.getElementById('railNew').innerHTML = DATA.rail.map(cardHtml).join('');
-document.getElementById('heroImg1').src = DATA.detail.thumbBig;
-document.getElementById('heroImg2').src = DATA.rail.find(p=>p.id==='p2') ? DATA.rail.find(p=>p.id==='p2').thumb : '';
+document.querySelectorAll('[data-signal]').forEach(inp=>{
+  inp.value=signal[inp.dataset.signal];
+  inp.addEventListener('change',()=>{ signal[inp.dataset.signal]=inp.value; reloadRealHome(); });
+});
+document.getElementById('signalReset').addEventListener('click',()=>{
+  Object.assign(signal,SIGNAL_DEFAULT);
+  document.querySelectorAll('[data-signal]').forEach(inp=>{ inp.value=signal[inp.dataset.signal]; });
+  reloadRealHome();
+});
 
 /* ── 라우터 ── */
 const scrs=document.querySelectorAll('.scr');
@@ -432,6 +412,7 @@ let backTo='home';
 function show(name){
   if(name!=='product') backTo=name==='cart'?'home':name;
   scrs.forEach(s=>s.classList.toggle('on', s.dataset.scr===name));
+  document.getElementById('phone').classList.toggle('home-live', name==='home');
   document.querySelectorAll('.nav > button').forEach((b,i)=>b.classList.toggle('on',(name==='home'&&i===0)||(name==='cart'&&i===3)));
   const sc=document.querySelector('.scr.on'); if(sc) sc.scrollTop=0;
 }

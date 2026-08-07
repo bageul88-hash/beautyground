@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
-import { comma } from '../../lib/format'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 
@@ -84,9 +83,18 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
             const hidden = i !== current
 
             if (product) {
-              const sell = product.sale_price ?? product.price
               const hasSale = product.sale_price != null && product.sale_price < product.price
               const rate = hasSale ? Math.round((1 - product.sale_price! / product.price) * 100) : 0
+              // 히어로는 가격 대신 큐레이션 성격을 보여준다(2026-08-08 대표님 지시):
+              // 할인 중 → 특가세일, 최근 45일 내 등록 → 신상품, 그 외 → 추천상품
+              const isNew =
+                product.created_at != null &&
+                Date.now() - new Date(product.created_at).getTime() < 1000 * 60 * 60 * 24 * 45
+              const tag = hasSale
+                ? { label: `특가세일 -${rate}%`, className: 'bg-signal-red text-paper' }
+                : isNew
+                  ? { label: '신상품', className: 'bg-signal-blue text-paper' }
+                  : { label: '추천상품', className: 'bg-ink text-paper' }
               return (
                 <button
                   key={banner.id}
@@ -109,30 +117,20 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                       <ImagePlaceholder />
                     )}
                   </div>
-                  {/* 자막바: 이미지 아래 흰 면. 이름은 왼쪽, 숫자는 오른쪽 정렬 */}
+                  {/* 자막바: 이미지 아래 흰 면. 가격 숫자 대신 큐레이션 배지 + 상품명 */}
                   <div className="border-t border-rule px-4 py-4">
-                    {/* 관리자가 headline을 넣어두면 상품명 대신 마케팅 카피를 먼저 보여준다(2026-08-06) */}
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums ${tag.className}`}
+                    >
+                      {tag.label}
+                    </span>
+                    {/* 관리자가 headline을 넣어두면 마케팅 카피를 함께 보여준다(2026-08-06) */}
                     {custom?.headline && (
-                      <p className="mb-1 text-[13px] font-bold text-ink-soft">{custom.headline}</p>
+                      <p className="mt-2 text-[13px] font-bold text-ink-soft">{custom.headline}</p>
                     )}
-                    <div className="flex items-end justify-between gap-4">
-                      <h2 className="min-w-0 flex-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
-                        {product.name}
-                      </h2>
-                      {/* 읽는 순서: 할인율 → 판매가 → (아래) 원가 취소선 */}
-                      <p className="shrink-0 text-right leading-none">
-                        <span className="text-[22px] font-bold tabular-nums text-ink">
-                          {hasSale && <span className="mr-1.5">{rate}%</span>}
-                          {comma(sell)}
-                        </span>
-                        <span className="ml-0.5 text-[13px] text-ink-faint">원</span>
-                        {hasSale && (
-                          <span className="mt-1.5 block text-[13px] tabular-nums text-ink-faint line-through">
-                            {comma(product.price)}원
-                          </span>
-                        )}
-                      </p>
-                    </div>
+                    <h2 className="mt-1.5 text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
+                      {product.name}
+                    </h2>
                     {custom?.subcopy && <p className="mt-1.5 text-[13px] text-ink-faint">{custom.subcopy}</p>}
                   </div>
                 </button>
