@@ -17,9 +17,10 @@ const config: Config = {
         rule: '#E3E5E9', // 면을 나누는 1px 선 — 이 시스템의 유일한 구획 수단
         quiet: '#F4F5F7', // 입력·비활성 등 눌린 면
         signal: {
-          red: '#E60012',
-          blue: '#0047FF',
-          yellow: '#FFD400',
+          // 실제 색은 globals.css의 CSS 변수("R G B" 채널) — /admin/theme에서 런타임 교체 가능
+          red: 'rgb(var(--signal-red) / <alpha-value>)',
+          blue: 'rgb(var(--signal-blue) / <alpha-value>)',
+          yellow: 'rgb(var(--signal-yellow) / <alpha-value>)',
         },
 
         // ── 구 골드 월드 (폐기 대상) ──

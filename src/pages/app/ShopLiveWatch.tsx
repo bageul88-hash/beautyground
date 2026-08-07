@@ -64,7 +64,8 @@ export default function ShopLiveWatch() {
   const [hostSheetOpen, setHostSheetOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [shareMenuOpen, setShareMenuOpen] = useState(false)
-  const [partnerName, setPartnerName] = useState<string | null>(null)
+  // partnerName 값은 아직 화면에서 안 쓰지만 로딩 로직이 setter를 호출하므로 setter만 유지
+  const [, setPartnerName] = useState<string | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [youtubePlaying, setYoutubePlaying] = useState(false)
 

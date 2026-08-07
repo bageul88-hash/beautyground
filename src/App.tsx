@@ -66,6 +66,8 @@ import AdminPartners from './pages/admin/Partners'
 import AdminSettlements from './pages/admin/Settlements'
 import AdminLives from './pages/admin/Lives'
 import AdminCoupons from './pages/admin/Coupons'
+import AdminTheme from './pages/admin/Theme'
+import { useMallTheme } from './hooks/useMallTheme'
 
 // 진행자(라이브 호스트) 인증/전용 (RequireHostAuth + RequireHost + HostLayout)
 import HostRegister from './pages/host/Register'
@@ -85,6 +87,9 @@ import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 
 export default function App() {
+  // 홈 테마(시그널 3색) — /admin/theme 저장값 또는 ?themePreview= 값을 CSS 변수로 적용
+  useMallTheme()
+
   // 로그인 시(카카오 포함) 게스트 장바구니를 서버 장바구니로 합친다.
   // 게스트 카트가 비어있으면 no-op이라 SIGNED_IN이 여러 번 떠도 안전.
   useEffect(() => {
@@ -153,6 +158,7 @@ export default function App() {
               <Route path="/admin/settlements" element={<AdminSettlements />} />
               <Route path="/admin/lives" element={<AdminLives />} />
               <Route path="/admin/coupons" element={<AdminCoupons />} />
+              <Route path="/admin/theme" element={<AdminTheme />} />
             </Route>
           </Route>
         </Route>

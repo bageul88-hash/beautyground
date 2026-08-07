@@ -5,6 +5,14 @@
 @tailwind utilities;
 
 @layer base {
+  /* 시그널 3색 — 기본값은 DESIGN.md 원색. /admin/theme 저장값이 런타임에 이 변수를 덮어쓴다.
+     bg-signal-blue/10 같은 투명도 변형이 살아있도록 "R G B" 채널 형식으로 정의한다. */
+  :root {
+    --signal-red: 230 0 18;      /* #E60012 */
+    --signal-blue: 0 71 255;     /* #0047FF */
+    --signal-yellow: 255 212 0;  /* #FFD400 */
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
