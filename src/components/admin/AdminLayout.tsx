@@ -11,7 +11,6 @@ import {
   IconShoppingCart,
   IconCash,
   IconAddressBook,
-  IconMedal,
   IconShoppingBag,
   IconBox,
   IconBuildingStore,
@@ -23,22 +22,38 @@ import {
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
-const NAV_ITEMS = [
-  { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
-  { label: '홈 테마 설정', to: '/admin/theme', icon: IconPalette },
-  { label: '마케팅 센터', to: '/admin/marketing', icon: IconSpeakerphone },
-  { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
-  { label: '회원 등급 설정', to: '/admin/membership-tiers', icon: IconMedal },
-  { label: '전체 주문 관리', to: '/admin/orders', icon: IconShoppingBag },
-  { label: '전체 상품 관리', to: '/admin/products', icon: IconBox },
-  { label: '파트너 관리', to: '/admin/partners', icon: IconBuildingStore },
-  { label: '파트너 정산 관리', to: '/admin/settlements', icon: IconReceipt2 },
-  { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
-  { label: '라이브 방송 관리', to: '/admin/lives', icon: IconBroadcast },
-  { label: '쿠폰 현황', to: '/admin/coupons', icon: IconTicket },
-  { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
-  { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
-  { label: '진행자 정산 관리', to: '/admin/host-settlements', icon: IconCashBanknote },
+// 온라인몰과 라이브커머스를 당분간 분리 운영하기로 한 방침(2026-07-31)을 관리자 메뉴에도 그대로
+// 반영 — 평평한 15개 목록 대신 채널별로 묶어서 한눈에 훑을 수 있게 소제목으로 나눈다(2026-08-08).
+const NAV_GROUPS = [
+  {
+    title: '쇼핑몰',
+    items: [
+      { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
+      { label: '홈 테마 설정', to: '/admin/theme', icon: IconPalette },
+      { label: '마케팅 센터', to: '/admin/marketing', icon: IconSpeakerphone },
+      { label: '전체 주문 관리', to: '/admin/orders', icon: IconShoppingBag },
+      { label: '전체 상품 관리', to: '/admin/products', icon: IconBox },
+    ],
+  },
+  {
+    title: '라이브커머스',
+    items: [
+      { label: '라이브 방송 관리', to: '/admin/lives', icon: IconBroadcast },
+      { label: '쿠폰 현황', to: '/admin/coupons', icon: IconTicket },
+      { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
+      { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
+      { label: '진행자 정산 관리', to: '/admin/host-settlements', icon: IconCashBanknote },
+    ],
+  },
+  {
+    title: '회원·파트너',
+    items: [
+      { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
+      { label: '파트너 관리', to: '/admin/partners', icon: IconBuildingStore },
+      { label: '파트너 정산 관리', to: '/admin/settlements', icon: IconReceipt2 },
+      { label: '파트너 신청 관리', to: '/admin/applications', icon: IconClipboardCheck },
+    ],
+  },
 ]
 
 // 판매자 센터(상품/주문/정산)로 바로 이동 — 관리자도 상품 업로드 등을 한 곳에서 오갈 수 있게
@@ -71,21 +86,26 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 py-4 overflow-y-auto">
-          {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
-                  isActive
-                    ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
-                    : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
-                }`
-              }
-            >
-              <Icon size={18} />
-              {label}
-            </NavLink>
+          {NAV_GROUPS.map((group, i) => (
+            <div key={group.title} className={i > 0 ? 'mt-3 pt-3 border-t border-rule' : ''}>
+              <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-ink-faint">{group.title}</p>
+              {group.items.map(({ label, to, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
+                      isActive
+                        ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
+                        : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
+                    }`
+                  }
+                >
+                  <Icon size={18} />
+                  {label}
+                </NavLink>
+              ))}
+            </div>
           ))}
 
           {/* 판매자 센터 바로가기 */}

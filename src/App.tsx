@@ -60,7 +60,6 @@ import AdminHosts from './pages/admin/Hosts'
 import AdminCommissionTiers from './pages/admin/CommissionTiers'
 import AdminHostSettlements from './pages/admin/HostSettlements'
 import AdminMembers from './pages/admin/Members'
-import AdminMembershipTiers from './pages/admin/MembershipTiers'
 import AdminOrders from './pages/admin/Orders'
 import AdminProducts from './pages/admin/Products'
 import AdminPartners from './pages/admin/Partners'
@@ -159,7 +158,6 @@ export default function App() {
               <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
               <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
               <Route path="/admin/members" element={<AdminMembers />} />
-              <Route path="/admin/membership-tiers" element={<AdminMembershipTiers />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/partners" element={<AdminPartners />} />
