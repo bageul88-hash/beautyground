@@ -19,12 +19,14 @@ import {
   IconBroadcast,
   IconTicket,
   IconPalette,
+  IconSpeakerphone,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
 const NAV_ITEMS = [
   { label: '홈 화면 관리', to: '/admin/home', icon: IconHome },
   { label: '홈 테마 설정', to: '/admin/theme', icon: IconPalette },
+  { label: '마케팅 센터', to: '/admin/marketing', icon: IconSpeakerphone },
   { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
   { label: '회원 등급 설정', to: '/admin/membership-tiers', icon: IconMedal },
   { label: '전체 주문 관리', to: '/admin/orders', icon: IconShoppingBag },

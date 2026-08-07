@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { mergeGuestCartToServer } from './lib/cart'
+import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
 import WebHome from './pages/WebHome'
 import CompanyProposal from './pages/CompanyProposal'
 import CompanyIntro from './pages/CompanyIntro'
@@ -66,6 +67,7 @@ import AdminPartners from './pages/admin/Partners'
 import AdminSettlements from './pages/admin/Settlements'
 import AdminLives from './pages/admin/Lives'
 import AdminCoupons from './pages/admin/Coupons'
+import AdminMarketing from './pages/admin/Marketing'
 import AdminTheme from './pages/admin/Theme'
 import { useMallTheme } from './hooks/useMallTheme'
 
@@ -94,10 +96,16 @@ export default function App() {
   // 게스트 카트가 비어있으면 no-op이라 SIGNED_IN이 여러 번 떠도 안전.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') void mergeGuestCartToServer()
+      if (event === 'SIGNED_IN') {
+        void mergeGuestCartToServer()
+        void syncAttributionToUser()
+      }
     })
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  // 유입경로 방문 로그 — 광고/검색/SNS 어디서 들어왔는지 최초 1회 기록(마케팅 센터에서 집계).
+  useEffect(() => { void logVisitOnce() }, [])
 
   return (
     <BrowserRouter>
@@ -158,6 +166,7 @@ export default function App() {
               <Route path="/admin/settlements" element={<AdminSettlements />} />
               <Route path="/admin/lives" element={<AdminLives />} />
               <Route path="/admin/coupons" element={<AdminCoupons />} />
+              <Route path="/admin/marketing" element={<AdminMarketing />} />
               <Route path="/admin/theme" element={<AdminTheme />} />
             </Route>
           </Route>
