@@ -90,6 +90,7 @@
   .obtn.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,169,106,.3); background: #fff; }
 
   /* 텍스트 편집 모드 */
+  .ed { white-space: pre-line; }
   body.editing .ed { outline: 1.5px dashed rgba(201,169,106,.9); outline-offset: 2px; cursor: text; border-radius: 4px; }
   body.editing .ed:focus { outline: 2px solid var(--gold); background: rgba(255,255,255,.65); }
 
@@ -268,4 +269,70 @@
     et.textContent = on ? '✅ 편집 끝내기' : '✏️ 편집 모드 켜기';
     et.classList.toggle('on', on);
   });
+
+  /* ── 서버 연동 ──
+     · /admin/theme 안(iframe)에서: 조작할 때마다 부모창에 현재 설정을 전송 → 관리자 [저장] 버튼이 서버 기록
+     · 직접 열었을 때: 서버(home_settings.theme.draft)에 저장된 설정을 불러와 적용 (?cfg= 파라미터가 있으면 그것 우선) */
+  const SB_URL = 'https://bjqtuklkskrqzbuxdwxm.supabase.co';
+  const SB_KEY = 'sb_publishable_nuBbC2D1_S_eV0fA9OAjhQ_ntsloX0Q';
+  const eds = () => Array.from(document.querySelectorAll('.ed'));
+
+  function currentCfg() {
+    const c = document.querySelector('.cbtn.on');
+    const r = document.querySelector('.obtn[data-r].on');
+    const w = document.querySelector('.obtn[data-w].on');
+    return {
+      color: c ? { a1: c.dataset.a1, a2: c.dataset.a2, ink: c.dataset.ink, chip: c.dataset.chip } : null,
+      radius: r ? r.dataset.r : null,
+      w: w ? w.dataset.w : null,
+      texts: eds().map((e) => e.innerText),
+    };
+  }
+  function broadcast() {
+    try { parent.postMessage({ type: 'bgDraftCfg', cfg: currentCfg() }, location.origin); } catch (e) { /* 무시 */ }
+  }
+  function applyCfg(c) {
+    if (!c) return;
+    if (c.color && c.color.a1) {
+      root.style.setProperty('--ac1', c.color.a1);
+      root.style.setProperty('--ac2', c.color.a2);
+      root.style.setProperty('--ac-ink', c.color.ink);
+      root.style.setProperty('--ac-chip', c.color.chip);
+      document.querySelectorAll('.cbtn').forEach((b) => b.classList.toggle('on', b.dataset.a1 === c.color.a1));
+    }
+    if (c.radius) {
+      root.style.setProperty('--radius', c.radius);
+      document.querySelectorAll('.obtn[data-r]').forEach((b) => b.classList.toggle('on', b.dataset.r === c.radius));
+    }
+    if (c.w) {
+      root.style.setProperty('--tw', c.w);
+      document.querySelectorAll('.obtn[data-w]').forEach((b) => b.classList.toggle('on', b.dataset.w === c.w));
+    }
+    if (Array.isArray(c.texts)) {
+      eds().forEach((e, i) => {
+        if (typeof c.texts[i] === 'string' && c.texts[i] !== e.innerText) e.textContent = c.texts[i];
+      });
+    }
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest('.cbtn, .obtn')) setTimeout(broadcast, 0); });
+  document.addEventListener('input', (e) => { if (e.target.closest && e.target.closest('.ed')) broadcast(); });
+
+  (function initFromServer() {
+    const raw = new URLSearchParams(location.search).get('cfg');
+    if (raw) {
+      try { applyCfg(JSON.parse(raw)); } catch (e) { /* 무시 */ }
+      setTimeout(broadcast, 0);
+      return;
+    }
+    fetch(`${SB_URL}/rest/v1/home_settings?id=eq.1&select=theme`, {
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+    })
+      .then((r) => r.json())
+      .then((rows) => {
+        const d = rows && rows[0] && rows[0].theme && rows[0].theme.draft;
+        if (d) applyCfg(d);
+        setTimeout(broadcast, 0);
+      })
+      .catch(() => {});
+  })();
 </script>
