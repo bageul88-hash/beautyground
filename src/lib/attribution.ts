@@ -27,7 +27,10 @@ const REFERRER_LABELS: Array<[RegExp, string]> = [
 function referrerDomain(referrer: string): string {
   if (!referrer) return '직접접속'
   try {
-    const host = new URL(referrer).hostname.replace(/^www\.|^m\.|^l\./, '')
+    const url = new URL(referrer)
+    // 새 탭으로 내부 링크를 열면 리퍼러가 우리 사이트 자신으로 찍힌다 — 외부 채널이 아니므로 직접접속 취급.
+    if (url.hostname === window.location.hostname) return '직접접속'
+    const host = url.hostname.replace(/^www\.|^m\.|^l\./, '')
     for (const [re, label] of REFERRER_LABELS) if (re.test(host)) return label
     return host || '직접접속'
   } catch {
