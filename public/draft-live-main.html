@@ -55,11 +55,13 @@
   .scr::-webkit-scrollbar { display:none; }
 
   /* ── 상단 탭 (원본 그대로: 홈 기획전 팔로잉 백화점TV 해외직구) ── */
-  .tabs { display:flex; gap:22px; padding:18px 20px 0; position:sticky; top:0; background:var(--bg); z-index:5; overflow-x:auto; scrollbar-width:none; }
+  .tabs { display:flex; align-items:center; gap:22px; padding:18px 20px 0; position:sticky; top:0; background:var(--bg); z-index:5; overflow-x:auto; scrollbar-width:none; }
   .tabs::-webkit-scrollbar { display:none; }
   .tabs button { flex-shrink:0; border:none; background:none; color:var(--sub); font-size:calc(14.5px*var(--s)); font-weight:var(--wn); cursor:pointer; padding-bottom:11px; position:relative; }
   .tabs button.on { color:var(--ink); font-weight:var(--wh); }
   .tabs button.on::after { content:''; position:absolute; left:0; right:0; bottom:0; height:2.5px; background:var(--ink); border-radius:999px; }
+  .tabs .cat-btn { display:flex; align-items:center; color:var(--ink); padding:2px 0 11px; margin-right:-4px; }
+  .tabs .cat-btn svg { width:19px; height:19px; }
 
   /* ── LIVE 진행 카드 (2열, 둘 다 완전히 보이게) ── */
   .live-rail { display:flex; gap:10px; padding:14px 20px 0; }
@@ -145,11 +147,10 @@
   <div class="scr">
 
     <nav class="tabs" aria-label="라이브 홈 탭">
+      <button class="cat-btn" data-toast="카테고리는 실제 몰에서 연결됩니다" aria-label="카테고리"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></button>
       <button class="on ed">홈</button>
       <button class="ed" data-toast="기획전 탭은 실제 몰에서 연결됩니다">기획전</button>
       <button class="ed" data-toast="팔로잉 탭은 실제 몰에서 연결됩니다">팔로잉</button>
-      <button class="ed" data-toast="백화점TV 탭은 실제 몰에서 연결됩니다">백화점TV</button>
-      <button class="ed" data-toast="해외직구 탭은 실제 몰에서 연결됩니다">해외직구</button>
     </nav>
 
     <div class="live-rail" id="liveRail"></div>
