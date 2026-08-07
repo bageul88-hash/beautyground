@@ -359,6 +359,15 @@
   <p class="d">쇼핑몰예시 이미지 픽셀 실측 기반 · 실상품 데이터. 조합 확정 후 실몰에 반영합니다.</p>
 
   <div class="grp">
+    <p class="t">화면 보기 (이미지의 3페이지)</p>
+    <div class="row">
+      <button class="opt on" data-view="home">① 메인</button>
+      <button class="opt" data-view="product">② 구매</button>
+      <button class="opt" data-view="cart">③ 장바구니</button>
+    </div>
+  </div>
+
+  <div class="grp">
     <p class="t">텍스트 수정</p>
     <div class="row"><button class="opt" id="editToggle">수정 모드 켜기</button></div>
     <p class="d">점선 문구 클릭 = 직접 수정. 새로고침하면 원래대로.</p>
@@ -400,6 +409,7 @@
 <script>
 const DATA = {"rail":[{"id":"p1","name":"오 드 퍼퓸 15ml 오 솝 : clean pe","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/c74193b83b05e.png"},{"id":"p2","name":"오 드 퍼퓸 15ml 오디너리 머스크 : cle","brand":"뷰티그라운드","price":28000,"sale":23900,"thumb":"https://cdn.imweb.me/thumbnail/20260406/153be9ecf3988.png"},{"id":"p3","name":"나는 겨울 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-winter.jpg"},{"id":"p4","name":"나는 가을 마스크 (5매입)","brand":"더나은","price":12000,"sale":null,"thumb":"https://bjqtuklkskrqzbuxdwxm.supabase.co/storage/v1/object/public/product-images/thenaneun/i-am-autumn.jpg"},{"id":"p5","name":"다비 차량용 왕볼 디퓨저 50ml 프리미엄자몽","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"},{"id":"p6","name":"다비 차량용 왕볼 디퓨저 50ml 사려니숲길","brand":"다비","price":15900,"sale":null,"thumb":"https://ecimg.cafe24img.com/pg617b02260318074/davy1503/web/product/big/20240415/30f6653e4bfd622711154fc257277215.jpg"}],"detail":{"name":"마이스킨솔루닉 세라로지  모이스트 인 트리트먼트 피부 장벽 토너 150ml","brand":"마이스킨솔루닉","price":24000,"sale":18900,"gallery":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/big/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"details":["https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/small/20260329/33490e6c91f58163f6d0de2beb8bb047.jpg","https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/extra/small/20260329/7e1a3eee2bb5fe075ea0c662e47ddae0.jpg"],"reviews":[{"rating":5,"text":"마이스킨솔루닉 깐보스킨 세라로지 모이스트 인 트리트먼트  \n일단 이 제품을 쓰고 다른 스킨들과 다르게 가장 눈에 띄게 좋았던점은 바로 \n각질 정","author":"카카오스타일 - 지그재그 구****"},{"rating":5,"text":"🎀마이스킨솔루닉 깐보스킨🎀\n\n✔️피부타입:건성\n✔️속건조가 심한 건성타입입니다\n용량도 크고 패키지가 고급스럽고예뻐요 \n스킨인데 완전물같은제형","author":"카카오스타일 - 지그재그 구****"},{"rating":4,"text":"진짜 너무 만족스럽씀다 일단 개봉할때부터 포장이 매우 기분 좋아서 좋아써요 ㅎㅋ 크기는 조금 아쉬운듯해요 대용량이 아니다보니!! 그래도 기대감을","author":"카카오스타일 - 지그재그 구****"}],"rvCount":50,"rvAvg":"4.9","thumbBig":"https://ecimg.cafe24img.com/pg1970b46957293028/dsbkorea2/web/product/big/20260329/d93661a257f13439852bc4cd062529c0.jpg"}};
 const comma = n => n.toLocaleString('ko-KR');
+let editOn=false; // 수정모드 플래그 — 초기 렌더보다 먼저 선언(TDZ 오류 방지)
 
 /* ── 메인 상품 레일 ── */
 function cardHtml(p, i){
@@ -528,7 +538,6 @@ const sHead=document.getElementById('sHead'),sHeadV=document.getElementById('sHe
 sAll.addEventListener('input',()=>{document.body.style.setProperty('--s',sAll.value);sAllV.textContent=Math.round(sAll.value*100)+'%';});
 sHead.addEventListener('input',()=>{document.body.style.setProperty('--sh',sHead.value);sHeadV.textContent=Math.round(sHead.value*100)+'%';});
 
-let editOn=false;
 function refreshEditable(){ document.querySelectorAll('.ed').forEach(el=>{ el.setAttribute('contenteditable',editOn?'true':'false'); if(editOn)el.setAttribute('spellcheck','false'); }); }
 document.getElementById('editToggle').addEventListener('click',function(){
   editOn=!editOn; state.edit=editOn?'edit-mode':'';
@@ -537,6 +546,11 @@ document.getElementById('editToggle').addEventListener('click',function(){
   refreshEditable(); apply();
 });
 
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{
+  if(b.dataset.view==="cart") renderCart();
+  show(b.dataset.view);
+  document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("on",x===b));
+}));
 renderBadge(); renderCart(); refreshEditable();
 </script>
 </body>
