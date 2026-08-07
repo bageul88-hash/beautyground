@@ -131,10 +131,6 @@
   .d-opts { display:flex; gap:8px; margin-top:12px; }
   .d-opts button { border:1.5px solid var(--line); background:var(--bg); color:var(--ink); border-radius:999px; padding:7px 16px; font-size:calc(12px*var(--s)); font-weight:var(--wn); cursor:pointer; }
   .d-opts button.on { border-color:var(--black); }
-  .d-flags { margin-top:14px; display:flex; flex-direction:column; gap:7px; }
-  .d-flags span { font-size:calc(11.5px*var(--s)); color:var(--sub); display:flex; align-items:center; gap:7px; }
-  .d-flags .ok { color:var(--green-deep); font-weight:600; }
-  .d-flags svg { width:14px; height:14px; flex-shrink:0; }
   .d-desc { font-size:calc(12.5px*var(--s)); font-weight:var(--wb); color:var(--sub); line-height:1.65; margin-top:12px; }
   .d-sec { margin-top:22px; padding:0 22px; }
   .d-sec h4 { font-size:calc(14.5px*var(--s)*var(--sh)); font-weight:var(--wh); color:var(--ink); padding-bottom:10px; }
@@ -166,10 +162,6 @@
   .c-item .qty button { width:24px; height:24px; border:1px solid var(--line); border-radius:50%; background:var(--bg); cursor:pointer; font-size:13px; line-height:1; color:var(--ink); }
   .c-item .qty b { font-size:calc(12px*var(--s)); min-width:14px; text-align:center; font-variant-numeric:tabular-nums; }
   .c-item .rm { border:none; background:none; color:var(--faint); font-size:14px; cursor:pointer; align-self:flex-start; margin-top:2px; }
-  .coupon { margin:14px 20px 0; display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:var(--chip); border-radius:999px; padding:11px 15px; }
-  .coupon svg { width:16px; height:16px; color:var(--sub); flex-shrink:0; }
-  .coupon input { flex:1; border:none; background:none; outline:none; font-size:calc(12px*var(--s)); color:var(--ink); min-width:0; }
-  .coupon .pct { background:var(--green); color:#fff; font-size:calc(10.5px*var(--s)); font-weight:700; border-radius:999px; padding:4px 9px; }
   .totals { padding:16px 22px 0; }
   .totals .row { display:flex; justify-content:space-between; align-items:baseline; }
   .totals .row .lb { font-size:calc(13.5px*var(--s)); font-weight:700; color:var(--ink); }
@@ -255,11 +247,7 @@
         <span class="now" id="pdNow"></span><s id="pdWas"></s><span class="off" id="pdOff"></span>
       </div>
       <div class="d-opts" id="pdOpts"></div>
-      <div class="d-flags">
-        <span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span class="ed">In stock</span></span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg><span class="ed">Free delivery (3만원 이상)</span></span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5-6.5-10a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21Z"/><circle cx="12" cy="11" r="2.3"/></svg><span class="ed">Available in the nearest store</span></span>
-      </div>
+      <!-- 재고/배송/매장수령 안내 3줄 제거(2026-08-08 대표님 지시) — 실제 상품상세 페이지에 없는 기능이라 시안을 실사이트에 맞춰 단순화 -->
       <p class="d-desc ed" id="pdDesc"></p>
     </div>
 
@@ -294,11 +282,7 @@
       <h2 class="ed">Shopping Cart</h2>
     </div>
     <div id="cartList"></div>
-    <div class="coupon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 6v12" stroke-dasharray="2.5 3"/></svg>
-      <input placeholder="Add coupon code" aria-label="쿠폰 코드">
-      <span class="pct" data-toast="쿠폰은 실제 몰에서 적용됩니다">적용</span>
-    </div>
+    <!-- 쿠폰 코드 입력창 제거(2026-08-08 대표님 지시) — 실제 장바구니에 없는 기능이라 시안을 실사이트에 맞춰 단순화 -->
     <div class="totals">
       <div class="row"><span class="lb ed">Total:</span><span class="vl" id="cartTotal">0원</span></div>
       <div class="hint"><span id="cartPoints"></span><span id="cartShip"></span></div>
