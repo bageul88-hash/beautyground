@@ -7,25 +7,45 @@ import ImagePlaceholder from '../common/ImagePlaceholder'
 // 홈 히어로 배너: 관리자가 고른 상품을 그린 그라데이션 카드로 노출.
 // 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측 적용 — 카드 배경 그라데이션
 // #6DB33F→#94D64F, 이미지는 카드 우하단에 걸치고, 좌하단 흰 알약이 CTA를 대신한다.
+// 레퍼런스가 다음 카드를 살짝 걸쳐 보여주는 이유는 "옆으로 밀 수 있다"는 걸 손으로 말하기 위함이라
+// 카드 폭을 100%가 아닌 86%로 두고(다음 카드가 우측에 자연히 피크), 네이티브 스크롤 스냅으로
+// 실제 손가락 드래그가 되게 한다 — 2026-08-08 대표님 재지적.
 export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
+  const scrollerRef = useRef<HTMLDivElement | null>(null)
+  const itemRefs = useRef<Array<HTMLElement | null>>([])
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const touchStartX = useRef(0)
+  const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const count = banners.length
 
   // 모션 최소화를 선택한 사용자에게는 자동 넘김도 슬라이드 애니메이션도 걸지 않는다.
-  // (자동으로 움직이는 캐러셀은 이 설정이 가장 먼저 막으려는 종류의 움직임이다.)
   const reduceMotion = useReducedMotion()
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      itemRefs.current[index]?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        inline: 'start',
+        block: 'nearest',
+      })
+    },
+    [reduceMotion],
+  )
 
   const resetInterval = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     if (count <= 1 || reduceMotion) return
+    // 2초에 한 번 좌측(다음 카드)으로 자동 이동 — 대표님 지시(2026-08-08)
     intervalRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % count)
-    }, 4000)
-  }, [count, reduceMotion])
+      setCurrent((prev) => {
+        const next = (prev + 1) % count
+        scrollToIndex(next)
+        return next
+      })
+    }, 2000)
+  }, [count, reduceMotion, scrollToIndex])
 
   useEffect(() => {
     resetInterval()
@@ -35,17 +55,37 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   }, [resetInterval])
 
   const goTo = (index: number) => {
-    setCurrent((index + count) % count)
+    const next = (index + count) % count
+    setCurrent(next)
+    scrollToIndex(next)
     resetInterval()
   }
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]?.clientX ?? 0
+  // 사용자가 손가락으로 직접 밀었을 때(네이티브 스크롤) — 스크롤이 멎으면 가장 가까운 카드로 current를 맞추고,
+  // 자동 넘김 타이머를 그 지점부터 다시 2초로 재시작한다(드래그 중 자동 넘김이 손 밑에서 카드를 뺏어가지 않도록
+  // onPointerDown에서 먼저 멈춰둔다 — 2026-08-08 대표님 지시로 스와이프 도입하며 발견한 충돌 방지).
+  const handleScroll = () => {
+    if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
+    scrollDebounceRef.current = setTimeout(() => {
+      const el = scrollerRef.current
+      if (!el) return
+      let closest = 0
+      let closestDist = Infinity
+      itemRefs.current.forEach((item, i) => {
+        if (!item) return
+        const dist = Math.abs(item.offsetLeft - el.scrollLeft)
+        if (dist < closestDist) {
+          closestDist = dist
+          closest = i
+        }
+      })
+      setCurrent(closest)
+      resetInterval()
+    }, 120)
   }
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const delta = touchStartX.current - (e.changedTouches[0]?.clientX ?? 0)
-    if (Math.abs(delta) > 30) goTo(delta > 0 ? current + 1 : current - 1)
+  const pauseAutoplay = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
   }
 
   if (count === 0) {
@@ -64,113 +104,124 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   }
 
   return (
-    <section
-      className="relative select-none px-4 pt-4 pb-1"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      aria-roledescription="carousel"
-      aria-label="추천 배너"
-    >
-      <div className="overflow-hidden rounded-card">
-        <div
-          className={`flex ${reduceMotion ? '' : 'transition-transform duration-500 ease-out'}`}
-          style={{ transform: `translateX(-${current * 100}%)` }}
-        >
-          {banners.map((banner, i) => {
-            const product = banner.product
-            const custom = banner.custom
-            const hidden = i !== current
+    <section className="relative select-none pt-4 pb-1" aria-roledescription="carousel" aria-label="추천 배너">
+      <div
+        ref={scrollerRef}
+        onScroll={handleScroll}
+        onPointerDown={pauseAutoplay}
+        onTouchStart={pauseAutoplay}
+        className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth px-4"
+      >
+        {banners.map((banner, i) => {
+          const product = banner.product
+          const custom = banner.custom
 
-            if (product) {
-              const hasSale = product.sale_price != null && product.sale_price < product.price
-              const rate = hasSale ? Math.round((1 - product.sale_price! / product.price) * 100) : 0
-              // 큐레이션 문구: 할인 중이면 퍼센트, 최근 45일 내 등록이면 NEW, 그 외 BUY NOW만
-              const isNew =
-                product.created_at != null &&
-                Date.now() - new Date(product.created_at).getTime() < 1000 * 60 * 60 * 24 * 45
-              const ctaLabel = hasSale ? `${rate}% OFF | BUY NOW` : isNew ? 'NEW | BUY NOW' : 'BUY NOW'
-              return (
-                <button
-                  key={banner.id}
-                  onClick={() => navigate(`/app/product/${product.id}`)}
-                  tabIndex={hidden ? -1 : 0}
-                  aria-hidden={hidden}
-                  className="relative min-h-[220px] w-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-hero-1 to-hero-2 p-5 text-left focus:outline-none focus-visible:shadow-ring"
-                  aria-label={product.name}
-                >
-                  <div className="relative z-10 max-w-[62%]">
-                    {product.brand ? (
-                      <span className="text-[12px] font-bold text-paper/90">{product.brand}</span>
-                    ) : null}
-                    <h2 className="mt-1.5 text-[20px] font-bold leading-tight tracking-[-0.02em] text-paper line-clamp-2">
-                      {custom?.headline || product.name}
-                    </h2>
-                    {custom?.subcopy && <p className="mt-2 text-[12px] leading-relaxed text-paper/90 line-clamp-2">{custom.subcopy}</p>}
-                    <span className="mt-4 inline-block rounded-pill bg-paper/95 px-3.5 py-2 text-[11px] font-bold text-accent-ink">
-                      {ctaLabel}
-                    </span>
-                  </div>
-                  {/* 상품 이미지 — 카드 우하단에 걸쳐서, 브랜드 원본 비율 유지 */}
-                  <div className="pointer-events-none absolute bottom-0 right-0 h-[85%] w-[44%]">
-                    {product.thumbnail_url ? (
-                      <img
-                        src={product.thumbnail_url}
-                        alt=""
-                        loading={i === 0 ? 'eager' : 'lazy'}
-                        className="h-full w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.25)]"
-                      />
-                    ) : (
-                      <ImagePlaceholder className="h-full w-full" />
-                    )}
-                  </div>
-                </button>
-              )
-            }
-
-            if (custom) {
-              const handleClick = () => {
-                const link = custom.link_url
-                if (!link) return
-                if (link.startsWith('/')) navigate(link)
-                else window.location.href = link
-              }
-              return (
-                <button
-                  key={banner.id}
-                  onClick={handleClick}
-                  disabled={!custom.link_url}
-                  tabIndex={hidden ? -1 : 0}
-                  aria-hidden={hidden}
-                  className="w-full flex-shrink-0 text-left disabled:cursor-default focus:outline-none focus-visible:shadow-ring"
-                  aria-label={custom.headline ?? '배너'}
-                >
-                  <div className="aspect-square bg-quiet">
-                    {custom.image_url ? (
-                      <img
-                        src={custom.image_url}
-                        alt={custom.headline ?? ''}
-                        loading={i === 0 ? 'eager' : 'lazy'}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  {(custom.headline || custom.subcopy) && (
-                    <div className="bg-paper px-4 py-4">
-                      {custom.headline && (
-                        <h2 className="text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
-                          {custom.headline}
-                        </h2>
-                      )}
-                      {custom.subcopy && <p className="mt-1.5 text-[14px] text-ink-soft">{custom.subcopy}</p>}
-                    </div>
+          if (product) {
+            const hasSale = product.sale_price != null && product.sale_price < product.price
+            const rate = hasSale ? Math.round((1 - product.sale_price! / product.price) * 100) : 0
+            // 큐레이션 문구: 할인 중이면 퍼센트, 최근 45일 내 등록이면 NEW, 그 외 BUY NOW만
+            const isNew =
+              product.created_at != null &&
+              Date.now() - new Date(product.created_at).getTime() < 1000 * 60 * 60 * 24 * 45
+            const ctaLabel = hasSale ? `${rate}% OFF | BUY NOW` : isNew ? 'NEW | BUY NOW' : 'BUY NOW'
+            return (
+              <button
+                key={banner.id}
+                ref={(el) => {
+                  itemRefs.current[i] = el
+                }}
+                onClick={() => navigate(`/app/product/${product.id}`)}
+                className="relative min-h-[220px] w-[86%] flex-shrink-0 snap-start overflow-hidden rounded-card bg-gradient-to-br from-hero-1 to-hero-2 p-5 text-left focus:outline-none focus-visible:shadow-ring"
+                aria-label={product.name}
+              >
+                <div className="relative z-10 max-w-[62%]">
+                  {product.brand ? (
+                    <span className="text-[12px] font-bold text-paper/90">{product.brand}</span>
+                  ) : null}
+                  <h2 className="mt-1.5 text-[20px] font-bold leading-tight tracking-[-0.02em] text-paper line-clamp-2">
+                    {custom?.headline || product.name}
+                  </h2>
+                  {custom?.subcopy && <p className="mt-2 text-[12px] leading-relaxed text-paper/90 line-clamp-2">{custom.subcopy}</p>}
+                  <span className="mt-4 inline-block rounded-pill bg-paper/95 px-3.5 py-2 text-[11px] font-bold text-accent-ink">
+                    {ctaLabel}
+                  </span>
+                </div>
+                {/* 상품 이미지 — 카드 우하단에 걸쳐서, 브랜드 원본 비율 유지.
+                    상품컷 자체의 흰/회색 스튜디오 배경이 그린 카드와 사각형 경계로 부딪히는 문제(2026-08-08 대표님 지적) —
+                    우하단(카드 모서리에 실제로 걸치는 쪽)은 그대로 두고, 상단·좌측 가장자리만 마스크로 자연스럽게 페이드아웃. */}
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[85%] w-[44%]">
+                  {product.thumbnail_url ? (
+                    <img
+                      src={product.thumbnail_url}
+                      alt=""
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      className="h-full w-full object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.18)]"
+                      style={{
+                        WebkitMaskImage:
+                          'radial-gradient(130% 130% at 100% 100%, #000 48%, transparent 88%)',
+                        maskImage: 'radial-gradient(130% 130% at 100% 100%, #000 48%, transparent 88%)',
+                      }}
+                    />
+                  ) : (
+                    <ImagePlaceholder className="h-full w-full" />
                   )}
-                </button>
-              )
-            }
+                </div>
+              </button>
+            )
+          }
 
-            return <div key={banner.id} className="aspect-square w-full flex-shrink-0 bg-quiet" />
-          })}
-        </div>
+          if (custom) {
+            const handleClick = () => {
+              const link = custom.link_url
+              if (!link) return
+              if (link.startsWith('/')) navigate(link)
+              else window.location.href = link
+            }
+            return (
+              <button
+                key={banner.id}
+                ref={(el) => {
+                  itemRefs.current[i] = el
+                }}
+                onClick={handleClick}
+                disabled={!custom.link_url}
+                className="w-[86%] flex-shrink-0 snap-start overflow-hidden rounded-card text-left disabled:cursor-default focus:outline-none focus-visible:shadow-ring"
+                aria-label={custom.headline ?? '배너'}
+              >
+                <div className="aspect-square bg-quiet">
+                  {custom.image_url ? (
+                    <img
+                      src={custom.image_url}
+                      alt={custom.headline ?? ''}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                </div>
+                {(custom.headline || custom.subcopy) && (
+                  <div className="bg-paper px-4 py-4">
+                    {custom.headline && (
+                      <h2 className="text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink line-clamp-2">
+                        {custom.headline}
+                      </h2>
+                    )}
+                    {custom.subcopy && <p className="mt-1.5 text-[14px] text-ink-soft">{custom.subcopy}</p>}
+                  </div>
+                )}
+              </button>
+            )
+          }
+
+          return (
+            <div
+              key={banner.id}
+              ref={(el) => {
+                itemRefs.current[i] = el
+              }}
+              className="aspect-square w-[86%] flex-shrink-0 snap-start rounded-card bg-quiet"
+            />
+          )
+        })}
       </div>
 
       {count > 1 && (
