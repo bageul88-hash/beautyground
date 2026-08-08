@@ -6,16 +6,11 @@ import AppHeader from '../../components/layout/AppHeader'
 import AppFrame from '../../components/layout/AppFrame'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
 import DesktopLiveList from '../../components/live/DesktopLiveList'
+import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
+import { IconGrid } from '../../components/common/Icon'
 import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
-import { formatDateTime } from '../../lib/format'
-
-interface PrimaryProduct {
-  name: string
-  price: number
-  sale_price: number | null
-  thumbnail_url: string | null
-}
+import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
 
 export default function ShopLiveList() {
   const [lives, setLives] = useState<Live[]>([])
@@ -114,6 +109,27 @@ export default function ShopLiveList() {
   const usedReplayIds = new Set([hero?.id, ...otherLiveNow.map((l) => l.id)].filter(Boolean) as string[])
   const displayReplays = usingReplayFallback ? replays.filter((l) => !usedReplayIds.has(l.id)) : replays
 
+  // 모바일 상단 2카드 — 히어로 + 바로 다음 1개(다른 라이브 중 → 없으면 예정 → 없으면 다시보기 순으로 채움).
+  // 나머지 다른 라이브 중 항목은 아래 세로 목록으로, 예정/다시보기 목록에선 여기 쓴 항목을 제외한다.
+  const secondCardCandidate = otherLiveNow[0] ?? scheduledLives[0] ?? displayReplays[0] ?? null
+  const secondCard = secondCardCandidate && secondCardCandidate.id !== hero?.id ? secondCardCandidate : null
+  const topRow = [hero, secondCard].filter((l): l is Live => Boolean(l))
+  const extraLiveNow = otherLiveNow.filter((l) => l.id !== secondCard?.id)
+  const mobileScheduled = scheduledLives.filter((l) => l.id !== secondCard?.id)
+  const mobileReplays = displayReplays.filter((l) => l.id !== secondCard?.id)
+
+  // LIVE 예고 — 날짜별로 묶어서 보여준다(데스크톱 DesktopLiveList와 동일한 규칙).
+  const scheduleGroups = (() => {
+    const order: string[] = []
+    const byDate = new Map<string, Live[]>()
+    for (const live of mobileScheduled) {
+      const key = dateKey(live.scheduled_at)
+      if (!byDate.has(key)) { byDate.set(key, []); order.push(key) }
+      byDate.get(key)!.push(live)
+    }
+    return order.map((key) => ({ key, label: formatDateOnly(byDate.get(key)![0].scheduled_at), items: byDate.get(key)! }))
+  })()
+
   if (isDesktop) {
     return (
       <>
@@ -136,88 +152,87 @@ export default function ShopLiveList() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <AppHeader />
 
-      <main className="px-4 py-5">
-        <h1 className="text-[20px] font-bold text-text mb-4">라이브</h1>
+      <nav className="sticky top-14 z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
+        <Link to="/app/category" aria-label="카테고리" className="shrink-0 py-3 text-ink">
+          <IconGrid className="w-5 h-5" />
+        </Link>
+        <span className="shrink-0 py-3 text-[14.5px] font-bold text-ink border-b-2 border-ink -mb-px">홈</span>
+        <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">기획전</span>
+        <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">팔로잉</span>
+      </nav>
 
+      <main className="px-4 py-5">
         {loading ? (
-          <div className="py-20 text-center text-[14px] text-text-hint">
+          <div className="py-20 text-center text-[13px] text-ink-faint">
             불러오는 중…
           </div>
         ) : !hero ? (
-          <div className="py-10 text-center text-[14px] text-text-hint">
+          <div className="py-10 text-center text-[13px] text-ink-faint">
             진행 중이거나 예정된 라이브가 없습니다.
           </div>
         ) : (
           <>
-            {hero && (
-              <Link
-                to={`/app/live/${hero.id}`}
-                className="block bg-white rounded-md border overflow-hidden mb-5 focus:outline-none focus:shadow-focus"
-                style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
-              >
-                <div className="relative">
-                  {hero.thumbnail_url ? (
-                    <img
-                      src={hero.thumbnail_url}
-                      alt={hero.title}
-                      className="w-full aspect-square object-cover"
-                    />
-                  ) : (
-                    <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
-                  )}
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <LiveStatusBadge live={hero} />
-                    {hero.status === 'scheduled' && (
-                      <span className="inline-flex items-center rounded-pill bg-black/50 text-white text-[11px] font-medium px-2.5 py-1">
-                        {formatDateTime(hero.scheduled_at)}
-                        {hero.duration_minutes ? ` · 약 ${hero.duration_minutes}분` : ''}
-                      </span>
+            <div className={topRow.length === 2 ? 'grid grid-cols-2 gap-3' : ''}>
+              {topRow.map((live) => (
+                <Link
+                  key={live.id}
+                  to={`/app/live/${live.id}`}
+                  className="block bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="relative">
+                    {live.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
+                    ) : (
+                      <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
+                      </div>
                     )}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-2">
+                      <LiveStatusBadge live={live} size="sm" />
+                      {live.status === 'scheduled' && (
+                        <span className="inline-flex items-center rounded-control bg-black/50 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
+                          {formatDateTime(live.scheduled_at)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="px-4 py-3">
-                  <p className="text-[17px] font-bold text-text leading-snug line-clamp-2">
-                    {hero.title}
-                  </p>
-                  {hero.host_id && hostNames[hero.host_id] && (
-                    <p className="text-[12px] text-text-sub mt-1">{hostNames[hero.host_id]} 진행</p>
-                  )}
-                </div>
-              </Link>
-            )}
+                  <div className="px-3 py-2.5">
+                    <p className="text-[13.5px] font-bold text-ink line-clamp-2">{live.title}</p>
+                    {live.host_id && hostNames[live.host_id] && (
+                      <p className="text-[11px] text-ink-soft mt-0.5">{hostNames[live.host_id]} 진행</p>
+                    )}
+                    {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                  </div>
+                </Link>
+              ))}
+            </div>
 
-            {otherLiveNow.length > 0 && (
-              <div className="flex flex-col gap-4">
-                {otherLiveNow.map((live) => (
+            {extraLiveNow.length > 0 && (
+              <div className="flex flex-col gap-4 mt-4">
+                {extraLiveNow.map((live) => (
                   <Link
                     key={live.id}
                     to={`/app/live/${live.id}`}
-                    className="block bg-white rounded-md border overflow-hidden transition-colors hover:border-gold/40 focus:outline-none focus:shadow-focus"
-                    style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
+                    className="block bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
                   >
                     <div className="relative">
                       {live.thumbnail_url ? (
-                        <img
-                          src={live.thumbnail_url}
-                          alt={live.title}
-                          className="w-full aspect-square object-cover"
-                        />
+                        <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
                       ) : (
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
+                        <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                          <img src="/images/bg-logo-mark.png" alt="" className="w-12 h-12 object-contain opacity-50" />
+                        </div>
                       )}
-
                       <div className="absolute top-3 left-3">
                         <LiveStatusBadge live={live} />
                       </div>
                     </div>
-
                     <div className="px-4 py-3">
-                      <p className="text-[15px] font-medium text-text line-clamp-2">
-                        {live.title}
-                      </p>
+                      <p className="text-[15px] font-bold text-ink line-clamp-2">{live.title}</p>
                       {live.host_id && hostNames[live.host_id] && (
-                        <p className="text-[12px] text-text-sub mt-0.5">{hostNames[live.host_id]} 진행</p>
+                        <p className="text-[12px] text-ink-soft mt-0.5">{hostNames[live.host_id]} 진행</p>
                       )}
+                      {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
                     </div>
                   </Link>
                 ))}
@@ -226,36 +241,72 @@ export default function ShopLiveList() {
           </>
         )}
 
-        {/* 다시보기 — 종료된 방송 중 영상이 있는 것(히어로·위 목록에 이미 쓰인 건 제외) */}
-        {!loading && displayReplays.length > 0 && (
+        {/* LIVE 예고 — 예정된 방송이 실제로 있을 때만(가짜 일정을 만들어 채우지 않음) */}
+        {!loading && mobileScheduled.length > 0 && (
           <>
-            <h2 className="text-[17px] font-bold text-text mt-8 mb-4">다시보기</h2>
+            <h2 className="text-[16px] font-bold text-ink mt-9 mb-3">LIVE 예고</h2>
+            {scheduleGroups.map((group) => (
+              <div key={group.key} className="mt-5 first:mt-0">
+                <p className="text-[12.5px] font-bold text-ink-soft mb-2.5 pb-1.5 border-b border-rule">{group.label}</p>
+                <div className="flex flex-col gap-3.5">
+                  {group.items.map((live) => (
+                    <Link
+                      key={live.id}
+                      to={`/app/live/${live.id}`}
+                      className="flex gap-3 items-center focus:outline-none focus-visible:shadow-ring"
+                    >
+                      <div className="relative w-20 h-20 shrink-0 bg-quiet overflow-hidden">
+                        {live.thumbnail_url ? (
+                          <img src={live.thumbnail_url} alt={live.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-50 m-auto" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
+                          {formatTimeOnly(live.scheduled_at)}
+                          {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
+                        </span>
+                        <p className="text-[13.5px] font-bold text-ink line-clamp-1 mt-1.5">{live.title}</p>
+                        {live.host_id && hostNames[live.host_id] && (
+                          <p className="text-[11px] text-ink-soft mt-0.5">{hostNames[live.host_id]} 진행</p>
+                        )}
+                        {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
+        {!loading && mobileReplays.length > 0 && (
+          <>
+            <h2 className="text-[16px] font-bold text-ink mt-9 mb-3.5">지난 라이브</h2>
             <div className="grid grid-cols-2 gap-3">
-              {displayReplays.map((live) => (
+              {mobileReplays.map((live) => (
                 <Link
                   key={live.id}
                   to={`/app/live/${live.id}`}
-                  className="block bg-white rounded-md border overflow-hidden transition-colors hover:border-gold/40 focus:outline-none focus:shadow-focus"
-                  style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
+                  className="block bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
                 >
                   <div className="relative">
                     {live.thumbnail_url ? (
-                      <img
-                        src={live.thumbnail_url}
-                        alt={live.title}
-                        className="w-full aspect-square object-cover"
-                      />
+                      <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
                     ) : (
-                      <img src="/images/bg-logo-mark.png" alt="" className="w-full aspect-square object-cover" />
+                      <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-9 h-9 object-contain opacity-50" />
+                      </div>
                     )}
-                    <span className="absolute top-2 left-2 inline-flex items-center rounded-pill bg-black/60 text-white text-[10px] font-bold px-2.5 py-0.5">
+                    <span className="absolute top-2 left-2 inline-flex items-center rounded-control bg-ink text-paper text-[10px] font-bold px-2 py-0.5 tracking-[0.04em]">
                       REPLAY
                     </span>
                   </div>
                   <div className="px-3 py-2.5">
-                    <p className="text-[13px] font-medium text-text line-clamp-2">
-                      {live.title}
-                    </p>
+                    <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
+                    {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
                   </div>
                 </Link>
               ))}
