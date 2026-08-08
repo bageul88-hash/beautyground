@@ -23,6 +23,7 @@ import AppNaverCallback from './pages/AppNaverCallback'
 import AppAccount from './pages/AppAccount'
 import AppAddresses from './pages/AppAddresses'
 import AppWishlist from './pages/AppWishlist'
+import AppBenefits from './pages/AppBenefits'
 import AppSkinTest from './pages/AppSkinTest'
 
 // 법적 고지
@@ -158,6 +159,7 @@ export default function App() {
         <Route path="/app/account" element={<AppAccount />} />
         <Route path="/app/addresses" element={<AppAddresses />} />
         <Route path="/app/wishlist" element={<AppWishlist />} />
+        <Route path="/app/benefits" element={<AppBenefits />} />
         <Route path="/app/skin-test" element={<AppSkinTest />} />
 
         {/* fallback */}

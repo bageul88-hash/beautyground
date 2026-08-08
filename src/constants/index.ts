@@ -349,3 +349,11 @@ export const SHIPPING_NOTICE = '배송비 3,100원 · 20,000원 이상 무료'
 // 적립금 비율(판매가 기준) · 기본 제조국
 export const REWARD_RATE = 0.03
 export const MADE_IN = '대한민국'
+
+// 혜택(적립금·쿠폰) 공통 최소 구매금액 — 회원가입/카카오 친구추가 혜택 사용 조건
+export const BENEFIT_MIN_ORDER_AMOUNT = 30000
+
+// 카카오톡 채널(앱 전용, 검색ID bg_라이브커머스) 친구추가 링크
+// ⚠️ 2026-08-08 기준 정확한 pf.kakao.com 퍼머링크를 아직 확보하지 못해 임시값 — 대표님 확인 후 교체 필요.
+// (기존 매장용 채널 pf.kakao.com/_vnwfX 를 재사용하면 안 됨 — 앱 전용으로 의도적으로 분리된 별개 채널)
+export const KAKAO_CHANNEL_URL = 'https://pf.kakao.com/_bg_라이브커머스'

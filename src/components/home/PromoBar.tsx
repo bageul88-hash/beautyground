@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 // 상단 프로모션 띠 — 대표님 확정 시안(2026-08-08) 두 개를 2초마다 교대 노출.
-// ① 검정 바탕 + 카카오 노랑 아이콘: 카카오 가입 3,000원 쿠폰
+// ① 검정 바탕 + 카카오 노랑 아이콘: 적립금·카카오 친구추가 혜택
 // ② 청록 바탕: 신규회원 48시간 반값 찬스
+// 두 항목 모두 /app/benefits(혜택 페이지)로 연결 — 로그인 여부와 무관하게 눌러서 들어가면
+// 회원가입 적립금·카카오 친구추가 혜택이 전부 보이고 그 자리에서 받을 수 있다(2026-08-08 대표님 지시).
 const ROTATE_MS = 2000
 
 interface PromoItem {
@@ -17,8 +19,8 @@ interface PromoItem {
 const ITEMS: PromoItem[] = [
   {
     key: 'kakao',
-    message: '카카오로 가입하고 3000원 할인쿠폰 즉시 받기',
-    href: '/app/login',
+    message: '적립금 받기 + 카카오 친구추가 혜택 보러가기',
+    href: '/app/benefits',
     bgClass: 'bg-[#0F0F0F]',
     withKakao: true,
   },

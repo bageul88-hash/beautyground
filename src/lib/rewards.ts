@@ -54,6 +54,21 @@ export async function releaseSignupCoupon(paymentId: string): Promise<void> {
   await supabase.rpc('release_signup_coupon', { p_payment_id: paymentId })
 }
 
+// 카카오 친구추가 혜택(자율신고) — supabase/kakao_friend_bonus.sql. 이미 신청했으면 false 반환.
+export async function claimKakaoFriendBonus(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('claim_kakao_friend_bonus')
+  if (error) throw new Error(error.message)
+  return Boolean(data)
+}
+
+export async function hasClaimedKakaoFriendBonus(): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return false
+  const { data, error } = await supabase.rpc('has_claimed_kakao_friend_bonus')
+  if (error) return false
+  return Boolean(data)
+}
+
 export async function getMyValidCoupons(): Promise<ValidCoupon[]> {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return []
