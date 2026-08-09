@@ -54,7 +54,8 @@ export default function ProductRail({
       ) : products.length === 0 ? (
         <p className="py-12 text-center text-[14px] text-ink-faint">{emptyText}</p>
       ) : (
-        <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth">
+        // overflow-x-auto를 주면 브라우저가 overflow-y도 auto로 취급해 shadow-card 아래쪽이 잘려 보임(대표님 지적) — 그림자가 들어갈 여유를 pt/pb로 확보해서 방지
+        <div className="flex gap-3 px-4 pt-1 pb-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth">
           {products.map((product) => {
             const sell = product.sale_price ?? product.price
             const hasSale = product.sale_price != null && product.sale_price < product.price
