@@ -9,12 +9,15 @@ export interface MallTheme {
   signalRed?: string
   signalBlue?: string
   signalYellow?: string
+  // 라이브커머스 목록 화면(ShopLiveList) — "덩어리" 사이(지금 라이브 → LIVE 예고 → 지난 라이브) 간격(px).
+  liveGap?: number
 }
 
 export const DEFAULT_THEME: Required<MallTheme> = {
   signalRed: '#E60012',
   signalBlue: '#0047FF',
   signalYellow: '#FFD400',
+  liveGap: 32,
 }
 
 const VAR_MAP: Array<[keyof MallTheme, string]> = [
@@ -36,6 +39,11 @@ export function applyMallTheme(theme: MallTheme | null) {
     const channels = theme?.[key] ? hexToChannels(theme[key] as string) : null
     if (channels) root.style.setProperty(cssVar, channels)
     else root.style.removeProperty(cssVar)
+  }
+  if (typeof theme?.liveGap === 'number' && Number.isFinite(theme.liveGap)) {
+    root.style.setProperty('--live-gap', `${theme.liveGap}px`)
+  } else {
+    root.style.removeProperty('--live-gap')
   }
 }
 

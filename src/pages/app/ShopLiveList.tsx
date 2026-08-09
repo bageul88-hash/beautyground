@@ -244,7 +244,7 @@ export default function ShopLiveList() {
         {/* LIVE 예고 — 예정된 방송이 실제로 있을 때만(가짜 일정을 만들어 채우지 않음) */}
         {!loading && mobileScheduled.length > 0 && (
           <>
-            <h2 className="text-[16px] font-bold text-ink mt-9 mb-3">LIVE 예고</h2>
+            <h2 className="text-[16px] font-bold text-ink mb-3" style={{ marginTop: 'var(--live-gap, 32px)' }}>LIVE 예고</h2>
             {scheduleGroups.map((group) => (
               <div key={group.key} className="mt-5 first:mt-0">
                 <p className="text-[12.5px] font-bold text-ink-soft mb-2.5 pb-1.5 border-b border-rule">{group.label}</p>
@@ -284,7 +284,7 @@ export default function ShopLiveList() {
         {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
         {!loading && mobileReplays.length > 0 && (
           <>
-            <h2 className="text-[16px] font-bold text-ink mt-9 mb-3.5">지난 라이브</h2>
+            <h2 className="text-[16px] font-bold text-ink mb-3.5" style={{ marginTop: 'var(--live-gap, 32px)' }}>지난 라이브</h2>
             <div className="grid grid-cols-2 gap-3">
               {mobileReplays.map((live) => (
                 <Link

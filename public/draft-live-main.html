@@ -90,6 +90,19 @@
     <p class="d">브라우저 안에서만 임시로 글자를 고쳐볼 수 있습니다(레이아웃 확인용). 새로고침하면 원래대로 — 실제 반영은 아닙니다.</p>
   </div>
 
+  <div class="grp">
+    <p class="t">덩어리 간격 (지금 라이브 → LIVE 예고 → 지난 라이브)</p>
+    <div class="row" style="width:100%">
+      <input type="range" id="gapSlider" min="0" max="72" step="2" value="32" style="flex:1">
+      <span id="gapVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="opt" id="gapSave">저장하고 실제 반영</button>
+      <span id="gapMsg" style="font-size:11.5px;color:var(--panel-soft)"></span>
+    </div>
+    <p class="d">슬라이더는 이 미리보기에서 바로 확인용입니다. [저장]을 눌러야 실제 고객 화면에도 반영됩니다.</p>
+  </div>
+
   <div class="foot">
     이 페이지는 접근코드가 걸린 라이브커머스 화면(대표님 지시 2026-07-31, 고객 미노출)을 대표님 브라우저에서만 자동으로 통과시켜 보여줍니다.<br><br>
     상품·방송·가격·"LIVE 예고"는 모두 <b>실제 Supabase 데이터</b>입니다 — 예정된 방송이 없으면 "LIVE 예고" 섹션 자체가 뜨지 않습니다(가짜 일정 없음).<br><br>
@@ -120,6 +133,48 @@ setInterval(()=>{
     if(m&&m!==deviceMode) setDevice(m,false);
   }catch(e){/* 무시 */}
 },600);
+
+/* ── 덩어리 간격 슬라이더: 실페이지 iframe에 즉시 미리보기 + Supabase home_settings.theme에 저장 ── */
+const SB_URL='https://bjqtuklkskrqzbuxdwxm.supabase.co';
+const SB_ANON='sb_publishable_nuBbC2D1_S_eV0fA9OAjhQ_ntsloX0Q';
+function sbAuthToken(){
+  try{
+    const key=Object.keys(localStorage).find(k=>/^sb-.*-auth-token$/.test(k));
+    if(!key) return null;
+    const parsed=JSON.parse(localStorage.getItem(key));
+    return parsed && parsed.access_token || null;
+  }catch(e){ return null; }
+}
+function previewGap(px){
+  try{
+    const d=document.getElementById('realLive').contentDocument;
+    if(d) d.documentElement.style.setProperty('--live-gap', px+'px');
+  }catch(e){/* 무시 */}
+}
+const gapSlider=document.getElementById('gapSlider'), gapVal=document.getElementById('gapVal'), gapMsg=document.getElementById('gapMsg');
+gapSlider.addEventListener('input',()=>{ gapVal.textContent=gapSlider.value+'px'; previewGap(gapSlider.value); });
+document.getElementById('realLive').addEventListener('load',()=>previewGap(gapSlider.value));
+
+fetch(SB_URL+'/rest/v1/home_settings?select=theme&id=eq.1',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}})
+  .then(r=>r.json()).then(rows=>{
+    const t=rows && rows[0] && rows[0].theme;
+    if(t && typeof t.liveGap==='number'){ gapSlider.value=t.liveGap; gapVal.textContent=t.liveGap+'px'; previewGap(t.liveGap); }
+  }).catch(()=>{});
+
+document.getElementById('gapSave').addEventListener('click', async ()=>{
+  gapMsg.textContent='저장 중…';
+  try{
+    const token=sbAuthToken();
+    const headers={apikey:SB_ANON,Authorization:'Bearer '+(token||SB_ANON),'Content-Type':'application/json',Prefer:'return=representation'};
+    const cur=await fetch(SB_URL+'/rest/v1/home_settings?select=theme&id=eq.1',{headers}).then(r=>r.json());
+    const merged=Object.assign({}, (cur&&cur[0]&&cur[0].theme)||{}, {liveGap:Number(gapSlider.value)});
+    const res=await fetch(SB_URL+'/rest/v1/home_settings?id=eq.1',{method:'PATCH',headers,body:JSON.stringify({theme:merged,updated_at:new Date().toISOString()})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    gapMsg.textContent='저장했습니다 ✓';
+  }catch(e){
+    gapMsg.textContent='저장 실패 — 관리자 로그인 상태에서 다시 시도해 주세요';
+  }
+});
 
 let editOn=false;
 function applyEmbedEdit(){
