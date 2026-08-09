@@ -165,14 +165,16 @@ document.getElementById('gapSave').addEventListener('click', async ()=>{
   gapMsg.textContent='저장 중…';
   try{
     const token=sbAuthToken();
-    const headers={apikey:SB_ANON,Authorization:'Bearer '+(token||SB_ANON),'Content-Type':'application/json',Prefer:'return=representation'};
+    if(!token){ gapMsg.textContent='저장 실패 — 이 브라우저에 관리자 로그인이 안 되어 있습니다. beautyground.co.kr에서 관리자 계정으로 로그인 후 다시 시도해 주세요.'; return; }
+    const headers={apikey:SB_ANON,Authorization:'Bearer '+token,'Content-Type':'application/json',Prefer:'return=representation'};
     const cur=await fetch(SB_URL+'/rest/v1/home_settings?select=theme&id=eq.1',{headers}).then(r=>r.json());
     const merged=Object.assign({}, (cur&&cur[0]&&cur[0].theme)||{}, {liveGap:Number(gapSlider.value)});
     const res=await fetch(SB_URL+'/rest/v1/home_settings?id=eq.1',{method:'PATCH',headers,body:JSON.stringify({theme:merged,updated_at:new Date().toISOString()})});
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows=res.ok ? await res.json().catch(()=>[]) : [];
+    if(!res.ok || !Array.isArray(rows) || rows.length===0) throw new Error('HTTP '+res.status+' rows='+(rows&&rows.length));
     gapMsg.textContent='저장했습니다 ✓';
   }catch(e){
-    gapMsg.textContent='저장 실패 — 관리자 로그인 상태에서 다시 시도해 주세요';
+    gapMsg.textContent='저장 실패 — 관리자 로그인 상태에서 다시 시도해 주세요 ('+e.message+')';
   }
 });
 
