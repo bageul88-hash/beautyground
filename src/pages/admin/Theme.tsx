@@ -7,7 +7,7 @@ import { DEFAULT_THEME, type MallTheme } from '../../hooks/useMallTheme'
 // ① 시그널 색상: 저장하면 지금 홈페이지에 즉시 적용되는 실색상.
 // ② 모바일 시안 연습장(draft.html iframe): 새 홈 디자인 시안을 조정·문구 수정하고
 //    [시안 저장]하면 home_settings.theme.draft 에 기록 → /draft.html 을 어디서 열어도 그 상태로 보인다.
-const COLOR_FIELDS: Array<{ key: keyof MallTheme; label: string; role: string }> = [
+const COLOR_FIELDS: Array<{ key: 'signalRed' | 'signalBlue' | 'signalYellow'; label: string; role: string }> = [
   { key: 'signalRed', label: '시그널 레드', role: '지금 벌어지는 일 — 라이브 표시, 취소·경고' },
   { key: 'signalBlue', label: '시그널 블루', role: '확정된 정보·행동 — 버튼, 상태 칩, 링크 강조' },
   { key: 'signalYellow', label: '시그널 옐로', role: '조건부 혜택 — 쿠폰·적립 안내 띠' },
