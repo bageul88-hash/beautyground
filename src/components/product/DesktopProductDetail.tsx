@@ -61,7 +61,7 @@ export default function DesktopProductDetail({
   return (
     <div className="bg-quiet min-h-screen">
       <div className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-[13px] font-bold text-ink-soft hover:text-ink">← 뒤로</button>
           <div className="flex items-center gap-4 text-ink">
             <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
@@ -76,44 +76,50 @@ export default function DesktopProductDetail({
 
       <CategoryTabBar active={view.category} stickyTop="top-16" />
 
-      <div className="max-w-[1920px] mx-auto px-6 py-10 grid grid-cols-[1.4fr_1fr] gap-12 items-start">
+      <div className="max-w-[1440px] mx-auto px-6 py-10 grid grid-cols-[1.1fr_1fr] gap-12 items-start">
         {/* 콘텐츠 영역 */}
         <div className="min-w-0 bg-paper border border-rule">
+          {/* 상품 사진은 화면이 넓어져도 이 폭을 넘기지 않음 — 그 이상은 사진이 커 보이기만
+              하고 정보량이 늘지 않아, 일반 쇼핑몰처럼 고정 폭으로 캡(대표님 지적, 2026-08-09) */}
           {view.images.length > 0 ? (
             <div className="p-6">
-              <div className="aspect-square bg-quiet overflow-hidden">
-                <img
-                  src={view.images[Math.min(activeImg, view.images.length - 1)]}
-                  alt={view.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              {view.images.length > 1 && (
-                <div className="flex gap-2 mt-3">
-                  {view.images.map((url, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImg(i)}
-                      className={`w-16 h-16 overflow-hidden border-2 focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'border-ink' : 'border-rule'}`}
-                      aria-label={`${i + 1}번째 이미지`}
-                    >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
+              <div className="max-w-[520px] mx-auto">
+                <div className="aspect-square bg-quiet overflow-hidden">
+                  <img
+                    src={view.images[Math.min(activeImg, view.images.length - 1)]}
+                    alt={view.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-              )}
+                {view.images.length > 1 && (
+                  <div className="flex gap-2 mt-3">
+                    {view.images.map((url, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImg(i)}
+                        className={`w-16 h-16 overflow-hidden border-2 focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'border-ink' : 'border-rule'}`}
+                        aria-label={`${i + 1}번째 이미지`}
+                      >
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <ImagePlaceholder className="aspect-square w-full" />
+            <ImagePlaceholder className="aspect-square w-full max-w-[520px] mx-auto" />
           )}
 
           <ReviewSummary summary={view.reviewSummary} productId={id} className="border-t border-rule" />
 
           {view.detailImages.length > 0 && (
-            <div className="border-t border-rule">
-              {view.detailImages.map((url, i) => (
-                <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
-              ))}
+            <div className="border-t border-rule py-6">
+              <div className="max-w-[520px] mx-auto">
+                {view.detailImages.map((url, i) => (
+                  <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
+                ))}
+              </div>
             </div>
           )}
 
