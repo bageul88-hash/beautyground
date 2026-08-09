@@ -91,12 +91,27 @@
   </div>
 
   <div class="grp">
-    <p class="t">덩어리 간격 (지금 라이브 → LIVE 예고 → 지난 라이브)</p>
+    <p class="t">덩어리 간격 (구간별로 따로 조절)</p>
+
+    <p class="d" style="margin-top:0">① 2카드 → 그 아래 다른 라이브 카드</p>
     <div class="row" style="width:100%">
-      <input type="range" id="gapSlider" min="0" max="72" step="2" value="32" style="flex:1">
-      <span id="gapVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+      <input type="range" id="gapTopExtra" min="0" max="72" step="2" value="16" style="flex:1">
+      <span id="gapTopExtraVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">16px</span>
     </div>
-    <div class="row" style="margin-top:8px">
+
+    <p class="d">② 지금 라이브 → LIVE 예고</p>
+    <div class="row" style="width:100%">
+      <input type="range" id="gapUpcoming" min="0" max="72" step="2" value="32" style="flex:1">
+      <span id="gapUpcomingVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+    </div>
+
+    <p class="d">③ LIVE 예고 → 지난 라이브</p>
+    <div class="row" style="width:100%">
+      <input type="range" id="gapPast" min="0" max="72" step="2" value="32" style="flex:1">
+      <span id="gapPastVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+    </div>
+
+    <div class="row" style="margin-top:10px">
       <button class="opt" id="gapSave">저장하고 실제 반영</button>
       <span id="gapMsg" style="font-size:11.5px;color:var(--panel-soft)"></span>
     </div>
@@ -145,20 +160,36 @@ function sbAuthToken(){
     return parsed && parsed.access_token || null;
   }catch(e){ return null; }
 }
-function previewGap(px){
+const GAPS=[
+  {key:'liveGapTopExtra', cssVar:'--live-gap-top-extra', slider:'gapTopExtra', val:'gapTopExtraVal', def:16},
+  {key:'liveGapUpcoming', cssVar:'--live-gap-upcoming', slider:'gapUpcoming', val:'gapUpcomingVal', def:32},
+  {key:'liveGapPast', cssVar:'--live-gap-past', slider:'gapPast', val:'gapPastVal', def:32},
+];
+function previewGap(cssVar, px){
   try{
     const d=document.getElementById('realLive').contentDocument;
-    if(d) d.documentElement.style.setProperty('--live-gap', px+'px');
+    if(d) d.documentElement.style.setProperty(cssVar, px+'px');
   }catch(e){/* 무시 */}
 }
-const gapSlider=document.getElementById('gapSlider'), gapVal=document.getElementById('gapVal'), gapMsg=document.getElementById('gapMsg');
-gapSlider.addEventListener('input',()=>{ gapVal.textContent=gapSlider.value+'px'; previewGap(gapSlider.value); });
-document.getElementById('realLive').addEventListener('load',()=>previewGap(gapSlider.value));
+GAPS.forEach(g=>{
+  const slider=document.getElementById(g.slider), val=document.getElementById(g.val);
+  slider.addEventListener('input',()=>{ val.textContent=slider.value+'px'; previewGap(g.cssVar, slider.value); });
+});
+document.getElementById('realLive').addEventListener('load',()=>{
+  GAPS.forEach(g=>previewGap(g.cssVar, document.getElementById(g.slider).value));
+});
 
 fetch(SB_URL+'/rest/v1/home_settings?select=theme&id=eq.1',{headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}})
   .then(r=>r.json()).then(rows=>{
     const t=rows && rows[0] && rows[0].theme;
-    if(t && typeof t.liveGap==='number'){ gapSlider.value=t.liveGap; gapVal.textContent=t.liveGap+'px'; previewGap(t.liveGap); }
+    if(!t) return;
+    GAPS.forEach(g=>{
+      if(typeof t[g.key]==='number'){
+        document.getElementById(g.slider).value=t[g.key];
+        document.getElementById(g.val).textContent=t[g.key]+'px';
+        previewGap(g.cssVar, t[g.key]);
+      }
+    });
   }).catch(()=>{});
 
 document.getElementById('gapSave').addEventListener('click', async ()=>{
@@ -168,7 +199,9 @@ document.getElementById('gapSave').addEventListener('click', async ()=>{
     if(!token){ gapMsg.textContent='저장 실패 — 이 브라우저에 관리자 로그인이 안 되어 있습니다. beautyground.co.kr에서 관리자 계정으로 로그인 후 다시 시도해 주세요.'; return; }
     const headers={apikey:SB_ANON,Authorization:'Bearer '+token,'Content-Type':'application/json',Prefer:'return=representation'};
     const cur=await fetch(SB_URL+'/rest/v1/home_settings?select=theme&id=eq.1',{headers}).then(r=>r.json());
-    const merged=Object.assign({}, (cur&&cur[0]&&cur[0].theme)||{}, {liveGap:Number(gapSlider.value)});
+    const gapValues={};
+    GAPS.forEach(g=>{ gapValues[g.key]=Number(document.getElementById(g.slider).value); });
+    const merged=Object.assign({}, (cur&&cur[0]&&cur[0].theme)||{}, gapValues);
     const res=await fetch(SB_URL+'/rest/v1/home_settings?id=eq.1',{method:'PATCH',headers,body:JSON.stringify({theme:merged,updated_at:new Date().toISOString()})});
     const rows=res.ok ? await res.json().catch(()=>[]) : [];
     if(!res.ok || !Array.isArray(rows) || rows.length===0) throw new Error('HTTP '+res.status+' rows='+(rows&&rows.length));
