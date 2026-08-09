@@ -49,6 +49,18 @@
   .grp .row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
   .opt { border:1.5px solid var(--panel-line); background:none; color:var(--panel-ink); border-radius:10px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; }
   .opt.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,169,106,.28); }
+
+  .gap-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .gap-btn { width:34px; height:34px; flex-shrink:0; border-radius:9px; border:1.5px solid var(--panel-line); background:#fff; color:var(--panel-ink); font-size:19px; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .gap-btn:hover { border-color:var(--gold); }
+  .gap-btn:active { background:var(--panel-line); }
+  .gap-slider { flex:1; min-width:0; height:22px; accent-color:var(--gold); cursor:pointer; }
+  .gap-slider::-webkit-slider-runnable-track { height:6px; border-radius:999px; background:var(--panel-line); }
+  .gap-slider::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--gold); border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); margin-top:-8px; cursor:pointer; }
+  .gap-slider::-moz-range-track { height:6px; border-radius:999px; background:var(--panel-line); }
+  .gap-slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:var(--gold); border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); cursor:pointer; }
+  .gap-val { font-size:12.5px; font-weight:700; min-width:42px; text-align:right; flex-shrink:0; }
+
   .ctrl .foot { margin-top:18px; padding-top:14px; border-top:1px solid var(--panel-line); font-size:11.5px; color:var(--panel-soft); line-height:1.6; }
   .ctrl .foot b { color:var(--gold); }
 
@@ -92,30 +104,37 @@
 
   <div class="grp">
     <p class="t">덩어리 간격 (구간별로 따로 조절)</p>
+    <p class="d" style="margin-top:0">− / + 버튼을 누르면 4px씩 바뀝니다. (드래그 막대도 같이 움직입니다)</p>
 
-    <p class="d" style="margin-top:0">① 2카드 → 그 아래 다른 라이브 카드</p>
-    <div class="row" style="width:100%">
-      <input type="range" id="gapTopExtra" min="0" max="72" step="2" value="16" style="flex:1">
-      <span id="gapTopExtraVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">16px</span>
+    <p class="d">① 2카드 → 그 아래 다른 라이브 카드</p>
+    <div class="gap-row">
+      <button class="gap-btn" data-gap="gapTopExtra" data-step="-4" aria-label="줄이기">−</button>
+      <input type="range" id="gapTopExtra" min="0" max="72" step="2" value="16" class="gap-slider">
+      <button class="gap-btn" data-gap="gapTopExtra" data-step="4" aria-label="늘리기">+</button>
+      <span id="gapTopExtraVal" class="gap-val">16px</span>
     </div>
 
     <p class="d">② 지금 라이브 → LIVE 예고</p>
-    <div class="row" style="width:100%">
-      <input type="range" id="gapUpcoming" min="0" max="72" step="2" value="32" style="flex:1">
-      <span id="gapUpcomingVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+    <div class="gap-row">
+      <button class="gap-btn" data-gap="gapUpcoming" data-step="-4" aria-label="줄이기">−</button>
+      <input type="range" id="gapUpcoming" min="0" max="72" step="2" value="32" class="gap-slider">
+      <button class="gap-btn" data-gap="gapUpcoming" data-step="4" aria-label="늘리기">+</button>
+      <span id="gapUpcomingVal" class="gap-val">32px</span>
     </div>
 
     <p class="d">③ LIVE 예고 → 지난 라이브</p>
-    <div class="row" style="width:100%">
-      <input type="range" id="gapPast" min="0" max="72" step="2" value="32" style="flex:1">
-      <span id="gapPastVal" style="font-size:12.5px;font-weight:700;min-width:40px;text-align:right">32px</span>
+    <div class="gap-row">
+      <button class="gap-btn" data-gap="gapPast" data-step="-4" aria-label="줄이기">−</button>
+      <input type="range" id="gapPast" min="0" max="72" step="2" value="32" class="gap-slider">
+      <button class="gap-btn" data-gap="gapPast" data-step="4" aria-label="늘리기">+</button>
+      <span id="gapPastVal" class="gap-val">32px</span>
     </div>
 
     <div class="row" style="margin-top:10px">
       <button class="opt" id="gapSave">저장하고 실제 반영</button>
       <span id="gapMsg" style="font-size:11.5px;color:var(--panel-soft)"></span>
     </div>
-    <p class="d">슬라이더는 이 미리보기에서 바로 확인용입니다. [저장]을 눌러야 실제 고객 화면에도 반영됩니다.</p>
+    <p class="d">[저장]을 눌러야 실제 고객 화면에도 반영됩니다.</p>
   </div>
 
   <div class="foot">
@@ -175,6 +194,14 @@ GAPS.forEach(g=>{
   const slider=document.getElementById(g.slider), val=document.getElementById(g.val);
   slider.addEventListener('input',()=>{ val.textContent=slider.value+'px'; previewGap(g.cssVar, slider.value); });
 });
+document.querySelectorAll('[data-gap]').forEach(btn=>btn.addEventListener('click',()=>{
+  const g=GAPS.find(x=>x.slider===btn.dataset.gap);
+  if(!g) return;
+  const slider=document.getElementById(g.slider), val=document.getElementById(g.val);
+  const min=Number(slider.min), max=Number(slider.max);
+  const next=Math.min(max, Math.max(min, Number(slider.value)+Number(btn.dataset.step)));
+  slider.value=next; val.textContent=next+'px'; previewGap(g.cssVar, next);
+}));
 document.getElementById('realLive').addEventListener('load',()=>{
   GAPS.forEach(g=>previewGap(g.cssVar, document.getElementById(g.slider).value));
 });
