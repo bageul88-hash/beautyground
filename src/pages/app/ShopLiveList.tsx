@@ -258,23 +258,6 @@ export default function ShopLiveList() {
           </>
         )}
 
-        {/* 입점하기 CTA — 레퍼런스 시안 하단 배너(2026-08-10) */}
-        {!loading && (
-          <a
-            href="mailto:beautyground.official@gmail.com?subject=라이브커머스 입점 문의"
-            className="mt-6 flex items-center justify-between gap-3 rounded-[16px] px-4 py-4"
-            style={{ background: 'linear-gradient(115deg, #1fa7a0, #2d6fb8)' }}
-          >
-            <div>
-              <p className="text-[13.5px] font-extrabold text-white">판매할 상품이 있나요?</p>
-              <p className="text-[11px] text-white/85 mt-1">내 상품을 LIVE로 진정성 있게 전하세요.</p>
-            </div>
-            <span className="shrink-0 bg-white text-[#2d6fb8] text-[12px] font-extrabold px-4 py-2 rounded-full whitespace-nowrap">
-              입점하기
-            </span>
-          </a>
-        )}
-
         {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
         {!loading && mobileReplays.length > 0 && (
           <>
