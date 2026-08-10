@@ -10,7 +10,6 @@ export interface MallTheme {
   signalBlue?: string
   signalYellow?: string
   // 라이브커머스 목록 화면(ShopLiveList) — 구간별 "덩어리" 사이 간격(px), 각각 따로 조절.
-  liveGapTopExtra?: number // 상단 2카드 → 그 아래 다른 라이브중 카드
   liveGapUpcoming?: number // 지금 라이브 블록 → LIVE 예고
   liveGapPast?: number // LIVE 예고(또는 그 위) → 지난 라이브
 }
@@ -19,7 +18,6 @@ export const DEFAULT_THEME: Required<MallTheme> = {
   signalRed: '#E60012',
   signalBlue: '#0047FF',
   signalYellow: '#FFD400',
-  liveGapTopExtra: 16,
   liveGapUpcoming: 32,
   liveGapPast: 32,
 }
@@ -31,7 +29,6 @@ const VAR_MAP: Array<[keyof MallTheme, string]> = [
 ]
 
 const GAP_VAR_MAP: Array<[keyof MallTheme, string]> = [
-  ['liveGapTopExtra', '--live-gap-top-extra'],
   ['liveGapUpcoming', '--live-gap-upcoming'],
   ['liveGapPast', '--live-gap-past'],
 ]

@@ -106,15 +106,7 @@
     <p class="t">덩어리 간격 (구간별로 따로 조절)</p>
     <p class="d" style="margin-top:0">− / + 버튼을 누르면 4px씩 바뀝니다. (드래그 막대도 같이 움직입니다)</p>
 
-    <p class="d">① 2카드 → 그 아래 다른 라이브 카드</p>
-    <div class="gap-row">
-      <button class="gap-btn" data-gap="gapTopExtra" data-step="-4" aria-label="줄이기">−</button>
-      <input type="range" id="gapTopExtra" min="0" max="72" step="2" value="16" class="gap-slider">
-      <button class="gap-btn" data-gap="gapTopExtra" data-step="4" aria-label="늘리기">+</button>
-      <span id="gapTopExtraVal" class="gap-val">16px</span>
-    </div>
-
-    <p class="d">② 지금 라이브 → LIVE 예고</p>
+    <p class="d">① 지금 라이브 → LIVE 예고</p>
     <div class="gap-row">
       <button class="gap-btn" data-gap="gapUpcoming" data-step="-4" aria-label="줄이기">−</button>
       <input type="range" id="gapUpcoming" min="0" max="72" step="2" value="32" class="gap-slider">
@@ -122,7 +114,7 @@
       <span id="gapUpcomingVal" class="gap-val">32px</span>
     </div>
 
-    <p class="d">③ LIVE 예고 → 지난 라이브</p>
+    <p class="d">② LIVE 예고 → 지난 라이브</p>
     <div class="gap-row">
       <button class="gap-btn" data-gap="gapPast" data-step="-4" aria-label="줄이기">−</button>
       <input type="range" id="gapPast" min="0" max="72" step="2" value="32" class="gap-slider">
@@ -180,7 +172,6 @@ function sbAuthToken(){
   }catch(e){ return null; }
 }
 const GAPS=[
-  {key:'liveGapTopExtra', cssVar:'--live-gap-top-extra', slider:'gapTopExtra', val:'gapTopExtraVal', def:16},
   {key:'liveGapUpcoming', cssVar:'--live-gap-upcoming', slider:'gapUpcoming', val:'gapUpcomingVal', def:32},
   {key:'liveGapPast', cssVar:'--live-gap-past', slider:'gapPast', val:'gapPastVal', def:32},
 ];
