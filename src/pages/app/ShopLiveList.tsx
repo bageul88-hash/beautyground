@@ -171,22 +171,24 @@ export default function ShopLiveList() {
             진행 중이거나 예정된 라이브가 없습니다.
           </div>
         ) : (
-          /* 지금 라이브 — 레퍼런스 시안(라이브커머스메인페이지예시.png) 실측: 카드폭이
-             화면의 54%(2열 그리드 아님) → 다음 카드가 절반쯤 걸쳐 보이는 가로 스크롤
-             캐러셀. 둥근 모서리·LIVE 그라디언트 알약 배지(2026-08-10, 대표님 지시로
-             DESIGN.md 각진/무그림자/신호3색 규칙 대신 시안 룩을 그대로 입힘). */
-          <div className="flex gap-[3.6vw] -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          /* 지금 라이브 — 피그마 Codia 변환 실측(node 3328:3, 2026-08-10): 카드폭 52.6%,
+             카드간격 1.5% → 다음 카드가 프레임 끝에서 그대로 잘리는 가로 스크롤 캐러셀.
+             사진 비율 170:256(정사각 아님, 세로로 긴 비율). 상품정보 패널은 사진 아래
+             별도 영역이 아니라 사진 바닥에 겹치는 밝은 오버레이(사진 높이의 19%).
+             둥근 모서리·LIVE 그라디언트 알약 배지 — DESIGN.md 각진/무채색 규칙 대신
+             대표님 지시로 시안 룩을 그대로 입힘. */
+          <div className="flex gap-[1.5%] -mx-4 px-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[54%] block focus:outline-none focus-visible:shadow-ring">
-                <div className="relative rounded-[14px] overflow-hidden bg-quiet">
+              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[52.6%] block focus:outline-none focus-visible:shadow-ring">
+                <div className="relative rounded-[14px] overflow-hidden bg-quiet aspect-[170/256]">
                   {live.thumbnail_url ? (
-                    <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
+                    <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full aspect-square bg-quiet flex items-center justify-center">
+                    <div className="absolute inset-0 bg-quiet flex items-center justify-center">
                       <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
                     </div>
                   )}
-                  <div className="absolute top-2 left-2 flex items-center gap-2">
+                  <div className="absolute top-[4.3%] left-[5.7%] flex items-center gap-2">
                     <LiveStatusBadge live={live} size="sm" variant="pill" />
                     {live.status === 'scheduled' && (
                       <span className="inline-flex items-center rounded-full bg-black/50 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
@@ -195,23 +197,21 @@ export default function ShopLiveList() {
                     )}
                   </div>
                   {primaryProducts[live.id] && (
-                    <div className="absolute left-0 right-0 bottom-0 bg-black/55 backdrop-blur-[2px] px-2.5 py-2">
-                      <div className="flex items-center gap-2">
-                        {primaryProducts[live.id].thumbnail_url && (
-                          <img src={primaryProducts[live.id].thumbnail_url!} alt="" className="w-7 h-7 rounded-[6px] object-cover shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-[10.5px] text-white/85 truncate">{primaryProducts[live.id].name}</p>
-                          <p className="text-[12px] font-extrabold text-white">{(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원</p>
-                        </div>
+                    <div className="absolute left-[1.5%] right-[1.5%] bottom-0 h-[19%] flex items-center gap-2 px-2 bg-[#f0f0f1]/95">
+                      {primaryProducts[live.id].thumbnail_url && (
+                        <img src={primaryProducts[live.id].thumbnail_url!} alt="" className="w-7 h-7 rounded-[7px] object-cover shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[10.5px] text-ink-soft truncate">{primaryProducts[live.id].name}</p>
+                        <p className="text-[12px] font-extrabold text-ink">{(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원</p>
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="pt-2.5 px-0.5">
-                  <p className="text-[12px] font-semibold text-ink line-clamp-1">{live.title}</p>
+                <div className="pt-[11px] px-0.5">
+                  <p className="text-[11.5px] font-semibold text-ink line-clamp-1">{live.title}</p>
                   {live.host_id && hostNames[live.host_id] && (
-                    <p className="text-[11.5px] font-bold text-ink mt-1.5">{hostNames[live.host_id]}</p>
+                    <p className="text-[11.5px] font-bold text-ink mt-1">{hostNames[live.host_id]}</p>
                   )}
                 </div>
               </Link>
@@ -233,7 +233,7 @@ export default function ShopLiveList() {
                       to={`/app/live/${live.id}`}
                       className="flex gap-3 items-center focus:outline-none focus-visible:shadow-ring"
                     >
-                      <div className="relative w-20 h-20 shrink-0 rounded-[10px] bg-quiet overflow-hidden">
+                      <div className="relative w-[27.3%] aspect-[91/69] shrink-0 rounded-[10px] bg-quiet overflow-hidden">
                         {live.thumbnail_url ? (
                           <img src={live.thumbnail_url} alt={live.title} className="w-full h-full object-cover" />
                         ) : (
