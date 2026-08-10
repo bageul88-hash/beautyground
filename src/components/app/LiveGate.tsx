@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useIsAdmin } from '../../lib/useIsAdmin'
 
 const UNLOCK_KEY = 'bg_preview_unlock'
@@ -9,11 +10,29 @@ const PREVIEW_CODE = '0990'
 // (2026-08-06, 대표님이 검수 편의를 위해 요청). 일반 방문자는 URL을 알아도 코드를 모르면 못 들어오고,
 // "라이브"라는 단어는 프롬프트에 노출하지 않아 이 페이지의 정체를 최대한 숨긴다.
 // 온라인몰에 라이브커머스를 아예 노출하지 않기로 한 방침(2026-07-31) 자체는 유지.
+//
+// ⚠️ 2026-08-10: 세션 저장(sessionStorage)이었을 때는 "홈 화면에 추가"한 앱을 새로 열 때마다
+// 코드 입력 화면부터 다시 나왔음(대표님 지적: "라이브커머스 메인 페이지가 보여야지") — 앱을
+// 완전히 닫고 다시 열면 매번 새 세션으로 취급돼 코드가 초기화됐기 때문. localStorage로 바꿔서
+// 한 번 입력하면 그 기기/브라우저에서는 계속 유지되게 함(관리자 로그인 유지 방식과 동일).
 export default function LiveGate({ children }: { children: ReactNode }) {
+  const location = useLocation()
   const { loading, isAdmin } = useIsAdmin()
-  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem(UNLOCK_KEY) === PREVIEW_CODE)
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem(UNLOCK_KEY) === PREVIEW_CODE)
   const [code, setCode] = useState('')
   const [error, setError] = useState(false)
+
+  // 라이브 라우트에 있는 동안은(코드 입력 화면이어도) manifest를 라이브용으로 바꿔둔다 —
+  // 코드 입력 전에 "홈 화면에 추가"해도 라이브 전용 앱 이름/아이콘/시작주소가 적용되도록.
+  useEffect(() => {
+    if (!location.pathname.startsWith('/app/live')) return
+    const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null
+    const prevHref = link?.getAttribute('href') ?? '/manifest.json'
+    link?.setAttribute('href', '/manifest-live.json')
+    return () => {
+      link?.setAttribute('href', prevHref)
+    }
+  }, [location.pathname])
 
   if (loading) {
     return (
@@ -28,7 +47,7 @@ export default function LiveGate({ children }: { children: ReactNode }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (code === PREVIEW_CODE) {
-      sessionStorage.setItem(UNLOCK_KEY, code)
+      localStorage.setItem(UNLOCK_KEY, code)
       setUnlocked(true)
     } else {
       setError(true)
