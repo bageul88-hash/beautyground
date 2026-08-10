@@ -171,16 +171,13 @@ export default function ShopLiveList() {
             진행 중이거나 예정된 라이브가 없습니다.
           </div>
         ) : (
-          /* 지금 라이브 — 가로 스크롤 레일(다음 카드가 살짝 걸쳐 보여야 스와이프를 유도).
-             DESIGN.md: 면은 직각·그림자 없음·1px 룰 테두리, 색은 신호 3색만. */
-          <div className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+          /* 지금 라이브 — 레퍼런스 시안(라이브커머스메인페이지예시.png) 배치: 2열 카드,
+             둥근 모서리, LIVE 그라디언트 알약 배지(2026-08-10, 대표님 지시로 DESIGN.md
+             각진/무그림자/신호3색 규칙 대신 시안 룩을 그대로 입힘). */
+          <div className="grid grid-cols-2 gap-2.5">
             {[...topRow, ...extraLiveNow].map((live) => (
-              <Link
-                key={live.id}
-                to={`/app/live/${live.id}`}
-                className="shrink-0 w-64 snap-start bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
-              >
-                <div className="relative">
+              <Link key={live.id} to={`/app/live/${live.id}`} className="block focus:outline-none focus-visible:shadow-ring">
+                <div className="relative rounded-[14px] overflow-hidden bg-quiet">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
                   ) : (
@@ -188,21 +185,33 @@ export default function ShopLiveList() {
                       <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
                     </div>
                   )}
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-2">
-                    <LiveStatusBadge live={live} size="sm" />
+                  <div className="absolute top-2 left-2 flex items-center gap-2">
+                    <LiveStatusBadge live={live} size="sm" variant="pill" />
                     {live.status === 'scheduled' && (
-                      <span className="inline-flex items-center rounded-control bg-black/50 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
+                      <span className="inline-flex items-center rounded-full bg-black/50 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
                         {formatDateTime(live.scheduled_at)}
                       </span>
                     )}
                   </div>
-                </div>
-                <div className="px-3 py-2.5">
-                  <p className="text-[13.5px] font-bold text-ink line-clamp-2">{live.title}</p>
-                  {live.host_id && hostNames[live.host_id] && (
-                    <p className="text-[11px] text-ink-soft mt-0.5">{hostNames[live.host_id]} 진행</p>
+                  {primaryProducts[live.id] && (
+                    <div className="absolute left-0 right-0 bottom-0 bg-black/55 backdrop-blur-[2px] px-2.5 py-2">
+                      <div className="flex items-center gap-2">
+                        {primaryProducts[live.id].thumbnail_url && (
+                          <img src={primaryProducts[live.id].thumbnail_url!} alt="" className="w-7 h-7 rounded-[6px] object-cover shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-[10.5px] text-white/85 truncate">{primaryProducts[live.id].name}</p>
+                          <p className="text-[12px] font-extrabold text-white">{(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원</p>
+                        </div>
+                      </div>
+                    </div>
                   )}
-                  {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                </div>
+                <div className="pt-2.5 px-0.5">
+                  <p className="text-[12px] font-semibold text-ink line-clamp-1">{live.title}</p>
+                  {live.host_id && hostNames[live.host_id] && (
+                    <p className="text-[11.5px] font-bold text-ink mt-1.5">{hostNames[live.host_id]}</p>
+                  )}
                 </div>
               </Link>
             ))}
@@ -223,7 +232,7 @@ export default function ShopLiveList() {
                       to={`/app/live/${live.id}`}
                       className="flex gap-3 items-center focus:outline-none focus-visible:shadow-ring"
                     >
-                      <div className="relative w-20 h-20 shrink-0 bg-quiet overflow-hidden">
+                      <div className="relative w-20 h-20 shrink-0 rounded-[10px] bg-quiet overflow-hidden">
                         {live.thumbnail_url ? (
                           <img src={live.thumbnail_url} alt={live.title} className="w-full h-full object-cover" />
                         ) : (
@@ -231,15 +240,14 @@ export default function ShopLiveList() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="inline-flex items-center rounded-control bg-ink text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
+                        <p className="text-[13px] font-extrabold text-ink tabular-nums">
                           {formatTimeOnly(live.scheduled_at)}
                           {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
-                        </span>
-                        <p className="text-[13.5px] font-bold text-ink line-clamp-1 mt-1.5">{live.title}</p>
+                        </p>
                         {live.host_id && hostNames[live.host_id] && (
-                          <p className="text-[11px] text-ink-soft mt-0.5">{hostNames[live.host_id]} 진행</p>
+                          <p className="text-[13px] font-bold mt-1" style={{ color: '#c9456f' }}>{hostNames[live.host_id]}</p>
                         )}
-                        {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                        <p className="text-[11.5px] text-ink-soft line-clamp-1 mt-0.5">{live.title}</p>
                       </div>
                     </Link>
                   ))}
@@ -247,6 +255,23 @@ export default function ShopLiveList() {
               </div>
             ))}
           </>
+        )}
+
+        {/* 입점하기 CTA — 레퍼런스 시안 하단 배너(2026-08-10) */}
+        {!loading && (
+          <a
+            href="mailto:beautyground.official@gmail.com?subject=라이브커머스 입점 문의"
+            className="mt-6 flex items-center justify-between gap-3 rounded-[16px] px-4 py-4"
+            style={{ background: 'linear-gradient(115deg, #1fa7a0, #2d6fb8)' }}
+          >
+            <div>
+              <p className="text-[13.5px] font-extrabold text-white">판매할 상품이 있나요?</p>
+              <p className="text-[11px] text-white/85 mt-1">내 상품을 LIVE로 진정성 있게 전하세요.</p>
+            </div>
+            <span className="shrink-0 bg-white text-[#2d6fb8] text-[12px] font-extrabold px-4 py-2 rounded-full whitespace-nowrap">
+              입점하기
+            </span>
+          </a>
         )}
 
         {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
