@@ -198,10 +198,10 @@ export default function ShopLiveList() {
              별도 영역이 아니라 사진 바닥에 겹치는 밝은 오버레이(사진 높이의 19%).
              둥근 모서리·LIVE 그라디언트 알약 배지 — DESIGN.md 각진/무채색 규칙 대신
              대표님 지시로 시안 룩을 그대로 입힘. */
-          <div className="flex gap-[1.5%] -mx-4 pl-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 -mx-4 pl-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[56.5%] block focus:outline-none focus-visible:shadow-ring">
-                <div className="relative rounded-[14px] overflow-hidden bg-quiet aspect-[170/256]">
+              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[48%] block focus:outline-none focus-visible:shadow-ring">
+                <div className="relative rounded-2xl overflow-hidden bg-quiet aspect-[3/4]">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
@@ -258,14 +258,14 @@ export default function ShopLiveList() {
             {scheduleGroups.map((group) => (
               <div key={group.key} className="mt-5 first:mt-0">
                 <p className="text-[12.5px] font-bold text-ink-soft mb-2.5 pb-1.5 border-b border-rule">{group.label}</p>
-                <div className="flex flex-col gap-3.5">
+                <div className="flex flex-col">
                   {group.items.map((live) => (
                     <Link
                       key={live.id}
                       to={`/app/live/${live.id}`}
-                      className="flex gap-3 items-center focus:outline-none focus-visible:shadow-ring"
+                      className="flex items-center gap-3 py-4 border-b border-rule last:border-b-0 focus:outline-none focus-visible:shadow-ring"
                     >
-                      <div className="relative w-[27.3%] aspect-[91/69] shrink-0 rounded-[10px] bg-quiet overflow-hidden">
+                      <div className="relative w-[72px] h-[72px] shrink-0 rounded-lg bg-quiet overflow-hidden">
                         {live.thumbnail_url ? (
                           <img src={live.thumbnail_url} alt={live.title} className="w-full h-full object-cover" />
                         ) : (
@@ -273,14 +273,14 @@ export default function ShopLiveList() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[13px] font-extrabold text-ink tabular-nums">
+                        <p className="text-[14px] font-bold text-ink tabular-nums">
                           {formatTimeOnly(live.scheduled_at)}
                           {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
                         </p>
                         {live.host_id && hostNames[live.host_id] && (
                           <p className="text-[13px] font-bold mt-1" style={{ color: '#72293F' }}>{hostNames[live.host_id]}</p>
                         )}
-                        <p className="text-[11.5px] text-ink-soft line-clamp-1 mt-0.5">{live.title}</p>
+                        <p className="text-[12px] text-ink-soft line-clamp-1 mt-1">{live.title}</p>
                       </div>
                     </Link>
                   ))}
