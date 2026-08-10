@@ -7,7 +7,7 @@ import AppFrame from '../../components/layout/AppFrame'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
 import DesktopLiveList from '../../components/live/DesktopLiveList'
 import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
-import { IconGrid } from '../../components/common/Icon'
+import { IconGrid, IconHome, IconCart, IconUser } from '../../components/common/Icon'
 import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
 import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
@@ -152,7 +152,28 @@ export default function ShopLiveList() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <AppHeader />
 
-      <nav className="sticky top-14 z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
+      {/* 상단 바로가기(홈·카테고리·장바구니·마이) — 대표님 지시(2026-08-10): 라이브 화면에서도
+          몰 핵심 동선을 상단에서 바로 오갈 수 있게. 하단 BottomNav(AppFrame 공통)는 그대로 유지. */}
+      <div className="sticky top-14 z-40 flex items-center justify-around border-b border-rule bg-paper py-2.5">
+        <Link to="/app/home" aria-label="홈" className="flex flex-col items-center gap-1 text-ink focus:outline-none focus-visible:shadow-ring">
+          <IconHome className="w-[19px] h-[19px]" />
+          <span className="text-[10px] font-medium">홈</span>
+        </Link>
+        <Link to="/app/category" aria-label="카테고리" className="flex flex-col items-center gap-1 text-ink focus:outline-none focus-visible:shadow-ring">
+          <IconGrid className="w-[19px] h-[19px]" />
+          <span className="text-[10px] font-medium">카테고리</span>
+        </Link>
+        <Link to="/app/cart" aria-label="장바구니" className="flex flex-col items-center gap-1 text-ink focus:outline-none focus-visible:shadow-ring">
+          <IconCart className="w-[19px] h-[19px]" />
+          <span className="text-[10px] font-medium">장바구니</span>
+        </Link>
+        <Link to="/app/mypage" aria-label="마이" className="flex flex-col items-center gap-1 text-ink focus:outline-none focus-visible:shadow-ring">
+          <IconUser className="w-[19px] h-[19px]" />
+          <span className="text-[10px] font-medium">마이</span>
+        </Link>
+      </div>
+
+      <nav className="sticky top-[6.5rem] z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
         <Link to="/app/category" aria-label="카테고리" className="shrink-0 py-3 text-ink">
           <IconGrid className="w-5 h-5" />
         </Link>
