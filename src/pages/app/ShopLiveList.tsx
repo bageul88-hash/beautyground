@@ -230,21 +230,20 @@ export default function ShopLiveList() {
                   )}
                 </div>
                 <div className="pt-[11px] px-0.5">
-                  {/* 조회수 — 방송 중 실시간 폴링 최고치(lives.peak_viewers) 기록치.
-                      피그마 레퍼런스와 동일하게 [조회수 → 진행자명(컬러) → 타이틀] 순서(2026-08-10). */}
-                  {typeof live.peak_viewers === 'number' && live.peak_viewers > 0 && (
-                    <p className="flex items-center gap-1 text-[10px] text-ink-faint tabular-nums">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3 h-3" aria-hidden="true">
-                        <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
-                        <circle cx="12" cy="12" r="2.5" />
-                      </svg>
-                      {live.peak_viewers.toLocaleString('ko-KR')}
-                    </p>
-                  )}
-                  {live.host_id && hostNames[live.host_id] && (
-                    <p className="text-[11.5px] font-bold mt-1" style={{ color: '#72293F' }}>{hostNames[live.host_id]}</p>
-                  )}
-                  <p className="text-[11.5px] font-semibold text-ink line-clamp-1 mt-0.5">{live.title}</p>
+                  {/* 확정 시안(mobile-live-ui 샌드박스) 구조: 제목(굵게, 2줄) → 채널·조회수(한 줄, 회색) (2026-08-10) */}
+                  <p className="text-[13px] font-bold text-ink leading-snug line-clamp-2">{live.title}</p>
+                  {(() => {
+                    const channel = live.host_id ? hostNames[live.host_id] : undefined
+                    const hasViewers = typeof live.peak_viewers === 'number' && live.peak_viewers > 0
+                    if (!channel && !hasViewers) return null
+                    return (
+                      <p className="flex items-center gap-1 text-[11px] text-ink-soft mt-1">
+                        {channel && <span>{channel}</span>}
+                        {channel && hasViewers && <span className="w-0.5 h-0.5 rounded-full bg-ink-soft" />}
+                        {hasViewers && <span className="tabular-nums">{live.peak_viewers!.toLocaleString('ko-KR')}</span>}
+                      </p>
+                    )
+                  })()}
                 </div>
               </Link>
             ))}
