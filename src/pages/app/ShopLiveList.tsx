@@ -177,9 +177,9 @@ export default function ShopLiveList() {
              별도 영역이 아니라 사진 바닥에 겹치는 밝은 오버레이(사진 높이의 19%).
              둥근 모서리·LIVE 그라디언트 알약 배지 — DESIGN.md 각진/무채색 규칙 대신
              대표님 지시로 시안 룩을 그대로 입힘. */
-          <div className="flex gap-[1.5%] -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-[1.5%] -mx-4 pl-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[52.6%] block focus:outline-none focus-visible:shadow-ring">
+              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[56.5%] block focus:outline-none focus-visible:shadow-ring">
                 <div className="relative rounded-[14px] overflow-hidden bg-quiet aspect-[170/256]">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
