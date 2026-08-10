@@ -105,7 +105,11 @@ export default function AppCategoryDetail() {
       <BackHeader
         title={selected ?? '전체 상품'}
         rightElement={
-          <button aria-label="검색" className="text-ink focus:outline-none focus-visible:shadow-ring">
+          <button
+            aria-label="검색"
+            onClick={() => navigate('/app/search')}
+            className="text-ink focus:outline-none focus-visible:shadow-ring"
+          >
             <IconSearch className="w-5 h-5" />
           </button>
         }

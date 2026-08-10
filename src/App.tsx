@@ -8,6 +8,7 @@ import CompanyProposal from './pages/CompanyProposal'
 import CompanyIntro from './pages/CompanyIntro'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
+import AppSearch from './pages/AppSearch'
 import AppCategoryDetail from './pages/AppCategoryDetail'
 import AppBrandDetail from './pages/AppBrandDetail'
 import AppProductDetail from './pages/AppProductDetail'
@@ -63,6 +64,7 @@ import HostProfile from './pages/host/Profile'
 import ShopLiveList from './pages/app/ShopLiveList'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
+import ScrollRestoration from './components/layout/ScrollRestoration'
 
 export default function App() {
   // 홈 테마(시그널 3색) — /admin/theme 저장값 또는 ?themePreview= 값을 CSS 변수로 적용
@@ -85,6 +87,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollRestoration />
       <Routes>
         {/* 메인 = 소비자 쇼핑 홈. /partners는 예전 라이브커머스 중심 B2B 랜딩페이지라(하위
             10개 컴포넌트 전체가 라이브 소개) 어디서도 링크하지 않고 관리자 전용으로 보존만 함(2026-07-31) */}
@@ -144,6 +147,7 @@ export default function App() {
         <Route path="/app/live" element={<LiveGate><ShopLiveList /></LiveGate>} />
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
+        <Route path="/app/search" element={<AppSearch />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
         <Route path="/app/brand/:id" element={<AppBrandDetail />} />
         <Route path="/app/product/:id" element={<AppProductDetail />} />

@@ -18,8 +18,8 @@ function buildMenuItems(user: RealUser) {
     { label: '배송지 관리', path: '/app/addresses' },
     { label: '찜 목록', path: '/app/wishlist' },
     { label: '혜택', path: '/app/benefits' },
-    { label: '쿠폰함', count: user.coupons },
-    { label: '포인트', value: `${user.points.toLocaleString()}P` },
+    { label: '쿠폰함', count: user.coupons, path: '/app/benefits' },
+    { label: '포인트', value: `${user.points.toLocaleString()}P`, path: '/app/benefits' },
     { label: '최근 본 상품' },
     { label: '리뷰 관리' },
   ]
