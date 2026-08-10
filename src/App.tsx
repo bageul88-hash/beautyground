@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { mergeGuestCartToServer } from './lib/cart'
 import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
-import WebHome from './pages/WebHome'
-import CompanyProposal from './pages/CompanyProposal'
 import CompanyIntro from './pages/CompanyIntro'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
@@ -89,12 +87,10 @@ export default function App() {
     <BrowserRouter>
       <ScrollRestoration />
       <Routes>
-        {/* 메인 = 소비자 쇼핑 홈. /partners는 예전 라이브커머스 중심 B2B 랜딩페이지라(하위
-            10개 컴포넌트 전체가 라이브 소개) 어디서도 링크하지 않고 관리자 전용으로 보존만 함(2026-07-31) */}
+        {/* 메인 = 소비자 쇼핑 홈. /partners·/proposal(예전 "입점 브랜드 모집" B2B 랜딩페이지)은
+            매입 후 직접 판매하는 구조로 확정되며 완전 삭제(2026-08-10) — PG(NHN KCP) 심사에서
+            "중개플랫폼"으로 오인되는 근거가 될 수 있었음. */}
         <Route path="/" element={<AppHome />} />
-        <Route path="/partners" element={<LiveGate><WebHome /></LiveGate>} />
-        {/* /proposal은 전체가 "입점 브랜드 모집" 제안서라 온라인몰 공개범위에서 뺌(2026-07-31) — 관리자만 */}
-        <Route path="/proposal" element={<LiveGate><CompanyProposal /></LiveGate>} />
         <Route path="/company" element={<CompanyIntro />} />
 
         {/* 법적 고지 */}
