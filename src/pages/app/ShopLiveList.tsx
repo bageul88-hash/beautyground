@@ -20,6 +20,17 @@ export default function ShopLiveList() {
   const [loading, setLoading] = useState<boolean>(true)
   const { mode, isDesktop, toggle } = useViewMode()
 
+  // 이 페이지를 "홈 화면에 추가"하면 온라인몰(manifest.json, start_url=/app/home)이 아니라
+  // 라이브커머스로 바로 열리도록, 여기 있는 동안만 manifest를 라이브용으로 바꿔둔다(대표님 요청 2026-08-10).
+  useEffect(() => {
+    const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null
+    const prevHref = link?.getAttribute('href') ?? '/manifest.json'
+    link?.setAttribute('href', '/manifest-live.json')
+    return () => {
+      link?.setAttribute('href', prevHref)
+    }
+  }, [])
+
   useEffect(() => {
     let active = true
     const load = async () => {
