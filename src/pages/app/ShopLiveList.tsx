@@ -171,12 +171,13 @@ export default function ShopLiveList() {
             진행 중이거나 예정된 라이브가 없습니다.
           </div>
         ) : (
-          /* 지금 라이브 — 레퍼런스 시안(라이브커머스메인페이지예시.png) 배치: 2열 카드,
-             둥근 모서리, LIVE 그라디언트 알약 배지(2026-08-10, 대표님 지시로 DESIGN.md
-             각진/무그림자/신호3색 규칙 대신 시안 룩을 그대로 입힘). */
-          <div className="grid grid-cols-2 gap-2.5">
+          /* 지금 라이브 — 레퍼런스 시안(라이브커머스메인페이지예시.png) 실측: 카드폭이
+             화면의 54%(2열 그리드 아님) → 다음 카드가 절반쯤 걸쳐 보이는 가로 스크롤
+             캐러셀. 둥근 모서리·LIVE 그라디언트 알약 배지(2026-08-10, 대표님 지시로
+             DESIGN.md 각진/무그림자/신호3색 규칙 대신 시안 룩을 그대로 입힘). */
+          <div className="flex gap-[3.6vw] -mx-4 px-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="block focus:outline-none focus-visible:shadow-ring">
+              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[54%] block focus:outline-none focus-visible:shadow-ring">
                 <div className="relative rounded-[14px] overflow-hidden bg-quiet">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
