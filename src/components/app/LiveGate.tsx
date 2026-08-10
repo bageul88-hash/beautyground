@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
 import { useIsAdmin } from '../../lib/useIsAdmin'
 
 const UNLOCK_KEY = 'bg_preview_unlock'
@@ -15,24 +14,17 @@ const PREVIEW_CODE = '0990'
 // 코드 입력 화면부터 다시 나왔음(대표님 지적: "라이브커머스 메인 페이지가 보여야지") — 앱을
 // 완전히 닫고 다시 열면 매번 새 세션으로 취급돼 코드가 초기화됐기 때문. localStorage로 바꿔서
 // 한 번 입력하면 그 기기/브라우저에서는 계속 유지되게 함(관리자 로그인 유지 방식과 동일).
+//
+// ⚠️ 2026-08-10 추가: "홈 화면에 추가" 시 라이브 전용 이름/아이콘이 적용되도록 이 컴포넌트에서
+// JS로 <link rel=manifest>를 바꿔봤으나, iOS Safari가 "홈 화면에 추가" 하는 순간 이 JS 변경을
+// 무시하고 원래(온라인몰용) manifest를 그대로 가져가버림(대표님 실기기 확인 — 앱이 온라인몰로
+// 열림). 그 방식은 폐기하고, 대신 완전히 정적인 public/live.html(+manifest-live.json)을
+// 새로 만들어 그 페이지 자체를 "홈 화면에 추가"하도록 함 — 여기서는 더 손댈 것 없음.
 export default function LiveGate({ children }: { children: ReactNode }) {
-  const location = useLocation()
   const { loading, isAdmin } = useIsAdmin()
   const [unlocked, setUnlocked] = useState(() => localStorage.getItem(UNLOCK_KEY) === PREVIEW_CODE)
   const [code, setCode] = useState('')
   const [error, setError] = useState(false)
-
-  // 라이브 라우트에 있는 동안은(코드 입력 화면이어도) manifest를 라이브용으로 바꿔둔다 —
-  // 코드 입력 전에 "홈 화면에 추가"해도 라이브 전용 앱 이름/아이콘/시작주소가 적용되도록.
-  useEffect(() => {
-    if (!location.pathname.startsWith('/app/live')) return
-    const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null
-    const prevHref = link?.getAttribute('href') ?? '/manifest.json'
-    link?.setAttribute('href', '/manifest-live.json')
-    return () => {
-      link?.setAttribute('href', prevHref)
-    }
-  }, [location.pathname])
 
   if (loading) {
     return (

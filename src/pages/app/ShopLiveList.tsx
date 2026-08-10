@@ -19,8 +19,6 @@ export default function ShopLiveList() {
   const [primaryProducts, setPrimaryProducts] = useState<Record<string, PrimaryProduct>>({})
   const [loading, setLoading] = useState<boolean>(true)
   const { mode, isDesktop, toggle } = useViewMode()
-  // manifest 교체(홈 화면에 추가 시 라이브로 바로 열리게)는 LiveGate에서 코드 입력 화면 포함해
-  // 더 앞단에서 처리한다 — 여기선 별도 처리 불필요.
 
   useEffect(() => {
     let active = true
