@@ -230,10 +230,21 @@ export default function ShopLiveList() {
                   )}
                 </div>
                 <div className="pt-[11px] px-0.5">
-                  <p className="text-[11.5px] font-semibold text-ink line-clamp-1">{live.title}</p>
-                  {live.host_id && hostNames[live.host_id] && (
-                    <p className="text-[11.5px] font-bold text-ink mt-1">{hostNames[live.host_id]}</p>
+                  {/* 조회수 — 방송 중 실시간 폴링 최고치(lives.peak_viewers) 기록치.
+                      피그마 레퍼런스와 동일하게 [조회수 → 진행자명(컬러) → 타이틀] 순서(2026-08-10). */}
+                  {typeof live.peak_viewers === 'number' && live.peak_viewers > 0 && (
+                    <p className="flex items-center gap-1 text-[10px] text-ink-faint tabular-nums">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3 h-3" aria-hidden="true">
+                        <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
+                        <circle cx="12" cy="12" r="2.5" />
+                      </svg>
+                      {live.peak_viewers.toLocaleString('ko-KR')}
+                    </p>
                   )}
+                  {live.host_id && hostNames[live.host_id] && (
+                    <p className="text-[11.5px] font-bold mt-1" style={{ color: '#72293F' }}>{hostNames[live.host_id]}</p>
+                  )}
+                  <p className="text-[11.5px] font-semibold text-ink line-clamp-1 mt-0.5">{live.title}</p>
                 </div>
               </Link>
             ))}
@@ -267,7 +278,7 @@ export default function ShopLiveList() {
                           {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
                         </p>
                         {live.host_id && hostNames[live.host_id] && (
-                          <p className="text-[13px] font-bold mt-1" style={{ color: '#c9456f' }}>{hostNames[live.host_id]}</p>
+                          <p className="text-[13px] font-bold mt-1" style={{ color: '#72293F' }}>{hostNames[live.host_id]}</p>
                         )}
                         <p className="text-[11.5px] text-ink-soft line-clamp-1 mt-0.5">{live.title}</p>
                       </div>
