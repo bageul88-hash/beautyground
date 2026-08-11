@@ -8,7 +8,6 @@ import PromoBar from '../../components/home/PromoBar'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
 import DesktopLiveList from '../../components/live/DesktopLiveList'
 import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
-import { IconGrid } from '../../components/common/Icon'
 import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
 import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
@@ -155,12 +154,10 @@ export default function ShopLiveList() {
       <AppHeader />
 
       {/* 상단 바로가기(홈·카테고리·장바구니·마이) — 2026-08-10에 추가했었으나 하단 BottomNav와
-          완전히 중복(둘 다 "홈"이 보임)이라 2026-08-11 제거. 라이브 전용 탭(아래)만 유지. */}
+          완전히 중복(둘 다 "홈"이 보임)이라 2026-08-11 제거. 카테고리 아이콘도 하단 BottomNav
+          "카테고리"와 같은 목적지(/app/category)라 같이 제거 — 라이브 콘텐츠 탭(홈/기획전/팔로잉)만 유지. */}
 
       <nav className="sticky top-14 z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
-        <Link to="/app/category" aria-label="카테고리" className="shrink-0 py-3 text-ink">
-          <IconGrid className="w-5 h-5" />
-        </Link>
         <span className="shrink-0 py-3 text-[14.5px] font-bold text-ink border-b-2 border-ink -mb-px">홈</span>
         <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">기획전</span>
         <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">팔로잉</span>
