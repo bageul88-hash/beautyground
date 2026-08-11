@@ -6,10 +6,10 @@
 <meta name="robots" content="noindex, nofollow">
 <title>라이브커머스 메인 — 실페이지 미리보기</title>
 <style>
-  :root { --page:#ececea; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; --gold:#c9a96a; }
-  @media (prefers-color-scheme: dark){ :root{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; } }
-  :root[data-theme="dark"]{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; }
-  :root[data-theme="light"]{ --page:#ececea; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; }
+  :root { --page:#fff; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; --gold:#c9a96a; --phone-line:#e8dcc3; }
+  @media (prefers-color-scheme: dark){ :root{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; --phone-line:#4a4438; } }
+  :root[data-theme="dark"]{ --page:#1d1d1b; --panel:#2a2a27; --panel-ink:#f0efec; --panel-soft:#a5a29a; --panel-line:#3c3c38; --phone-line:#4a4438; }
+  :root[data-theme="light"]{ --page:#fff; --panel:#fff; --panel-ink:#1b1b19; --panel-soft:#75726b; --panel-line:#e2e0da; --phone-line:#e8dcc3; }
 
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -27,7 +27,8 @@
   .phone {
     width:420px; height:880px; flex-shrink:0; position:relative; overflow:hidden;
     border-radius:28px; background:#fff;
-    box-shadow:0 24px 70px rgba(20,20,18,.20), 0 0 0 1px var(--panel-line);
+    border:1.5px solid var(--phone-line);
+    box-shadow:0 24px 70px rgba(20,20,18,.12);
   }
   .real-live { width:100%; height:100%; border:0; display:block; background:#fff; }
 
