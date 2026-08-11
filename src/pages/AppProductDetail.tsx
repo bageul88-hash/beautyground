@@ -16,6 +16,7 @@ import ReviewSummary from '../components/product/ReviewSummary'
 import ProductQnA from '../components/product/ProductQnA'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/Icon'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
+import ScrollToTopButton from '../components/common/ScrollToTopButton'
 
 const DETAIL_TABS = ['상품정보', '성분', '배송/반품']
 
@@ -418,6 +419,9 @@ export default function AppProductDetail() {
 
       {/* 상품 문의(Q&A) */}
       {id && <ProductQnA productId={id} className="border-t border-rule" />}
+
+      {/* 맨 위로 버튼 (긴 상세페이지 스크롤 시 노출, 하단 구매 바 위에 배치) */}
+      <ScrollToTopButton />
 
       {/* 하단 sticky 구매 바 (하단 네비 바로 위에 쌓임, 모든 화면 폭에서 동일) */}
       <div
