@@ -185,6 +185,9 @@ export default function ShopLiveList() {
           <div className="flex gap-2 -mx-4 pl-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
               <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[48%] block focus:outline-none focus-visible:shadow-ring">
+                {/* 목업(live-commerce-new) LiveCard 톤 통일(2026-08-11): 어두운 그라디언트 위에 흰 텍스트 오버레이 —
+                    상품정보 패널을 별도 밝은 박스로 분리하지 않고, 배지·제목·채널·조회수·상품가격까지 전부
+                    카드 안에서 끝나도록(기존엔 제목/채널이 카드 밖 별도 텍스트 블록이었음). */}
                 <div className="relative rounded-2xl overflow-hidden bg-quiet aspect-[3/4]">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -201,33 +204,29 @@ export default function ShopLiveList() {
                       </span>
                     )}
                   </div>
-                  {primaryProducts[live.id] && (
-                    <div className="absolute left-[1.5%] right-[1.5%] bottom-0 h-[19%] flex items-center gap-2 px-2 bg-[#f0f0f1]/95">
-                      {primaryProducts[live.id].thumbnail_url && (
-                        <img src={primaryProducts[live.id].thumbnail_url!} alt="" className="w-7 h-7 rounded-[7px] object-cover shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-[10.5px] text-ink-soft truncate">{primaryProducts[live.id].name}</p>
-                        <p className="text-[12px] font-extrabold text-ink">{(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="pt-[11px] px-0.5">
-                  {/* 확정 시안(mobile-live-ui 샌드박스) 구조: 제목(굵게, 2줄) → 채널·조회수(한 줄, 회색) (2026-08-10) */}
-                  <p className="text-[13px] font-bold text-ink leading-snug line-clamp-2">{live.title}</p>
-                  {(() => {
-                    const channel = live.host_id ? hostNames[live.host_id] : undefined
-                    const hasViewers = typeof live.peak_viewers === 'number' && live.peak_viewers > 0
-                    if (!channel && !hasViewers) return null
-                    return (
-                      <p className="flex items-center gap-1 text-[11px] text-ink-soft mt-1">
-                        {channel && <span>{channel}</span>}
-                        {channel && hasViewers && <span className="w-0.5 h-0.5 rounded-full bg-ink-soft" />}
-                        {hasViewers && <span className="tabular-nums">{live.peak_viewers!.toLocaleString('ko-KR')}</span>}
+                  <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 p-3">
+                    {primaryProducts[live.id] && (
+                      <p className="text-paper text-[13px] font-extrabold" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
+                        {(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원
                       </p>
-                    )
-                  })()}
+                    )}
+                    <p className="text-paper text-[13px] font-bold leading-snug line-clamp-2 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
+                      {live.title}
+                    </p>
+                    {(() => {
+                      const channel = live.host_id ? hostNames[live.host_id] : undefined
+                      const hasViewers = typeof live.peak_viewers === 'number' && live.peak_viewers > 0
+                      if (!channel && !hasViewers) return null
+                      return (
+                        <p className="flex items-center gap-1 text-[11px] text-paper/80 mt-1">
+                          {channel && <span>{channel}</span>}
+                          {channel && hasViewers && <span className="w-0.5 h-0.5 rounded-full bg-paper/80" />}
+                          {hasViewers && <span className="tabular-nums">{live.peak_viewers!.toLocaleString('ko-KR')}</span>}
+                        </p>
+                      )
+                    })()}
+                  </div>
                 </div>
               </Link>
             ))}
@@ -282,23 +281,24 @@ export default function ShopLiveList() {
                 <Link
                   key={live.id}
                   to={`/app/live/${live.id}`}
-                  className="block bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
+                  className="relative block rounded-2xl overflow-hidden aspect-square focus:outline-none focus-visible:shadow-ring"
                 >
-                  <div className="relative">
-                    {live.thumbnail_url ? (
-                      <img src={live.thumbnail_url} alt={live.title} className="w-full aspect-square object-cover" />
-                    ) : (
-                      <div className="w-full aspect-square bg-quiet flex items-center justify-center">
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-9 h-9 object-contain opacity-50" />
-                      </div>
-                    )}
-                    <span className="absolute top-2 left-2 inline-flex items-center rounded-control bg-ink text-paper text-[10px] font-bold px-2 py-0.5 tracking-[0.04em]">
-                      REPLAY
-                    </span>
-                  </div>
-                  <div className="px-3 py-2.5">
-                    <p className="text-[13px] font-medium text-ink line-clamp-2">{live.title}</p>
-                    {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="inline" />}
+                  {live.thumbnail_url ? (
+                    <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-quiet flex items-center justify-center">
+                      <img src="/images/bg-logo-mark.png" alt="" className="w-9 h-9 object-contain opacity-50" />
+                    </div>
+                  )}
+                  <span className="absolute top-2 left-2 inline-flex items-center rounded-control bg-ink text-paper text-[10px] font-bold px-2 py-0.5 tracking-[0.04em]">
+                    REPLAY
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 p-2.5">
+                    {primaryProducts[live.id] && <ProductPeek product={primaryProducts[live.id]} variant="onImage" />}
+                    <p className="text-paper text-[12px] font-bold leading-snug line-clamp-2 mt-1.5" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
+                      {live.title}
+                    </p>
                   </div>
                 </Link>
               ))}
