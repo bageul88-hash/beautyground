@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
@@ -19,6 +19,22 @@ export default function AppLogin() {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  // 이미 다른 계정으로 로그인된 채 /app/login에 들어오면 로그인 폼만 보여서
+  // 계정을 바꿀 방법이 없었음 — 현재 로그인 이메일을 보여주고 로그아웃 버튼을 제공
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (active) setCurrentEmail(session?.user.email ?? null)
+    })
+    return () => { active = false }
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setCurrentEmail(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,11 +112,29 @@ export default function AppLogin() {
     </>
   )
 
+  const loggedInNotice = currentEmail && (
+    <div className="flex items-center justify-between rounded-control bg-quiet px-4 py-3 mb-5">
+      <p className="text-[12.5px] text-ink-soft truncate">
+        <span className="font-bold text-ink">{currentEmail}</span>로 로그인되어 있어요
+      </p>
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="shrink-0 text-[12.5px] text-ink-faint underline ml-3 focus:outline-none focus-visible:shadow-ring"
+      >
+        로그아웃
+      </button>
+    </div>
+  )
+
   if (isDesktop) {
     return (
       <>
         <ViewModeToggle mode={mode} onToggle={toggle} />
-        <DesktopAuthLayout title="로그인">{formContent}</DesktopAuthLayout>
+        <DesktopAuthLayout title="로그인">
+          {loggedInNotice}
+          {formContent}
+        </DesktopAuthLayout>
       </>
     )
   }
@@ -109,7 +143,20 @@ export default function AppLogin() {
     <div className="min-h-screen bg-quiet md:py-6">
     <ViewModeToggle mode={mode} onToggle={toggle} />
     <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
-      <BackHeader title="로그인" />
+      <BackHeader
+        title="로그인"
+        rightElement={
+          currentEmail ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-[13px] text-ink-faint underline focus:outline-none focus-visible:shadow-ring"
+            >
+              로그아웃
+            </button>
+          ) : undefined
+        }
+      />
       <div className="px-6 py-10">
         <h1 className="text-[24px] font-bold text-ink text-center mb-8">뷰티그라운드</h1>
         {formContent}
