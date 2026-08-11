@@ -158,7 +158,7 @@ export default function ShopLiveList() {
           "카테고리"와 같은 목적지(/app/category)라 같이 제거 — 라이브 콘텐츠 탭(홈/기획전/팔로잉)만 유지. */}
 
       <nav className="sticky top-14 z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
-        <span className="shrink-0 py-3 text-[14.5px] font-bold text-ink border-b-2 border-ink -mb-px">홈</span>
+        <span className="shrink-0 py-3 text-[14.5px] font-bold text-ink border-b-2 border-ink -mb-px">전체</span>
         <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">기획전</span>
         <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">팔로잉</span>
       </nav>
