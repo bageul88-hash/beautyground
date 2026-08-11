@@ -20,20 +20,25 @@ export default function AppLogin() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   // 이미 다른 계정으로 로그인된 채 /app/login에 들어오면 로그인 폼만 보여서
-  // 계정을 바꿀 방법이 없었음 — 현재 로그인 이메일을 보여주고 로그아웃 버튼을 제공
-  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+  // 계정을 바꿀 방법이 없었음 — 현재 로그인 상태를 보여주고 로그아웃 버튼을 제공.
+  // 카카오 가입 계정은 이메일이 없을 수 있어(비즈니스 인증 전) email 유무가 아니라
+  // 세션 존재 자체로 판단하고, 표시 라벨은 이메일 → 닉네임(user_metadata.name) 순으로 대체한다.
+  const [loggedInLabel, setLoggedInLabel] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (active) setCurrentEmail(session?.user.email ?? null)
+      if (!active) return
+      if (!session) { setLoggedInLabel(null); return }
+      const meta = session.user.user_metadata as { name?: string } | undefined
+      setLoggedInLabel(session.user.email ?? meta?.name ?? '로그인된 계정')
     })
     return () => { active = false }
   }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    setCurrentEmail(null)
+    setLoggedInLabel(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,10 +117,10 @@ export default function AppLogin() {
     </>
   )
 
-  const loggedInNotice = currentEmail && (
+  const loggedInNotice = loggedInLabel && (
     <div className="flex items-center justify-between rounded-control bg-quiet px-4 py-3 mb-5">
       <p className="text-[12.5px] text-ink-soft truncate">
-        <span className="font-bold text-ink">{currentEmail}</span>로 로그인되어 있어요
+        <span className="font-bold text-ink">{loggedInLabel}</span>로 로그인되어 있어요
       </p>
       <button
         type="button"
@@ -146,7 +151,7 @@ export default function AppLogin() {
       <BackHeader
         title="로그인"
         rightElement={
-          currentEmail ? (
+          loggedInLabel ? (
             <button
               type="button"
               onClick={handleLogout}
