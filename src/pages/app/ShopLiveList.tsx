@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import type { Live } from '../../lib/types'
 import AppHeader from '../../components/layout/AppHeader'
 import AppFrame from '../../components/layout/AppFrame'
+import PromoBar from '../../components/home/PromoBar'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
 import DesktopLiveList from '../../components/live/DesktopLiveList'
 import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
@@ -150,6 +151,7 @@ export default function ShopLiveList() {
   return (
     <AppFrame>
       <ViewModeToggle mode={mode} onToggle={toggle} />
+      <PromoBar />
       <AppHeader />
 
       {/* 상단 바로가기(홈·카테고리·장바구니·마이) — 대표님 지시(2026-08-10): 라이브 화면에서도
