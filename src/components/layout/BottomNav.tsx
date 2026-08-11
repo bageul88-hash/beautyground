@@ -1,13 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
-import { IconHome, IconSearch, IconHeart, IconCart, IconUser } from '../common/Icon'
+import { IconHome, IconSearch, IconLive, IconCart, IconUser } from '../common/Icon'
 
-// 온라인몰과 라이브커머스를 당분간 분리하기로 해(대표님 지시 2026-07-29)
-// '라이브' 탭을 뺐다 — 온라인몰 상시 네비게이션에 라이브 진입점을 두지 않는다.
-// 장바구니는 기존에 상단 헤더에 있었는데, 헤더를 인사말+검색 전용으로 바꾸며 하단 탭으로 이동.
+// 2026-07-29엔 온라인몰·라이브커머스를 분리한다며 '라이브' 탭을 빼고 '찜'을 넣었었으나,
+// 2026-08-11 대표님 지시로 재변경 — 라이브 목업(live-commerce-new) 하단 네비와 통일해
+// '찜' 대신 '라이브'(/app/live) 진입점을 상시 노출한다.
 const NAV_ITEMS = [
   { path: '/app/home', Icon: IconHome, label: '홈' },
   { path: '/app/category', Icon: IconSearch, label: '카테고리' },
-  { path: '/app/wishlist', Icon: IconHeart, label: '찜' },
+  { path: '/app/live', Icon: IconLive, label: '라이브' },
   { path: '/app/cart', Icon: IconCart, label: '장바구니' },
   { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]
