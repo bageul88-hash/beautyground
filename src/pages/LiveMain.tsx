@@ -9,7 +9,7 @@ import ViewModeToggle from '../components/layout/ViewModeToggle'
 import { useViewMode } from '../lib/viewMode'
 import { useSaleProducts } from '../hooks/useSaleProducts'
 import { useShopBrands } from '../hooks/useShopBrands'
-import { comma } from '../lib/format'
+import { comma, formatLiveSchedTime } from '../lib/format'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
 // 공유한다. 라이브에서 들어온 구매는 live_id로 태깅되어 정산·통계에서 구분된다(AppOrder.tsx).
@@ -19,21 +19,6 @@ import { comma } from '../lib/format'
 // 이 페이지에서 전혀 쓰지 않는다 — 색은 tailwind.config.ts의 brand-pink/live-start/live-end/
 // bg-overlay/bg-card/card-border(목업 designTokens.js와 1:1 동일)만 사용, 그 외는 black/white/
 // #666666 리터럴로 목업과 동일하게 맞춘다.
-
-// 젠스파크 목업 표기 그대로: 아침/오후/저녁/밤 (예: "오늘 저녁 7:00", "오늘 밤 9:00")
-function formatSchedTime(iso: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  const now = new Date()
-  const sameDay = d.toDateString() === now.toDateString()
-  const hh = d.getHours()
-  const mm = String(d.getMinutes()).padStart(2, '0')
-  const part = hh < 12 ? '오전' : hh < 17 ? '오후' : hh < 20 ? '저녁' : '밤'
-  const h12 = hh % 12 === 0 ? 12 : hh % 12
-  const timePart = `${part} ${h12}:${mm}`
-  return sameDay ? `오늘 ${timePart}` : `${d.getMonth() + 1}/${d.getDate()} ${timePart}`
-}
 
 export default function LiveMain() {
   const [lives, setLives] = useState<Live[]>([])
@@ -194,7 +179,12 @@ export default function LiveMain() {
           <>
             <div className="mt-8 mx-4 border-t border-card-border" aria-hidden="true" />
             <section className="pt-8 px-4">
-              <h2 className="text-base font-bold text-black mb-4">LIVE 예고</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold text-black">LIVE 예고</h2>
+                <Link to="/live/schedule" className="text-xs text-[#666666] focus:outline-none focus-visible:shadow-ring">
+                  전체보기 →
+                </Link>
+              </div>
               <ul className="flex flex-col gap-6">
                 {scheduled.map((live) => {
                   const product = primaryProducts[live.id]
@@ -216,7 +206,7 @@ export default function LiveMain() {
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs text-[#666666]">{formatSchedTime(live.scheduled_at)}</p>
+                          <p className="text-xs text-[#666666]">{formatLiveSchedTime(live.scheduled_at)}</p>
                           <p className="text-sm font-bold text-brand-pink mt-1 truncate">{channel || live.title}</p>
                           <p className="text-xs text-[#666666] mt-1 truncate">{live.title}</p>
                         </div>

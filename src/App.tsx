@@ -60,6 +60,7 @@ import HostProfile from './pages/host/Profile'
 
 // 구매자 라이브 (Supabase 연동)
 import LiveMain from './pages/LiveMain'
+import LiveSchedule from './pages/LiveSchedule'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -141,6 +142,7 @@ export default function App() {
         {/* 2026-08-12 대표님 지시로 재구축 — 젠스파크 디자인 기준, 실데이터 바로 연결.
             게이트 없이 공개(온라인몰 메인과 별개의 독립 진입점). */}
         <Route path="/live" element={<LiveMain />} />
+        <Route path="/live/schedule" element={<LiveSchedule />} />
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />

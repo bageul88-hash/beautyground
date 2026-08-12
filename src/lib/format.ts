@@ -20,6 +20,21 @@ export const formatDateTime = (iso: string | null | undefined): string => {
 
 const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
 
+// 라이브 예고 표기(젠스파크 목업 스펙): 오전/오후/저녁/밤 + "오늘" 접두 (예: "오늘 저녁 7:00", "오늘 밤 9:00")
+export const formatLiveSchedTime = (iso: string | null | undefined): string => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const now = new Date()
+  const sameDay = d.toDateString() === now.toDateString()
+  const hh = d.getHours()
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const part = hh < 12 ? '오전' : hh < 17 ? '오후' : hh < 20 ? '저녁' : '밤'
+  const h12 = hh % 12 === 0 ? 12 : hh % 12
+  const timePart = `${part} ${h12}:${mm}`
+  return sameDay ? `오늘 ${timePart}` : `${d.getMonth() + 1}/${d.getDate()} ${timePart}`
+}
+
 // 방송 예고를 날짜별로 묶어 보여줄 때 쓰는 날짜 헤더용("8월 10일 (월)") — 시간은 뺀 날짜만.
 export const formatDateOnly = (iso: string | null | undefined): string => {
   if (!iso) return '-'
