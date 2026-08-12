@@ -6,8 +6,6 @@ import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
 import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
-import ViewModeToggle from '../components/layout/ViewModeToggle'
-import { useViewMode } from '../lib/viewMode'
 import { comma, formatLiveSchedTime } from '../lib/format'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
@@ -47,7 +45,6 @@ export default function LiveMain() {
   const [brandNames, setBrandNames] = useState<Record<string, string>>({})
   const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
   const [loading, setLoading] = useState(true)
-  const { mode, isDesktop, toggle } = useViewMode()
   const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([])
   const [saleLoading, setSaleLoading] = useState(true)
 
@@ -198,20 +195,11 @@ export default function LiveMain() {
     }
   }
 
-  if (isDesktop) {
-    return (
-      <>
-        <ViewModeToggle mode={mode} onToggle={toggle} />
-        <PromoBar />
-        <AppHeader />
-        <p className="text-center text-[13px] text-[#666666] py-10">데스크톱 라이브 메인은 준비 중입니다.</p>
-      </>
-    )
-  }
-
+  // PC버전 복원(2026-08-13) 이후에도 라이브 메인은 전용 PC 레이아웃이 없어 "준비 중" 대신
+  // 모바일 레이아웃(중앙 480px)을 그대로 보여준다 — 영상이 세로형이라 PC에서도 자연스러움.
+  // PC 전환 토글도 이 페이지에선 숨김(전환할 PC 레이아웃이 없어 눌러도 변화가 없기 때문).
   return (
     <AppFrame>
-      <ViewModeToggle mode={mode} onToggle={toggle} />
       <PromoBar />
       <AppHeader />
 

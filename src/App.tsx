@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { mergeGuestCartToServer } from './lib/cart'
@@ -69,13 +69,28 @@ export default function App() {
   // 홈 테마(시그널 3색) — /admin/theme 저장값 또는 ?themePreview= 값을 CSS 변수로 적용
   useMallTheme()
 
+  // 신규 가입 환영 안내 — 카카오 OAuth는 콜백 후 바로 앱으로 돌아와 "가입이 된 건지" 알 수 없다는
+  // 매장 직원 피드백(2026-08-13)으로 추가. 계정 생성 5분 이내의 첫 SIGNED_IN에서 1회만 노출.
+  const [welcomeToast, setWelcomeToast] = useState<string | null>(null)
+
   // 로그인 시(카카오 포함) 게스트 장바구니를 서버 장바구니로 합친다.
   // 게스트 카트가 비어있으면 no-op이라 SIGNED_IN이 여러 번 떠도 안전.
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         void mergeGuestCartToServer()
         void syncAttributionToUser()
+
+        const user = session?.user
+        if (user?.created_at) {
+          const isNew = Date.now() - new Date(user.created_at).getTime() < 5 * 60 * 1000
+          const shownKey = `bg_welcome_shown:${user.id}`
+          if (isNew && !localStorage.getItem(shownKey)) {
+            localStorage.setItem(shownKey, '1')
+            setWelcomeToast('회원가입이 완료되었습니다. 환영합니다! 🎉')
+            setTimeout(() => setWelcomeToast(null), 4000)
+          }
+        }
       }
     })
     return () => sub.subscription.unsubscribe()
@@ -87,6 +102,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollRestoration />
+      {welcomeToast && (
+        <div
+          className="fixed left-1/2 -translate-x-1/2 top-5 z-[100] rounded-pill bg-ink text-paper text-[14px] font-bold px-5 py-3 shadow-card"
+          role="status"
+        >
+          {welcomeToast}
+        </div>
+      )}
       <Routes>
         {/* 메인 = 소비자 쇼핑 홈. /partners·/proposal(예전 "입점 브랜드 모집" B2B 랜딩페이지)은
             매입 후 직접 판매하는 구조로 확정되며 완전 삭제(2026-08-10) — PG(NHN KCP) 심사에서

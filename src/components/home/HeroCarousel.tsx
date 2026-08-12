@@ -43,14 +43,14 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const resetInterval = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     if (count <= 1 || reduceMotion) return
-    // 3초에 한 번 좌측(다음 카드)으로 자동 이동 — 대표님 지시(2026-08-08, 2초→3초 조정)
+    // 5초에 한 번 좌측(다음 카드)으로 자동 이동 — 매장 직원 피드백 "전환이 너무 빠름"(2026-08-13, 3초→5초)
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => {
         const next = (prev + 1) % count
         scrollToIndex(next)
         return next
       })
-    }, 3000)
+    }, 5000)
   }, [count, reduceMotion, scrollToIndex])
 
   useEffect(() => {

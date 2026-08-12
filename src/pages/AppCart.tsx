@@ -276,6 +276,16 @@ export default function AppCart() {
                 <span className="text-[18px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
               </div>
             </div>
+
+            {/* 다른 상품을 더 담으러 가는 동선 — 매장 직원 피드백(2026-08-13) */}
+            <div className="px-4 mt-4">
+              <button
+                onClick={() => navigate('/app/home')}
+                className="w-full py-3 rounded-card border border-rule text-[14px] font-bold text-ink focus:outline-none focus-visible:shadow-ring"
+              >
+                ← 계속 쇼핑하기
+              </button>
+            </div>
           </div>
         </>
       )}
