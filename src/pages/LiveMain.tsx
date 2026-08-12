@@ -20,6 +20,7 @@ import { comma } from '../lib/format'
 // bg-overlay/bg-card/card-border(목업 designTokens.js와 1:1 동일)만 사용, 그 외는 black/white/
 // #666666 리터럴로 목업과 동일하게 맞춘다.
 
+// 젠스파크 목업 표기 그대로: 아침/오후/저녁/밤 (예: "오늘 저녁 7:00", "오늘 밤 9:00")
 function formatSchedTime(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -28,9 +29,9 @@ function formatSchedTime(iso: string | null): string {
   const sameDay = d.toDateString() === now.toDateString()
   const hh = d.getHours()
   const mm = String(d.getMinutes()).padStart(2, '0')
-  const ampm = hh < 12 ? '오전' : '오후'
+  const part = hh < 12 ? '오전' : hh < 17 ? '오후' : hh < 20 ? '저녁' : '밤'
   const h12 = hh % 12 === 0 ? 12 : hh % 12
-  const timePart = `${ampm} ${h12}:${mm}`
+  const timePart = `${part} ${h12}:${mm}`
   return sameDay ? `오늘 ${timePart}` : `${d.getMonth() + 1}/${d.getDate()} ${timePart}`
 }
 
@@ -140,7 +141,18 @@ export default function LiveMain() {
                     to={`/app/live/${live.id}`}
                     className="relative w-[168px] h-[240px] rounded-2xl overflow-hidden shrink-0 bg-bg-card focus:outline-none focus-visible:shadow-ring"
                   >
-                    {live.thumbnail_url ? (
+                    {/* 젠스파크 스펙: 방송 녹화본(mp4)이 연결된 카드는 무음 자동재생 (목업 LiveCard의 video 대응) */}
+                    {live.playback_url && /\.mp4(\?|$)/i.test(live.playback_url) ? (
+                      <video
+                        src={live.playback_url}
+                        poster={live.thumbnail_url ?? undefined}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    ) : live.thumbnail_url ? (
                       <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
                       <div className="absolute inset-0 bg-bg-card flex items-center justify-center">
