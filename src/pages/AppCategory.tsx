@@ -4,12 +4,15 @@ import AppFrame from '../components/layout/AppFrame'
 import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCategory from '../components/category/DesktopCategory'
+import BrandRail from '../components/home/BrandRail'
 import { useViewMode } from '../lib/viewMode'
+import { useShopBrands } from '../hooks/useShopBrands'
 import { CATEGORIES } from '../constants'
 
 export default function AppCategory() {
   const navigate = useNavigate()
   const { mode, isDesktop, toggle } = useViewMode()
+  const { brands, loading: brandsLoading } = useShopBrands()
 
   if (isDesktop) {
     return (
@@ -52,6 +55,11 @@ export default function AppCategory() {
             <span className="text-ink-faint text-lg shrink-0" aria-hidden="true">›</span>
           </button>
         ))}
+      </div>
+
+      {/* 브랜드 텍스트 레일 — /live·홈과 동일 컴포넌트 (2026-08-12 대표님 지시로 카테고리에도 노출) */}
+      <div className="pb-8">
+        <BrandRail brands={brands} loading={brandsLoading} />
       </div>
 
       <AppFooter />
