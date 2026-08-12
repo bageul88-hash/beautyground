@@ -26,10 +26,7 @@ export default function LiveStatusBadge({
     if (onAir) {
       if (variant === 'pill') {
         return (
-          <span
-            className="inline-flex items-center gap-[5px] text-white text-[10.5px] font-extrabold tracking-[0.02em] px-[9px] py-1 rounded-full"
-            style={{ background: 'linear-gradient(100deg, #e63238, #e6602e)' }}
-          >
+          <span className="inline-flex items-center gap-[5px] text-white text-[10.5px] font-extrabold tracking-[0.02em] px-[9px] py-1 rounded-full bg-gradient-to-r from-live-start to-live-end">
             <span className="flex items-end gap-[1.5px] h-[9px]" aria-hidden="true">
               <span className="block w-[2px] rounded-[1px] bg-white" style={{ height: '40%' }} />
               <span className="block w-[2px] rounded-[1px] bg-white" style={{ height: '100%' }} />
@@ -47,9 +44,17 @@ export default function LiveStatusBadge({
         </span>
       )
     }
+    if (variant === 'pill') return <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-white text-[10.5px] font-bold px-[9px] py-1">준비중</span>
     return <span className={`${base} bg-ink text-paper`}>준비중</span>
   }
 
+  if (variant === 'pill') {
+    return (
+      <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-white text-[10.5px] font-bold px-[9px] py-1">
+        {live.status === 'scheduled' ? '예정' : '종료'}
+      </span>
+    )
+  }
   return (
     <span className={`${base} bg-ink text-paper`}>
       {live.status === 'scheduled' ? '예정' : '종료'}

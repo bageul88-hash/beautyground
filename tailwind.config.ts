@@ -86,6 +86,20 @@ const config: Config = {
           hair: { bg: '#FAEEDA', text: '#854F0B' },
           body: { bg: '#E6F1FB', text: '#185FA5' },
         },
+
+        // ── 목업(live-commerce-new) 팔레트 그대로 이식 (2026-08-12, 대표님 지시로 라이브 메인이
+        // 이 톤을 최우선으로 가져감) — 목업 src/designTokens.js와 값 1:1 동일하게 유지할 것.
+        'brand-pink': '#FF2D87',
+        'live-start': '#FF4444',
+        'live-end': '#FF6B6B',
+        'bg-overlay': '#1f1f1f',
+        'card-border': 'rgba(0,0,0,0.08)',
+        'star-gold': '#FFB800',
+        'brand-tile-1': '#FDEBF3',
+        'brand-tile-2': '#E8F3FF',
+        'brand-tile-3': '#FFF3E0',
+        'brand-tile-4': '#E9F7EF',
+        'brand-tile-5': '#F3EFFF',
       },
       fontFamily: {
         // 맑은고딕으로 통일(대표님 지시) — Windows는 실제 맑은고딕, Mac은 Apple SD 고딕Neo,

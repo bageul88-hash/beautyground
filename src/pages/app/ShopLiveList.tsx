@@ -8,9 +8,12 @@ import PromoBar from '../../components/home/PromoBar'
 import LiveStatusBadge from '../../components/live/LiveStatusBadge'
 import DesktopLiveList from '../../components/live/DesktopLiveList'
 import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
+import BrandRail from '../../components/home/BrandRail'
 import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
-import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
+import { useSaleProducts } from '../../hooks/useSaleProducts'
+import { useShopBrands } from '../../hooks/useShopBrands'
+import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey, comma } from '../../lib/format'
 
 export default function ShopLiveList() {
   const [lives, setLives] = useState<Live[]>([])
@@ -19,6 +22,8 @@ export default function ShopLiveList() {
   const [primaryProducts, setPrimaryProducts] = useState<Record<string, PrimaryProduct>>({})
   const [loading, setLoading] = useState<boolean>(true)
   const { mode, isDesktop, toggle } = useViewMode()
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
+  const { brands, loading: brandsLoading } = useShopBrands()
 
   useEffect(() => {
     let active = true
@@ -155,13 +160,9 @@ export default function ShopLiveList() {
 
       {/* 상단 바로가기(홈·카테고리·장바구니·마이) — 2026-08-10에 추가했었으나 하단 BottomNav와
           완전히 중복(둘 다 "홈"이 보임)이라 2026-08-11 제거. 카테고리 아이콘도 하단 BottomNav
-          "카테고리"와 같은 목적지(/app/category)라 같이 제거 — 라이브 콘텐츠 탭(홈/기획전/팔로잉)만 유지. */}
-
-      <nav className="sticky top-14 z-40 -mx-0 px-4 bg-paper border-b border-rule flex items-center gap-5 overflow-x-auto scrollbar-hide">
-        <span className="shrink-0 py-3 text-[14.5px] font-bold text-ink border-b-2 border-ink -mb-px">전체</span>
-        <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">기획전</span>
-        <span className="shrink-0 py-3 text-[14.5px] font-medium text-ink-faint">팔로잉</span>
-      </nav>
+          "카테고리"와 같은 목적지(/app/category)라 같이 제거.
+          2026-08-12: 라이브 콘텐츠 탭(전체/기획전/팔로잉)도 목업(live-commerce-new) 대비 중복
+          UI라 대표님 지시로 제거 — 라이브 메인이 목업 배치를 그대로 따른다. */}
 
       <main className="px-4 py-5">
         {loading ? (
@@ -196,7 +197,7 @@ export default function ShopLiveList() {
                   <div className="absolute top-[4.3%] left-[5.7%] flex items-center gap-2">
                     <LiveStatusBadge live={live} size="sm" variant="pill" />
                     {live.status === 'scheduled' && (
-                      <span className="inline-flex items-center rounded-full bg-black/50 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
+                      <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
                         {formatDateTime(live.scheduled_at)}
                       </span>
                     )}
@@ -257,7 +258,7 @@ export default function ShopLiveList() {
                           {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
                         </p>
                         {live.host_id && hostNames[live.host_id] && (
-                          <p className="text-[13px] font-bold mt-1" style={{ color: '#72293F' }}>{hostNames[live.host_id]}</p>
+                          <p className="text-[13px] font-bold text-brand-pink mt-1">{hostNames[live.host_id]}</p>
                         )}
                         <p className="text-[12px] text-ink-soft line-clamp-1 mt-1">{live.title}</p>
                       </div>
@@ -268,6 +269,40 @@ export default function ShopLiveList() {
             ))}
           </>
         )}
+
+        {/* 할인 특가 — 목업(live-commerce-new) 홈 배치 이식(2026-08-12): 라이브 예고 다음,
+            지난 라이브 앞. 2열 그리드 + 핑크 가격·할인율(목업 BestSellerGrid와 동일). */}
+        {!saleLoading && saleProducts.length > 0 && (
+          <>
+            <h2 className="text-[16px] font-bold text-ink mb-3.5 mt-8">할인 특가</h2>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+              {saleProducts.map((p) => (
+                <Link key={p.id} to={`/app/product/${p.id}`} className="text-left focus:outline-none focus-visible:shadow-ring">
+                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-quiet border border-card-border">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-50" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[13px] font-bold text-ink mt-2 line-clamp-2">{p.name}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-sm font-bold text-brand-pink">{comma(p.sale_price)}원</span>
+                    <span className="text-xs font-bold text-brand-pink">
+                      {Math.round((1 - (p.sale_price ?? p.price) / p.price) * 100)}%
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-ink-faint line-through mt-0.5">{comma(p.price)}원</p>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* 브랜드 — 목업 홈 배치 이식(2026-08-12), 할인 특가 바로 아래. /app/home과 동일 컴포넌트. */}
+        <BrandRail brands={brands} loading={brandsLoading} />
 
         {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
         {!loading && mobileReplays.length > 0 && (
@@ -287,7 +322,7 @@ export default function ShopLiveList() {
                       <img src="/images/bg-logo-mark.png" alt="" className="w-9 h-9 object-contain opacity-50" />
                     </div>
                   )}
-                  <span className="absolute top-2 left-2 inline-flex items-center rounded-control bg-ink text-paper text-[10px] font-bold px-2 py-0.5 tracking-[0.04em]">
+                  <span className="absolute top-2 left-2 inline-flex items-center rounded-full bg-bg-overlay/70 text-paper text-[10px] font-bold px-2 py-0.5 tracking-[0.04em]">
                     REPLAY
                   </span>
                   <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />

@@ -6,14 +6,14 @@ interface BrandRailProps {
   loading?: boolean
 }
 
-// 목업(live-commerce-new)의 "브랜드" 타일 섹션을 실사이트 디자인 토큰(피그마 레퍼런스 파스텔)으로 이식.
-// 색은 새로 만들지 않고 이미 정의된 category.* 파스텔 5색을 브랜드 순서대로 순환 배정한다.
+// 목업(live-commerce-new)의 "브랜드" 타일 섹션 — 색은 목업 designTokens.js의 brand-tile-1~5와
+// 1:1 동일한 값(2026-08-12, 대표님 지시로 라이브 메인이 목업 톤을 최우선으로 가져감).
 const TILE_COLORS = [
-  'bg-category-skincare-bg text-category-skincare-text',
-  'bg-category-makeup-bg text-category-makeup-text',
-  'bg-category-perfume-bg text-category-perfume-text',
-  'bg-category-hair-bg text-category-hair-text',
-  'bg-category-body-bg text-category-body-text',
+  'bg-brand-tile-1 text-ink',
+  'bg-brand-tile-2 text-ink',
+  'bg-brand-tile-3 text-ink',
+  'bg-brand-tile-4 text-ink',
+  'bg-brand-tile-5 text-ink',
 ]
 
 export default function BrandRail({ brands, loading }: BrandRailProps) {
