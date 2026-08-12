@@ -122,7 +122,9 @@ export default function LiveMain() {
 
   const nowLive = lives.filter((l) => l.status === 'live')
   const scheduled = lives.filter((l) => l.status === 'scheduled')
-  const carouselItems = [...nowLive, ...scheduled, ...replays].slice(0, 10)
+  // 캐러셀엔 실제 영상이 있는 것만(진행중 방송 + 다시보기 녹화본) — 예고는 아래 "LIVE 예고" 목록 전용.
+  // (2026-08-12 대표님 지시: 제품 카드 말고 실제 보유 영상자료로 채울 것)
+  const carouselItems = [...nowLive, ...replays].slice(0, 10)
 
   // ── 캐러셀 자동 슬라이드 + 드래그 (목업 LiveCarousel.jsx 동작 그대로) ──
   // 3초마다 한 칸씩 좌측으로, 끝에 닿으면 처음으로. 손가락 스와이프/마우스 드래그로
