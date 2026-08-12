@@ -6,6 +6,7 @@ import HomeBody from '../../components/home/HomeBody'
 import { useShopCategories } from '../../hooks/useShopCategories'
 import { useHomeProductSections } from '../../hooks/useHomeProductSections'
 import { useSaleProducts } from '../../hooks/useSaleProducts'
+import { useShopBrands } from '../../hooks/useShopBrands'
 import { DEFAULT_MARQUEE_ITEMS } from '../../hooks/useHomeSettings'
 import { SEASONS, autoSeasonByMonth } from '../../lib/season'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
@@ -72,6 +73,7 @@ export default function AdminHome() {
 
   // 미리보기용 실데이터
   const { categories } = useShopCategories()
+  const { brands, loading: brandsLoading } = useShopBrands()
   // 실제 구매자 홈과 완전히 같은 로직(브랜드당 최대 2개, 신상품·추천 분리)으로 미리보기를 채운다.
   // 전엔 최신 10개를 두 레일에 그대로 중복 표시해서 실제로는 스크롤이 안 되는 상황에서도
   // 미리보기만 스크롤되는 것처럼 보였다 — 실제 화면과 다른 걸 보여주는 미리보기였음.
@@ -549,15 +551,15 @@ export default function AdminHome() {
                 <HomeBody
                   marqueeItems={marqueeItems.filter((t) => t.trim())}
                   banners={previewBanners}
-                  categories={categories}
                   recommended={previewRecommended}
                   seasonLabel={previewSeasonLabel}
                   products={previewProducts}
                   prodLoading={prodLoading}
                   saleProducts={previewSaleProducts}
                   saleLoading={saleLoading}
+                  brands={brands}
+                  brandsLoading={brandsLoading}
                   onProductClick={() => {}}
-                  onCategoryClick={() => {}}
                 />
               </div>
             </div>
