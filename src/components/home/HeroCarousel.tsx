@@ -25,10 +25,16 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      itemRefs.current[index]?.scrollIntoView({
+      // ⚠️ scrollIntoView 금지 — 배너가 시야 밖(사용자가 아래로 스크롤한 상태)일 때 페이지
+      // 전체를 배너 위치로 끌어올려 "보다가 자꾸 맨 위로 튐" 사고를 냄(2026-08-13 대표님 리포트).
+      // 캐러셀 컨테이너의 가로 스크롤만 직접 움직인다 — 세로 스크롤은 절대 건드리지 않음.
+      const scroller = scrollerRef.current
+      const item = itemRefs.current[index]
+      const first = itemRefs.current[0]
+      if (!scroller || !item || !first) return
+      scroller.scrollTo({
+        left: item.offsetLeft - first.offsetLeft,
         behavior: reduceMotion ? 'auto' : 'smooth',
-        inline: 'start',
-        block: 'nearest',
       })
     },
     [reduceMotion],
