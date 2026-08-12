@@ -144,6 +144,8 @@ export default function App() {
             새 진입점은 게이트 없이 공개(2026-08-11 결정으로 이미 하단 네비 기본 탭이라 비공개
             유지가 모순이었음). 시청 상세(/app/live/:id)는 그대로 유지, 게이트도 유지. */}
         <Route path="/live" element={<LiveMain />} />
+        {/* 구주소 북마크/기존 링크가 catch-all("*")에 걸려 홈으로 튕기지 않도록 명시적으로 새 주소로 리다이렉트 */}
+        <Route path="/app/live" element={<Navigate to="/live" replace />} />
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />
