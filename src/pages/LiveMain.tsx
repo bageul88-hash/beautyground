@@ -152,7 +152,9 @@ export default function LiveMain() {
       else track.scrollTo({ left: Math.min(track.scrollLeft + CARD_STEP, maxScroll), behavior: 'smooth' })
     }, 3000)
     return () => clearInterval(timer)
-  }, [isPaused, carouselItems.length])
+    // loading 의존성 필수: 캐러셀 DOM은 로딩이 끝나야 렌더되는데, 데이터(length)만 의존하면
+    // 로딩 해제 시점에 효과가 재실행되지 않아 타이머가 영영 안 생김(2026-08-12 E2E로 발견한 버그)
+  }, [isPaused, loading, carouselItems.length])
 
   useEffect(() => () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
