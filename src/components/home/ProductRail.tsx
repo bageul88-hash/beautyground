@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import { comma } from '../../lib/format'
@@ -34,7 +34,6 @@ export default function ProductRail({
   const dragStartXRef = useRef(0)
   const dragStartScrollRef = useRef(0)
   const draggedRef = useRef(false)
-  const [dragging, setDragging] = useState(false)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const track = trackRef.current
@@ -43,7 +42,6 @@ export default function ProductRail({
     draggedRef.current = false
     dragStartXRef.current = e.pageX
     dragStartScrollRef.current = track.scrollLeft
-    setDragging(true)
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -58,7 +56,6 @@ export default function ProductRail({
 
   const stopDragging = () => {
     isDraggingRef.current = false
-    setDragging(false)
   }
 
   const handleClickCapture = (e: React.MouseEvent) => {
@@ -98,11 +95,11 @@ export default function ProductRail({
         <p className="py-12 text-center text-[14px] text-ink-faint">{emptyText}</p>
       ) : (
         // overflow-x-auto를 주면 브라우저가 overflow-y도 auto로 취급해 shadow-card 아래쪽이 잘려 보임(대표님 지적) — 그림자가 들어갈 여유를 pt/pb로 확보해서 방지
+        // scroll-smooth+snap-mandatory 조합은 iOS 사파리에서 손가락 스와이프가 튕겨 되돌아가는
+        // 원인이라 제거(2026-08-12 대표님 "손으로 밀면 다른 제품 안 보임" 리포트) — /live 캐러셀과 동일한 순수 관성 스크롤
         <div
           ref={trackRef}
-          className={`flex gap-3 px-4 pt-1 pb-4 overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none ${
-            dragging ? 'snap-none' : 'snap-x snap-mandatory scroll-smooth'
-          }`}
+          className="flex gap-3 px-4 pt-1 pb-4 overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={stopDragging}
@@ -118,7 +115,7 @@ export default function ProductRail({
               // 구조를 레퍼런스처럼 한 장의 둥근 카드로 통합(2026-08-08 피그마 레퍼런스 라운드+그림자 적용).
               <div
                 key={product.id}
-                className="relative w-[42%] flex-shrink-0 snap-start rounded-card overflow-hidden bg-paper shadow-card"
+                className="relative w-[42%] flex-shrink-0 rounded-card overflow-hidden bg-paper shadow-card"
               >
                 <div className="relative aspect-square bg-quiet">
                   <button

@@ -10,8 +10,9 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const MAIL_FROM = process.env.ORDER_MAIL_FROM || 'onboarding@resend.dev'
 
 // 배송정책 상수 — src/constants/index.ts 와 동일하게 유지할 것(불일치 시 정상결제가 거부되는 방향이라 안전).
-const SHIPPING_FEE = 3100
-const FREE_SHIPPING_THRESHOLD = 20000
+// 2026-08-12 대표님 지시: 배송비 3,000원 · 3만원 이상 무료
+const SHIPPING_FEE = 3000
+const FREE_SHIPPING_THRESHOLD = 30000
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
