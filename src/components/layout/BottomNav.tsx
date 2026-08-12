@@ -1,14 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { IconHome, IconGrid, IconLive, IconCart, IconUser } from '../common/Icon'
+import { IconHome, IconGrid, IconCart, IconUser } from '../common/Icon'
 
-// 2026-07-29엔 온라인몰·라이브커머스를 분리한다며 '라이브' 탭을 빼고 '찜'을 넣었었으나,
-// 2026-08-11 대표님 지시로 재변경 — '찜' 대신 '라이브' 진입점을 넣고, '홈'도 /app/live로
-// 연결(온라인 메인 /app/home 대신 라이브 메인이 기본 진입점). 온라인 메인은 상단 헤더
-// "환영합니다,...님" 링크로 여전히 접근 가능.
+// 2026-08-12: /live 페이지를 롤백하면서 '라이브' 탭도 임시로 제거 — 갈 곳이 없어서 '홈'과
+// 경로가 겹쳐 두 탭이 동시에 활성화되는 버그가 있었음(대표님 지적). 목업에서 실데이터 연결을
+// 마치고 /live를 다시 만들면 그때 이 탭도 복원.
 const NAV_ITEMS = [
   { path: '/app/home', Icon: IconHome, label: '홈' },
   { path: '/app/category', Icon: IconGrid, label: '카테고리' },
-  { path: '/app/home', Icon: IconLive, label: '라이브' },
   { path: '/app/cart', Icon: IconCart, label: '장바구니' },
   { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]
