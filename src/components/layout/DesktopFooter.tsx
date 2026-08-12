@@ -43,12 +43,6 @@ export default function DesktopFooter() {
             <p>
               <a href={`tel:${COMPANY_INFO.csPhone}`} className="text-ink-soft">{COMPANY_INFO.csPhone}</a>
             </p>
-            <p>주문·배송·상품 문의는 이메일로도 접수됩니다.</p>
-            <p>
-              <a href={`mailto:${COMPANY_INFO.csEmail}`} className="text-ink-soft underline decoration-rule underline-offset-2">
-                {COMPANY_INFO.csEmail}
-              </a>
-            </p>
           </div>
         </div>
 
