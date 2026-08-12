@@ -102,6 +102,8 @@ export default function LiveMain() {
             <p className="text-[13px] text-ink-faint py-8 text-center">진행 중이거나 지난 라이브가 없습니다.</p>
           ) : (
             <div className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+              {/* 젠스파크 스펙 이미지(Section 2 - LIVE Carousel) 그대로: 리본이 이미지 위에 바로
+                  얹히고, 하단 텍스트도 이미지 안 그라디언트에 겹쳐진다 — 별도 박스 없음. */}
               {carouselItems.map((live) => {
                 const product = primaryProducts[live.id]
                 const channel = live.host_id ? hostNames[live.host_id] : undefined
@@ -111,7 +113,7 @@ export default function LiveMain() {
                   <Link
                     key={live.id}
                     to={`/app/live/${live.id}`}
-                    className="relative w-[220px] shrink-0 rounded-2xl overflow-hidden bg-quiet aspect-[3/4] focus:outline-none focus-visible:shadow-ring"
+                    className="relative w-[168px] h-[240px] rounded-2xl overflow-hidden shrink-0 bg-quiet focus:outline-none focus-visible:shadow-ring"
                   >
                     {live.thumbnail_url ? (
                       <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -120,29 +122,26 @@ export default function LiveMain() {
                         <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
                       </div>
                     )}
-                    {isLive ? (
-                      <span className="absolute top-3 left-3 flex items-center gap-1 bg-signal-red text-paper text-[11px] font-bold px-2 py-1 rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-paper animate-pulse" />
-                        LIVE
-                      </span>
-                    ) : isScheduled ? (
-                      <span className="absolute top-3 left-3 bg-ink text-paper text-[11px] font-bold px-2 py-1 rounded-full">예정</span>
-                    ) : (
-                      <span className="absolute top-3 left-3 bg-black/40 text-paper text-[11px] font-bold px-2 py-1 rounded-full">종료</span>
-                    )}
-                    {typeof live.peak_viewers === 'number' && live.peak_viewers > 0 && (
-                      <span className="absolute top-3 right-3 text-paper text-[11px] bg-black/40 px-2 py-1 rounded-full">
-                        👁 {live.peak_viewers.toLocaleString('ko-KR')}
-                      </span>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
-                    <div className="absolute inset-x-0 bottom-0 p-3">
-                      {channel && <p className="text-paper text-[12px] font-medium">{channel}</p>}
-                      <p className="text-paper text-[13px] font-bold line-clamp-2 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
+                    <div className="absolute top-2.5 left-2.5">
+                      {isLive ? (
+                        <span className="inline-flex items-center text-white text-[10px] font-bold px-2 py-1 rounded-full bg-gradient-to-r from-live-start to-live-end">LIVE</span>
+                      ) : isScheduled ? (
+                        <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-white text-[10px] font-bold px-2 py-1">예정</span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-white text-[10px] font-bold px-2 py-1">종료</span>
+                      )}
+                    </div>
+                    <div className="absolute top-9 left-2.5 right-2.5 flex justify-center">
+                      <span className="text-white text-[10px] font-semibold text-center leading-tight line-clamp-2" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
                         {live.title}
-                      </p>
+                      </span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-bg-overlay/90 via-bg-overlay/40 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                      {channel && <p className="text-white text-[11px] font-medium truncate">{channel}</p>}
+                      {product && <p className="text-white text-[13px] font-semibold truncate mt-0.5">{product.name}</p>}
                       {product && (
-                        <p className="text-paper/80 text-[12px] mt-1">
+                        <p className="text-white text-sm font-bold mt-1">
                           {comma(product.sale_price ?? product.price)}원
                         </p>
                       )}
