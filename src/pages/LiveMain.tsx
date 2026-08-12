@@ -38,7 +38,8 @@ export default function LiveMain() {
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
-  const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null }>>({})
+  const [brandNames, setBrandNames] = useState<Record<string, string>>({})
+  const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
   const [loading, setLoading] = useState(true)
   const { mode, isDesktop, toggle } = useViewMode()
   const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
@@ -75,7 +76,7 @@ export default function LiveMain() {
       const productIds = Array.from(new Set(Object.values(primaryIdByLive)))
       if (productIds.length > 0) {
         const { data: productsData } = await supabase.from('products')
-          .select('id, name, price, sale_price, thumbnail_url').in('id', productIds)
+          .select('id, name, price, sale_price, thumbnail_url, partner_id').in('id', productIds)
         if (active && productsData) {
           const byId = Object.fromEntries(productsData.map((p) => [p.id, p]))
           const map: typeof primaryProducts = {}
@@ -84,6 +85,13 @@ export default function LiveMain() {
             if (p) map[liveId] = p
           })
           setPrimaryProducts(map)
+
+          // 진행자(host) 미지정 방송은 대표상품의 브랜드명을 핑크 라벨로 쓴다 (목업 스펙: 시간/브랜드/설명)
+          const partnerIds = Array.from(new Set(productsData.map((p) => p.partner_id).filter((v): v is string => Boolean(v))))
+          if (partnerIds.length > 0) {
+            const { data: brandRows } = await supabase.from('partner_brands').select('id, brand_name').in('id', partnerIds)
+            if (active && brandRows) setBrandNames(Object.fromEntries(brandRows.map((b) => [b.id, b.brand_name])))
+          }
         }
       }
       setLoading(false)
@@ -122,7 +130,8 @@ export default function LiveMain() {
             <div className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide">
               {carouselItems.map((live) => {
                 const product = primaryProducts[live.id]
-                const channel = live.host_id ? hostNames[live.host_id] : undefined
+                const brand = product?.partner_id ? brandNames[product.partner_id] : undefined
+                const channel = (live.host_id ? hostNames[live.host_id] : undefined) || brand
                 const isLive = live.status === 'live'
                 const isScheduled = live.status === 'scheduled'
                 return (
@@ -177,7 +186,8 @@ export default function LiveMain() {
               <ul className="flex flex-col gap-6">
                 {scheduled.map((live) => {
                   const product = primaryProducts[live.id]
-                  const channel = live.host_id ? hostNames[live.host_id] : ''
+                  const brand = product?.partner_id ? brandNames[product.partner_id] : ''
+                  const channel = (live.host_id ? hostNames[live.host_id] : '') || brand
                   const thumb = product?.thumbnail_url ?? live.thumbnail_url
                   return (
                     <li key={live.id}>
@@ -196,7 +206,7 @@ export default function LiveMain() {
                         <div className="min-w-0 flex-1">
                           <p className="text-xs text-[#666666]">{formatSchedTime(live.scheduled_at)}</p>
                           <p className="text-sm font-bold text-brand-pink mt-1 truncate">{channel || live.title}</p>
-                          <p className="text-xs text-[#666666] mt-1 truncate">{product?.name ?? live.title}</p>
+                          <p className="text-xs text-[#666666] mt-1 truncate">{live.title}</p>
                         </div>
                       </Link>
                     </li>
