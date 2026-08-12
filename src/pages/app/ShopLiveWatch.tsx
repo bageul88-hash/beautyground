@@ -365,7 +365,7 @@ export default function ShopLiveWatch() {
         ) : !live ? (
           <div className="h-full flex flex-col items-center justify-center gap-3 text-white/80 text-[14px] px-6 text-center">
             <p>라이브를 찾을 수 없습니다.</p>
-            <Link to="/app/live" className="text-gold-light font-medium">라이브 목록으로</Link>
+            <Link to="/live" className="text-gold-light font-medium">라이브 목록으로</Link>
           </div>
         ) : (
           <>

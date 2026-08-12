@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
-import type { Live } from '../../lib/types'
-import AppHeader from '../../components/layout/AppHeader'
-import AppFrame from '../../components/layout/AppFrame'
-import PromoBar from '../../components/home/PromoBar'
-import LiveStatusBadge from '../../components/live/LiveStatusBadge'
-import DesktopLiveList from '../../components/live/DesktopLiveList'
-import ProductPeek, { type PrimaryProduct } from '../../components/live/ProductPeek'
-import BrandRail from '../../components/home/BrandRail'
-import ViewModeToggle from '../../components/layout/ViewModeToggle'
-import { useViewMode } from '../../lib/viewMode'
-import { useSaleProducts } from '../../hooks/useSaleProducts'
-import { useShopBrands } from '../../hooks/useShopBrands'
-import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey, comma } from '../../lib/format'
+import { supabase } from '../lib/supabase'
+import type { Live } from '../lib/types'
+import AppHeader from '../components/layout/AppHeader'
+import AppFrame from '../components/layout/AppFrame'
+import PromoBar from '../components/home/PromoBar'
+import LiveStatusBadge from '../components/live/LiveStatusBadge'
+import DesktopLiveList from '../components/live/DesktopLiveList'
+import ProductPeek, { type PrimaryProduct } from '../components/live/ProductPeek'
+import BrandRail from '../components/home/BrandRail'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
+import { useSaleProducts } from '../hooks/useSaleProducts'
+import { useShopBrands } from '../hooks/useShopBrands'
+import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey, comma } from '../lib/format'
 
-export default function ShopLiveList() {
+// /live — 목업(live-commerce-new)을 그대로 이식한 새 라이브 메인. 기존 /app/live(ShopLiveList)를
+// 대체한다(2026-08-12, 대표님 지시: 계속 기존 페이지를 부분 수정하지 말고 새로 만들 것).
+// 데이터 로직(히어로/다시보기 폴백/호스트명/대표상품)은 기존 페이지에서 그대로 가져왔다 — 실제
+// Supabase 라이브 운영 로직이라 변경 없음. 화면 구조·색상만 목업 그대로.
+export default function LiveMain() {
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
@@ -34,7 +38,6 @@ export default function ShopLiveList() {
           .from('lives')
           .select('*')
           .in('status', ['live', 'scheduled'])
-          // 호스트 방송 설정 검증용 테스트 방송("호스트검증방송_숫자")은 고객 화면에 노출하지 않음
           .not('title', 'ilike', '호스트검증방송%')
           .order('scheduled_at', { ascending: true, nullsFirst: false }),
         supabase
@@ -48,7 +51,6 @@ export default function ShopLiveList() {
       if (!active) return
       const liveList = (data ?? []) as Live[]
       setLives(liveList)
-      // 다시보기: 볼 영상이 있는 종료 방송만
       setReplays(((endedData ?? []) as Live[]).filter((l) => l.stream_url || l.playback_url || l.stream_uid))
 
       const hostIds = Array.from(
@@ -61,8 +63,6 @@ export default function ShopLiveList() {
         }
       }
 
-      // 목록 카드에 "뭘 파는지" 미리 보여주기 위한 대표 상품(찜한 상품 지정 우선, 없으면 첫 상품).
-      // 클릭 전에는 상품 정보가 하나도 안 보여 구매 동기가 안 생기던 문제 대응(2026-08-06).
       const allLives = [...liveList, ...(((endedData ?? []) as Live[]).filter((l) => l.stream_url || l.playback_url || l.stream_uid))]
       const primaryIdByLive: Record<string, string> = {}
       allLives.forEach((l) => {
@@ -94,17 +94,11 @@ export default function ShopLiveList() {
     }
   }, [])
 
-  // 히어로: 진행중 라이브 우선, 없으면 가장 임박한 예정 라이브(scheduled_at asc 정렬의 첫 항목)
   const realHero = lives.find((l) => l.status === 'live') ?? lives[0] ?? null
   const restLives = realHero ? lives.filter((l) => l.id !== realHero.id) : lives
-  // PC 전용 — "지금 라이브" 그리드(다른 진행중 방송)와 "예정된 방송"을 분리해서 보여준다.
   const otherLiveNowReal = restLives.filter((l) => l.status === 'live')
   const scheduledLives = restLives.filter((l) => l.status === 'scheduled')
 
-  // 진행중/예정 라이브가 하나도 없을 때 — 화면을 비워두지 않고 기존 다시보기 자료로 채운다
-  // (대표님 지시 2026-08-06: 오픈 전에도 "이미 운영 중인 느낌"이 나야 함). LiveStatusBadge가
-  // ended 상태를 "종료"로 정직하게 표시하므로 라이브인 척 속이는 게 아니라 "인기 다시보기"
-  // 느낌으로 자연스럽게 채워짐. 조회수(peak_viewers) 높은 순으로 히어로·그리드에 우선 배정.
   const usingReplayFallback = !realHero
   const sortedForFallback = usingReplayFallback
     ? [...replays].sort((a, b) => (b.peak_viewers ?? 0) - (a.peak_viewers ?? 0))
@@ -114,8 +108,6 @@ export default function ShopLiveList() {
   const usedReplayIds = new Set([hero?.id, ...otherLiveNow.map((l) => l.id)].filter(Boolean) as string[])
   const displayReplays = usingReplayFallback ? replays.filter((l) => !usedReplayIds.has(l.id)) : replays
 
-  // 모바일 상단 2카드 — 히어로 + 바로 다음 1개(다른 라이브 중 → 없으면 예정 → 없으면 다시보기 순으로 채움).
-  // 나머지 다른 라이브 중 항목은 아래 세로 목록으로, 예정/다시보기 목록에선 여기 쓴 항목을 제외한다.
   const secondCardCandidate = otherLiveNow[0] ?? scheduledLives[0] ?? displayReplays[0] ?? null
   const secondCard = secondCardCandidate && secondCardCandidate.id !== hero?.id ? secondCardCandidate : null
   const topRow = [hero, secondCard].filter((l): l is Live => Boolean(l))
@@ -123,7 +115,6 @@ export default function ShopLiveList() {
   const mobileScheduled = scheduledLives.filter((l) => l.id !== secondCard?.id)
   const mobileReplays = displayReplays.filter((l) => l.id !== secondCard?.id)
 
-  // LIVE 예고 — 날짜별로 묶어서 보여준다(데스크톱 DesktopLiveList와 동일한 규칙).
   const scheduleGroups = (() => {
     const order: string[] = []
     const byDate = new Map<string, Live[]>()
@@ -158,34 +149,15 @@ export default function ShopLiveList() {
       <PromoBar />
       <AppHeader />
 
-      {/* 상단 바로가기(홈·카테고리·장바구니·마이) — 2026-08-10에 추가했었으나 하단 BottomNav와
-          완전히 중복(둘 다 "홈"이 보임)이라 2026-08-11 제거. 카테고리 아이콘도 하단 BottomNav
-          "카테고리"와 같은 목적지(/app/category)라 같이 제거.
-          2026-08-12: 라이브 콘텐츠 탭(전체/기획전/팔로잉)도 목업(live-commerce-new) 대비 중복
-          UI라 대표님 지시로 제거 — 라이브 메인이 목업 배치를 그대로 따른다. */}
-
       <main className="px-4 py-5">
         {loading ? (
-          <div className="py-20 text-center text-[13px] text-ink-faint">
-            불러오는 중…
-          </div>
+          <div className="py-20 text-center text-[13px] text-ink-faint">불러오는 중…</div>
         ) : !hero ? (
-          <div className="py-10 text-center text-[13px] text-ink-faint">
-            진행 중이거나 예정된 라이브가 없습니다.
-          </div>
+          <div className="py-10 text-center text-[13px] text-ink-faint">진행 중이거나 예정된 라이브가 없습니다.</div>
         ) : (
-          /* 지금 라이브 — 피그마 Codia 변환 실측(node 3328:3, 2026-08-10): 카드폭 52.6%,
-             카드간격 1.5% → 다음 카드가 프레임 끝에서 그대로 잘리는 가로 스크롤 캐러셀.
-             사진 비율 170:256(정사각 아님, 세로로 긴 비율). 상품정보 패널은 사진 아래
-             별도 영역이 아니라 사진 바닥에 겹치는 밝은 오버레이(사진 높이의 19%).
-             둥근 모서리·LIVE 그라디언트 알약 배지 — DESIGN.md 각진/무채색 규칙 대신
-             대표님 지시로 시안 룩을 그대로 입힘. */
           <div className="flex gap-2 -mx-4 pl-4 overflow-x-auto scrollbar-hide">
             {[...topRow, ...extraLiveNow].map((live) => (
               <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[48%] block focus:outline-none focus-visible:shadow-ring">
-                {/* 목업(live-commerce-new) LiveCard 톤 통일(2026-08-11): 어두운 그라디언트 위에 흰 텍스트 오버레이 —
-                    상품정보 패널을 별도 밝은 박스로 분리하지 않고, 배지·제목·채널·조회수·상품가격까지 전부
-                    카드 안에서 끝나도록(기존엔 제목/채널이 카드 밖 별도 텍스트 블록이었음). */}
                 <div className="relative rounded-2xl overflow-hidden bg-quiet aspect-[3/4]">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -231,10 +203,9 @@ export default function ShopLiveList() {
           </div>
         )}
 
-        {/* LIVE 예고 — 예정된 방송이 실제로 있을 때만(가짜 일정을 만들어 채우지 않음) */}
         {!loading && mobileScheduled.length > 0 && (
           <>
-            <h2 className="text-[16px] font-bold text-ink mb-3" style={{ marginTop: 'var(--live-gap-upcoming, 32px)' }}>LIVE 예고</h2>
+            <h2 className="text-[16px] font-bold text-ink mb-3 mt-8">LIVE 예고</h2>
             {scheduleGroups.map((group) => (
               <div key={group.key} className="mt-5 first:mt-0">
                 <p className="text-[12.5px] font-bold text-ink-soft mb-2.5 pb-1.5 border-b border-rule">{group.label}</p>
@@ -270,8 +241,6 @@ export default function ShopLiveList() {
           </>
         )}
 
-        {/* 할인 특가 — 목업(live-commerce-new) 홈 배치 이식(2026-08-12): 라이브 예고 다음,
-            지난 라이브 앞. 2열 그리드 + 핑크 가격·할인율(목업 BestSellerGrid와 동일). */}
         {!saleLoading && saleProducts.length > 0 && (
           <>
             <h2 className="text-[16px] font-bold text-ink mb-3.5 mt-8">할인 특가</h2>
@@ -301,13 +270,11 @@ export default function ShopLiveList() {
           </>
         )}
 
-        {/* 브랜드 — 목업 홈 배치 이식(2026-08-12), 할인 특가 바로 아래. /app/home과 동일 컴포넌트. */}
         <BrandRail brands={brands} loading={brandsLoading} />
 
-        {/* 지난 라이브(다시보기) — 종료된 방송 중 영상이 있는 것(위에서 이미 쓴 항목은 제외) */}
         {!loading && mobileReplays.length > 0 && (
           <>
-            <h2 className="text-[16px] font-bold text-ink mb-3.5" style={{ marginTop: 'var(--live-gap-past, 32px)' }}>지난 라이브</h2>
+            <h2 className="text-[16px] font-bold text-ink mb-3.5 mt-8">지난 라이브</h2>
             <div className="grid grid-cols-2 gap-3">
               {mobileReplays.map((live) => (
                 <Link
@@ -338,7 +305,6 @@ export default function ShopLiveList() {
           </>
         )}
       </main>
-
     </AppFrame>
   )
 }

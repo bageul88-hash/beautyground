@@ -10,7 +10,7 @@
      React 앱(index.html) 안에서 JS로 <link rel=manifest>를 바꾸는 방식은 iOS Safari가
      "홈 화면에 추가" 순간에 원래(온라인몰용) manifest를 그대로 읽어가버려서 안 먹혔음
      (대표님 지적 2026-08-10: 앱을 열면 라이브가 아니라 온라인몰이 나옴). 이 페이지 자체를
-     "홈 화면에 추가"하면 실제 라이브 화면(/app/live)을 그대로 보여주면서도, 저장되는
+     "홈 화면에 추가"하면 실제 라이브 화면(/live)을 그대로 보여주면서도, 저장되는
      시작주소·아이콘·이름은 이 페이지의 고정값이라 항상 정확함. -->
 <link rel="manifest" href="/manifest-live.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -24,6 +24,6 @@
 </style>
 </head>
 <body>
-  <iframe src="/app/live" title="뷰티그라운드 라이브" allow="clipboard-write"></iframe>
+  <iframe src="/live" title="뷰티그라운드 라이브" allow="clipboard-write"></iframe>
 </body>
 </html>
