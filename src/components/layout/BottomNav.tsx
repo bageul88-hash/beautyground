@@ -6,9 +6,9 @@ import { IconHome, IconGrid, IconLive, IconCart, IconUser } from '../common/Icon
 // 연결(온라인 메인 /app/home 대신 라이브 메인이 기본 진입점). 온라인 메인은 상단 헤더
 // "환영합니다,...님" 링크로 여전히 접근 가능.
 const NAV_ITEMS = [
-  { path: '/live', Icon: IconHome, label: '홈' },
+  { path: '/app/home', Icon: IconHome, label: '홈' },
   { path: '/app/category', Icon: IconGrid, label: '카테고리' },
-  { path: '/live', Icon: IconLive, label: '라이브' },
+  { path: '/app/home', Icon: IconLive, label: '라이브' },
   { path: '/app/cart', Icon: IconCart, label: '장바구니' },
   { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]

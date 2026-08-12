@@ -19,7 +19,7 @@ export default function LiveTeaser() {
         <h2 className="text-[17px] font-bold tracking-[-0.02em] text-ink">
           {liveNow ? '지금 라이브 중' : '라이브 예정'}
         </h2>
-        <Link to="/live" className="shrink-0 text-[13px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
+        <Link to="/app/home" className="shrink-0 text-[13px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
           전체보기 ›
         </Link>
       </div>

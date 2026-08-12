@@ -196,7 +196,7 @@ export default function DesktopMyPage({
           <div className="mt-6 border border-rule">
             <p className="px-6 py-3 text-[12px] font-bold text-ink-faint tracking-wide border-b border-rule">관리자</p>
             <button
-              onClick={() => navigate('/live')}
+              onClick={() => navigate('/app/home')}
               className="w-full flex items-center justify-between px-6 py-4 focus:outline-none focus-visible:shadow-ring"
             >
               <span className="text-[14px] text-ink">라이브 관리</span>

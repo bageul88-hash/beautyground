@@ -59,7 +59,6 @@ import HostSettlementPage from './pages/host/Settlement'
 import HostProfile from './pages/host/Profile'
 
 // 구매자 라이브 (Supabase 연동)
-import LiveMain from './pages/LiveMain'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -138,14 +137,8 @@ export default function App() {
         {/* 앱 UI */}
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
-        {/* 라이브커머스: 온라인몰과 당분간 분리(대표님 지시 2026-07-31) — 관리자만 실제 화면,
-            일반 고객은 준비중 안내. 7/28에 한 번 고객 개방했었으나 다시 막음. */}
-        {/* /app/live(구) → /live(신규, 목업 그대로 이식) — 2026-08-12 대표님 지시로 완전 교체.
-            새 진입점은 게이트 없이 공개(2026-08-11 결정으로 이미 하단 네비 기본 탭이라 비공개
-            유지가 모순이었음). 시청 상세(/app/live/:id)는 그대로 유지, 게이트도 유지. */}
-        <Route path="/live" element={<LiveMain />} />
-        {/* 구주소 북마크/기존 링크가 catch-all("*")에 걸려 홈으로 튕기지 않도록 명시적으로 새 주소로 리다이렉트 */}
-        <Route path="/app/live" element={<Navigate to="/live" replace />} />
+        {/* 2026-08-12 대표님 지시로 /live 페이지 제거(디자인 이슈로 롤백) — 라이브 메인 진입점은
+            없음. 시청 상세(/app/live/:id)는 그대로 유지(방송 자체는 살아있음), 게이트도 유지. */}
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />

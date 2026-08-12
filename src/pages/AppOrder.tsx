@@ -490,7 +490,7 @@ export default function AppOrder() {
           {/* 라이브커머스와 온라인몰 메인은 서로 독립된 흐름 — 라이브 구매(liveId 있음)는 라이브커머스로,
               일반 구매는 온라인 메인으로 돌려보낸다(라이브 구매자가 온라인 메인으로 빠지지 않게) */}
           <button
-            onClick={() => navigate(liveId ? '/live' : '/app/home')}
+            onClick={() => navigate('/app/home')}
             className="w-full rounded-control border border-rule text-ink-soft font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring"
           >
             {liveId ? '라이브커머스로 돌아가기' : '계속 쇼핑하기'}

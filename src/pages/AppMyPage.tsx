@@ -288,7 +288,7 @@ export default function AppMyPage() {
         <div className="mt-2 bg-paper">
           <p className="px-5 py-3 text-[12px] font-bold text-ink-faint tracking-wide">관리자</p>
           <button
-            onClick={() => navigate('/live')}
+            onClick={() => navigate('/app/home')}
             className="w-full flex items-center justify-between px-5 py-4 border-b border-rule last:border-0 focus:outline-none focus-visible:shadow-ring"
           >
             <span className="text-[14px] text-ink">라이브 관리</span>
