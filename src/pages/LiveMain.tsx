@@ -8,7 +8,6 @@ import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import { useViewMode } from '../lib/viewMode'
-import { useShopBrands } from '../hooks/useShopBrands'
 import { comma, formatLiveSchedTime } from '../lib/format'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
@@ -51,7 +50,6 @@ export default function LiveMain() {
   const { mode, isDesktop, toggle } = useViewMode()
   const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([])
   const [saleLoading, setSaleLoading] = useState(true)
-  const { brands, loading: brandsLoading } = useShopBrands()
 
   // 할인 특가: 지정된 5개를 지정 순서 그대로
   useEffect(() => {
@@ -371,25 +369,7 @@ export default function LiveMain() {
           </>
         )}
 
-        {!brandsLoading && brands.length > 0 && (
-          <>
-            <div className="mt-8 mx-4 border-t border-card-border" aria-hidden="true" />
-            <section className="pt-8">
-              <h2 className="text-base font-bold text-black mb-4 px-4">브랜드</h2>
-              <div className="flex gap-5 px-4 pb-1 overflow-x-auto scrollbar-hide">
-                {brands.map((b) => (
-                  <Link
-                    key={b.id}
-                    to={`/app/brand/${b.id}`}
-                    className="shrink-0 text-sm font-bold text-black whitespace-nowrap focus:outline-none focus-visible:shadow-ring"
-                  >
-                    {b.name}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          </>
-        )}
+        {/* 브랜드 레일은 카테고리 페이지로 이동 (2026-08-12 대표님 지시 — AppCategory.tsx) */}
       </main>
       <AppFooter />
     </AppFrame>
