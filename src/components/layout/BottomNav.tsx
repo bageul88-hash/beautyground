@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { IconHome, IconGrid, IconCart, IconUser } from '../common/Icon'
+import { IconHome, IconGrid, IconLive, IconCart, IconUser } from '../common/Icon'
 
-// 2026-08-12: /live 페이지를 롤백하면서 '라이브' 탭도 임시로 제거 — 갈 곳이 없어서 '홈'과
-// 경로가 겹쳐 두 탭이 동시에 활성화되는 버그가 있었음(대표님 지적). 목업에서 실데이터 연결을
-// 마치고 /live를 다시 만들면 그때 이 탭도 복원.
+// 2026-08-12: /live 재구축(실데이터) 완료로 '라이브' 탭 복원. '홈'=/app/home(온라인몰 메인),
+// '라이브'=/live(라이브방송 메인) — 서로 다른 독립 경로라 중복활성 버그 없음.
 const NAV_ITEMS = [
   { path: '/app/home', Icon: IconHome, label: '홈' },
   { path: '/app/category', Icon: IconGrid, label: '카테고리' },
+  { path: '/live', Icon: IconLive, label: '라이브' },
   { path: '/app/cart', Icon: IconCart, label: '장바구니' },
   { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]

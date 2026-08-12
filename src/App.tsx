@@ -59,6 +59,7 @@ import HostSettlementPage from './pages/host/Settlement'
 import HostProfile from './pages/host/Profile'
 
 // 구매자 라이브 (Supabase 연동)
+import LiveMain from './pages/LiveMain'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -137,8 +138,9 @@ export default function App() {
         {/* 앱 UI */}
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
-        {/* 2026-08-12 대표님 지시로 /live 페이지 제거(디자인 이슈로 롤백) — 라이브 메인 진입점은
-            없음. 시청 상세(/app/live/:id)는 그대로 유지(방송 자체는 살아있음), 게이트도 유지. */}
+        {/* 2026-08-12 대표님 지시로 재구축 — 젠스파크 디자인 기준, 실데이터 바로 연결.
+            게이트 없이 공개(온라인몰 메인과 별개의 독립 진입점). */}
+        <Route path="/live" element={<LiveMain />} />
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />

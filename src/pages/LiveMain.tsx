@@ -1,0 +1,192 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import type { Live } from '../lib/types'
+import AppHeader from '../components/layout/AppHeader'
+import AppFrame from '../components/layout/AppFrame'
+import PromoBar from '../components/home/PromoBar'
+import BrandRail from '../components/home/BrandRail'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import { useViewMode } from '../lib/viewMode'
+import { useSaleProducts } from '../hooks/useSaleProducts'
+import { useShopBrands } from '../hooks/useShopBrands'
+import { comma } from '../lib/format'
+
+// /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
+// 공유한다. 라이브에서 들어온 구매는 live_id로 태깅되어 정산·통계에서 구분된다(AppOrder.tsx).
+// 2026-08-12 대표님 지시로 재구축 — 실데이터(Supabase) 그대로 연결, 별도 폴더 프로젝트 아님.
+export default function LiveMain() {
+  const [lives, setLives] = useState<Live[]>([])
+  const [replays, setReplays] = useState<Live[]>([])
+  const [hostNames, setHostNames] = useState<Record<string, string>>({})
+  const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null }>>({})
+  const [loading, setLoading] = useState(true)
+  const { mode, isDesktop, toggle } = useViewMode()
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
+  const { brands, loading: brandsLoading } = useShopBrands()
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      setLoading(true)
+      const [{ data }, { data: endedData }] = await Promise.all([
+        supabase.from('lives').select('*').in('status', ['live', 'scheduled'])
+          .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: true, nullsFirst: false }),
+        supabase.from('lives').select('*').eq('status', 'ended')
+          .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: false, nullsFirst: false }).limit(12),
+      ])
+      if (!active) return
+      const liveList = (data ?? []) as Live[]
+      const replayList = ((endedData ?? []) as Live[]).filter((l) => l.stream_url || l.playback_url || l.stream_uid)
+      setLives(liveList)
+      setReplays(replayList)
+
+      const all = [...liveList, ...replayList]
+      const hostIds = Array.from(new Set(all.map((l) => l.host_id).filter((id): id is string => Boolean(id))))
+      if (hostIds.length > 0) {
+        const { data: hostsData } = await supabase.from('hosts').select('id, name').in('id', hostIds)
+        if (active && hostsData) setHostNames(Object.fromEntries(hostsData.map((h) => [h.id, h.name])))
+      }
+
+      const primaryIdByLive: Record<string, string> = {}
+      all.forEach((l) => {
+        const pid = l.highlight_product_id || l.product_ids?.[0]
+        if (pid) primaryIdByLive[l.id] = pid
+      })
+      const productIds = Array.from(new Set(Object.values(primaryIdByLive)))
+      if (productIds.length > 0) {
+        const { data: productsData } = await supabase.from('products')
+          .select('id, name, price, sale_price, thumbnail_url').in('id', productIds)
+        if (active && productsData) {
+          const byId = Object.fromEntries(productsData.map((p) => [p.id, p]))
+          const map: typeof primaryProducts = {}
+          Object.entries(primaryIdByLive).forEach(([liveId, pid]) => {
+            const p = byId[pid]
+            if (p) map[liveId] = p
+          })
+          setPrimaryProducts(map)
+        }
+      }
+      setLoading(false)
+    })()
+    return () => { active = false }
+  }, [])
+
+  const nowLive = lives.filter((l) => l.status === 'live')
+  const scheduled = lives.filter((l) => l.status === 'scheduled')
+  const carouselItems = [...nowLive, ...scheduled, ...replays].slice(0, 6)
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <PromoBar />
+        <AppHeader />
+        <p className="text-center text-[13px] text-ink-faint py-10">데스크톱 라이브 메인은 준비 중입니다.</p>
+      </>
+    )
+  }
+
+  return (
+    <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
+      <PromoBar />
+      <AppHeader />
+
+      <main className="px-4 py-5">
+        <section>
+          <h2 className="text-[16px] font-bold text-ink mb-3">지금 라이브</h2>
+          {loading ? (
+            <p className="text-[13px] text-ink-faint py-8 text-center">불러오는 중…</p>
+          ) : carouselItems.length === 0 ? (
+            <p className="text-[13px] text-ink-faint py-8 text-center">진행 중이거나 지난 라이브가 없습니다.</p>
+          ) : (
+            <div className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+              {carouselItems.map((live) => {
+                const product = primaryProducts[live.id]
+                const channel = live.host_id ? hostNames[live.host_id] : undefined
+                const isLive = live.status === 'live'
+                const isScheduled = live.status === 'scheduled'
+                return (
+                  <Link
+                    key={live.id}
+                    to={`/app/live/${live.id}`}
+                    className="relative w-[220px] shrink-0 rounded-2xl overflow-hidden bg-quiet aspect-[3/4] focus:outline-none focus-visible:shadow-ring"
+                  >
+                    {live.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 bg-quiet flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
+                      </div>
+                    )}
+                    {isLive ? (
+                      <span className="absolute top-3 left-3 flex items-center gap-1 bg-signal-red text-paper text-[11px] font-bold px-2 py-1 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-paper animate-pulse" />
+                        LIVE
+                      </span>
+                    ) : isScheduled ? (
+                      <span className="absolute top-3 left-3 bg-ink text-paper text-[11px] font-bold px-2 py-1 rounded-full">예정</span>
+                    ) : (
+                      <span className="absolute top-3 left-3 bg-black/40 text-paper text-[11px] font-bold px-2 py-1 rounded-full">종료</span>
+                    )}
+                    {typeof live.peak_viewers === 'number' && live.peak_viewers > 0 && (
+                      <span className="absolute top-3 right-3 text-paper text-[11px] bg-black/40 px-2 py-1 rounded-full">
+                        👁 {live.peak_viewers.toLocaleString('ko-KR')}
+                      </span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      {channel && <p className="text-paper text-[12px] font-medium">{channel}</p>}
+                      <p className="text-paper text-[13px] font-bold line-clamp-2 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
+                        {live.title}
+                      </p>
+                      {product && (
+                        <p className="text-paper/80 text-[12px] mt-1">
+                          {comma(product.sale_price ?? product.price)}원
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </section>
+
+        {!saleLoading && saleProducts.length > 0 && (
+          <section className="mt-8">
+            <h2 className="text-[16px] font-bold text-ink mb-3.5">할인 특가</h2>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+              {saleProducts.map((p) => (
+                <Link key={p.id} to={`/app/product/${p.id}`} className="text-left focus:outline-none focus-visible:shadow-ring">
+                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-quiet">
+                    {p.thumbnail_url ? (
+                      <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-50" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[12px] text-ink-faint mt-2">{p.brand_name}</p>
+                  <p className="text-[13px] text-ink line-clamp-2 mt-0.5">{p.name}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    {p.sale_price != null && p.sale_price < p.price && (
+                      <span className="text-sm font-bold text-accent-deep">
+                        {Math.round((1 - p.sale_price / p.price) * 100)}%
+                      </span>
+                    )}
+                    <span className="text-sm font-bold text-ink">{comma(p.sale_price ?? p.price)}원</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <BrandRail brands={brands} loading={brandsLoading} />
+      </main>
+    </AppFrame>
+  )
+}
