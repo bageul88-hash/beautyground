@@ -145,9 +145,11 @@ export default function LiveMain() {
     if (!track) return undefined
     const timer = setInterval(() => {
       const maxScroll = track.scrollWidth - track.clientWidth
-      const next = track.scrollLeft + CARD_STEP
-      if (next >= maxScroll - 4) track.scrollTo({ left: 0, behavior: 'smooth' })
-      else track.scrollTo({ left: next, behavior: 'smooth' })
+      if (maxScroll <= 4) return // 카드가 화면에 다 들어오면 슬라이드 불필요
+      // 끝에 도달한 상태면 처음으로, 아니면 다음 칸(끝을 넘으면 끝까지만) — 카드가 적어도
+      // "끝까지 갔다가 처음으로" 움직임이 항상 보이게 (3개일 때 0→0으로 멈춰 보이던 문제 수정)
+      if (track.scrollLeft >= maxScroll - 4) track.scrollTo({ left: 0, behavior: 'smooth' })
+      else track.scrollTo({ left: Math.min(track.scrollLeft + CARD_STEP, maxScroll), behavior: 'smooth' })
     }, 3000)
     return () => clearInterval(timer)
   }, [isPaused, carouselItems.length])
