@@ -15,7 +15,8 @@ export default function ShopProductCard({ product }: { product: ShopProduct }) {
   const soldOut = product.status === 'sold_out'
 
   return (
-    <div>
+    // data-product-id: 뒤로가기 시 "클릭했던 상품 위치로 복귀"의 앵커 (ScrollRestoration이 클릭을 감지해 저장)
+    <div data-product-id={product.id}>
       {/* 1) 썸네일 */}
       <div className="relative aspect-square overflow-hidden bg-quiet">
         {product.thumbnail_url ? (

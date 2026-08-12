@@ -44,12 +44,17 @@ export function useShopProducts({ category, brand, sort = 'latest', pageSize = 2
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
 
+  // 뒤로가기 복원용: 이 필터 조합에서 몇 페이지까지 봤는지 기억 (ScrollRestoration의 상품 앵커가
+  // 2페이지 이후 상품이어도, 재마운트 때 그 페이지까지 한 번에 다시 불러와야 앵커 요소가 존재한다)
+  const depthKey = `bg_list_depth:${category ?? ''}|${brand ?? ''}|${sort}`
+
   const fetchPage = useCallback(
-    async (pageIndex: number, replace: boolean) => {
+    async (pageIndex: number, replace: boolean, span = 1) => {
       setLoading(true)
       setError(null)
 
       const from = pageIndex * pageSize
+      const size = pageSize * span
 
       // 판매가(할인가 우선) 기준 정렬. effective_price = coalesce(sale_price, price) 생성 컬럼.
       const runQuery = (priceCol: 'effective_price' | 'price') => {
@@ -64,7 +69,7 @@ export function useShopProducts({ category, brand, sort = 'latest', pageSize = 2
         else if (sort === 'price_desc') q = q.order(priceCol, { ascending: false })
         else q = q.order('created_at', { ascending: false })
 
-        return q.range(from, from + pageSize - 1)
+        return q.range(from, from + size - 1)
       }
 
       let { data, error: err } = await runQuery('effective_price')
@@ -106,22 +111,35 @@ export function useShopProducts({ category, brand, sort = 'latest', pageSize = 2
         seasonTags: r.season_tags ?? [],
       }))
 
-      setHasMore(rows.length === pageSize)
+      setHasMore(rows.length === size)
       setProducts((prev) => (replace ? mapped : [...prev, ...mapped]))
       setLoading(false)
     },
     [category, brand, sort, pageSize]
   )
 
-  // 카테고리/브랜드/정렬 변경 시 첫 페이지부터 다시 로드
+  // 카테고리/브랜드/정렬 변경 시 첫 페이지부터 다시 로드.
+  // 이 조합을 전에 몇 페이지까지 봤으면(뒤로가기 복귀 등) 그 깊이까지 한 번에 복원.
   useEffect(() => {
-    setPage(0)
-    fetchPage(0, true)
+    let depth = 1
+    try {
+      depth = Math.max(1, Math.min(20, Number(sessionStorage.getItem(depthKey)) || 1))
+    } catch {
+      /* 무시 */
+    }
+    setPage(depth - 1)
+    fetchPage(0, true, depth)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchPage])
 
   const loadMore = () => {
     const next = page + 1
     setPage(next)
+    try {
+      sessionStorage.setItem(depthKey, String(next + 1))
+    } catch {
+      /* 무시 */
+    }
     fetchPage(next, false)
   }
 

@@ -8,7 +8,6 @@ import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import { useViewMode } from '../lib/viewMode'
-import { useSaleProducts } from '../hooks/useSaleProducts'
 import { useShopBrands } from '../hooks/useShopBrands'
 import { comma, formatLiveSchedTime } from '../lib/format'
 
@@ -21,6 +20,24 @@ import { comma, formatLiveSchedTime } from '../lib/format'
 // bg-overlay/bg-card/card-border(목업 designTokens.js와 1:1 동일)만 사용, 그 외는 black/white/
 // #666666 리터럴로 목업과 동일하게 맞춘다.
 
+// 할인 특가 상품 — 대표님 직접 지정 5개 (2026-08-12), 이 순서 그대로 노출.
+// 자동 선정(할인율순)이 아니라 고정 큐레이션. 변경 시 이 배열만 수정.
+const SALE_PRODUCT_IDS = [
+  '3a4db46e-612b-456d-ac92-7ee0c23ce909', // 하이드라 15 히아루론산 솔루션 30ml
+  '5c8dd76f-9495-4ba1-b7b5-4dbd653a6dbf', // 저자극 효소클렌저(파우더워시)
+  '799f9295-c391-4872-af46-3f77ebbf7539', // 나비클 퓨어워터 클렌징폼 약산성 거품 세안 150ml
+  'fb9bd00e-1532-46d3-abe9-d44b61f1b3a9', // 키위글로우 비건 제주 연꽃 마일드 각질케어 70송이 토너패드
+  '350689be-5390-4601-b464-a4251ed90c96', // 메이크업헬퍼 비건 에센스 선쿠션 SPF50+카무카무 멜팅 클렌징 밤 80ml 세트
+]
+
+interface SaleProduct {
+  id: string
+  name: string
+  price: number
+  sale_price: number | null
+  thumbnail_url: string | null
+}
+
 export default function LiveMain() {
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
@@ -29,8 +46,25 @@ export default function LiveMain() {
   const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
   const [loading, setLoading] = useState(true)
   const { mode, isDesktop, toggle } = useViewMode()
-  const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
+  const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([])
+  const [saleLoading, setSaleLoading] = useState(true)
   const { brands, loading: brandsLoading } = useShopBrands()
+
+  // 할인 특가: 지정된 5개를 지정 순서 그대로
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const { data } = await supabase.from('products')
+        .select('id, name, price, sale_price, thumbnail_url')
+        .in('id', SALE_PRODUCT_IDS)
+        .eq('status', 'on_sale')
+      if (!active) return
+      const byId = Object.fromEntries(((data ?? []) as SaleProduct[]).map((p) => [p.id, p]))
+      setSaleProducts(SALE_PRODUCT_IDS.map((id) => byId[id]).filter(Boolean))
+      setSaleLoading(false)
+    })()
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -303,7 +337,7 @@ export default function LiveMain() {
               <h2 className="text-base font-bold text-black mb-4">할인 특가</h2>
               <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                 {saleProducts.map((p) => (
-                  <Link key={p.id} to={`/app/product/${p.id}`} className="text-left focus:outline-none focus-visible:shadow-ring">
+                  <Link key={p.id} to={`/app/product/${p.id}`} data-product-id={p.id} className="text-left focus:outline-none focus-visible:shadow-ring">
                     <div className="w-full aspect-square rounded-xl overflow-hidden bg-bg-card border border-card-border">
                       {p.thumbnail_url ? (
                         <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
