@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
+import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCart from '../components/cart/DesktopCart'
 import { useViewMode } from '../lib/viewMode'
@@ -296,6 +297,7 @@ export default function AppCart() {
         </div>
       )}
 
+      <AppFooter />
       <BottomNav />
     </div>
     </div>

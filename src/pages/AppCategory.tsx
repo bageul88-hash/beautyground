@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
+import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCategory from '../components/category/DesktopCategory'
 import { useViewMode } from '../lib/viewMode'
@@ -53,6 +54,7 @@ export default function AppCategory() {
         ))}
       </div>
 
+      <AppFooter />
     </AppFrame>
   )
 }

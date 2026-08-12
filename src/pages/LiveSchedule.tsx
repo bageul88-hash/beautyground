@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import type { Live } from '../lib/types'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
+import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import { formatDateOnly, dateKey, formatLiveSchedTime } from '../lib/format'
 
@@ -118,6 +119,7 @@ export default function LiveSchedule() {
           ))
         )}
       </main>
+      <AppFooter />
     </AppFrame>
   )
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import AppFrame from '../components/layout/AppFrame'
+import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopMyPage from '../components/mypage/DesktopMyPage'
 import { useViewMode } from '../lib/viewMode'
@@ -322,6 +323,7 @@ export default function AppMyPage() {
         </div>
       )}
 
+      <AppFooter />
     </AppFrame>
   )
 }
