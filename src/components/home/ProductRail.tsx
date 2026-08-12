@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import { comma } from '../../lib/format'
@@ -25,6 +26,48 @@ export default function ProductRail({
   moreHref,
   onProductClick,
 }: ProductRailProps) {
+  // 마우스로 잡아끌어 좌우 이동 (2026-08-12 대표님 지시 — 터치 스와이프는 브라우저 기본 지원).
+  // 드래그 중에는 snap을 꺼서 부드럽게 끌리고, 놓으면 snap 복원. 끌다 놓은 걸 카드 클릭으로
+  // 오인해 상세로 넘어가는 것도 click 캡처 단계에서 차단.
+  const trackRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const dragStartXRef = useRef(0)
+  const dragStartScrollRef = useRef(0)
+  const draggedRef = useRef(false)
+  const [dragging, setDragging] = useState(false)
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const track = trackRef.current
+    if (!track) return
+    isDraggingRef.current = true
+    draggedRef.current = false
+    dragStartXRef.current = e.pageX
+    dragStartScrollRef.current = track.scrollLeft
+    setDragging(true)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return
+    const track = trackRef.current
+    if (!track) return
+    e.preventDefault()
+    const delta = e.pageX - dragStartXRef.current
+    if (Math.abs(delta) > 4) draggedRef.current = true
+    track.scrollLeft = dragStartScrollRef.current - delta
+  }
+
+  const stopDragging = () => {
+    isDraggingRef.current = false
+    setDragging(false)
+  }
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (draggedRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   return (
     <section className="pt-8" aria-labelledby={id}>
       <div className="mb-3 flex items-baseline justify-between px-4">
@@ -55,7 +98,17 @@ export default function ProductRail({
         <p className="py-12 text-center text-[14px] text-ink-faint">{emptyText}</p>
       ) : (
         // overflow-x-auto를 주면 브라우저가 overflow-y도 auto로 취급해 shadow-card 아래쪽이 잘려 보임(대표님 지적) — 그림자가 들어갈 여유를 pt/pb로 확보해서 방지
-        <div className="flex gap-3 px-4 pt-1 pb-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth">
+        <div
+          ref={trackRef}
+          className={`flex gap-3 px-4 pt-1 pb-4 overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none ${
+            dragging ? 'snap-none' : 'snap-x snap-mandatory scroll-smooth'
+          }`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
+          onClickCapture={handleClickCapture}
+        >
           {products.map((product) => {
             const sell = product.sale_price ?? product.price
             const hasSale = product.sale_price != null && product.sale_price < product.price

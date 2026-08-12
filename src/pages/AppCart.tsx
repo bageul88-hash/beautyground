@@ -139,7 +139,8 @@ export default function AppCart() {
   return (
     <div className="min-h-screen bg-quiet md:py-6">
     <ViewModeToggle mode={mode} onToggle={toggle} />
-    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-40">
+    {/* pb: 상품 있을 땐 고정 주문바+하단네비(pb-40), 비었을 땐 하단네비만(pb-14) — 빈 화면 큰 공백 방지 */}
+    <div className={`max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule ${lines.length > 0 ? 'pb-40' : 'pb-14'}`}>
       <BackHeader title="장바구니" />
 
       {lines.length === 0 ? (

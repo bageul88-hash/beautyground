@@ -8,7 +8,8 @@ import BottomNav from './BottomNav'
 export default function AppFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-quiet md:py-6">
-      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-24">
+      {/* pb-14 = 고정 하단네비 높이만큼만 — 푸터와 네비 사이 불필요한 공백 제거(2026-08-12 대표님 지적) */}
+      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule pb-14">
         {children}
         <BottomNav />
       </div>

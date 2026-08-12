@@ -3,7 +3,6 @@ import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
 import TrustStrip from './TrustStrip'
 import ProductRail from './ProductRail'
-import BrandRail from './BrandRail'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import type { ShopBrand } from '../../hooks/useShopBrands'
@@ -17,6 +16,7 @@ interface HomeBodyProps {
   prodLoading: boolean
   saleProducts: ShopProduct[]
   saleLoading: boolean
+  // 브랜드 레일은 카테고리 페이지로 이전(2026-08-12 대표님 지시) — 호출부 호환을 위해 props만 유지
   brands: ShopBrand[]
   brandsLoading: boolean
   onProductClick: (id: string) => void
@@ -35,8 +35,6 @@ export default function HomeBody({
   prodLoading,
   saleProducts,
   saleLoading,
-  brands,
-  brandsLoading,
   onProductClick,
 }: HomeBodyProps) {
   return (
@@ -57,7 +55,6 @@ export default function HomeBody({
           onProductClick={onProductClick}
         />
       )}
-      <BrandRail brands={brands} loading={brandsLoading} />
       <ProductRail
         id="home-recommended"
         title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
