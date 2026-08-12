@@ -13,7 +13,7 @@ import ViewModeToggle from '../components/layout/ViewModeToggle'
 import { useViewMode } from '../lib/viewMode'
 import { useSaleProducts } from '../hooks/useSaleProducts'
 import { useShopBrands } from '../hooks/useShopBrands'
-import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey, comma } from '../lib/format'
+import { formatTimeOnly, comma } from '../lib/format'
 
 // /live — 목업(live-commerce-new)을 그대로 이식한 새 라이브 메인. 기존 /app/live(ShopLiveList)를
 // 대체한다(2026-08-12, 대표님 지시: 계속 기존 페이지를 부분 수정하지 말고 새로 만들 것).
@@ -115,17 +115,6 @@ export default function LiveMain() {
   const mobileScheduled = scheduledLives.filter((l) => l.id !== secondCard?.id)
   const mobileReplays = displayReplays.filter((l) => l.id !== secondCard?.id)
 
-  const scheduleGroups = (() => {
-    const order: string[] = []
-    const byDate = new Map<string, Live[]>()
-    for (const live of mobileScheduled) {
-      const key = dateKey(live.scheduled_at)
-      if (!byDate.has(key)) { byDate.set(key, []); order.push(key) }
-      byDate.get(key)!.push(live)
-    }
-    return order.map((key) => ({ key, label: formatDateOnly(byDate.get(key)![0].scheduled_at), items: byDate.get(key)! }))
-  })()
-
   if (isDesktop) {
     return (
       <>
@@ -155,10 +144,15 @@ export default function LiveMain() {
         ) : !hero ? (
           <div className="py-10 text-center text-[13px] text-ink-faint">진행 중이거나 예정된 라이브가 없습니다.</div>
         ) : (
-          <div className="flex gap-2 -mx-4 pl-4 overflow-x-auto scrollbar-hide">
-            {[...topRow, ...extraLiveNow].map((live) => (
-              <Link key={live.id} to={`/app/live/${live.id}`} className="shrink-0 w-[48%] block focus:outline-none focus-visible:shadow-ring">
-                <div className="relative rounded-2xl overflow-hidden bg-quiet aspect-[3/4]">
+          <div className="flex gap-3 -mx-4 pl-4 overflow-x-auto scrollbar-hide">
+            {/* 목업(live-commerce-new) LiveCard.jsx와 완전히 동일한 구조로 이식(2026-08-12):
+                고정 168×240px, 배지 top-2.5 left-2.5, 상단 중앙 리본(방송 제목), 하단 3줄
+                (호스트/대표상품명/가격), 그라디언트 h-28. 실데이터는 lives+hosts+products 그대로. */}
+            {[...topRow, ...extraLiveNow].map((live) => {
+              const channel = live.host_id ? hostNames[live.host_id] : undefined
+              const product = primaryProducts[live.id]
+              return (
+                <Link key={live.id} to={`/app/live/${live.id}`} className="relative w-[168px] h-[240px] rounded-2xl overflow-hidden shrink-0 bg-bg-card block focus:outline-none focus-visible:shadow-ring">
                   {live.thumbnail_url ? (
                     <img src={live.thumbnail_url} alt={live.title} className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
@@ -166,78 +160,59 @@ export default function LiveMain() {
                       <img src="/images/bg-logo-mark.png" alt="" className="w-10 h-10 object-contain opacity-50" />
                     </div>
                   )}
-                  <div className="absolute top-[4.3%] left-[5.7%] flex items-center gap-2">
+                  <div className="absolute top-2.5 left-2.5">
                     <LiveStatusBadge live={live} size="sm" variant="pill" />
-                    {live.status === 'scheduled' && (
-                      <span className="inline-flex items-center rounded-full bg-bg-overlay/70 text-paper text-[10.5px] font-bold px-2 py-0.5 tabular-nums">
-                        {formatDateTime(live.scheduled_at)}
-                      </span>
-                    )}
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-                  <div className="absolute inset-x-0 bottom-0 p-3">
-                    {primaryProducts[live.id] && (
-                      <p className="text-paper text-[13px] font-extrabold" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
-                        {(primaryProducts[live.id].sale_price ?? primaryProducts[live.id].price).toLocaleString('ko-KR')}원
+                  <div className="absolute top-9 left-2.5 right-2.5 flex justify-center">
+                    <span className="text-paper text-[10px] font-semibold text-center leading-tight line-clamp-2" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                      {live.title}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-bg-overlay/90 via-bg-overlay/40 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    {channel && <p className="text-paper text-[11px] font-medium truncate">{channel}</p>}
+                    {product && <p className="text-paper text-[13px] font-semibold truncate mt-0.5">{product.name}</p>}
+                    {product && (
+                      <p className="text-paper text-sm font-bold mt-1">
+                        {(product.sale_price ?? product.price).toLocaleString('ko-KR')}원
                       </p>
                     )}
-                    <p className="text-paper text-[13px] font-bold leading-snug line-clamp-2 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,.5)' }}>
-                      {live.title}
-                    </p>
-                    {(() => {
-                      const channel = live.host_id ? hostNames[live.host_id] : undefined
-                      const hasViewers = typeof live.peak_viewers === 'number' && live.peak_viewers > 0
-                      if (!channel && !hasViewers) return null
-                      return (
-                        <p className="flex items-center gap-1 text-[11px] text-paper/80 mt-1">
-                          {channel && <span>{channel}</span>}
-                          {channel && hasViewers && <span className="w-0.5 h-0.5 rounded-full bg-paper/80" />}
-                          {hasViewers && <span className="tabular-nums">{live.peak_viewers!.toLocaleString('ko-KR')}</span>}
-                        </p>
-                      )
-                    })()}
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         )}
 
+        {/* 목업 ScheduleSection.jsx와 동일한 플랫 리스트(날짜 그룹·구분선 없음, gap-7)로 이식(2026-08-12). */}
         {!loading && mobileScheduled.length > 0 && (
           <>
-            <h2 className="text-[16px] font-bold text-ink mb-3 mt-8">LIVE 예고</h2>
-            {scheduleGroups.map((group) => (
-              <div key={group.key} className="mt-5 first:mt-0">
-                <p className="text-[12.5px] font-bold text-ink-soft mb-2.5 pb-1.5 border-b border-rule">{group.label}</p>
-                <div className="flex flex-col">
-                  {group.items.map((live) => (
-                    <Link
-                      key={live.id}
-                      to={`/app/live/${live.id}`}
-                      className="flex items-center gap-3 py-4 border-b border-rule last:border-b-0 focus:outline-none focus-visible:shadow-ring"
-                    >
-                      <div className="relative w-[72px] h-[72px] shrink-0 rounded-lg bg-quiet overflow-hidden">
-                        {live.thumbnail_url ? (
-                          <img src={live.thumbnail_url} alt={live.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-50 m-auto" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-ink tabular-nums">
+            <h2 className="text-[16px] font-bold text-ink mb-4 mt-8">LIVE 예고</h2>
+            <ul className="flex flex-col gap-7">
+              {mobileScheduled.map((live) => {
+                const channel = live.host_id ? hostNames[live.host_id] : undefined
+                const product = primaryProducts[live.id]
+                return (
+                  <li key={live.id}>
+                    <Link to={`/app/live/${live.id}`} className="flex items-center gap-3 focus:outline-none focus-visible:shadow-ring">
+                      <img
+                        src={live.thumbnail_url ?? product?.thumbnail_url ?? '/images/bg-logo-mark.png'}
+                        alt={channel ?? live.title}
+                        className="w-16 h-16 rounded-lg object-cover bg-quiet border border-card-border shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs text-ink-faint">
                           {formatTimeOnly(live.scheduled_at)}
                           {live.duration_minutes ? ` · 약 ${live.duration_minutes}분` : ''}
                         </p>
-                        {live.host_id && hostNames[live.host_id] && (
-                          <p className="text-[13px] font-bold text-brand-pink mt-1">{hostNames[live.host_id]}</p>
-                        )}
-                        <p className="text-[12px] text-ink-soft line-clamp-1 mt-1">{live.title}</p>
+                        {channel && <p className="text-sm font-bold text-brand-pink mt-1">{channel}</p>}
+                        <p className="text-xs text-ink-soft mt-1 truncate">{product?.name ?? live.title}</p>
                       </div>
                     </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
+                  </li>
+                )
+              })}
+            </ul>
           </>
         )}
 

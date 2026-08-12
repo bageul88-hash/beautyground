@@ -93,6 +93,7 @@ const config: Config = {
         'live-start': '#FF4444',
         'live-end': '#FF6B6B',
         'bg-overlay': '#1f1f1f',
+        'bg-card': '#F5F5F5',
         'card-border': 'rgba(0,0,0,0.08)',
         'star-gold': '#FFB800',
         'brand-tile-1': '#FDEBF3',
