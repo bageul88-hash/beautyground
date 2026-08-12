@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Live } from '../lib/types'
@@ -87,7 +87,74 @@ export default function LiveMain() {
 
   const nowLive = lives.filter((l) => l.status === 'live')
   const scheduled = lives.filter((l) => l.status === 'scheduled')
-  const carouselItems = [...nowLive, ...scheduled, ...replays].slice(0, 6)
+  const carouselItems = [...nowLive, ...scheduled, ...replays].slice(0, 10)
+
+  // ── 캐러셀 자동 슬라이드 + 드래그 (목업 LiveCarousel.jsx 동작 그대로) ──
+  // 3초마다 한 칸씩 좌측으로, 끝에 닿으면 처음으로. 손가락 스와이프/마우스 드래그로
+  // 직접 밀 수 있고, 조작하는 동안 자동 슬라이드는 멈췄다가 4초 뒤 재개된다.
+  const CARD_STEP = 168 + 12 // 카드 폭 + gap-3
+  const trackRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const dragStartXRef = useRef(0)
+  const dragStartScrollRef = useRef(0)
+  const draggedRef = useRef(false)
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    if (isPaused) return undefined
+    const track = trackRef.current
+    if (!track) return undefined
+    const timer = setInterval(() => {
+      const maxScroll = track.scrollWidth - track.clientWidth
+      const next = track.scrollLeft + CARD_STEP
+      if (next >= maxScroll - 4) track.scrollTo({ left: 0, behavior: 'smooth' })
+      else track.scrollTo({ left: next, behavior: 'smooth' })
+    }, 3000)
+    return () => clearInterval(timer)
+  }, [isPaused, carouselItems.length])
+
+  useEffect(() => () => {
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+  }, [])
+
+  const pauseAndScheduleResume = () => {
+    setIsPaused(true)
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+    resumeTimerRef.current = setTimeout(() => setIsPaused(false), 4000)
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const track = trackRef.current
+    if (!track) return
+    isDraggingRef.current = true
+    draggedRef.current = false
+    dragStartXRef.current = e.pageX
+    dragStartScrollRef.current = track.scrollLeft
+    pauseAndScheduleResume()
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return
+    const track = trackRef.current
+    if (!track) return
+    e.preventDefault()
+    const delta = e.pageX - dragStartXRef.current
+    if (Math.abs(delta) > 4) draggedRef.current = true
+    track.scrollLeft = dragStartScrollRef.current - delta
+  }
+
+  const stopDragging = () => {
+    isDraggingRef.current = false
+  }
+
+  // 드래그로 밀다 놓은 것을 카드 클릭(페이지 이동)으로 오인하지 않게 차단
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (draggedRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
 
   if (isDesktop) {
     return (
@@ -113,7 +180,16 @@ export default function LiveMain() {
           ) : carouselItems.length === 0 ? (
             <p className="text-[13px] text-[#666666] py-8 text-center">진행 중이거나 지난 라이브가 없습니다.</p>
           ) : (
-            <div className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+            <div
+              ref={trackRef}
+              className="flex gap-3 -mx-4 px-4 overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={stopDragging}
+              onMouseLeave={stopDragging}
+              onTouchStart={pauseAndScheduleResume}
+              onClickCapture={handleClickCapture}
+            >
               {carouselItems.map((live) => {
                 const product = primaryProducts[live.id]
                 const brand = product?.partner_id ? brandNames[product.partner_id] : undefined
