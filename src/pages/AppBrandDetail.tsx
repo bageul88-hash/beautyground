@@ -1,100 +1,102 @@
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
-import ViewModeToggle from '../components/layout/ViewModeToggle'
-import DesktopBrandDetail from '../components/brand/DesktopBrandDetail'
-import { useViewMode } from '../lib/viewMode'
-import ProductCard from '../components/product/ProductCard'
-import Badge from '../components/common/Badge'
-import { BRANDS } from '../constants'
+import AppFooter from '../components/layout/AppFooter'
+import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
+import { useShopProducts } from '../hooks/useShopProducts'
+import { supabase } from '../lib/supabase'
 
+// 브랜드 전용관 — 카테고리/홈의 브랜드 레일에서 브랜드명을 누르면 진입(2026-08-13 대표님 지시로 재작성).
+// 이전 버전은 목업(BRANDS 상수, 숫자 id) 기반이라 실제 partner_id(UUID)로는 항상
+// "브랜드를 찾을 수 없습니다"가 떴음 — partner_brands + products 실데이터로 전면 교체.
+// PC에서도 중앙 480px 레이아웃(전용 PC 레이아웃 없음 — 구 DesktopBrandDetail은 목업 기반이라 미사용).
 export default function AppBrandDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { mode, isDesktop, toggle } = useViewMode()
+  const [brandName, setBrandName] = useState<string | null>(null)
+  const [nameLoading, setNameLoading] = useState(true)
 
-  const brand = BRANDS.find(b => b.id === Number(id))
+  const { products, loading, error, hasMore, loadMore } = useShopProducts({
+    brand: id ?? undefined,
+    pageSize: 20,
+  })
 
-  if (!brand) {
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      if (!id) { setNameLoading(false); return }
+      const { data } = await supabase.from('partner_brands').select('brand_name').eq('id', id).maybeSingle()
+      if (!active) return
+      setBrandName((data?.brand_name as string) ?? null)
+      setNameLoading(false)
+    })()
+    return () => { active = false }
+  }, [id])
+
+  if (!nameLoading && !brandName) {
     return (
-      <div className="min-h-screen bg-quiet md:py-6">
-      <ViewModeToggle mode={mode} onToggle={toggle} />
-      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
-        <p className="text-ink-faint">브랜드를 찾을 수 없습니다.</p>
-      </div>
-      </div>
-    )
-  }
-
-  if (isDesktop) {
-    return (
-      <>
-        <ViewModeToggle mode={mode} onToggle={toggle} />
-        <DesktopBrandDetail brand={brand} onProductClick={(pid) => navigate(`/app/product/${pid}`)} />
-      </>
+      <AppFrame>
+        <BackHeader title="브랜드" />
+        <p className="text-center py-16 text-ink-faint text-[14px]">브랜드를 찾을 수 없습니다.</p>
+        <AppFooter />
+      </AppFrame>
     )
   }
 
   return (
     <AppFrame>
-      <ViewModeToggle mode={mode} onToggle={toggle} />
-      <BackHeader
-        title=""
-        transparent
-        rightElement={
-          <button aria-label="공유" className="text-xl text-white">
-            <span aria-hidden="true">↗</span>
-          </button>
-        }
-      />
+      <BackHeader title={brandName ?? ''} />
 
-      {/* 브랜드 헤더 */}
-      <div
-        className="relative -mt-14 pt-20 pb-8 px-5 flex flex-col items-center text-center"
-        style={{ backgroundColor: brand.bgColor }}
-      >
-        <div
-          className="w-20 h-20 rounded-[24px] flex items-center justify-center text-4xl mb-3"
-          style={{ backgroundColor: `${brand.accentColor}33` }}
-          aria-hidden="true"
-        >
-          {brand.icon}
-        </div>
-        <Badge type="dept" label={brand.deptName} deptKey={brand.deptKey} className="mb-2" />
-        <h1
-          className="font-serif text-[24px] font-bold"
-          style={{ color: brand.textColor }}
-        >
-          {brand.name}
-        </h1>
-        <p className="text-[13px] mt-1.5 max-w-xs leading-relaxed" style={{ color: `${brand.textColor}99` }}>
-          {brand.description}
-        </p>
-        <div className="mt-5 text-center">
-          <p className="text-[18px] font-bold" style={{ color: brand.textColor }}>{brand.productCount}</p>
-          <p className="text-[11px]" style={{ color: `${brand.textColor}80` }}>상품</p>
-        </div>
+      {/* 브랜드 헤더 — 브랜드명 + 판매중 상품 수 */}
+      <div className="px-4 pt-7 pb-5 border-b border-rule">
+        <h1 className="text-[22px] font-bold text-ink">{brandName ?? ' '}</h1>
+        {!loading && (
+          <p className="text-[13px] text-ink-soft mt-1">판매중 상품 {products.length}개{hasMore ? '+' : ''}</p>
+        )}
       </div>
 
       <div className="px-4 pt-4">
-        <div className="grid grid-cols-2 gap-3">
-          {brand.products.length === 0 ? (
-            <p className="col-span-2 text-center py-10 text-ink-faint text-[14px]">상품이 준비 중입니다.</p>
-          ) : (
-            brand.products.map(product => (
-              <button
-                key={product.id}
-                onClick={() => navigate(`/app/product/${product.id}`)}
-                className="text-left focus:outline-none focus-visible:shadow-ring"
-                aria-label={`${product.brand} ${product.name}`}
-              >
-                <ProductCard {...product} />
-              </button>
-            ))
-          )}
-        </div>
+        {loading && products.length === 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ShopProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-center py-16 text-ink-faint text-[14px]">{error}</p>
+        ) : products.length === 0 ? (
+          <p className="text-center py-16 text-ink-faint text-[14px]">상품이 준비 중입니다.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {products.map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() => navigate(`/app/product/${product.id}`)}
+                  className="text-left focus:outline-none focus-visible:shadow-ring"
+                  aria-label={`${brandName ?? ''} ${product.name}`}
+                >
+                  <ShopProductCard product={product} />
+                </button>
+              ))}
+            </div>
+            {hasMore && (
+              <div className="pt-4">
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="w-full py-3 rounded-control border border-rule text-[14px] text-ink-soft disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
+                >
+                  {loading ? '불러오는 중…' : '더보기'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
+      <AppFooter />
     </AppFrame>
   )
 }
