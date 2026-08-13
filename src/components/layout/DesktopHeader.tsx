@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { IconHeart, IconCart } from '../common/Icon'
+import CartCountBadge from '../common/CartCountBadge'
 import { CATEGORIES } from '../../constants'
 
 // PC 전용 공용 헤더 — 지금까지 Desktop*.tsx 14개가 각자 비슷한 헤더를 따로
@@ -15,7 +16,7 @@ const QUICK_LINKS = [
 export default function DesktopHeader() {
   return (
     <header className="bg-paper border-b border-rule sticky top-0 z-50">
-      <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
           뷰티그라운드
         </Link>
@@ -23,14 +24,15 @@ export default function DesktopHeader() {
           <Link to="/app/wishlist" aria-label="찜" className="text-ink">
             <IconHeart className="w-[20px] h-[20px]" />
           </Link>
-          <Link to="/app/cart" aria-label="장바구니" className="text-ink">
+          <Link to="/app/cart" aria-label="장바구니" className="relative text-ink">
             <IconCart className="w-[20px] h-[20px]" />
+            <CartCountBadge />
           </Link>
         </div>
       </div>
 
       <div className="border-t border-rule">
-        <div className="max-w-[1920px] mx-auto px-6 h-11 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-6 h-11 flex items-center justify-between">
           <nav className="flex items-center gap-6" aria-label="카테고리">
             <Link to="/app/category/all" className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
               전체

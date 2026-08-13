@@ -9,7 +9,6 @@ import { useViewMode } from '../lib/viewMode'
 import { useHomeProductSections } from '../hooks/useHomeProductSections'
 import { useShopCategories } from '../hooks/useShopCategories'
 import { useHeroBanners } from '../hooks/useHeroBanners'
-import { useCategoryThumbnails } from '../hooks/useCategoryThumbnails'
 import { useSaleProducts } from '../hooks/useSaleProducts'
 import { useShopBrands } from '../hooks/useShopBrands'
 
@@ -28,14 +27,11 @@ export default function AppHome() {
   const { products, recommended, seasonLabel, loading: prodLoading } = useHomeProductSections()
   const { categories } = useShopCategories()
   const { banners } = useHeroBanners()
-  const { thumbnails: categoryThumbnails } = useCategoryThumbnails()
   const { products: saleProducts, loading: saleLoading } = useSaleProducts()
   const { brands, loading: brandsLoading } = useShopBrands()
   const { mode, isDesktop, toggle } = useViewMode()
 
   const goProduct = (id: string) => navigate(`/app/product/${id}`)
-  const goCategory = (cat: string | null) =>
-    navigate(cat ? `/app/category/all?cat=${encodeURIComponent(cat)}` : '/app/category/all')
 
   if (isDesktop) {
     return (
@@ -44,7 +40,6 @@ export default function AppHome() {
         <DesktopHome
           banners={banners}
           categories={categories}
-          categoryThumbnails={categoryThumbnails}
           recommended={recommended}
           seasonLabel={seasonLabel}
           products={products}
@@ -52,7 +47,6 @@ export default function AppHome() {
           saleProducts={saleProducts}
           saleLoading={saleLoading}
           onProductClick={goProduct}
-          onCategoryClick={goCategory}
         />
       </>
     )

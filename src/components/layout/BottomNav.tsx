@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { IconHome, IconGrid, IconLive, IconCart, IconUser } from '../common/Icon'
+import CartCountBadge from '../common/CartCountBadge'
 
 // 2026-08-12: /live 재구축(실데이터) 완료로 '라이브' 탭 복원. '홈'=/app/home(온라인몰 메인),
 // '라이브'=/live(라이브방송 메인) — 서로 다른 독립 경로라 중복활성 버그 없음.
@@ -33,7 +34,10 @@ export default function BottomNav() {
                 aria-label={label}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className="w-[21px] h-[21px]" strokeWidth={isActive ? 2 : 1.6} />
+                <span className="relative inline-flex">
+                  <Icon className="w-[21px] h-[21px]" strokeWidth={isActive ? 2 : 1.6} />
+                  {path === '/app/cart' && <CartCountBadge />}
+                </span>
                 <span className={`text-[11px] leading-none ${isActive ? 'font-bold' : ''}`}>{label}</span>
               </Link>
             )

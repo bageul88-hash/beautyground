@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import LiveStatusBadge from './LiveStatusBadge'
 import ProductPeek, { type PrimaryProduct } from './ProductPeek'
 import { IconCart } from '../common/Icon'
+import CartCountBadge from '../common/CartCountBadge'
 import PromoBar from '../home/PromoBar'
 import DesktopFooter from '../layout/DesktopFooter'
 import { formatDateTime, formatDateOnly, formatTimeOnly, dateKey } from '../../lib/format'
@@ -72,17 +73,18 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
     <div className="bg-paper min-h-screen">
       <PromoBar />
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
             뷰티그라운드
           </Link>
-          <Link to="/app/cart" aria-label="장바구니" className="text-ink">
+          <Link to="/app/cart" aria-label="장바구니" className="relative text-ink">
             <IconCart className="w-[20px] h-[20px]" />
+            <CartCountBadge />
           </Link>
         </div>
       </header>
 
-      <div className="max-w-[1920px] mx-auto px-6 py-10">
+      <div className="max-w-[1200px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">라이브</h1>
 
         {loading ? (

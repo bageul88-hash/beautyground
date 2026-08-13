@@ -37,7 +37,7 @@ export default function DesktopBrandDetail({ brand, onProductClick }: Props) {
         </div>
       </div>
 
-      <div className="max-w-[1920px] mx-auto px-6 py-10">
+      <div className="max-w-[1200px] mx-auto px-6 py-10">
         {brand.products.length === 0 ? (
           <p className="text-center py-16 text-ink-faint text-[14px]">상품이 준비 중입니다.</p>
         ) : (

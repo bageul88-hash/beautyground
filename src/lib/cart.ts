@@ -91,6 +91,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<{ erro
       .update({ quantity: (existing as { quantity: number }).quantity + quantity })
       .eq('id', (existing as { id: string }).id)
     if (error) return { error: error.message }
+    window.dispatchEvent(new Event('bg-cart-changed'))
     return {}
   }
 
@@ -98,6 +99,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<{ erro
     .from('cart_items')
     .insert({ user_id: userId, product_id: productId, quantity })
   if (error) return { error: error.message }
+  window.dispatchEvent(new Event('bg-cart-changed'))
   return {}
 }
 
@@ -112,6 +114,7 @@ export async function updateCartQuantity(cartItemId: string, quantity: number): 
     return
   }
   await supabase.from('cart_items').update({ quantity: qty }).eq('id', cartItemId)
+  window.dispatchEvent(new Event('bg-cart-changed'))
 }
 
 export async function removeFromCart(cartItemId: string): Promise<void> {
@@ -121,6 +124,7 @@ export async function removeFromCart(cartItemId: string): Promise<void> {
     return
   }
   await supabase.from('cart_items').delete().eq('id', cartItemId)
+  window.dispatchEvent(new Event('bg-cart-changed'))
 }
 
 export async function clearCartItems(cartItemIds: string[]): Promise<void> {
@@ -133,6 +137,7 @@ export async function clearCartItems(cartItemIds: string[]): Promise<void> {
   if (serverIds.length > 0) {
     await supabase.from('cart_items').delete().in('id', serverIds)
   }
+  window.dispatchEvent(new Event('bg-cart-changed'))
 }
 
 // 게스트 장바구니 담긴 개수(배지용) — 상품 조회 없이 로컬만

@@ -5,6 +5,7 @@ import ReviewSummary from './ReviewSummary'
 import ProductQnA from './ProductQnA'
 import CategoryTabBar from './CategoryTabBar'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../common/Icon'
+import CartCountBadge from '../common/CartCountBadge'
 import { SHIPPING_NOTICE } from '../../constants'
 import type { ReviewSummaryData, ScrapedReview } from '../../lib/types'
 
@@ -67,8 +68,9 @@ export default function DesktopProductDetail({
             <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
               <IconHeart filled={wished} className="w-[20px] h-[20px]" />
             </button>
-            <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="focus:outline-none focus-visible:shadow-ring">
+            <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="relative focus:outline-none focus-visible:shadow-ring">
               <IconCart className="w-[20px] h-[20px]" />
+              <CartCountBadge />
             </button>
           </div>
         </div>

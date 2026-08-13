@@ -18,6 +18,7 @@ import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/I
 import { IconSend2, IconBrandFacebook, IconBrandX, IconLink } from '@tabler/icons-react'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
 import ScrollToTopButton from '../components/common/ScrollToTopButton'
+import CartCountBadge from '../components/common/CartCountBadge'
 
 const DETAIL_TABS = ['상품정보', '성분', '배송/반품']
 
@@ -187,10 +188,16 @@ export default function AppProductDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
-      <ViewModeToggle mode={mode} onToggle={toggle} />
-      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
-        <p className="text-ink-faint text-[14px]">불러오는 중...</p>
-      </div>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        {isDesktop ? (
+          <div className="max-w-[1440px] mx-auto px-6 py-24 flex items-center justify-center">
+            <p className="text-ink-faint text-[14px]">불러오는 중...</p>
+          </div>
+        ) : (
+          <div className="max-w-[480px] mx-auto bg-paper min-h-screen flex items-center justify-center">
+            <p className="text-ink-faint text-[14px]">불러오는 중...</p>
+          </div>
+        )}
       </div>
     )
   }
@@ -198,10 +205,16 @@ export default function AppProductDetail() {
   if (!view) {
     return (
       <div className="min-h-screen bg-quiet md:py-6">
-      <ViewModeToggle mode={mode} onToggle={toggle} />
-      <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule flex items-center justify-center">
-        <p className="text-ink-faint">상품을 찾을 수 없습니다.</p>
-      </div>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        {isDesktop ? (
+          <div className="max-w-[1440px] mx-auto px-6 py-24 flex items-center justify-center">
+            <p className="text-ink-faint">상품을 찾을 수 없습니다.</p>
+          </div>
+        ) : (
+          <div className="max-w-[480px] mx-auto bg-paper min-h-screen flex items-center justify-center">
+            <p className="text-ink-faint">상품을 찾을 수 없습니다.</p>
+          </div>
+        )}
       </div>
     )
   }
@@ -326,8 +339,9 @@ export default function AppProductDetail() {
             <button onClick={toggleWish} aria-label={wished ? '찜 해제' : '찜하기'} className="focus:outline-none focus-visible:shadow-ring">
               <IconHeart filled={wished} className={`w-[22px] h-[22px] ${wished ? 'text-accent' : ''}`} />
             </button>
-            <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="focus:outline-none focus-visible:shadow-ring">
+            <button onClick={() => navigate('/app/cart')} aria-label="장바구니" className="relative focus:outline-none focus-visible:shadow-ring">
               <IconCart />
+              <CartCountBadge />
             </button>
           </div>
         }

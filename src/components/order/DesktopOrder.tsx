@@ -101,7 +101,7 @@ export default function DesktopOrder({
   return (
     <div className="bg-paper min-h-screen">
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center">
           <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
             뷰티그라운드
           </Link>
@@ -109,7 +109,7 @@ export default function DesktopOrder({
         </div>
       </header>
 
-      <div className="max-w-[1920px] mx-auto px-6 py-10 grid grid-cols-[1.6fr_1fr] gap-10 items-start">
+      <div className="max-w-[1200px] mx-auto px-6 py-10 grid grid-cols-[1.6fr_1fr] gap-10 items-start">
         <div className="space-y-2">
           {!paymentReady && (
             <div className="bg-quiet border border-rule px-5 py-3">
