@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import GNB from '../../components/layout/GNB'
-import Footer from '../../components/layout/Footer'
-import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
 
-// 백화점 담당자 로그인 — 예전 4자리 공용 코드 게이트를 대체(2026-08-15). 지점별로 계정을 따로
-// 발급해(예: "AK플라자_광명") 관리자가 미리 만들어준다(자체 회원가입 없음).
+// 백화점 담당자 로그인 — beautyground-erp(매장관리 시스템)의 로그인 화면과 같은 톤으로 통일:
+// 옅은 라벤더그레이 배경 + 흰 카드(radius 18, soft shadow) + 네이비(#1a1e36) 강조.
+// 온라인몰 헤더/푸터 없이 독립된 유틸리티 화면으로 둔다(ERP 로그인과 동일한 방식).
 export default function DeptLogin() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -32,78 +30,58 @@ export default function DeptLogin() {
   }
 
   return (
-    <>
-      <GNB />
-      <main className="py-20 md:py-28 relative overflow-hidden" style={{ backgroundColor: '#f7f4ef' }}>
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #111 1px, transparent 0)',
-            backgroundSize: '28px 28px',
-          }}
-          aria-hidden="true"
-        />
-        <div className="max-w-[420px] mx-auto px-6 relative">
-          <div className="text-center mb-8">
-            <span className="text-gold text-[13px] font-medium tracking-widest uppercase mb-3 block">
-              STORE LOGIN
-            </span>
-            <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-text">
-              백화점 담당자 로그인
-            </h1>
-            <p className="text-[13px] text-text-sub mt-2">
-              지점별로 발급된 아이디로 로그인해 판매실적을 확인하세요.
-            </p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f5f9', padding: 20 }}>
+      <div style={{ width: '100%', maxWidth: 360, background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(20,25,60,.1)', padding: 28 }}>
+        <div style={{ textAlign: 'center', marginBottom: 26 }}>
+          <img src="/images/bg-logo-mark.png" alt="뷰티그라운드" style={{ width: 64, margin: '0 auto 12px', display: 'block' }} />
+          <h1 style={{ fontSize: 16, fontWeight: 700, color: '#8b90ad', letterSpacing: '.5px' }}>백화점 담당자 시스템</h1>
+        </div>
+
+        <form onSubmit={handleSubmit} noValidate style={{ display: 'grid', gap: 14 }}>
+          <div>
+            <label htmlFor="email" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#666', marginBottom: 6 }}>
+              아이디
+            </label>
+            <input
+              id="email" type="email" required
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="ak-gwangmyeong@beautyground.co.kr"
+              style={{ width: '100%', padding: '13px 14px', border: '1px solid #d5d8e2', borderRadius: 10, fontSize: 15, color: '#1a1e36' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="password" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#666', marginBottom: 6 }}>
+              비밀번호
+            </label>
+            <input
+              id="password" type="password" required
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="비밀번호"
+              style={{ width: '100%', padding: '13px 14px', border: '1px solid #d5d8e2', borderRadius: 10, fontSize: 15, color: '#1a1e36' }}
+            />
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="bg-white rounded-lg p-6 md:p-8 border shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-            style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
+          {error && (
+            <p role="alert" style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: '100%', padding: 16, borderRadius: 12, fontSize: 15.5, fontWeight: 700,
+              cursor: submitting ? 'default' : 'pointer', border: 'none',
+              background: submitting ? '#999' : '#1a1e36', color: '#fff', marginTop: 4,
+            }}
           >
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-[13px] font-medium text-text mb-1.5">
-                  아이디
-                </label>
-                <input
-                  id="email" type="email" required
-                  value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ak-gwangmyeong@beautyground.co.kr"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-[13px] font-medium text-text mb-1.5">
-                  비밀번호
-                </label>
-                <input
-                  id="password" type="password" required
-                  value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="비밀번호"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
-                />
-              </div>
+            {submitting ? '로그인 중...' : '로그인'}
+          </button>
 
-              {error && (
-                <p className="text-[13px] text-[#FF4757]" role="alert">{error}</p>
-              )}
-
-              <Button
-                type="submit" variant="gold" size="md"
-                label={submitting ? '로그인 중…' : '로그인'}
-                disabled={submitting} className="w-full"
-              />
-
-              <p className="text-center text-[13px] text-text-sub pt-1">
-                아이디 발급은 뷰티그라운드 담당자에게 문의해 주세요.
-              </p>
-            </div>
-          </form>
-        </div>
-      </main>
-      <Footer />
-    </>
+          <p style={{ textAlign: 'center', fontSize: 12.5, color: '#8b90ad', margin: '4px 0 0' }}>
+            아이디는 뷰티그라운드 담당자에게 문의하세요.
+          </p>
+        </form>
+      </div>
+    </div>
   )
 }
