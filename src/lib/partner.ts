@@ -47,3 +47,65 @@ export async function setMyProductExportFeatured(productId: string, featured: bo
   })
   if (error) throw error
 }
+
+// 수출용 상품 이미지/설명 저장 (update_my_product_export_content RPC, supabase/products_export_content.sql)
+export async function updateMyProductExportContent(
+  productId: string,
+  imageUrls: string[],
+  description: string,
+  descriptionEn: string
+) {
+  const { error } = await supabase.rpc('update_my_product_export_content', {
+    p_product_id: productId,
+    p_image_urls: imageUrls,
+    p_description: description,
+    p_description_en: descriptionEn,
+  })
+  if (error) throw error
+}
+
+// 브랜드 BI 로고 저장 (update_my_partner_export_logo RPC, supabase/partners_export_logo.sql)
+export async function updateMyExportLogo(logoUrl: string): Promise<Partner> {
+  const { data, error } = await supabase.rpc('update_my_partner_export_logo', { p_logo_url: logoUrl })
+  if (error) throw error
+  return data as Partner
+}
+
+// 수출용 이미지 1장을 product-images 버킷의 export/<partnerId>/... 경로에 업로드하고 공개 URL 반환.
+// storage RLS가 이 경로 접두사만 본인 partner_id로 제한(products_export_content.sql).
+export async function uploadExportImage(file: File, partnerId: string, folder: string): Promise<string> {
+  const bitmap = await createImageBitmap(file)
+  const MAX_W = 1600
+  const scale = Math.min(1, MAX_W / bitmap.width)
+  const w = Math.round(bitmap.width * scale)
+  const h = Math.round(bitmap.height * scale)
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close()
+
+  const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/webp', 0.85))
+  const path = `export/${partnerId}/${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.webp`
+  const { error } = await supabase.storage.from('product-images').upload(path, blob, {
+    upsert: true,
+    contentType: 'image/webp',
+  })
+  if (error) throw error
+  const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+  return data.publicUrl
+}
+
+// 한글 텍스트를 영문으로 번역 (/api/translate, Gemini 사용 — 로그인 세션 토큰 필요)
+export async function translateText(text: string): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) throw new Error('로그인이 필요합니다.')
+  const r = await fetch('/api/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ text }),
+  })
+  const data = await r.json().catch(() => ({}))
+  if (!r.ok || !data.ok) throw new Error(data.reason || '번역에 실패했습니다.')
+  return data.translated as string
+}

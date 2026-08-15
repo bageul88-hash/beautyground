@@ -102,7 +102,14 @@ export default function AdminPartners() {
               <tbody>
                 {partners.map((p) => (
                   <tr key={p.id} className="border-b border-rule last:border-b-0">
-                    <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{p.brand_name}</td>
+                    <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {p.export_logo_url && (
+                          <img src={p.export_logo_url} alt="" className="w-6 h-6 rounded object-contain border border-rule bg-paper shrink-0" />
+                        )}
+                        {p.brand_name}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${

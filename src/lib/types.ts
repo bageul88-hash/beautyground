@@ -28,6 +28,10 @@ export interface Product {
   source_url: string | null // 스크랩 원본 상품 페이지 URL(후기 재수집용)
   season_tags: string[] // 계절/명절 추천 태그(봄·여름·가을·겨울·추석·설) — 홈 "지금 확인할 상품" 큐레이션에 사용
   is_export_featured: boolean // 브랜드가 해외 바이어용 대표상품으로 고른 상품인지 (supabase/products_export_featured.sql)
+  // 수출용 별도 이미지/설명 — 소비자용 gallery_images/description과 분리 (supabase/products_export_content.sql)
+  export_image_urls: string[]
+  export_description: string | null
+  export_description_en: string | null // /api/translate로 자동번역
   created_at: string
 }
 
@@ -87,6 +91,7 @@ export interface Partner {
   export_certifications: string[]
   export_countries: string | null // 이미 수출 중인 국가(자유서술)
   export_moq_notes: string | null // 최소주문수량·샘플 정책 등
+  export_logo_url: string | null // 브랜드 BI 로고 (supabase/partners_export_logo.sql)
   created_at: string
 }
 

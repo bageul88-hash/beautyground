@@ -1,16 +1,47 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { getMyPartner, updateMyExportDetails, setMyProductExportFeatured } from '../../lib/partner'
+import {
+  getMyPartner,
+  updateMyExportDetails,
+  setMyProductExportFeatured,
+  updateMyProductExportContent,
+  updateMyExportLogo,
+  uploadExportImage,
+  translateText,
+} from '../../lib/partner'
 import type { Partner, Product } from '../../lib/types'
 
 const CERTIFICATION_OPTIONS = ['CPNP(EU)', 'FDA(US)', '비건', '할랄', '유기농', 'ISO22716', '동물실험 안전']
 const MAX_FEATURED = 5
+const MAX_PRODUCT_IMAGES = 5
 
-interface ProductRow {
-  id: string
-  name: string
-  thumbnail_url: string | null
-  is_export_featured: boolean
+type ProductRow = Pick<
+  Product,
+  'id' | 'name' | 'thumbnail_url' | 'is_export_featured' | 'export_image_urls' | 'export_description' | 'export_description_en'
+>
+
+interface ProductDraft {
+  images: string[]
+  description: string
+  descriptionEn: string
+  uploading: boolean
+  translating: boolean
+  saving: boolean
+  saved: boolean
+  error: string
+}
+
+function draftFrom(p: ProductRow): ProductDraft {
+  return {
+    images: p.export_image_urls ?? [],
+    description: p.export_description ?? '',
+    descriptionEn: p.export_description_en ?? '',
+    uploading: false,
+    translating: false,
+    saving: false,
+    saved: false,
+    error: '',
+  }
 }
 
 export default function BrandExport() {
@@ -19,7 +50,9 @@ export default function BrandExport() {
   const [certifications, setCertifications] = useState<string[]>([])
   const [countries, setCountries] = useState('')
   const [moqNotes, setMoqNotes] = useState('')
+  const [logoUploading, setLogoUploading] = useState(false)
   const [products, setProducts] = useState<ProductRow[]>([])
+  const [drafts, setDrafts] = useState<Record<string, ProductDraft>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -40,11 +73,15 @@ export default function BrandExport() {
 
         const { data } = await supabase
           .from('products')
-          .select('id,name,thumbnail_url,is_export_featured')
+          .select('id,name,thumbnail_url,is_export_featured,export_image_urls,export_description,export_description_en')
           .eq('partner_id', p.id)
           .eq('status', 'on_sale')
           .order('name')
-        if (active) setProducts((data ?? []) as ProductRow[])
+        if (active) {
+          const rows = (data ?? []) as ProductRow[]
+          setProducts(rows)
+          setDrafts(Object.fromEntries(rows.filter((r) => r.is_export_featured).map((r) => [r.id, draftFrom(r)])))
+        }
       }
       setLoading(false)
     })()
@@ -65,6 +102,7 @@ export default function BrandExport() {
     }
     const next = !product.is_export_featured
     setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, is_export_featured: next } : p)))
+    if (next) setDrafts((prev) => (prev[product.id] ? prev : { ...prev, [product.id]: draftFrom(product) }))
     try {
       await setMyProductExportFeatured(product.id, next)
     } catch {
@@ -73,7 +111,79 @@ export default function BrandExport() {
     }
   }
 
-  const handleSave = async () => {
+  const patchDraft = (productId: string, patch: Partial<ProductDraft>) => {
+    setDrafts((prev) => ({ ...prev, [productId]: { ...prev[productId], ...patch } }))
+  }
+
+  const handleLogoUpload = async (file: File) => {
+    if (!partner) return
+    setLogoUploading(true)
+    setError('')
+    try {
+      const url = await uploadExportImage(file, partner.id, 'logo')
+      const updated = await updateMyExportLogo(url)
+      setPartner(updated)
+    } catch {
+      setError('로고 업로드에 실패했습니다.')
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
+  const handleAddProductImages = async (product: ProductRow, files: FileList) => {
+    if (!partner) return
+    const draft = drafts[product.id] ?? draftFrom(product)
+    const remaining = MAX_PRODUCT_IMAGES - draft.images.length
+    if (remaining <= 0) {
+      patchDraft(product.id, { error: `이미지는 최대 ${MAX_PRODUCT_IMAGES}장까지 등록할 수 있습니다.` })
+      return
+    }
+    patchDraft(product.id, { uploading: true, error: '' })
+    try {
+      const toUpload = Array.from(files).slice(0, remaining)
+      const urls = await Promise.all(toUpload.map((f) => uploadExportImage(f, partner.id, product.id)))
+      setDrafts((prev) => ({
+        ...prev,
+        [product.id]: { ...prev[product.id], images: [...prev[product.id].images, ...urls], uploading: false },
+      }))
+    } catch {
+      patchDraft(product.id, { uploading: false, error: '이미지 업로드에 실패했습니다.' })
+    }
+  }
+
+  const removeProductImage = (productId: string, url: string) => {
+    setDrafts((prev) => ({
+      ...prev,
+      [productId]: { ...prev[productId], images: prev[productId].images.filter((u) => u !== url) },
+    }))
+  }
+
+  const handleTranslate = async (productId: string) => {
+    const draft = drafts[productId]
+    if (!draft?.description.trim()) return
+    patchDraft(productId, { translating: true, error: '' })
+    try {
+      const translated = await translateText(draft.description.trim())
+      patchDraft(productId, { descriptionEn: translated, translating: false })
+    } catch {
+      patchDraft(productId, { translating: false, error: '번역에 실패했습니다.' })
+    }
+  }
+
+  const handleSaveProduct = async (productId: string) => {
+    const draft = drafts[productId]
+    if (!draft) return
+    patchDraft(productId, { saving: true, error: '', saved: false })
+    try {
+      await updateMyProductExportContent(productId, draft.images, draft.description.trim(), draft.descriptionEn.trim())
+      patchDraft(productId, { saving: false, saved: true })
+      setTimeout(() => patchDraft(productId, { saved: false }), 2500)
+    } catch {
+      patchDraft(productId, { saving: false, error: '저장에 실패했습니다.' })
+    }
+  }
+
+  const handleSaveDetails = async () => {
     setSaving(true)
     setError('')
     setSaved(false)
@@ -84,7 +194,7 @@ export default function BrandExport() {
         countries: countries.trim(),
         moqNotes: moqNotes.trim(),
       })
-      setPartner(updated)
+      setPartner((prev) => (prev ? { ...prev, ...updated } : updated))
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } catch {
@@ -111,6 +221,8 @@ export default function BrandExport() {
     )
   }
 
+  const featuredProducts = products.filter((p) => p.is_export_featured)
+
   return (
     <>
       <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
@@ -122,6 +234,33 @@ export default function BrandExport() {
         </p>
       </div>
 
+      {/* 브랜드 로고 */}
+      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
+        <p className="text-[14px] font-semibold text-[#111] mb-3">브랜드 BI 로고</p>
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-[10px] border border-[#e5e0d8] bg-[#f7f4ef] flex items-center justify-center overflow-hidden shrink-0">
+            {partner.export_logo_url ? (
+              <img src={partner.export_logo_url} alt={`${partner.brand_name} 로고`} className="w-full h-full object-contain" />
+            ) : (
+              <span className="text-[11px] text-[#c4bcae]">로고 없음</span>
+            )}
+          </div>
+          <label className="cursor-pointer">
+            <span className="inline-block bg-[#f7f4ef] border border-[#e5e0d8] rounded-[10px] px-4 py-2.5 text-[13px] text-[#111] hover:border-[#b8924a] transition-colors">
+              {logoUploading ? '업로드 중…' : partner.export_logo_url ? '로고 변경' : '로고 업로드'}
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={logoUploading}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleLogoUpload(f); e.target.value = '' }}
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* 브랜드 소개글 */}
       <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
         <p className="text-[14px] font-semibold text-[#111] mb-3">브랜드 소개글</p>
         <textarea
@@ -133,6 +272,7 @@ export default function BrandExport() {
         />
       </div>
 
+      {/* 인증/수출국가/MOQ */}
       <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
         <p className="text-[14px] font-semibold text-[#111] mb-3">보유 인증</p>
         <div className="flex flex-wrap gap-2 mb-6">
@@ -174,7 +314,7 @@ export default function BrandExport() {
 
         <div className="flex items-center gap-3 mt-5">
           <button
-            onClick={() => void handleSave()}
+            onClick={() => void handleSaveDetails()}
             disabled={saving}
             className="bg-[#0e0c08] text-white rounded-[10px] px-6 py-3 text-[14px] font-semibold hover:opacity-90 active:opacity-80 transition-opacity disabled:opacity-50"
           >
@@ -184,13 +324,15 @@ export default function BrandExport() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
+      {/* 대표상품 선택 */}
+      <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
         <div className="flex items-center justify-between mb-1">
           <p className="text-[14px] font-semibold text-[#111]">수출 대표상품 선택</p>
           <span className="text-[12px] text-[#9a9080]">{featuredCount}/{MAX_FEATURED}</span>
         </div>
         <p className="text-[12.5px] text-[#9a9080] mb-4">
-          해외 바이어에게 먼저 보여줄 대표상품을 최대 {MAX_FEATURED}개까지 선택해 주세요.
+          해외 바이어에게 먼저 보여줄 대표상품을 최대 {MAX_FEATURED}개까지 선택해 주세요. 선택하면 아래에
+          수출용 사진·설명을 따로 작성할 수 있습니다.
         </p>
 
         {featureError && <p className="text-[13px] text-red-600 mb-3">{featureError}</p>}
@@ -225,6 +367,88 @@ export default function BrandExport() {
           </div>
         )}
       </div>
+
+      {/* 대표상품별 수출용 사진/설명 */}
+      {featuredProducts.map((product) => {
+        const draft = drafts[product.id] ?? draftFrom(product)
+        return (
+          <div key={product.id} className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
+            <p className="text-[14px] font-semibold text-[#111] mb-1">{product.name}</p>
+            <p className="text-[12px] text-[#9a9080] mb-4">수출용 사진·설명 (소비자용 상품 정보와 별개로 저장됩니다)</p>
+
+            <p className="text-[13px] text-[#9a9080] mb-2">사진 ({draft.images.length}/{MAX_PRODUCT_IMAGES})</p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
+              {draft.images.map((url) => (
+                <div key={url} className="relative">
+                  <img src={url} alt="" className="w-full aspect-square object-cover rounded-[8px] border border-[#e5e0d8]" />
+                  <button
+                    type="button"
+                    onClick={() => removeProductImage(product.id, url)}
+                    className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-[11px]"
+                    aria-label="이미지 삭제"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {draft.images.length < MAX_PRODUCT_IMAGES && (
+                <label className="aspect-square rounded-[8px] border border-dashed border-[#e5e0d8] flex items-center justify-center cursor-pointer hover:border-[#b8924a] transition-colors">
+                  <span className="text-[12px] text-[#9a9080]">{draft.uploading ? '업로드중…' : '+ 추가'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    disabled={draft.uploading}
+                    onChange={(e) => { if (e.target.files?.length) void handleAddProductImages(product, e.target.files); e.target.value = '' }}
+                  />
+                </label>
+              )}
+            </div>
+
+            <p className="text-[13px] text-[#9a9080] mb-2">설명 (한글)</p>
+            <textarea
+              value={draft.description}
+              onChange={(e) => patchDraft(product.id, { description: e.target.value })}
+              rows={4}
+              placeholder="이 상품의 특징, 성분, 사용법 등을 자유롭게 작성해 주세요."
+              className="w-full px-4 py-3 border border-[#e5e0d8] rounded-[10px] text-[14px] text-[#111] placeholder:text-[#c4bcae] focus:outline-none focus:border-[#b8924a] transition-colors resize-none mb-3"
+            />
+
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[13px] text-[#9a9080]">영문 설명</p>
+              <button
+                type="button"
+                onClick={() => void handleTranslate(product.id)}
+                disabled={draft.translating || !draft.description.trim()}
+                className="text-[12px] text-[#b8924a] font-medium hover:underline disabled:opacity-40 disabled:no-underline"
+              >
+                {draft.translating ? '번역 중…' : '한글 설명 번역하기 →'}
+              </button>
+            </div>
+            <textarea
+              value={draft.descriptionEn}
+              onChange={(e) => patchDraft(product.id, { descriptionEn: e.target.value })}
+              rows={4}
+              placeholder="번역하기를 누르면 자동으로 채워집니다. 직접 수정도 가능합니다."
+              className="w-full px-4 py-3 border border-[#e5e0d8] rounded-[10px] text-[14px] text-[#111] placeholder:text-[#c4bcae] focus:outline-none focus:border-[#b8924a] transition-colors resize-none mb-3"
+            />
+
+            {draft.error && <p className="text-[13px] text-red-600 mb-2">{draft.error}</p>}
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => void handleSaveProduct(product.id)}
+                disabled={draft.saving}
+                className="bg-[#0e0c08] text-white rounded-[10px] px-5 py-2.5 text-[13px] font-semibold hover:opacity-90 active:opacity-80 transition-opacity disabled:opacity-50"
+              >
+                {draft.saving ? '저장 중…' : '이 상품 저장'}
+              </button>
+              {draft.saved && <span className="text-[13px] text-[#b8924a] font-medium">저장되었습니다</span>}
+            </div>
+          </div>
+        )
+      })}
     </>
   )
 }
