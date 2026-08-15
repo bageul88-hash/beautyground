@@ -4,6 +4,7 @@ import DesktopFooter from '../layout/DesktopFooter'
 import PromoBar from './PromoBar'
 import TrustStrip from './TrustStrip'
 import CategoryRecommend from './CategoryRecommend'
+import DeptStoreLiveSection from './DeptStoreLiveSection'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -152,6 +153,7 @@ export default function DesktopHome({
       </section>
 
       <TrustStrip />
+      <DeptStoreLiveSection />
 
       {/* 특가세일 — 지어낸 기획전 대신 실제 sale_price 걸린 상품을 할인율 높은 순으로 */}
       {!saleLoading && saleProducts.length > 0 && (

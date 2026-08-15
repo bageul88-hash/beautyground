@@ -68,7 +68,53 @@ export interface Live {
   host_id?: string | null
   // 예상 방송시간(분) (supabase/lives_duration.sql) — null이면 미정
   duration_minutes?: number | null
+  // 백화점 태그 (supabase/lives_dept_key.sql) — 홈 화면 백화점별 방송 박스/필터, /dept 담당자 페이지용
+  dept_key?: 'hyundai' | 'ak' | null
   created_at: string
+}
+
+// 브랜드(입점사) — 파트너센터 UI는 삭제됐지만 브랜드 식별·수수료·정산 기준 테이블로는 계속 사용.
+// 로그인 계정은 관리자가 admin_link_partner_account RPC로 연결(자체 회원가입 없음).
+export interface Partner {
+  id: string
+  user_id: string | null
+  brand_name: string
+  status: 'active' | 'suspended'
+  commission_rate: number
+  created_at: string
+}
+
+// 브랜드 정산 (supabase/admin_ops.sql — settlements 테이블 + admin_generate_partner_settlement 등)
+// 호스트와 달리 등급(tier) 없이 partners.commission_rate 고정값으로 계산.
+export interface Settlement {
+  id: string
+  partner_id: string
+  period: string
+  total_sales: number
+  commission: number
+  payout_amount: number
+  status: 'pending' | 'paid'
+  created_at: string
+}
+
+// admin_list_partner_settlements() RPC 반환 행 — 브랜드명 조인 포함
+export interface SettlementRow extends Settlement {
+  brand_name: string
+}
+
+// partner_live_sales_view 조회 결과 행 — 구매자 PII 없음(host_sales_view와 동일 원칙)
+export interface PartnerSaleRow {
+  id: string
+  live_id: string | null
+  product_id: string | null
+  amount: number
+  quantity: number
+  status: Order['status']
+  created_at: string
+  partner_id: string
+  live_title: string | null
+  live_scheduled_at: string | null
+  dept_key: 'hyundai' | 'ak' | null
 }
 
 // 라이브 한정 쿠폰/특가 (supabase/live_coupons.sql)

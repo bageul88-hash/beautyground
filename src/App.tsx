@@ -37,6 +37,8 @@ import AdminHome from './pages/admin/Home'
 import AdminHosts from './pages/admin/Hosts'
 import AdminCommissionTiers from './pages/admin/CommissionTiers'
 import AdminHostSettlements from './pages/admin/HostSettlements'
+import AdminPartners from './pages/admin/Partners'
+import AdminPartnerSettlements from './pages/admin/PartnerSettlements'
 import AdminMembers from './pages/admin/Members'
 import AdminOrders from './pages/admin/Orders'
 import AdminProducts from './pages/admin/Products'
@@ -58,9 +60,19 @@ import HostLiveSales from './pages/host/LiveSales'
 import HostSettlementPage from './pages/host/Settlement'
 import HostProfile from './pages/host/Profile'
 
+// 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
+import BrandLogin from './pages/brand/Login'
+import RequireBrandAuth from './components/brand/RequireBrandAuth'
+import RequireBrand from './components/brand/RequireBrand'
+import BrandLayout from './components/brand/BrandLayout'
+import BrandDashboard from './pages/brand/Dashboard'
+import BrandLiveSales from './pages/brand/LiveSales'
+import BrandSettlement from './pages/brand/Settlement'
+
 // 구매자 라이브 (Supabase 연동)
 import LiveMain from './pages/LiveMain'
 import LiveSchedule from './pages/LiveSchedule'
+import DeptSalesPage from './pages/DeptSalesPage'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -122,13 +134,16 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about" element={<Company />} />
 
-        {/* 관리자 (매입 후 직접 판매 구조라 브랜드사가 직접 로그인하는 파트너센터는 없음 — 2026-08-08 폐지) */}
+        {/* 관리자 (매입 후 직접 판매 구조라 브랜드사가 상품/방송을 직접 등록하는 파트너센터는 없음 — 2026-08-08 폐지.
+            단 브랜드가 자기 판매실적·정산만 읽기 전용으로 보는 /brand/* 포털은 별도로 존재 — 아래 참조) */}
         <Route element={<RequireAdmin />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/home" element={<AdminHome />} />
             <Route path="/admin/hosts" element={<AdminHosts />} />
             <Route path="/admin/commission-tiers" element={<AdminCommissionTiers />} />
             <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
+            <Route path="/admin/partners" element={<AdminPartners />} />
+            <Route path="/admin/partner-settlements" element={<AdminPartnerSettlements />} />
             <Route path="/admin/members" element={<AdminMembers />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminProducts />} />
@@ -159,6 +174,20 @@ export default function App() {
           </Route>
         </Route>
 
+        {/* 브랜드사(파트너) — 읽기 전용 포털. 상품/방송 등록 권한은 없음(그건 폐지된 파트너센터의
+            영역), 자기 라이브 판매실적·정산만 조회(2026-08-15). 자체 회원가입 없음 — 계정은
+            관리자가 /admin/partners에서 이메일로 연결. */}
+        <Route path="/brand/login" element={<BrandLogin />} />
+        <Route element={<RequireBrandAuth />}>
+          <Route element={<RequireBrand />}>
+            <Route element={<BrandLayout />}>
+              <Route path="/brand/dashboard" element={<BrandDashboard />} />
+              <Route path="/brand/sales" element={<BrandLiveSales />} />
+              <Route path="/brand/settlement" element={<BrandSettlement />} />
+            </Route>
+          </Route>
+        </Route>
+
         {/* 앱 UI */}
         <Route path="/app" element={<Navigate to="/app/home" replace />} />
         <Route path="/app/home" element={<AppHome />} />
@@ -166,6 +195,8 @@ export default function App() {
             게이트 없이 공개(온라인몰 메인과 별개의 독립 진입점). */}
         <Route path="/live" element={<LiveMain />} />
         <Route path="/live/schedule" element={<LiveSchedule />} />
+        {/* 백화점 지역 담당자용 — 정식 로그인 없이 백화점별 코드로만 판매실적 조회(DeptSalesPage 자체 게이트) */}
+        <Route path="/dept/:key" element={<DeptSalesPage />} />
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />

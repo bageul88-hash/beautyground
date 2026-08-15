@@ -51,6 +51,16 @@ export default function AdminLives() {
     setLives((prev) => prev.map((l) => (l.id === live.id ? { ...l, status: 'ended' } : l)))
   }
 
+  const setDeptKey = async (live: LiveRow, deptKey: string) => {
+    setBusyId(live.id)
+    setError('')
+    const value = deptKey || null
+    const { error: err } = await supabase.from('lives').update({ dept_key: value }).eq('id', live.id)
+    setBusyId(null)
+    if (err) { setError(`백화점 지정 실패: ${err.message}`); return }
+    setLives((prev) => prev.map((l) => (l.id === live.id ? { ...l, dept_key: value as Live['dept_key'] } : l)))
+  }
+
   const handleDelete = async (live: LiveRow) => {
     if (!window.confirm(`"${live.title}" 방송 정보를 삭제할까요? 되돌릴 수 없습니다.`)) return
     setBusyId(live.id)
@@ -104,6 +114,7 @@ export default function AdminLives() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">예정일시</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">최고 시청자</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">백화점</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
               </thead>
@@ -118,6 +129,18 @@ export default function AdminLives() {
                       <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{l.peak_viewers ?? 0}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${badge.className}`}>{badge.label}</span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <select
+                          value={l.dept_key ?? ''}
+                          disabled={busyId === l.id}
+                          onChange={(e) => void setDeptKey(l, e.target.value)}
+                          className="border border-rule rounded-md px-2 py-1.5 text-[12px] text-ink bg-paper"
+                        >
+                          <option value="">지정 안 함</option>
+                          <option value="hyundai">현대백화점</option>
+                          <option value="ak">AK플라자</option>
+                        </select>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">

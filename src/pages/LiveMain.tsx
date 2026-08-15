@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Live } from '../lib/types'
 import AppHeader from '../components/layout/AppHeader'
@@ -38,7 +38,15 @@ interface SaleProduct {
   thumbnail_url: string | null
 }
 
+const DEPT_TABS: { key: string; label: string }[] = [
+  { key: '', label: '전체' },
+  { key: 'hyundai', label: '현대백화점' },
+  { key: 'ak', label: 'AK플라자' },
+]
+
 export default function LiveMain() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const dept = searchParams.get('dept') ?? ''
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
@@ -68,12 +76,15 @@ export default function LiveMain() {
     let active = true
     ;(async () => {
       setLoading(true)
-      const [{ data }, { data: endedData }] = await Promise.all([
-        supabase.from('lives').select('*').in('status', ['live', 'scheduled'])
-          .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: true, nullsFirst: false }),
-        supabase.from('lives').select('*').eq('status', 'ended')
-          .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: false, nullsFirst: false }).limit(12),
-      ])
+      let liveQuery = supabase.from('lives').select('*').in('status', ['live', 'scheduled'])
+        .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: true, nullsFirst: false })
+      let endedQuery = supabase.from('lives').select('*').eq('status', 'ended')
+        .not('title', 'ilike', '호스트검증방송%').order('scheduled_at', { ascending: false, nullsFirst: false }).limit(12)
+      if (dept) {
+        liveQuery = liveQuery.eq('dept_key', dept)
+        endedQuery = endedQuery.eq('dept_key', dept)
+      }
+      const [{ data }, { data: endedData }] = await Promise.all([liveQuery, endedQuery])
       if (!active) return
       const liveList = (data ?? []) as Live[]
       const replayList = ((endedData ?? []) as Live[]).filter((l) => l.stream_url || l.playback_url || l.stream_uid)
@@ -116,7 +127,7 @@ export default function LiveMain() {
       setLoading(false)
     })()
     return () => { active = false }
-  }, [])
+  }, [dept])
 
   const nowLive = lives.filter((l) => l.status === 'live')
   const scheduled = lives.filter((l) => l.status === 'scheduled')
@@ -204,6 +215,20 @@ export default function LiveMain() {
       <AppHeader />
 
       <main className="bg-white pb-2">
+        <div className="flex gap-2 pt-4 px-4">
+          {DEPT_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => (tab.key ? setSearchParams({ dept: tab.key }) : setSearchParams({}))}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors ${
+                dept === tab.key ? 'bg-black text-white' : 'bg-bg-card text-[#666666]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
         <section className="pt-5 px-4">
           {loading ? (
             <p className="text-[13px] text-[#666666] py-8 text-center">불러오는 중…</p>

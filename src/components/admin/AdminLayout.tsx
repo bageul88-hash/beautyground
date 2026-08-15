@@ -12,12 +12,15 @@ import {
   IconTicket,
   IconPalette,
   IconSpeakerphone,
+  IconBuildingStore,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
 // 온라인몰과 라이브커머스를 당분간 분리 운영하기로 한 방침(2026-07-31)을 관리자 메뉴에도 그대로
 // 반영 — 채널별로 묶어서 한눈에 훑을 수 있게 소제목으로 나눈다(2026-08-08).
-// 매입 후 직접 판매하는 구조라 브랜드사가 직접 로그인하는 파트너센터/파트너 관리 메뉴는 없음(2026-08-08 폐지).
+// 매입 후 직접 판매하는 구조라 브랜드사가 상품/방송을 직접 등록하는 파트너센터는 없음(2026-08-08 폐지).
+// 단 브랜드가 자기 라이브 판매실적·정산을 읽기 전용으로 보는 /brand/* 포털은 2026-08-15 추가 —
+// 계정 연결·수수료율 관리는 아래 "브랜드" 메뉴에서.
 const NAV_GROUPS = [
   {
     title: '쇼핑몰',
@@ -37,6 +40,13 @@ const NAV_GROUPS = [
       { label: '진행자 관리', to: '/admin/hosts', icon: IconUsers },
       { label: '수수료 등급 관리', to: '/admin/commission-tiers', icon: IconAward },
       { label: '진행자 정산 관리', to: '/admin/host-settlements', icon: IconCashBanknote },
+    ],
+  },
+  {
+    title: '브랜드',
+    items: [
+      { label: '브랜드 관리', to: '/admin/partners', icon: IconBuildingStore },
+      { label: '브랜드 정산 관리', to: '/admin/partner-settlements', icon: IconCashBanknote },
     ],
   },
   {
