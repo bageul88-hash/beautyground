@@ -5,14 +5,26 @@ import { DEPT_NAMES } from '../../lib/deptAccount'
 import { formatDateTime } from '../../lib/format'
 import Button from '../../components/common/Button'
 
-// 백화점 담당자 계정 관리 — 가입은 담당자 본인이 /dept/register 링크에서 직접 한다(코드 없음,
-// 링크 자체를 필요한 사람에게만 전달하는 방식, 2026-08-15). 여기서는 가입된 계정 조회·정지만 한다.
+const inputCls =
+  'w-full border border-rule rounded-control px-3 py-2 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper'
+
+function registerUrl(id: string) {
+  return `https://beautyground.vercel.app/dept/register/${id}`
+}
+
+// 백화점 담당자 계정 관리 — 지점을 등록하면 그 지점 "전용" 가입링크가 생긴다(/dept/register/:id).
+// 링크 안에 백화점·지점명이 이미 정해져 있어 담당자는 이메일·비밀번호만 입력하면 된다
+// (2026-08-15, 대표님 지시: 담당자가 지점명을 직접 고를 여지 없이 링크=신원 보증 방식으로).
 export default function AdminDeptAccounts() {
   const [accounts, setAccounts] = useState<DeptAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const [deptKey, setDeptKey] = useState<'hyundai' | 'ak'>('ak')
+  const [branchName, setBranchName] = useState('')
+  const [creating, setCreating] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -24,6 +36,23 @@ export default function AdminDeptAccounts() {
 
   useEffect(() => { void load() }, [])
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!branchName.trim()) { setError('지점명을 입력해 주세요.'); return }
+    setCreating(true)
+    setError('')
+    const { data, error: err } = await supabase
+      .from('dept_accounts')
+      .insert({ dept_key: deptKey, display_name: `${DEPT_NAMES[deptKey]}_${branchName.trim()}` })
+      .select('*')
+      .single()
+    setCreating(false)
+    if (err) { setError(`지점 등록 실패: ${err.message}`); return }
+    setBranchName('')
+    void load()
+    if (data) copyLink(data as DeptAccount)
+  }
+
   const changeStatus = async (account: DeptAccount, status: DeptAccount['status']) => {
     setBusyId(account.id)
     setError('')
@@ -33,11 +62,10 @@ export default function AdminDeptAccounts() {
     setAccounts((prev) => prev.map((a) => (a.id === account.id ? { ...a, status } : a)))
   }
 
-  const registerUrl = 'https://beautyground.vercel.app/dept/register'
-  const copyLink = () => {
-    void navigator.clipboard.writeText(registerUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+  const copyLink = (account: DeptAccount) => {
+    void navigator.clipboard.writeText(registerUrl(account.id))
+    setCopiedId(account.id)
+    setTimeout(() => setCopiedId((id) => (id === account.id ? null : id)), 1500)
   }
 
   return (
@@ -49,14 +77,31 @@ export default function AdminDeptAccounts() {
       <main className="max-w-[1100px] p-8">
         <h1 className="text-[22px] font-bold text-ink mb-2">백화점 계정 관리</h1>
         <p className="text-[13px] text-ink-soft mb-5">
-          담당자가 아래 가입 링크에서 백화점·지점명·아이디·비밀번호를 직접 입력해 바로 가입합니다.
-          링크를 필요한 담당자에게만 전달하세요.
+          지점을 등록하면 그 지점 전용 가입링크가 자동으로 클립보드에 복사됩니다. 그 링크를
+          담당자에게 전달하면, 담당자는 이메일·비밀번호만 입력해 바로 가입합니다.
         </p>
 
-        <div className="bg-paper rounded-md border border-rule p-6 mb-6 flex items-center gap-3">
-          <code className="flex-1 text-[13px] text-ink bg-quiet px-3 py-2 rounded-md">{registerUrl}</code>
-          <Button variant="accent" size="sm" label={copied ? '복사됨' : '링크 복사'} onClick={copyLink} />
-        </div>
+        <form onSubmit={handleCreate} className="bg-paper rounded-md border border-rule p-6 mb-6">
+          <h2 className="text-[14px] font-bold text-ink mb-4">지점 등록 · 가입링크 발급</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr_auto] gap-3 items-end">
+            <div>
+              <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">백화점</label>
+              <select value={deptKey} onChange={(e) => setDeptKey(e.target.value as 'hyundai' | 'ak')} className={inputCls}>
+                <option value="ak">AK플라자</option>
+                <option value="hyundai">현대백화점</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">지점명</label>
+              <input
+                type="text" value={branchName} onChange={(e) => setBranchName(e.target.value)}
+                placeholder="광명"
+                className={inputCls}
+              />
+            </div>
+            <Button type="submit" variant="accent" size="sm" label={creating ? '등록 중...' : '등록 · 링크 복사'} disabled={creating} />
+          </div>
+        </form>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-md px-4 py-3 mb-5">{error}</div>
@@ -65,7 +110,7 @@ export default function AdminDeptAccounts() {
         {loading ? (
           <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
         ) : accounts.length === 0 ? (
-          <div className="py-20 text-center text-[14px] text-ink-faint">아직 가입한 담당자가 없습니다.</div>
+          <div className="py-20 text-center text-[14px] text-ink-faint">등록된 지점이 없습니다.</div>
         ) : (
           <div className="bg-paper rounded-md border border-rule overflow-x-auto">
             <table className="w-full text-[13px] text-left">
@@ -73,8 +118,8 @@ export default function AdminDeptAccounts() {
                 <tr className="border-b border-rule text-ink-soft">
                   <th className="px-4 py-3 font-medium whitespace-nowrap">지점명</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">백화점</th>
-                  <th className="px-4 py-3 font-medium whitespace-nowrap">가입일</th>
-                  <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">등록일</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">가입 상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
               </thead>
@@ -85,13 +130,19 @@ export default function AdminDeptAccounts() {
                     <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{DEPT_NAMES[a.dept_key]}</td>
                     <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(a.created_at)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${
-                          a.status === 'active' ? 'bg-signal-blue/10 text-signal-blue' : 'bg-quiet text-ink-faint'
-                        }`}
-                      >
-                        {a.status === 'active' ? '이용중' : '정지됨'}
-                      </span>
+                      {a.user_id ? (
+                        <span className="inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium bg-signal-blue/10 text-signal-blue">
+                          가입완료
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => copyLink(a)}
+                          className="text-[12px] text-ink-soft hover:text-ink underline"
+                        >
+                          {copiedId === a.id ? '링크 복사됨' : '가입링크 복사'}
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {a.status !== 'suspended' ? (
