@@ -139,8 +139,27 @@ export default function AdminPartners() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 max-w-[220px] truncate text-ink-soft" title={p.export_pitch ?? ''}>
-                      {p.export_pitch || '-'}
+                    <td className="px-4 py-3 max-w-[260px] text-ink-soft">
+                      {p.export_pitch || p.export_certifications.length > 0 || p.export_countries || p.export_moq_notes ? (
+                        <div
+                          className="truncate"
+                          title={[
+                            p.export_pitch,
+                            p.export_certifications.length > 0 ? `인증: ${p.export_certifications.join(', ')}` : null,
+                            p.export_countries ? `수출국가: ${p.export_countries}` : null,
+                            p.export_moq_notes ? `MOQ: ${p.export_moq_notes}` : null,
+                          ].filter(Boolean).join(' / ')}
+                        >
+                          {p.export_pitch || '(소개글 없음)'}
+                        </div>
+                      ) : '-'}
+                      {p.export_certifications.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {p.export_certifications.map((c) => (
+                            <span key={c} className="inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] bg-quiet text-ink-faint">{c}</span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {p.status !== 'suspended' ? (

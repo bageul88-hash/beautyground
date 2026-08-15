@@ -20,9 +20,30 @@ export async function getMyPartner(): Promise<Partner | null> {
   return (data as Partner | null) ?? null
 }
 
-// 브랜드 본인의 수출 소개글 저장 (update_my_partner_export_pitch RPC, supabase/partners_export_pitch.sql)
-export async function updateMyExportPitch(pitch: string): Promise<Partner> {
-  const { data, error } = await supabase.rpc('update_my_partner_export_pitch', { p_pitch: pitch })
+// 브랜드 본인의 수출 소개글+인증+수출국가+MOQ 저장 (update_my_partner_export_details RPC,
+// supabase/partners_export_details.sql — update_my_partner_export_pitch를 대체)
+export async function updateMyExportDetails(details: {
+  pitch: string
+  certifications: string[]
+  countries: string
+  moqNotes: string
+}): Promise<Partner> {
+  const { data, error } = await supabase.rpc('update_my_partner_export_details', {
+    p_pitch: details.pitch,
+    p_certifications: details.certifications,
+    p_countries: details.countries,
+    p_moq_notes: details.moqNotes,
+  })
   if (error) throw error
   return data as Partner
+}
+
+// 브랜드 본인 소유 상품의 "수출 대표상품" 표시 토글 (set_my_product_export_featured RPC,
+// supabase/products_export_featured.sql)
+export async function setMyProductExportFeatured(productId: string, featured: boolean) {
+  const { error } = await supabase.rpc('set_my_product_export_featured', {
+    p_product_id: productId,
+    p_featured: featured,
+  })
+  if (error) throw error
 }

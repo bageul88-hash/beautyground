@@ -27,6 +27,7 @@ export interface Product {
   review_summary: ReviewSummaryData | null // 리뷰 요약(수/평균평점/사진) — 간단 리뷰 위젯용
   source_url: string | null // 스크랩 원본 상품 페이지 URL(후기 재수집용)
   season_tags: string[] // 계절/명절 추천 태그(봄·여름·가을·겨울·추석·설) — 홈 "지금 확인할 상품" 큐레이션에 사용
+  is_export_featured: boolean // 브랜드가 해외 바이어용 대표상품으로 고른 상품인지 (supabase/products_export_featured.sql)
   created_at: string
 }
 
@@ -82,6 +83,10 @@ export interface Partner {
   status: 'active' | 'suspended'
   commission_rate: number
   export_pitch: string | null // 브랜드가 직접 쓰는 수출 제안용 소개글 (supabase/partners_export_pitch.sql)
+  // 수출 상세정보 (supabase/partners_export_details.sql)
+  export_certifications: string[]
+  export_countries: string | null // 이미 수출 중인 국가(자유서술)
+  export_moq_notes: string | null // 최소주문수량·샘플 정책 등
   created_at: string
 }
 
