@@ -22,11 +22,14 @@ const NAV_ITEMS = [
   { label: '수출 소개', to: '/brand/export', icon: IconWorld },
 ]
 
-const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-  active:    { bg: 'bg-[#E1F5EE]', text: 'text-[#085041]', label: '이용중' },
-  suspended: { bg: 'bg-[#FAECE7]', text: 'text-[#712B13]', label: '정지됨' },
+// 강조는 원색 1개(signal-blue)만 — 관리자(/admin) AdminLayout.tsx와 동일한 규칙.
+const STATUS_BADGE: Record<string, { className: string; label: string }> = {
+  active:    { className: 'bg-signal-blue/10 text-signal-blue', label: '이용중' },
+  suspended: { className: 'bg-quiet text-ink-faint', label: '정지됨' },
 }
 
+// 관리자(/admin) AdminLayout.tsx와 같은 톤으로 통일(2026-08-15) — 화이트+블랙 텍스트,
+// 진한 배경색·골드 강조 없이 얇은 선과 잉크 농도로만 상태 구분.
 export default function BrandLayout() {
   const navigate = useNavigate()
   const [partner, setPartner] = useState<Partner | null>(null)
@@ -55,7 +58,7 @@ export default function BrandLayout() {
   const badge = STATUS_BADGE[partner?.status ?? 'active']
 
   return (
-    <div className="flex min-h-screen bg-[#f7f4ef]">
+    <div className="flex min-h-screen bg-paper">
       {menuOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
@@ -65,34 +68,34 @@ export default function BrandLayout() {
       )}
 
       <aside
-        className={`w-[240px] min-h-screen bg-[#0e0c08] flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 ${
+        className={`w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <button
           onClick={() => setMenuOpen(false)}
-          className="lg:hidden absolute top-4 right-4 text-[#888] hover:text-white"
+          className="lg:hidden absolute top-4 right-4 text-ink-faint hover:text-ink"
           aria-label="메뉴 닫기"
         >
           <IconX size={20} />
         </button>
-        <div className="px-6 pt-8 pb-6 border-b border-white/10">
+        <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
-            <p className="text-[#b8924a] font-serif text-[20px] font-bold tracking-wide hover:text-[#d4aa6a] transition-colors">
+            <p className="text-ink text-[20px] font-bold tracking-wide">
               뷰티그라운드
             </p>
-            <p className="text-[#555] text-[11px] mt-0.5 tracking-widest uppercase">Brand Center</p>
+            <p className="text-ink-faint text-[11px] mt-0.5 tracking-widest uppercase">Brand Center</p>
           </Link>
         </div>
 
-        <div className="px-6 py-4 border-b border-white/10">
-          <p className="text-white text-[13px] font-semibold">{partner?.brand_name ?? '-'}</p>
-          <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[11px] font-medium ${badge.bg} ${badge.text}`}>
+        <div className="px-6 py-4 border-b border-rule">
+          <p className="text-ink text-[13px] font-semibold">{partner?.brand_name ?? '-'}</p>
+          <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[11px] font-medium ${badge.className}`}>
             {badge.label}
           </span>
         </div>
 
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto">
           {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
@@ -101,15 +104,15 @@ export default function BrandLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
                   isActive
-                    ? 'text-[#b8924a] bg-[rgba(184,146,74,0.1)] border-l-[3px] border-[#b8924a] pl-[17px]'
-                    : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
+                    ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
+                    : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
                 }`
               }
             >
               <Icon size={18} />
               {label}
               {to === '/brand/settlement' && pendingCount > 0 && (
-                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#d64550] text-white text-[10.5px] font-bold">
+                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-signal-red text-paper text-[10.5px] font-bold">
                   {pendingCount}
                 </span>
               )}
@@ -117,10 +120,10 @@ export default function BrandLayout() {
           ))}
         </nav>
 
-        <div className="px-6 py-6 border-t border-white/10">
+        <div className="px-6 py-6 border-t border-rule">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-[#555] hover:text-white text-[13px] transition-colors"
+            className="flex items-center gap-2 text-ink-faint hover:text-ink text-[13px] transition-colors"
           >
             <IconLogout size={16} />
             로그아웃
@@ -129,16 +132,16 @@ export default function BrandLayout() {
       </aside>
 
       <div className="flex-1 ml-0 lg:ml-[240px] flex flex-col min-h-screen">
-        <header className="h-[60px] bg-white border-b border-[#eee] flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
+        <header className="h-[60px] bg-paper border-b border-rule flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMenuOpen(true)}
-              className="lg:hidden text-[#555] hover:text-[#111]"
+              className="lg:hidden text-ink-faint hover:text-ink"
               aria-label="메뉴 열기"
             >
               <IconMenu2 size={22} />
             </button>
-            <p className="text-[15px] font-semibold text-[#111] truncate">
+            <p className="text-[15px] font-semibold text-ink truncate">
               {partner?.brand_name ?? '브랜드 센터'}
             </p>
           </div>
