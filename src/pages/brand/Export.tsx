@@ -13,7 +13,7 @@ import type { Partner, Product } from '../../lib/types'
 
 const CERTIFICATION_OPTIONS = ['CPNP(EU)', 'FDA(US)', '비건', '할랄', '유기농', 'ISO22716', '동물실험 안전']
 const MAX_FEATURED = 5
-const MAX_PRODUCT_IMAGES = 5
+const MAX_PRODUCT_IMAGES = 9
 
 type ProductRow = Pick<
   Product,
