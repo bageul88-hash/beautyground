@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+// 실존하지 않는 라우트(#success, #solution, /partnership, /career)로 연결되던 잔재를
+// 실제 존재하는 페이지로 교체 — 뷰티그라운드는 채용/B2B SaaS가 아니라 K-Beauty 커머스 회사(2026-08-15).
 const NAV_LINKS = [
-  { href: '#success', label: '성공스토리' },
-  { href: '#solution', label: 'B2B솔루션' },
-  { href: '/partnership', label: '광고·제휴' },
-  { href: '/career', label: '채용(영입)' },
+  { href: '/company', label: '회사소개' },
+  { href: '/terms', label: '이용약관' },
+  { href: '/privacy', label: '개인정보처리방침' },
 ]
 
 export default function GNB() {
