@@ -102,6 +102,28 @@ export interface SettlementRow extends Settlement {
   brand_name: string
 }
 
+// 백화점 담당자 계정 (supabase/dept_accounts.sql) — 한 백화점(dept_key)에 여러 지점 계정이 있을 수
+// 있음(예: display_name "AK플라자_광명"). 로그인은 관리자가 admin_create_dept_account RPC로 생성.
+export interface DeptAccount {
+  id: string
+  user_id: string | null
+  dept_key: 'hyundai' | 'ak'
+  display_name: string
+  status: 'active' | 'suspended'
+  created_at: string
+}
+
+// dept_live_sales_view 조회 결과 행 — 로그인한 담당자 본인의 dept_key로만 스코프됨(뷰 정의 안에서 필터)
+export interface DeptSaleRow {
+  live_id: string
+  live_title: string
+  live_scheduled_at: string | null
+  dept_key: 'hyundai' | 'ak'
+  total_amount: number
+  total_quantity: number
+  order_count: number
+}
+
 // partner_live_sales_view 조회 결과 행 — 구매자 PII 없음(host_sales_view와 동일 원칙)
 export interface PartnerSaleRow {
   id: string

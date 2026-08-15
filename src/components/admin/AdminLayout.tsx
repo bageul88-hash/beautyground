@@ -50,6 +50,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    title: '백화점',
+    items: [
+      { label: '백화점 계정 관리', to: '/admin/dept-accounts', icon: IconBuildingStore },
+    ],
+  },
+  {
     title: '회원',
     items: [
       { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },

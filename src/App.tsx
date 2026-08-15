@@ -39,6 +39,7 @@ import AdminCommissionTiers from './pages/admin/CommissionTiers'
 import AdminHostSettlements from './pages/admin/HostSettlements'
 import AdminPartners from './pages/admin/Partners'
 import AdminPartnerSettlements from './pages/admin/PartnerSettlements'
+import AdminDeptAccounts from './pages/admin/DeptAccounts'
 import AdminMembers from './pages/admin/Members'
 import AdminOrders from './pages/admin/Orders'
 import AdminProducts from './pages/admin/Products'
@@ -69,10 +70,15 @@ import BrandDashboard from './pages/brand/Dashboard'
 import BrandLiveSales from './pages/brand/LiveSales'
 import BrandSettlement from './pages/brand/Settlement'
 
+// 백화점 담당자 포털 (RequireDeptAuth + RequireDept) — 2026-08-15: 코드 게이트 대신 지점별 계정 로그인
+import DeptLogin from './pages/dept/Login'
+import RequireDeptAuth from './components/dept/RequireDeptAuth'
+import RequireDept from './components/dept/RequireDept'
+import DeptSales from './pages/dept/Sales'
+
 // 구매자 라이브 (Supabase 연동)
 import LiveMain from './pages/LiveMain'
 import LiveSchedule from './pages/LiveSchedule'
-import DeptSalesPage from './pages/DeptSalesPage'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -144,6 +150,7 @@ export default function App() {
             <Route path="/admin/host-settlements" element={<AdminHostSettlements />} />
             <Route path="/admin/partners" element={<AdminPartners />} />
             <Route path="/admin/partner-settlements" element={<AdminPartnerSettlements />} />
+            <Route path="/admin/dept-accounts" element={<AdminDeptAccounts />} />
             <Route path="/admin/members" element={<AdminMembers />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminProducts />} />
@@ -195,8 +202,13 @@ export default function App() {
             게이트 없이 공개(온라인몰 메인과 별개의 독립 진입점). */}
         <Route path="/live" element={<LiveMain />} />
         <Route path="/live/schedule" element={<LiveSchedule />} />
-        {/* 백화점 지역 담당자용 — 정식 로그인 없이 백화점별 코드로만 판매실적 조회(DeptSalesPage 자체 게이트) */}
-        <Route path="/dept/:key" element={<DeptSalesPage />} />
+        {/* 백화점 지역 담당자용 — 지점별 계정 로그인(2026-08-15, 예전 코드 게이트 대체) */}
+        <Route path="/dept/login" element={<DeptLogin />} />
+        <Route element={<RequireDeptAuth />}>
+          <Route element={<RequireDept />}>
+            <Route path="/dept/sales" element={<DeptSales />} />
+          </Route>
+        </Route>
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />
