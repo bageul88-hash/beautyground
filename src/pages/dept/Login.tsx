@@ -33,7 +33,7 @@ export default function DeptLogin() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f5f9', padding: 20 }}>
       <div style={{ width: '100%', maxWidth: 360, background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(20,25,60,.1)', padding: 28 }}>
         <div style={{ textAlign: 'center', marginBottom: 26 }}>
-          <img src="/images/bg-logo-mark-transparent.png" alt="뷰티그라운드" style={{ width: 64, margin: '0 auto 12px', display: 'block' }} />
+          <img src="/images/bg-logo-gold-wordmark.png" alt="뷰티그라운드" style={{ width: 140, margin: '0 auto 12px', display: 'block' }} />
           <h1 style={{ fontSize: 16, fontWeight: 700, color: '#8b90ad', letterSpacing: '.5px' }}>백화점 담당자 시스템</h1>
         </div>
 
