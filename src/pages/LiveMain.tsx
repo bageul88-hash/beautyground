@@ -7,6 +7,7 @@ import AppFrame from '../components/layout/AppFrame'
 import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import { comma, formatLiveSchedTime } from '../lib/format'
+import { useShopLives } from '../hooks/useShopLives'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
 // 공유한다. 라이브에서 들어온 구매는 live_id로 태깅되어 정산·통계에서 구분된다(AppOrder.tsx).
@@ -38,15 +39,22 @@ interface SaleProduct {
   thumbnail_url: string | null
 }
 
-const DEPT_TABS: { key: string; label: string }[] = [
-  { key: '', label: '전체' },
-  { key: 'hyundai', label: '현대백화점' },
-  { key: 'ak', label: 'AK플라자' },
+const STORES: { key: 'hyundai' | 'ak'; name: string; logo: string }[] = [
+  { key: 'hyundai', name: '현대백화점', logo: '/images/memberships/hyundai.png' },
+  { key: 'ak', name: 'AK플라자', logo: '/images/memberships/ak.png' },
 ]
+
+// 우선순위: 진행중 라이브 > 가장 이른 예정 라이브 > 없음("방송 준비중")
+function pickForDept(lives: Live[], dept: 'hyundai' | 'ak') {
+  const deptLives = lives.filter((l) => l.dept_key === dept)
+  return deptLives.find((l) => l.status === 'live') ?? deptLives[0] ?? null
+}
 
 export default function LiveMain() {
   const [searchParams, setSearchParams] = useSearchParams()
   const dept = searchParams.get('dept') ?? ''
+  // 백화점 카드용 — 현재 dept 필터와 무관하게 항상 전체 진행중/예정 라이브를 본다(카드 2개 동시 비교용).
+  const { lives: allLives } = useShopLives()
   const [lives, setLives] = useState<Live[]>([])
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
@@ -215,20 +223,59 @@ export default function LiveMain() {
       <AppHeader />
 
       <main className="bg-white pb-2">
-        <div className="flex gap-2 pt-4 px-4">
-          {DEPT_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => (tab.key ? setSearchParams({ dept: tab.key }) : setSearchParams({}))}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors ${
-                dept === tab.key ? 'bg-black text-white' : 'bg-bg-card text-[#666666]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <section className="pt-4 px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-bold text-black">백화점 라이브</h2>
+            {dept && (
+              <button
+                type="button"
+                onClick={() => setSearchParams({})}
+                className="text-[12px] font-bold text-[#666666]"
+              >
+                전체보기 ›
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {STORES.map((store) => {
+              const live = pickForDept(allLives, store.key)
+              const isActive = dept === store.key
+              const statusLabel = live?.status === 'live' ? 'LIVE' : live ? '방송 예정' : '방송 준비중'
+              return (
+                <button
+                  key={store.key}
+                  type="button"
+                  onClick={() => setSearchParams(isActive ? {} : { dept: store.key })}
+                  className={`text-left rounded-2xl overflow-hidden bg-bg-card border transition-colors ${
+                    isActive ? 'border-black' : 'border-card-border'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <img src={store.logo} alt="" className="h-4 w-auto object-contain" />
+                    <span className="text-[11px] font-bold text-black">{store.name}</span>
+                  </div>
+                  <div className="relative aspect-square bg-white">
+                    {live?.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-40" />
+                      </div>
+                    )}
+                    <span
+                      className={`absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full ${
+                        live?.status === 'live' ? 'bg-gradient-to-r from-live-start to-live-end' : 'bg-bg-overlay/70'
+                      }`}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
         <section className="pt-5 px-4">
           {loading ? (
             <p className="text-[13px] text-[#666666] py-8 text-center">불러오는 중…</p>
