@@ -16,6 +16,7 @@ export default function AdminPartners() {
   const [error, setError] = useState('')
   const [rateEdits, setRateEdits] = useState<Record<string, string>>({})
   const [emailEdits, setEmailEdits] = useState<Record<string, string>>({})
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -63,6 +64,14 @@ export default function AdminPartners() {
     if (err) { setError(`계정 연결 실패: ${err.message}`); return }
     setPartners((prev) => prev.map((p) => (p.id === partner.id ? (data as Partner) : p)))
     setEmailEdits((prev) => { const next = { ...prev }; delete next[partner.id]; return next })
+  }
+
+  // 이메일 선연결 대신 쓸 수 있는 셀프가입 링크(견본, 2026-08-15) — 백화점 담당자용 방식과 동일:
+  // 브랜드가 링크를 열면 자기 로고(BI)를 확인하고 이메일·비밀번호만 입력해 스스로 가입.
+  const copyRegisterLink = (partner: Partner) => {
+    void navigator.clipboard.writeText(`https://beautyground.vercel.app/brand/register/${partner.id}`)
+    setCopiedId(partner.id)
+    setTimeout(() => setCopiedId((id) => (id === partner.id ? null : id)), 1500)
   }
 
   return (
@@ -144,6 +153,15 @@ export default function AdminPartners() {
                           />
                           <Button variant="accent" size="sm" label="연결" disabled={busyId === p.id} onClick={() => void linkAccount(p)} />
                         </div>
+                      )}
+                      {!p.user_id && (
+                        <button
+                          type="button"
+                          onClick={() => copyRegisterLink(p)}
+                          className="mt-1 block text-[11px] text-ink-soft hover:text-ink underline"
+                        >
+                          {copiedId === p.id ? '가입링크 복사됨' : '또는 셀프가입 링크 복사'}
+                        </button>
                       )}
                     </td>
                     <td className="px-4 py-3 max-w-[260px] text-ink-soft">

@@ -65,6 +65,7 @@ import HostProfile from './pages/host/Profile'
 
 // 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
 import BrandLogin from './pages/brand/Login'
+import BrandRegister from './pages/brand/Register'
 import RequireBrandAuth from './components/brand/RequireBrandAuth'
 import RequireBrand from './components/brand/RequireBrand'
 import BrandLayout from './components/brand/BrandLayout'
@@ -195,6 +196,7 @@ export default function App() {
             영역), 자기 라이브 판매실적·정산만 조회(2026-08-15). 자체 회원가입 없음 — 계정은
             관리자가 /admin/partners에서 이메일로 연결. */}
         <Route path="/brand/login" element={<BrandLogin />} />
+        <Route path="/brand/register/:id" element={<BrandRegister />} />
         <Route element={<RequireBrandAuth />}>
           <Route element={<RequireBrand />}>
             <Route element={<BrandLayout />}>
