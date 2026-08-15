@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyPartner } from '../../lib/partner'
-import type { Partner } from '../../lib/types'
+import type { Partner, Settlement } from '../../lib/types'
 
 const NAV_ITEMS = [
   { label: '대시보드', to: '/brand/dashboard', icon: IconLayoutDashboard },
@@ -27,9 +27,20 @@ export default function BrandLayout() {
   const navigate = useNavigate()
   const [partner, setPartner] = useState<Partner | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  // 지급 대기 중인 정산 건수 — "새 정산이 생성됐다"는 신호로 정산내역 메뉴에 배지 표시.
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
-    getMyPartner().then((p) => setPartner(p))
+    getMyPartner().then((p) => {
+      setPartner(p)
+      if (!p) return
+      supabase
+        .from('settlements')
+        .select('id, status')
+        .eq('partner_id', p.id)
+        .eq('status', 'pending')
+        .then(({ data }) => setPendingCount(((data ?? []) as Pick<Settlement, 'id' | 'status'>[]).length))
+    })
   }, [])
 
   const handleLogout = async () => {
@@ -93,6 +104,11 @@ export default function BrandLayout() {
             >
               <Icon size={18} />
               {label}
+              {to === '/brand/settlement' && pendingCount > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#d64550] text-white text-[10.5px] font-bold">
+                  {pendingCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

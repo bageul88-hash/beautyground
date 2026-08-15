@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getMyPartner } from '../../lib/partner'
 import type { Partner, PartnerSaleRow } from '../../lib/types'
 import { comma, formatDateTime } from '../../lib/format'
+import PeriodFilter from '../../components/common/PeriodFilter'
+import { computePeriodRange, inRange, type PeriodKey } from '../../lib/period'
 
 const SETTLED_STATUSES = ['paid', 'shipped', 'done']
 
@@ -18,7 +20,11 @@ interface LiveSalesGroup {
 export default function BrandLiveSales() {
   const [loading, setLoading] = useState(true)
   const [partner, setPartner] = useState<Partner | null>(null)
-  const [groups, setGroups] = useState<LiveSalesGroup[]>([])
+  const [rows, setRows] = useState<PartnerSaleRow[]>([])
+
+  const [periodKey, setPeriodKey] = useState<PeriodKey>('all')
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
 
   useEffect(() => {
     let active = true
@@ -34,30 +40,35 @@ export default function BrandLiveSales() {
         .order('live_scheduled_at', { ascending: false })
       if (!active) return
 
-      const rows = ((data ?? []) as PartnerSaleRow[]).filter((r) => SETTLED_STATUSES.includes(r.status) && r.live_id)
-      const byLive = new Map<string, LiveSalesGroup>()
-      rows.forEach((r) => {
-        const key = r.live_id as string
-        const existing = byLive.get(key)
-        if (existing) {
-          existing.total_amount += r.amount
-          existing.total_quantity += r.quantity
-        } else {
-          byLive.set(key, {
-            live_id: key,
-            live_title: r.live_title ?? '(제목 없음)',
-            live_scheduled_at: r.live_scheduled_at,
-            total_amount: r.amount,
-            total_quantity: r.quantity,
-          })
-        }
-      })
-      setGroups(Array.from(byLive.values()))
+      setRows(((data ?? []) as PartnerSaleRow[]).filter((r) => SETTLED_STATUSES.includes(r.status) && r.live_id))
       setLoading(false)
     }
     load()
     return () => { active = false }
   }, [])
+
+  const groups = useMemo(() => {
+    const range = computePeriodRange(periodKey, customStart, customEnd)
+    const filtered = rows.filter((r) => inRange(r.created_at, range))
+    const byLive = new Map<string, LiveSalesGroup>()
+    filtered.forEach((r) => {
+      const key = r.live_id as string
+      const existing = byLive.get(key)
+      if (existing) {
+        existing.total_amount += r.amount
+        existing.total_quantity += r.quantity
+      } else {
+        byLive.set(key, {
+          live_id: key,
+          live_title: r.live_title ?? '(제목 없음)',
+          live_scheduled_at: r.live_scheduled_at,
+          total_amount: r.amount,
+          total_quantity: r.quantity,
+        })
+      }
+    })
+    return Array.from(byLive.values())
+  }, [rows, periodKey, customStart, customEnd])
 
   if (loading) {
     return (
@@ -81,13 +92,20 @@ export default function BrandLiveSales() {
 
   return (
     <>
+      <PeriodFilter
+        value={periodKey} customStart={customStart} customEnd={customEnd}
+        onChange={setPeriodKey}
+        onCustomChange={(s, e) => { setCustomStart(s); setCustomEnd(e) }}
+        theme="gold"
+      />
+
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
-          <p className="text-[12px] text-[#9a9080] mb-2">전체 판매금액</p>
+          <p className="text-[12px] text-[#9a9080] mb-2">판매금액</p>
           <p className="font-serif text-[22px] font-bold text-[#111]">{comma(totalAmount)}원</p>
         </div>
         <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
-          <p className="text-[12px] text-[#9a9080] mb-2">전체 판매수량</p>
+          <p className="text-[12px] text-[#9a9080] mb-2">판매수량</p>
           <p className="font-serif text-[22px] font-bold text-[#111]">{comma(totalQuantity)}개</p>
         </div>
       </div>
