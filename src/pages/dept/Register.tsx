@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { DEPT_NAMES } from '../../lib/deptAccount'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
@@ -12,13 +13,15 @@ const label: React.CSSProperties = {
   display: 'block', fontSize: 13, fontWeight: 600, color: '#666', marginBottom: 6,
 }
 
-// 백화점 담당자 셀프 가입 — 관리자가 발급한 가입코드로 본인이 직접 아이디/비밀번호를 만든다
-// (2026-08-15, 대표님 지시: "실제 브랜드/지점이 본인 아이디·비번만 설정하고 바로 볼 수 있게").
+// 백화점 담당자 셀프 가입 — 가입 링크(/dept/register) 자체를 필요한 담당자에게만 전달하는
+// 방식이라 별도 코드 없이, 본인이 직접 백화점·지점명·아이디·비밀번호를 입력해 바로 가입한다
+// (2026-08-15, 대표님 지시: "가입링크는 우리가 주는거라 코드 없이도 문제없다").
 export default function DeptRegister() {
   const navigate = useNavigate()
+  const [deptKey, setDeptKey] = useState<'hyundai' | 'ak'>('ak')
+  const [branchName, setBranchName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [code, setCode] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,9 +30,9 @@ export default function DeptRegister() {
     if (submitting) return
     setError(null)
 
+    if (!branchName.trim()) { setError('지점명을 입력해 주세요.'); return }
     if (!EMAIL_RE.test(email)) { setError('올바른 이메일 형식을 입력해 주세요.'); return }
     if (!PASSWORD_RE.test(password)) { setError('비밀번호는 8자 이상, 영문+숫자+특수문자를 포함해야 합니다.'); return }
-    if (!code.trim()) { setError('가입코드를 입력해 주세요.'); return }
 
     setSubmitting(true)
 
@@ -44,17 +47,22 @@ export default function DeptRegister() {
       }
       return
     }
-    if (signUpData.user?.identities?.length === 0) {
+    const userId = signUpData.user?.id
+    if (!userId || signUpData.user?.identities?.length === 0) {
       setSubmitting(false)
       setError('이미 가입된 이메일입니다. 로그인해 주세요.')
       return
     }
 
-    // 이메일 인증 없이 바로 세션이 생기는 프로젝트 설정 기준 — 코드 소진 처리.
-    const { error: claimError } = await supabase.rpc('claim_dept_account', { p_code: code.trim().toUpperCase() })
+    const displayName = `${DEPT_NAMES[deptKey]}_${branchName.trim()}`
+    const { error: insertError } = await supabase.from('dept_accounts').insert({
+      user_id: userId,
+      dept_key: deptKey,
+      display_name: displayName,
+    })
     setSubmitting(false)
-    if (claimError) {
-      setError(`가입코드 확인 실패: ${claimError.message} — 코드를 다시 확인해 주세요.`)
+    if (insertError) {
+      setError(`가입 처리 실패: ${insertError.message}`)
       return
     }
 
@@ -71,12 +79,22 @@ export default function DeptRegister() {
 
         <form onSubmit={handleSubmit} noValidate style={{ display: 'grid', gap: 14 }}>
           <div>
-            <label htmlFor="code" style={label}>가입코드</label>
+            <label htmlFor="deptKey" style={label}>백화점</label>
+            <select
+              id="deptKey" value={deptKey} onChange={(e) => setDeptKey(e.target.value as 'hyundai' | 'ak')}
+              style={field}
+            >
+              <option value="ak">AK플라자</option>
+              <option value="hyundai">현대백화점</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="branchName" style={label}>지점명</label>
             <input
-              id="code" type="text" required
-              value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="뷰티그라운드에서 받은 6자리 코드"
-              style={{ ...field, letterSpacing: '0.2em', fontWeight: 700, textAlign: 'center' }}
+              id="branchName" type="text" required
+              value={branchName} onChange={(e) => setBranchName(e.target.value)}
+              placeholder="예: 광명"
+              style={field}
             />
           </div>
           <div>

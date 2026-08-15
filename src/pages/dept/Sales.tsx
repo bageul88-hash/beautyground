@@ -144,6 +144,17 @@ export default function DeptSales() {
     )
   }
 
+  if (account.status === 'suspended') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f5f9', padding: 20 }}>
+        <div style={{ ...card, maxWidth: 360, textAlign: 'center' }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1e36', marginBottom: 8 }}>이용이 정지된 계정입니다</p>
+          <p style={{ fontSize: 13.5, color: '#8b90ad' }}>자세한 내용은 뷰티그라운드로 문의해 주세요.</p>
+        </div>
+      </div>
+    )
+  }
+
   const totalAmount = filteredRows.reduce((sum, r) => sum + r.total_amount, 0)
   const totalQuantity = filteredRows.reduce((sum, r) => sum + r.total_quantity, 0)
 
