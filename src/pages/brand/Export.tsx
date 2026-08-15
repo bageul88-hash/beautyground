@@ -48,6 +48,8 @@ export default function BrandExport() {
   const [partner, setPartner] = useState<Partner | null>(null)
   const [pitch, setPitch] = useState('')
   const [certifications, setCertifications] = useState<string[]>([])
+  const [addingCert, setAddingCert] = useState(false)
+  const [customCertInput, setCustomCertInput] = useState('')
   const [countries, setCountries] = useState('')
   const [moqNotes, setMoqNotes] = useState('')
   const [logoUploading, setLogoUploading] = useState(false)
@@ -90,6 +92,15 @@ export default function BrandExport() {
 
   const toggleCert = (cert: string) => {
     setCertifications((prev) => (prev.includes(cert) ? prev.filter((c) => c !== cert) : [...prev, cert]))
+  }
+
+  const addCustomCert = () => {
+    const v = customCertInput.trim()
+    if (v && !certifications.includes(v)) {
+      setCertifications((prev) => [...prev, v])
+    }
+    setCustomCertInput('')
+    setAddingCert(false)
   }
 
   const featuredCount = products.filter((p) => p.is_export_featured).length
@@ -291,6 +302,52 @@ export default function BrandExport() {
               </button>
             )
           })}
+
+          {certifications
+            .filter((c) => !CERTIFICATION_OPTIONS.includes(c))
+            .map((cert) => (
+              <button
+                key={cert}
+                type="button"
+                onClick={() => toggleCert(cert)}
+                title="클릭하면 삭제됩니다"
+                className="px-3.5 py-2 rounded-full text-[12.5px] border bg-[#0e0c08] text-white border-[#0e0c08] flex items-center gap-1.5"
+              >
+                {cert}
+                <span aria-hidden>×</span>
+              </button>
+            ))}
+
+          {addingCert ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                autoFocus
+                value={customCertInput}
+                onChange={(e) => setCustomCertInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { e.preventDefault(); addCustomCert() }
+                  if (e.key === 'Escape') { setAddingCert(false); setCustomCertInput('') }
+                }}
+                placeholder="예: KOSHA, GMP"
+                className="px-3 py-2 border border-[#b8924a] rounded-full text-[12.5px] text-[#111] placeholder:text-[#c4bcae] focus:outline-none w-[140px]"
+              />
+              <button
+                type="button"
+                onClick={addCustomCert}
+                className="px-3 py-2 rounded-full text-[12.5px] font-semibold bg-[#b8924a] text-white"
+              >
+                추가
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAddingCert(true)}
+              className="px-3.5 py-2 rounded-full text-[12.5px] border border-dashed border-[#c4bcae] text-[#9a9080] hover:border-[#b8924a] hover:text-[#b8924a] transition-colors"
+            >
+              + 추가
+            </button>
+          )}
         </div>
 
         <p className="text-[14px] font-semibold text-[#111] mb-2">이미 수출 중인 국가 (있다면)</p>
