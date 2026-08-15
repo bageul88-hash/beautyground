@@ -76,6 +76,7 @@ import BrandExport from './pages/brand/Export'
 
 // 백화점 담당자 포털 (RequireDeptAuth + RequireDept) — 2026-08-15: 코드 게이트 대신 지점별 계정 로그인
 import DeptLogin from './pages/dept/Login'
+import DeptRegister from './pages/dept/Register'
 import RequireDeptAuth from './components/dept/RequireDeptAuth'
 import RequireDept from './components/dept/RequireDept'
 import DeptSales from './pages/dept/Sales'
@@ -214,6 +215,7 @@ export default function App() {
         <Route path="/live/schedule" element={<LiveSchedule />} />
         {/* 백화점 지역 담당자용 — 지점별 계정 로그인(2026-08-15, 예전 코드 게이트 대체) */}
         <Route path="/dept/login" element={<DeptLogin />} />
+        <Route path="/dept/register" element={<DeptRegister />} />
         <Route element={<RequireDeptAuth />}>
           <Route element={<RequireDept />}>
             <Route path="/dept/sales" element={<DeptSales />} />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 // 백화점 담당자 로그인 — beautyground-erp(매장관리 시스템)의 로그인 화면과 같은 톤으로 통일:
@@ -78,7 +78,8 @@ export default function DeptLogin() {
           </button>
 
           <p style={{ textAlign: 'center', fontSize: 12.5, color: '#8b90ad', margin: '4px 0 0' }}>
-            아이디는 뷰티그라운드 담당자에게 문의하세요.
+            가입코드를 받으셨나요?{' '}
+            <Link to="/dept/register" style={{ color: '#1a1e36', fontWeight: 700 }}>가입하기</Link>
           </p>
         </form>
       </div>

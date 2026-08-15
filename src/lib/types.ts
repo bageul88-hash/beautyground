@@ -104,13 +104,15 @@ export interface SettlementRow extends Settlement {
 }
 
 // 백화점 담당자 계정 (supabase/dept_accounts.sql) — 한 백화점(dept_key)에 여러 지점 계정이 있을 수
-// 있음(예: display_name "AK플라자_광명"). 로그인은 관리자가 admin_create_dept_account RPC로 생성.
+// 있음(예: display_name "AK플라자_광명"). 관리자는 가입코드만 발급하고, 담당자 본인이
+// /dept/register에서 이메일·비밀번호를 만들어 셀프 가입(claim_dept_account RPC, 2026-08-15).
 export interface DeptAccount {
   id: string
   user_id: string | null
   dept_key: 'hyundai' | 'ak'
   display_name: string
   status: 'active' | 'suspended'
+  signup_code: string | null // 관리자가 발급한 1회용 가입코드 (supabase/dept_accounts_signup_code.sql) — user_id 연결되면 용도 끝
   created_at: string
 }
 

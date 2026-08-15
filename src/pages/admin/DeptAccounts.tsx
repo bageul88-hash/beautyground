@@ -8,19 +8,24 @@ import Button from '../../components/common/Button'
 const inputCls =
   'w-full border border-rule rounded-control px-3 py-2 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper'
 
-// 백화점 담당자 계정 관리 — 지점별로 계정을 발급한다(예: "AK플라자_광명").
-// 로그인 계정은 Supabase 대시보드 → Authentication에서 먼저 만든 뒤 이메일로 연결한다
-// (admin_create_dept_account RPC, AdminPartners.tsx의 계정 연결과 동일한 2단계 방식).
+// 가입코드 — 헷갈리기 쉬운 문자(0/O, 1/I) 제외한 6자리.
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+function generateCode() {
+  return Array.from({ length: 6 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('')
+}
+
+// 백화점 담당자 계정 관리 — 지점별로 "가입코드"만 발급하면, 담당자 본인이 /dept/register에서
+// 이메일·비밀번호·코드를 직접 입력해 셀프 가입한다(2026-08-15, 대표님 지시).
 export default function AdminDeptAccounts() {
-  const [accounts, setAccounts] = useState<DeptAccount[]>([]);
+  const [accounts, setAccounts] = useState<DeptAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
-  const [email, setEmail] = useState('')
   const [deptKey, setDeptKey] = useState<'hyundai' | 'ak'>('ak')
   const [displayName, setDisplayName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -34,17 +39,16 @@ export default function AdminDeptAccounts() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !displayName.trim()) { setError('아이디(이메일)와 지점명을 입력해 주세요.'); return }
+    if (!displayName.trim()) { setError('지점명을 입력해 주세요.'); return }
     setCreating(true)
     setError('')
-    const { error: err } = await supabase.rpc('admin_create_dept_account', {
-      p_email: email.trim(),
-      p_dept_key: deptKey,
-      p_display_name: displayName.trim(),
+    const { error: err } = await supabase.from('dept_accounts').insert({
+      dept_key: deptKey,
+      display_name: displayName.trim(),
+      signup_code: generateCode(),
     })
     setCreating(false)
-    if (err) { setError(`계정 생성 실패: ${err.message}`); return }
-    setEmail('')
+    if (err) { setError(`계정 발급 실패: ${err.message}`); return }
     setDisplayName('')
     void load()
   }
@@ -58,6 +62,13 @@ export default function AdminDeptAccounts() {
     setAccounts((prev) => prev.map((a) => (a.id === account.id ? { ...a, status } : a)))
   }
 
+  const copyCode = (account: DeptAccount) => {
+    if (!account.signup_code) return
+    void navigator.clipboard.writeText(account.signup_code)
+    setCopiedId(account.id)
+    setTimeout(() => setCopiedId((id) => (id === account.id ? null : id)), 1500)
+  }
+
   return (
     <>
       <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
@@ -67,21 +78,14 @@ export default function AdminDeptAccounts() {
       <main className="max-w-[1100px] p-8">
         <h1 className="text-[22px] font-bold text-ink mb-2">백화점 계정 관리</h1>
         <p className="text-[13px] text-ink-soft mb-5">
-          지점별로 로그인 계정을 발급합니다. 계정은 Supabase 대시보드 → Authentication에서 먼저
-          만든 뒤 이메일로 연결하세요.
+          지점을 등록하면 가입코드가 발급됩니다. 그 코드를 담당자에게 전달하면, 담당자가 직접
+          <span className="font-semibold text-ink"> beautyground.vercel.app/dept/register</span>에서
+          아이디·비밀번호를 만들어 가입합니다.
         </p>
 
         <form onSubmit={handleCreate} className="bg-paper rounded-md border border-rule p-6 mb-6">
-          <h2 className="text-[14px] font-bold text-ink mb-4">계정 발급</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_1fr_auto] gap-3 items-end">
-            <div>
-              <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">아이디(이메일)</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="ak-gwangmyeong@beautyground.co.kr"
-                className={inputCls}
-              />
-            </div>
+          <h2 className="text-[14px] font-bold text-ink mb-4">지점 등록 · 가입코드 발급</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr_auto] gap-3 items-end">
             <div>
               <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">백화점</label>
               <select value={deptKey} onChange={(e) => setDeptKey(e.target.value as 'hyundai' | 'ak')} className={inputCls}>
@@ -97,7 +101,7 @@ export default function AdminDeptAccounts() {
                 className={inputCls}
               />
             </div>
-            <Button type="submit" variant="accent" size="sm" label={creating ? '생성 중...' : '계정 발급'} disabled={creating} />
+            <Button type="submit" variant="accent" size="sm" label={creating ? '발급 중...' : '가입코드 발급'} disabled={creating} />
           </div>
         </form>
 
@@ -117,7 +121,7 @@ export default function AdminDeptAccounts() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">지점명</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">백화점</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">발급일</th>
-                  <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">가입 상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
               </thead>
@@ -127,14 +131,23 @@ export default function AdminDeptAccounts() {
                     <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{a.display_name}</td>
                     <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{DEPT_NAMES[a.dept_key]}</td>
                     <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(a.created_at)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${
-                          a.status === 'active' ? 'bg-signal-blue/10 text-signal-blue' : 'bg-quiet text-ink-faint'
-                        }`}
-                      >
-                        {a.status === 'active' ? '이용중' : '정지됨'}
-                      </span>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {a.user_id ? (
+                        <span className="inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium bg-signal-blue/10 text-signal-blue">
+                          가입완료
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono tracking-[0.15em] text-ink font-bold">{a.signup_code}</span>
+                          <button
+                            type="button"
+                            onClick={() => copyCode(a)}
+                            className="text-[11px] text-ink-soft hover:text-ink underline"
+                          >
+                            {copiedId === a.id ? '복사됨' : '복사'}
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {a.status !== 'suspended' ? (
