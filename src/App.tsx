@@ -18,7 +18,6 @@ import AppOrder from './pages/AppOrder'
 import AppOrders from './pages/AppOrders'
 import AppLogin from './pages/AppLogin'
 import AppSignup from './pages/AppSignup'
-import AppSignupEmail from './pages/AppSignupEmail'
 import AppNaverCallback from './pages/AppNaverCallback'
 import AppAccount from './pages/AppAccount'
 import AppAddresses from './pages/AppAddresses'
@@ -80,6 +79,7 @@ import DeptRegister from './pages/dept/Register'
 import RequireDeptAuth from './components/dept/RequireDeptAuth'
 import RequireDept from './components/dept/RequireDept'
 import DeptSales from './pages/dept/Sales'
+import DeptLives from './pages/dept/Lives'
 
 // 구매자 라이브 (Supabase 연동)
 import LiveMain from './pages/LiveMain'
@@ -220,6 +220,7 @@ export default function App() {
         <Route element={<RequireDeptAuth />}>
           <Route element={<RequireDept />}>
             <Route path="/dept/sales" element={<DeptSales />} />
+            <Route path="/dept/lives" element={<DeptLives />} />
           </Route>
         </Route>
         <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
@@ -235,7 +236,10 @@ export default function App() {
         <Route path="/app/orders" element={<AppOrders />} />
         <Route path="/app/login" element={<AppLogin />} />
         <Route path="/app/signup" element={<AppSignup />} />
-        <Route path="/app/signup/email" element={<AppSignupEmail />} />
+        {/* 이메일 가입 버튼은 뺐지만(2026-08-15, 카카오만 신규가입), URL 직접 접근으로
+            새 이메일 계정이 만들어지는 뒷문을 막기 위해 라우트 자체를 리다이렉트 —
+            AppSignupEmail.tsx 코드는 나중에 되살릴 수 있게 남겨둠. */}
+        <Route path="/app/signup/email" element={<Navigate to="/app/signup" replace />} />
         <Route path="/app/auth/naver/callback" element={<AppNaverCallback />} />
         <Route path="/app/account" element={<AppAccount />} />
         <Route path="/app/addresses" element={<AppAddresses />} />

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { getMyDeptAccount, DEPT_NAMES } from '../../lib/deptAccount'
+import { getMyDeptAccount } from '../../lib/deptAccount'
 import type { DeptAccount, DeptSaleRow } from '../../lib/types'
 import { comma, formatDateTime } from '../../lib/format'
 import PeriodFilter from '../../components/common/PeriodFilter'
 import { computePeriodRange, inRange, type PeriodKey } from '../../lib/period'
+import DeptHeader from '../../components/dept/DeptHeader'
 
 // beautyground-erp(매장관리 시스템)와 같은 톤 — 옅은 라벤더그레이 배경, 흰 rounded-16 카드,
 // 네이비(#1a1e36) 강조, 뮤트 라벤더그레이(#8b90ad) 보조텍스트.
@@ -85,7 +85,6 @@ function SalesTrendChart({ data }: { data: TrendPoint[] }) {
 }
 
 export default function DeptSales() {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [account, setAccount] = useState<DeptAccount | null>(null)
   const [rows, setRows] = useState<DeptSaleRow[]>([])
@@ -113,11 +112,6 @@ export default function DeptSales() {
     load()
     return () => { active = false }
   }, [])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/dept/login')
-  }
 
   const filteredRows = useMemo(() => {
     if (periodKey === 'all') return rows
@@ -169,21 +163,7 @@ export default function DeptSales() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f5f9' }}>
-      <header style={{ background: '#fff', boxShadow: '0 1px 3px rgba(20,25,60,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <img src="/images/bg-logo-gold-wordmark.png" alt="뷰티그라운드" style={{ height: 52, display: 'block' }} />
-          <div style={{ borderLeft: '1px solid #eceef5', paddingLeft: 14 }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1e36' }}>{account.display_name}</p>
-            <p style={{ fontSize: 12, color: '#8b90ad', marginTop: 2 }}>{DEPT_NAMES[account.dept_key]} 판매 실적</p>
-          </div>
-        </div>
-        <button
-          onClick={() => void handleLogout()}
-          style={{ fontSize: 13, fontWeight: 600, color: '#8b90ad', background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          로그아웃
-        </button>
-      </header>
+      <DeptHeader account={account} active="sales" />
 
       <main style={{ maxWidth: 900, margin: '0 auto', padding: 28 }}>
         <PeriodFilter
