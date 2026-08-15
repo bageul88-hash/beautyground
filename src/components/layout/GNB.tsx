@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 // 회사소개/이용약관/개인정보처리방침은 이미 Footer(LEGAL_LINKS)에 있어 상단엔 중복 노출하지
 // 않는다 — 예전엔 #success/#solution/career 같은 존재하지 않는 라우트였던 잔재를 지운 뒤
 // 실제 페이지로 바꿨었지만, 어차피 하단에 있는 걸 상단에 또 넣을 필요는 없다는 지적으로
 // 상단 메뉴 자체를 비움(2026-08-15).
-export default function GNB() {
+// extra: 특정 페이지(예: /export)에서만 우측 영역에 추가로 넣을 요소(언어 스위처 등).
+export default function GNB({ extra }: { extra?: ReactNode } = {}) {
   return (
     <header
       className="sticky top-0 z-50 border-b border-rule"
@@ -20,6 +22,7 @@ export default function GNB() {
         </Link>
 
         <div className="flex items-center gap-3">
+          {extra}
           <Link to="/app/home" className="text-[13px] text-ink-soft hover:text-ink transition-colors">
             앱 보기
           </Link>
