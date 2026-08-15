@@ -81,6 +81,7 @@ export interface Partner {
   brand_name: string
   status: 'active' | 'suspended'
   commission_rate: number
+  export_pitch: string | null // 브랜드가 직접 쓰는 수출 제안용 소개글 (supabase/partners_export_pitch.sql)
   created_at: string
 }
 
@@ -239,3 +240,33 @@ export const PRODUCT_CATEGORIES = [
   '뷰티 디바이스',
   '퍼퓸 디퓨저',
 ] as const
+
+// 해외 바이어 문의 (/export 페이지, supabase/export_inquiries.sql) — beautyground가
+// 직접 수출자(재판매자)로서 보유 브랜드를 제안하는 채널. 브랜드-바이어 중개가 아님.
+export interface ExportInquiry {
+  id: string
+  company_name: string
+  contact_name: string
+  email: string
+  phone: string | null
+  country: string
+  interested_categories: string[] | null
+  message: string | null
+  status: 'new' | 'contacted' | 'closed' // new=신규, contacted=연락완료, closed=종료
+  created_at: string
+}
+
+// 해외 바이어 타겟(아웃바운드 CRM, /admin/export-buyers, supabase/export_buyers.sql) — 관리자 전용.
+// 브랜드사는 이 데이터에 접근하지 않는다(바이어 정보 비공개 원칙).
+export interface ExportBuyer {
+  id: string
+  company_name: string
+  country: string
+  contact_name: string | null
+  contact_email: string | null
+  contact_phone: string | null
+  proposed_partner_ids: string[]
+  status: 'target' | 'contacted' | 'responded' | 'declined' | 'won'
+  notes: string | null
+  created_at: string
+}

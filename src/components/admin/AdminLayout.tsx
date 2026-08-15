@@ -13,6 +13,8 @@ import {
   IconPalette,
   IconSpeakerphone,
   IconBuildingStore,
+  IconWorld,
+  IconTargetArrow,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
@@ -53,6 +55,15 @@ const NAV_GROUPS = [
     title: '백화점',
     items: [
       { label: '백화점 계정 관리', to: '/admin/dept-accounts', icon: IconBuildingStore },
+    ],
+  },
+  {
+    // beautyground가 직접 수출자(재판매자)로서 보유 브랜드를 해외 바이어에게 제안하는 채널
+    // (/export 페이지) 문의 관리(2026-08-15)
+    title: '해외',
+    items: [
+      { label: '해외 바이어 문의', to: '/admin/export-inquiries', icon: IconWorld },
+      { label: '해외 바이어 타겟관리', to: '/admin/export-buyers', icon: IconTargetArrow },
     ],
   },
   {

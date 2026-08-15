@@ -5,6 +5,8 @@ import { COMPANY_INFO } from '../../lib/companyInfo'
 const FOOTER_LINKS = [
   { href: '/about', label: '회사소개' },
   { href: '/privacy', label: '개인정보처리방침' },
+  // 해외 바이어용 — 브랜드 모집이 아니라 뷰티그라운드가 직접 수출자로서 제안하는 채널(2026-08-15)
+  { href: '/export', label: 'For Global Partners' },
 ]
 
 const LEGAL_LINKS = [

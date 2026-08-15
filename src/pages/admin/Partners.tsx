@@ -95,6 +95,7 @@ export default function AdminPartners() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수수료율</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">계정 연결</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">수출 소개</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
               </thead>
@@ -137,6 +138,9 @@ export default function AdminPartners() {
                           <Button variant="accent" size="sm" label="연결" disabled={busyId === p.id} onClick={() => void linkAccount(p)} />
                         </div>
                       )}
+                    </td>
+                    <td className="px-4 py-3 max-w-[220px] truncate text-ink-soft" title={p.export_pitch ?? ''}>
+                      {p.export_pitch || '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {p.status !== 'suspended' ? (

@@ -7,6 +7,7 @@ import {
   IconLogout,
   IconMenu2,
   IconX,
+  IconWorld,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyPartner } from '../../lib/partner'
@@ -16,6 +17,9 @@ const NAV_ITEMS = [
   { label: '대시보드', to: '/brand/dashboard', icon: IconLayoutDashboard },
   { label: '판매내역', to: '/brand/sales', icon: IconVideo },
   { label: '정산내역', to: '/brand/settlement', icon: IconCash },
+  // 해외 바이어 제안용 소개글 작성 (2026-08-15) — 브랜드는 이 정보만 넣고, 실제 바이어 발굴·컨택은
+  // 뷰티그라운드가 전담(바이어 정보는 /admin/export-buyers에서만 관리, 브랜드에는 비공개).
+  { label: '수출 소개', to: '/brand/export', icon: IconWorld },
 ]
 
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {

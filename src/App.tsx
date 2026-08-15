@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import { mergeGuestCartToServer } from './lib/cart'
 import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
 import CompanyIntro from './pages/CompanyIntro'
+import Export from './pages/Export'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
 import AppSearch from './pages/AppSearch'
@@ -45,6 +46,8 @@ import AdminOrders from './pages/admin/Orders'
 import AdminProducts from './pages/admin/Products'
 import AdminLives from './pages/admin/Lives'
 import AdminCoupons from './pages/admin/Coupons'
+import AdminExportInquiries from './pages/admin/ExportInquiries'
+import AdminExportBuyers from './pages/admin/ExportBuyers'
 import AdminMarketing from './pages/admin/Marketing'
 import AdminTheme from './pages/admin/Theme'
 import { useMallTheme } from './hooks/useMallTheme'
@@ -69,6 +72,7 @@ import BrandLayout from './components/brand/BrandLayout'
 import BrandDashboard from './pages/brand/Dashboard'
 import BrandLiveSales from './pages/brand/LiveSales'
 import BrandSettlement from './pages/brand/Settlement'
+import BrandExport from './pages/brand/Export'
 
 // 백화점 담당자 포털 (RequireDeptAuth + RequireDept) — 2026-08-15: 코드 게이트 대신 지점별 계정 로그인
 import DeptLogin from './pages/dept/Login'
@@ -134,6 +138,9 @@ export default function App() {
             "중개플랫폼"으로 오인되는 근거가 될 수 있었음. */}
         <Route path="/" element={<AppHome />} />
         <Route path="/company" element={<CompanyIntro />} />
+        {/* 해외 바이어용 영문 카탈로그+문의 페이지 — beautyground가 직접 수출자(재판매자)로서
+            보유 브랜드를 제안하는 채널. 브랜드 입점신청(중개 성격)과는 다름(2026-08-15). */}
+        <Route path="/export" element={<Export />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
@@ -156,6 +163,8 @@ export default function App() {
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/lives" element={<AdminLives />} />
             <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/export-inquiries" element={<AdminExportInquiries />} />
+            <Route path="/admin/export-buyers" element={<AdminExportBuyers />} />
             <Route path="/admin/marketing" element={<AdminMarketing />} />
             <Route path="/admin/theme" element={<AdminTheme />} />
           </Route>
@@ -191,6 +200,7 @@ export default function App() {
               <Route path="/brand/dashboard" element={<BrandDashboard />} />
               <Route path="/brand/sales" element={<BrandLiveSales />} />
               <Route path="/brand/settlement" element={<BrandSettlement />} />
+              <Route path="/brand/export" element={<BrandExport />} />
             </Route>
           </Route>
         </Route>

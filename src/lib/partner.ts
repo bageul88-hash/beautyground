@@ -19,3 +19,10 @@ export async function getMyPartner(): Promise<Partner | null> {
 
   return (data as Partner | null) ?? null
 }
+
+// 브랜드 본인의 수출 소개글 저장 (update_my_partner_export_pitch RPC, supabase/partners_export_pitch.sql)
+export async function updateMyExportPitch(pitch: string): Promise<Partner> {
+  const { data, error } = await supabase.rpc('update_my_partner_export_pitch', { p_pitch: pitch })
+  if (error) throw error
+  return data as Partner
+}
