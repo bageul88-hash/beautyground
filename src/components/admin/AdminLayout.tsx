@@ -78,7 +78,7 @@ export default function AdminLayout() {
           </Link>
         </div>
 
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-4 pb-10 overflow-y-auto">
           {NAV_GROUPS.map((group, i) => (
             <div key={group.title} className={i > 0 ? 'mt-3 pt-3 border-t border-rule' : ''}>
               <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-ink-faint">{group.title}</p>
