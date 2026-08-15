@@ -69,10 +69,13 @@ export default function DeptSales() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f5f9' }}>
-      <header style={{ background: '#fff', boxShadow: '0 1px 3px rgba(20,25,60,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px' }}>
-        <div>
-          <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1e36' }}>{account.display_name}</p>
-          <p style={{ fontSize: 12, color: '#8b90ad', marginTop: 2 }}>{DEPT_NAMES[account.dept_key]} 판매 실적</p>
+      <header style={{ background: '#fff', boxShadow: '0 1px 3px rgba(20,25,60,.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <img src="/images/bg-logo-gold-wordmark.png" alt="뷰티그라운드" style={{ height: 52, display: 'block' }} />
+          <div style={{ borderLeft: '1px solid #eceef5', paddingLeft: 14 }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1e36' }}>{account.display_name}</p>
+            <p style={{ fontSize: 12, color: '#8b90ad', marginTop: 2 }}>{DEPT_NAMES[account.dept_key]} 판매 실적</p>
+          </div>
         </div>
         <button
           onClick={() => void handleLogout()}
