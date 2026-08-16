@@ -4,6 +4,7 @@ import GNB from '../../components/layout/GNB'
 import Footer from '../../components/layout/Footer'
 import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
+import { getMyBrandAccess } from '../../lib/partner'
 
 // 브랜드사 로그인 — 자체 회원가입 없음(관리자가 Supabase에서 계정을 만들고
 // admin_link_partner_account RPC로 partners 행에 연결해줌).
@@ -28,7 +29,9 @@ export default function BrandLogin() {
       return
     }
 
-    navigate('/brand/dashboard')
+    // 수출 전용 계정은 대시보드에 접근 권한이 없으므로(RequireBrand가 막음) 바로 "수출 소개"로.
+    const { isExportOnly } = await getMyBrandAccess()
+    navigate(isExportOnly ? '/brand/export' : '/brand/dashboard')
   }
 
   return (

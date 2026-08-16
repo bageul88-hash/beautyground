@@ -20,6 +20,26 @@ export async function getMyPartner(): Promise<Partner | null> {
   return (data as Partner | null) ?? null
 }
 
+// /brand/export 전용 — 판매 파트너 계정과 수출 전용 계정(export_contacts,
+// supabase/export_contacts.sql) 둘 다 지원. 판매 파트너면 기존처럼 partners 테이블을 직접
+// 읽고(빠름), 아니라면 get_my_export_partner() RPC로 export_contacts를 경유해 조회한다.
+// 대시보드/판매내역/정산내역은 여전히 getMyPartner()만 쓰므로 수출 전용 계정에서는 열리지 않는다.
+export async function getMyBrandAccess(): Promise<{ partner: Partner | null; isExportOnly: boolean }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+  if (!userId) return { partner: null, isExportOnly: false }
+
+  const { data: fullPartner } = await supabase.from('partners').select('*').eq('user_id', userId).maybeSingle()
+  if (fullPartner) return { partner: fullPartner as Partner, isExportOnly: false }
+
+  const { data: exportPartner } = await supabase.rpc('get_my_export_partner')
+  if (exportPartner) return { partner: exportPartner as Partner, isExportOnly: true }
+
+  return { partner: null, isExportOnly: false }
+}
+
 // 브랜드 본인의 수출 소개글+인증+수출국가+MOQ 저장 (update_my_partner_export_details RPC,
 // supabase/partners_export_details.sql — update_my_partner_export_pitch를 대체)
 export async function updateMyExportDetails(details: {

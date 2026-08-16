@@ -10,17 +10,23 @@ import {
   IconWorld,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
-import { getMyPartner } from '../../lib/partner'
+import { getMyBrandAccess } from '../../lib/partner'
 import type { Partner, Settlement } from '../../lib/types'
 
-const NAV_ITEMS = [
+// 해외 바이어 제안용 소개글 작성 (2026-08-15) — 브랜드는 이 정보만 넣고, 실제 바이어 발굴·컨택은
+// 뷰티그라운드가 전담(바이어 정보는 /admin/export-buyers에서만 관리, 브랜드에는 비공개).
+const EXPORT_NAV_ITEM = { label: '수출 소개', to: '/brand/export', icon: IconWorld }
+
+const FULL_NAV_ITEMS = [
   { label: '대시보드', to: '/brand/dashboard', icon: IconLayoutDashboard },
   { label: '판매내역', to: '/brand/sales', icon: IconVideo },
   { label: '정산내역', to: '/brand/settlement', icon: IconCash },
-  // 해외 바이어 제안용 소개글 작성 (2026-08-15) — 브랜드는 이 정보만 넣고, 실제 바이어 발굴·컨택은
-  // 뷰티그라운드가 전담(바이어 정보는 /admin/export-buyers에서만 관리, 브랜드에는 비공개).
-  { label: '수출 소개', to: '/brand/export', icon: IconWorld },
+  EXPORT_NAV_ITEM,
 ]
+
+// 수출 전용 계정(export_contacts로 로그인, 2026-08-16)은 라이브 판매실적·정산금을 볼 수 없어야
+// 하므로 "수출 소개" 하나만 노출한다.
+const EXPORT_ONLY_NAV_ITEMS = [EXPORT_NAV_ITEM]
 
 // 강조는 원색 1개(signal-blue)만 — 관리자(/admin) AdminLayout.tsx와 동일한 규칙.
 const STATUS_BADGE: Record<string, { className: string; label: string }> = {
@@ -33,14 +39,16 @@ const STATUS_BADGE: Record<string, { className: string; label: string }> = {
 export default function BrandLayout() {
   const navigate = useNavigate()
   const [partner, setPartner] = useState<Partner | null>(null)
+  const [isExportOnly, setIsExportOnly] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   // 지급 대기 중인 정산 건수 — "새 정산이 생성됐다"는 신호로 정산내역 메뉴에 배지 표시.
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
-    getMyPartner().then((p) => {
+    getMyBrandAccess().then(({ partner: p, isExportOnly: exportOnly }) => {
       setPartner(p)
-      if (!p) return
+      setIsExportOnly(exportOnly)
+      if (!p || exportOnly) return
       supabase
         .from('settlements')
         .select('id, status')
@@ -49,6 +57,8 @@ export default function BrandLayout() {
         .then(({ data }) => setPendingCount(((data ?? []) as Pick<Settlement, 'id' | 'status'>[]).length))
     })
   }, [])
+
+  const navItems = isExportOnly ? EXPORT_ONLY_NAV_ITEMS : FULL_NAV_ITEMS
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -96,7 +106,7 @@ export default function BrandLayout() {
         </div>
 
         <nav className="flex-1 py-4 overflow-y-auto">
-          {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+          {navItems.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

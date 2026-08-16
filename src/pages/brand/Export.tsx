@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import {
-  getMyPartner,
+  getMyBrandAccess,
   updateMyExportDetails,
   setMyProductExportFeatured,
   updateMyProductExportContent,
@@ -66,7 +66,7 @@ export default function BrandExport() {
   useEffect(() => {
     let active = true
     ;(async () => {
-      const p = await getMyPartner()
+      const { partner: p } = await getMyBrandAccess()
       if (!active) return
       setPartner(p)
       if (p) {

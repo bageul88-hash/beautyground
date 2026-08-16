@@ -66,8 +66,10 @@ import HostProfile from './pages/host/Profile'
 // 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
 import BrandLogin from './pages/brand/Login'
 import BrandRegister from './pages/brand/Register'
+import BrandExportRegister from './pages/brand/ExportRegister'
 import RequireBrandAuth from './components/brand/RequireBrandAuth'
 import RequireBrand from './components/brand/RequireBrand'
+import RequireBrandOrExportContact from './components/brand/RequireBrandOrExportContact'
 import BrandLayout from './components/brand/BrandLayout'
 import BrandDashboard from './pages/brand/Dashboard'
 import BrandLiveSales from './pages/brand/LiveSales'
@@ -194,15 +196,21 @@ export default function App() {
 
         {/* 브랜드사(파트너) — 읽기 전용 포털. 상품/방송 등록 권한은 없음(그건 폐지된 파트너센터의
             영역), 자기 라이브 판매실적·정산만 조회(2026-08-15). 자체 회원가입 없음 — 계정은
-            관리자가 /admin/partners에서 이메일로 연결. */}
+            관리자가 /admin/partners에서 이메일로 연결.
+            /brand/export는 판매 파트너 계정뿐 아니라 "수출 전용 계정"(export_contacts)도 접근
+            가능 — 단, 수출 전용 계정은 대시보드/판매내역/정산내역(RequireBrand, 판매 파트너만)에는
+            접근할 수 없다(2026-08-16, 라이브 판매실적 비공개 원칙). */}
         <Route path="/brand/login" element={<BrandLogin />} />
         <Route path="/brand/register/:id" element={<BrandRegister />} />
+        <Route path="/brand/export-register/:id" element={<BrandExportRegister />} />
         <Route element={<RequireBrandAuth />}>
-          <Route element={<RequireBrand />}>
-            <Route element={<BrandLayout />}>
+          <Route element={<BrandLayout />}>
+            <Route element={<RequireBrand />}>
               <Route path="/brand/dashboard" element={<BrandDashboard />} />
               <Route path="/brand/sales" element={<BrandLiveSales />} />
               <Route path="/brand/settlement" element={<BrandSettlement />} />
+            </Route>
+            <Route element={<RequireBrandOrExportContact />}>
               <Route path="/brand/export" element={<BrandExport />} />
             </Route>
           </Route>

@@ -17,6 +17,7 @@ export default function AdminPartners() {
   const [rateEdits, setRateEdits] = useState<Record<string, string>>({})
   const [emailEdits, setEmailEdits] = useState<Record<string, string>>({})
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [exportCopiedId, setExportCopiedId] = useState<string | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -74,6 +75,21 @@ export default function AdminPartners() {
     setTimeout(() => setCopiedId((id) => (id === partner.id ? null : id)), 1500)
   }
 
+  // 수출 전용 계정(대시보드/판매내역/정산내역은 안 보이고 "수출 소개"만 접근) 초대링크 생성.
+  // 기존 판매 파트너 계정 연결 여부와 무관하게 언제든 새로 발급 가능(export_contacts 테이블,
+  // supabase/export_contacts.sql) — 라이브 판매실적은 절대 노출되지 않는다.
+  const createExportContactLink = async (partner: Partner) => {
+    setBusyId(partner.id)
+    setError('')
+    const { data, error: err } = await supabase.rpc('create_export_contact_slot', { p_partner_id: partner.id })
+    setBusyId(null)
+    if (err) { setError(`수출 계정 초대링크 생성 실패: ${err.message}`); return }
+    const slotId = (data as { id: string }).id
+    void navigator.clipboard.writeText(`https://beautyground.vercel.app/brand/export-register/${slotId}`)
+    setExportCopiedId(partner.id)
+    setTimeout(() => setExportCopiedId((id) => (id === partner.id ? null : id)), 1500)
+  }
+
   return (
     <>
       <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
@@ -104,6 +120,7 @@ export default function AdminPartners() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수수료율</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">계정 연결</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">수출 전용 계정</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수출 소개</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
@@ -163,6 +180,17 @@ export default function AdminPartners() {
                           {copiedId === p.id ? '가입링크 복사됨' : '또는 셀프가입 링크 복사'}
                         </button>
                       )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => void createExportContactLink(p)}
+                        disabled={busyId === p.id}
+                        className="text-[11px] text-ink-soft hover:text-ink underline disabled:opacity-40"
+                        title="대시보드·판매내역·정산내역은 안 보이고 수출 소개만 접근 가능한 별도 계정"
+                      >
+                        {exportCopiedId === p.id ? '초대링크 복사됨' : '수출 계정 초대링크 생성'}
+                      </button>
                     </td>
                     <td className="px-4 py-3 max-w-[260px] text-ink-soft">
                       {p.export_pitch || p.export_certifications.length > 0 || p.export_countries || p.export_moq_notes ? (
