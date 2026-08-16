@@ -84,7 +84,7 @@ export interface Partner {
   id: string
   user_id: string | null
   brand_name: string
-  status: 'active' | 'suspended'
+  status: 'active' | 'pending' | 'suspended'
   commission_rate: number
   export_pitch: string | null // 브랜드가 직접 쓰는 수출 제안용 소개글 (supabase/partners_export_pitch.sql)
   export_pitch_en: string | null // export_pitch의 영문 번역 (supabase/partners_export_pitch_en.sql) — 공개 /export 페이지에 노출

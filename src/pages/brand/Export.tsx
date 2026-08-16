@@ -58,8 +58,8 @@ function Slot({
   open: boolean; onToggle: () => void; children: React.ReactNode
 }) {
   return (
-    <div className={`bg-white rounded-2xl border mb-2.5 overflow-hidden transition-colors ${open ? 'border-[#16202F] shadow-[0_4px_18px_rgba(22,32,47,0.07)]' : 'border-[#E8E6E1]'}`}>
-      <button type="button" onClick={onToggle} className="w-full flex items-center gap-3 px-4.5 py-4 px-5 text-left">
+    <div className={`bg-white rounded-lg border mb-2 overflow-hidden transition-colors ${open ? 'border-[#16202F] shadow-[0_4px_18px_rgba(22,32,47,0.07)]' : 'border-[#E8E6E1]'}`}>
+      <button type="button" onClick={onToggle} className="w-full flex items-center gap-3 px-4 py-3 text-left">
         <span className={`w-[26px] h-[26px] rounded-full text-white text-[12px] font-bold flex items-center justify-center shrink-0 bg-[#16202F]`}>{num}</span>
         <span className="flex-1">
           <span className="block text-[14px] font-bold text-[#23272F]">{title}</span>
@@ -68,7 +68,7 @@ function Slot({
         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${chipTone === 'ok' ? 'bg-[#E8F3EC] text-[#2E7D4F]' : 'bg-[#FDEEE4] text-[#C2410C]'}`}>{chip}</span>
         <span className={`text-[10px] text-[#B9B5AD] transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
-      {open && <div className="px-5 pb-5 pt-1 border-t border-dashed border-[#E8E6E1]">{children}</div>}
+      {open && <div className="px-4 pb-4 pt-1 border-t border-dashed border-[#E8E6E1]">{children}</div>}
     </div>
   )
 }
@@ -337,14 +337,14 @@ export default function BrandExport() {
     setTimeout(() => setCopied(false), 1800)
   }
 
-  const inputCls = 'w-full px-3.5 py-2.5 border border-[#E8E6E1] rounded-[10px] text-[13.5px] text-[#23272F] placeholder:text-[#c4bcae] bg-[#FBFAF8] focus:outline-none focus:border-[#16202F] transition-colors'
+  const inputCls = 'w-full px-3 py-2 border border-[#E8E6E1] rounded-md text-[13px] text-[#23272F] placeholder:text-[#c4bcae] bg-[#FBFAF8] focus:outline-none focus:border-[#16202F] transition-colors'
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,600px)_400px] gap-8 items-start justify-center">
       {/* ══════ 좌: 기본 정보 입력 (고정 슬롯) ══════ */}
       <div>
         {/* 완성도 게이지 */}
-        <div className="bg-white rounded-2xl border border-[#E8E6E1] px-5 py-4 mb-4">
+        <div className="bg-white rounded-lg border border-[#E8E6E1] px-4 py-3.5 mb-3">
           <div className="flex items-baseline justify-between mb-2">
             <p className="text-[15px] font-bold text-[#1B2537]">수출 페이지 완성도</p>
             <span className="text-[13px] font-bold text-[#16202F]">{completion}%</span>
@@ -378,7 +378,7 @@ export default function BrandExport() {
             </label>
           </div>
           <p className="text-[12px] font-bold text-[#1B2537] mb-1.5">브랜드 소개 (한글)</p>
-          <textarea value={pitch} onChange={(e) => setPitch(e.target.value)} rows={4}
+          <textarea value={pitch} onChange={(e) => setPitch(e.target.value)} rows={3}
             placeholder="예: OO은 2020년 설립된 스킨케어 브랜드로, 핵심 성분과 대표 제품, 국내 실적을 담아 소개해 주세요."
             className={`${inputCls} resize-none mb-3`} />
           <div className="flex items-center justify-between mb-1.5">
@@ -388,7 +388,7 @@ export default function BrandExport() {
               {translatingPitch ? '번역 중…' : '한글 소개 번역하기 →'}
             </button>
           </div>
-          <textarea value={pitchEn} onChange={(e) => setPitchEn(e.target.value)} rows={4}
+          <textarea value={pitchEn} onChange={(e) => setPitchEn(e.target.value)} rows={3}
             placeholder="번역하기를 누르면 자동으로 채워집니다. 이 내용을 저장하는 순간 내 수출 페이지가 열립니다."
             className={`${inputCls} resize-none`} />
         </Slot>
@@ -405,14 +405,14 @@ export default function BrandExport() {
               const active = certifications.includes(cert)
               return (
                 <button key={cert} type="button" onClick={() => toggleCert(cert)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] border transition-colors ${active ? 'bg-[#1B2537] text-white border-[#1B2537]' : 'bg-white text-[#6B7280] border-[#E8E6E1] hover:border-[#16202F]'}`}>
+                  className={`px-3 py-1.5 rounded-full text-[12px] border transition-colors ${active ? 'bg-[#16202F] text-white border-[#16202F]' : 'bg-white text-[#6B7280] border-[#E8E6E1] hover:border-[#16202F]'}`}>
                   {cert}
                 </button>
               )
             })}
             {certifications.filter((c) => !CERTIFICATION_OPTIONS.includes(c)).map((cert) => (
               <button key={cert} type="button" onClick={() => toggleCert(cert)} title="클릭하면 삭제됩니다"
-                className="px-3 py-1.5 rounded-full text-[12px] border bg-[#1B2537] text-white border-[#1B2537] flex items-center gap-1">
+                className="px-3 py-1.5 rounded-full text-[12px] border bg-[#16202F] text-white border-[#16202F] flex items-center gap-1">
                 {cert}<span aria-hidden>×</span>
               </button>
             ))}
@@ -512,7 +512,7 @@ export default function BrandExport() {
                   {draft.error && <p className="text-[12px] text-red-600 mb-1.5">{draft.error}</p>}
                   <div className="flex items-center gap-2.5">
                     <button onClick={() => void handleSaveProduct(product.id)} disabled={draft.saving}
-                      className="bg-[#1B2537] text-white rounded-[9px] px-4 py-2 text-[12px] font-bold disabled:opacity-50">
+                      className="bg-[#16202F] text-white rounded-md px-3.5 py-1.5 text-[12px] font-bold disabled:opacity-50">
                       {draft.saving ? '저장 중…' : '이 상품 저장'}
                     </button>
                     {draft.saved && <span className="text-[12px] text-[#16202F] font-bold">저장되었습니다 ✓</span>}
@@ -524,7 +524,7 @@ export default function BrandExport() {
         </Slot>
 
         {/* 안내 + 브랜드 정보 저장 */}
-        <div className="bg-[#FAF9F6] border border-[#E6E3DC] rounded-2xl px-5 py-3.5 mb-3 flex gap-3 items-start">
+        <div className="bg-[#FAF9F6] border border-[#E6E3DC] rounded-lg px-4 py-3 mb-3 flex gap-3 items-start">
           <span className="text-[16px]">🔒</span>
           <p className="text-[11.5px] text-[#9A8768] leading-relaxed">
             바이어 발굴·컨택·협상은 뷰티그라운드 수출팀이 전담하며, 바이어 정보는 브랜드사에 공개되지 않습니다.
@@ -535,7 +535,7 @@ export default function BrandExport() {
         {translateNote && <p className="text-[12.5px] text-[#5A564B] bg-[#FAF9F6] border border-[#E6E3DC] rounded-lg px-3 py-2 mb-2">{translateNote}</p>}
         <div className="sticky bottom-4 flex items-center gap-3">
           <button onClick={() => void handleSaveDetails()} disabled={saving}
-            className="flex-1 bg-[#1B2537] text-white rounded-xl py-3.5 text-[14px] font-bold shadow-lg hover:opacity-95 disabled:opacity-50">
+            className="flex-1 bg-[#16202F] text-white rounded-lg py-3 text-[13.5px] font-bold shadow-md hover:opacity-95 disabled:opacity-50">
             {saving ? '저장 중…' : '브랜드 정보 저장'}
           </button>
           {saved && <span className="text-[13px] text-[#16202F] font-bold whitespace-nowrap">저장 완료 ✓</span>}
