@@ -6,17 +6,23 @@ import type { ExportBrandPublic } from '../lib/types'
 // 브랜드별 수출 미니페이지(/x/:key) — 해외 바이어·소비자에게 링크/QR 하나로 전달하는 모바일 원페이지.
 // key는 partners.id(uuid) 또는 brand_name(한글 포함, URL 인코딩) 둘 다 허용.
 //
-// ⚠️ 원칙: 우리는 틀만 제공한다. 이 페이지는 브랜드사가 직접 가입해 수출 정보(영문 소개)를
-// 채운 경우에만 열린다 — 안 채운 브랜드 주소는 "아직 개설되지 않음" 안내만 보여준다.
-// 데이터는 기존 수출 스키마(export_brand_public 뷰 + products의 export_* 컬럼)를 그대로 읽는다.
+// ⚠️ 원칙: 우리는 틀만 제공한다. 브랜드사가 직접 가입해 수출 정보를 채운 경우에만 열린다.
+// 언어: 브랜드는 한글만 쓰고, 저장 시 서버가 9개 언어 번역을 만들어 저장(export_i18n.sql + api/export-translate).
+// 바이어에겐 기본 영어, 우상단 언어 버튼으로 번체·간체·일어·말레이·인니·베트남·태국·러시아·한국어 전환.
+// 번역 컬럼(DDL) 실행 전에는 영문(export_pitch_en)으로 폴백되므로 안전하게 동작한다.
 
-type Lang = 'en' | 'tw' | 'ja' | 'es' | 'ko'
+type Lang = 'en' | 'zh_tw' | 'zh_cn' | 'ja' | 'ms' | 'id' | 'vi' | 'th' | 'ru' | 'ko'
 
 const LANGS: { code: Lang; label: string }[] = [
   { code: 'en', label: 'English' },
-  { code: 'tw', label: '繁體中文' },
+  { code: 'zh_tw', label: '繁體中文' },
+  { code: 'zh_cn', label: '简体中文' },
   { code: 'ja', label: '日本語' },
-  { code: 'es', label: 'Español' },
+  { code: 'ms', label: 'Bahasa Melayu' },
+  { code: 'id', label: 'Bahasa Indonesia' },
+  { code: 'vi', label: 'Tiếng Việt' },
+  { code: 'th', label: 'ไทย' },
+  { code: 'ru', label: 'Русский' },
   { code: 'ko', label: '한국어' },
 ]
 
@@ -25,9 +31,14 @@ function detectLang(): Lang {
   if (typeof navigator === 'undefined') return 'en'
   const nl = navigator.language?.toLowerCase() ?? ''
   if (nl.startsWith('ko')) return 'ko'
-  if (nl.startsWith('zh')) return 'tw'
+  if (nl.startsWith('zh-tw') || nl.startsWith('zh-hk') || nl.startsWith('zh-hant')) return 'zh_tw'
+  if (nl.startsWith('zh')) return 'zh_cn'
   if (nl.startsWith('ja')) return 'ja'
-  if (nl.startsWith('es')) return 'es'
+  if (nl.startsWith('ms')) return 'ms'
+  if (nl.startsWith('id')) return 'id'
+  if (nl.startsWith('vi')) return 'vi'
+  if (nl.startsWith('th')) return 'th'
+  if (nl.startsWith('ru')) return 'ru'
   return 'en'
 }
 
@@ -62,7 +73,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundBody: 'The brand has not completed its export profile with Beautyground.',
     notFoundCta: 'Browse our export catalog',
   },
-  tw: {
+  zh_tw: {
     products: '產品', certs: '認證', provenTitle: '✦ 韓國實績 — BY BEAUTYGROUND',
     provenStore: ['百貨公司', '韓國門市陳列中'], provenMall: (n) => [`${n} 件商品`, 'Beautyground 商城販售中'],
     provenDirect: ['直營', '直接買斷再販售'],
@@ -73,6 +84,18 @@ const COPY: Record<Lang, Copy> = {
     notFoundTitle: '此品牌頁面尚未開設。',
     notFoundBody: '該品牌尚未在 Beautyground 完成出口資料登錄。',
     notFoundCta: '瀏覽我們的出口型錄',
+  },
+  zh_cn: {
+    products: '产品', certs: '认证', provenTitle: '✦ 韩国实绩 — BY BEAUTYGROUND',
+    provenStore: ['百货公司', '韩国门店陈列中'], provenMall: (n) => [`${n} 件商品`, 'Beautyground 商城在售'],
+    provenDirect: ['直营', '直接买断再销售'],
+    priceOnRequest: '批发价格请咨询', retail: '韩国零售价',
+    shopBtn: ['🛒 选购此品牌', 'Beautyground 线上商城'], wholesaleBtn: ['💬 批发咨询', '24小时内回复'],
+    ctaSub: '零售与出口均由首尔 BEAUTYGROUND 运营',
+    footer: 'CURATED & EXPORTED BY',
+    notFoundTitle: '此品牌页面尚未开设。',
+    notFoundBody: '该品牌尚未在 Beautyground 完成出口资料登记。',
+    notFoundCta: '浏览我们的出口目录',
   },
   ja: {
     products: '商品', certs: '認証', provenTitle: '✦ 韓国での実績 — BY BEAUTYGROUND',
@@ -86,17 +109,65 @@ const COPY: Record<Lang, Copy> = {
     notFoundBody: 'ブランドがBeautygroundでの輸出プロフィール登録を完了していません。',
     notFoundCta: '輸出カタログを見る',
   },
-  es: {
-    products: 'PRODUCTOS', certs: 'CERTIFICACIONES', provenTitle: '✦ PROBADO EN COREA — BY BEAUTYGROUND',
-    provenStore: ['Gran Almacén', 'En exhibición en Corea'], provenMall: (n) => [`${n} Productos`, 'En la tienda Beautyground'],
-    provenDirect: ['Directo', 'Compra y reventa directa'],
-    priceOnRequest: 'Precio mayorista a consultar', retail: 'Precio Corea',
-    shopBtn: ['🛒 Comprar Esta Marca', 'Tienda online Beautyground'], wholesaleBtn: ['💬 Consulta Mayorista', 'Respuesta en 24h'],
-    ctaSub: 'Venta minorista y exportación gestionadas por BEAUTYGROUND, Seúl',
+  ms: {
+    products: 'PRODUK', certs: 'PENSIJILAN', provenTitle: '✦ TERBUKTI DI KOREA — BY BEAUTYGROUND',
+    provenStore: ['Gedung Beli-belah', 'Dipamerkan di Korea'], provenMall: (n) => [`${n} Produk`, 'Di mal Beautyground'],
+    provenDirect: ['Terus', 'Beli & jual semula'],
+    priceOnRequest: 'Harga borong atas permintaan', retail: 'Runcit Korea',
+    shopBtn: ['🛒 Beli Jenama Ini', 'Mal dalam talian Beautyground'], wholesaleBtn: ['💬 Pertanyaan Borong', 'Balas dalam 24 jam'],
+    ctaSub: 'Runcit & eksport dikendalikan oleh BEAUTYGROUND, Seoul',
     footer: 'CURATED & EXPORTED BY',
-    notFoundTitle: 'Esta página de marca aún no está abierta.',
-    notFoundBody: 'La marca no ha completado su perfil de exportación con Beautyground.',
-    notFoundCta: 'Ver nuestro catálogo de exportación',
+    notFoundTitle: 'Halaman jenama ini belum dibuka.',
+    notFoundBody: 'Jenama belum melengkapkan profil eksport dengan Beautyground.',
+    notFoundCta: 'Lihat katalog eksport kami',
+  },
+  id: {
+    products: 'PRODUK', certs: 'SERTIFIKASI', provenTitle: '✦ TERBUKTI DI KOREA — BY BEAUTYGROUND',
+    provenStore: ['Dept. Store', 'Dipajang di Korea'], provenMall: (n) => [`${n} Produk`, 'Di mal Beautyground'],
+    provenDirect: ['Langsung', 'Beli & jual kembali'],
+    priceOnRequest: 'Harga grosir sesuai permintaan', retail: 'Ritel Korea',
+    shopBtn: ['🛒 Beli Merek Ini', 'Mal online Beautyground'], wholesaleBtn: ['💬 Pertanyaan Grosir', 'Dibalas dalam 24 jam'],
+    ctaSub: 'Ritel & ekspor ditangani BEAUTYGROUND, Seoul',
+    footer: 'CURATED & EXPORTED BY',
+    notFoundTitle: 'Halaman merek ini belum dibuka.',
+    notFoundBody: 'Merek belum melengkapi profil ekspor di Beautyground.',
+    notFoundCta: 'Lihat katalog ekspor kami',
+  },
+  vi: {
+    products: 'SẢN PHẨM', certs: 'CHỨNG NHẬN', provenTitle: '✦ ĐÃ KIỂM CHỨNG TẠI HÀN QUỐC — BY BEAUTYGROUND',
+    provenStore: ['TTTM', 'Đang trưng bày tại Hàn Quốc'], provenMall: (n) => [`${n} sản phẩm`, 'Trên mall Beautyground'],
+    provenDirect: ['Trực tiếp', 'Mua đứt & bán lại'],
+    priceOnRequest: 'Giá sỉ theo yêu cầu', retail: 'Giá lẻ Hàn Quốc',
+    shopBtn: ['🛒 Mua thương hiệu này', 'Mall trực tuyến Beautyground'], wholesaleBtn: ['💬 Hỏi giá sỉ', 'Phản hồi trong 24h'],
+    ctaSub: 'Bán lẻ & xuất khẩu đều do BEAUTYGROUND, Seoul đảm nhận',
+    footer: 'CURATED & EXPORTED BY',
+    notFoundTitle: 'Trang thương hiệu này chưa được mở.',
+    notFoundBody: 'Thương hiệu chưa hoàn tất hồ sơ xuất khẩu với Beautyground.',
+    notFoundCta: 'Xem danh mục xuất khẩu',
+  },
+  th: {
+    products: 'สินค้า', certs: 'การรับรอง', provenTitle: '✦ พิสูจน์แล้วในเกาหลี — BY BEAUTYGROUND',
+    provenStore: ['ห้างสรรพสินค้า', 'วางจำหน่ายในเกาหลี'], provenMall: (n) => [`${n} สินค้า`, 'บนมอลล์ Beautyground'],
+    provenDirect: ['โดยตรง', 'ซื้อขาดและขายต่อ'],
+    priceOnRequest: 'ราคาขายส่งสอบถามได้', retail: 'ราคาปลีกเกาหลี',
+    shopBtn: ['🛒 ช้อปแบรนด์นี้', 'มอลล์ออนไลน์ Beautyground'], wholesaleBtn: ['💬 สอบถามราคาส่ง', 'ตอบกลับภายใน 24 ชม.'],
+    ctaSub: 'ค้าปลีกและส่งออกดูแลโดย BEAUTYGROUND โซล',
+    footer: 'CURATED & EXPORTED BY',
+    notFoundTitle: 'หน้าแบรนด์นี้ยังไม่เปิด',
+    notFoundBody: 'แบรนด์ยังไม่ได้ลงทะเบียนข้อมูลส่งออกกับ Beautyground',
+    notFoundCta: 'ดูแคตตาล็อกส่งออกของเรา',
+  },
+  ru: {
+    products: 'ПРОДУКЦИЯ', certs: 'СЕРТИФИКАТЫ', provenTitle: '✦ ПРОВЕРЕНО В КОРЕЕ — BY BEAUTYGROUND',
+    provenStore: ['Универмаг', 'Представлено в Корее'], provenMall: (n) => [`${n} товаров`, 'В магазине Beautyground'],
+    provenDirect: ['Напрямую', 'Закупка и перепродажа'],
+    priceOnRequest: 'Оптовая цена по запросу', retail: 'Розница в Корее',
+    shopBtn: ['🛒 Купить этот бренд', 'Онлайн-магазин Beautyground'], wholesaleBtn: ['💬 Оптовый запрос', 'Ответ в течение 24 ч'],
+    ctaSub: 'Розница и экспорт — BEAUTYGROUND, Сеул',
+    footer: 'CURATED & EXPORTED BY',
+    notFoundTitle: 'Страница бренда ещё не открыта.',
+    notFoundBody: 'Бренд не завершил экспортный профиль в Beautyground.',
+    notFoundCta: 'Смотреть экспортный каталог',
   },
   ko: {
     products: '제품', certs: '인증', provenTitle: '✦ PROVEN IN KOREA — BY BEAUTYGROUND',
@@ -112,6 +183,12 @@ const COPY: Record<Lang, Copy> = {
   },
 }
 
+type I18nMap = Partial<Record<Lang, string>>
+
+interface ExportBrandRow extends ExportBrandPublic {
+  export_pitch_i18n?: I18nMap | null
+}
+
 interface ExportProduct {
   id: string
   name: string
@@ -120,12 +197,12 @@ interface ExportProduct {
   export_image_urls: string[] | null
   export_description_en: string | null
   is_export_featured: boolean
+  export_i18n?: { name?: I18nMap; desc?: I18nMap } | null
 }
 
 const norm = (s: string) => s.normalize('NFC').toLowerCase().replace(/[\s\-_]/g, '')
 
-// 가입(등록) 완료 판정 — 영문 소개를 채워야 페이지가 열린다. 우리는 틀만 제공하고,
-// 브랜드사가 직접 가입해 채워야 자기 페이지가 생기는 구조(대표님 원칙).
+// 가입(등록) 완료 판정 — 영문 소개를 채워야 페이지가 열린다(틀만 제공 원칙)
 const isRegistered = (b: ExportBrandPublic) => (b.export_pitch_en?.trim() ?? '').length > 0
 
 function LangButton({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
@@ -144,7 +221,7 @@ function LangButton({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-1.5 w-36 bg-white rounded-xl shadow-xl overflow-hidden z-40 border border-[#E8E6E1]">
+          <div className="absolute right-0 mt-1.5 w-44 max-h-[320px] overflow-y-auto bg-white rounded-xl shadow-xl z-40 border border-[#E8E6E1]">
             {LANGS.map((l) => (
               <button
                 key={l.code}
@@ -166,7 +243,7 @@ function LangButton({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
 
 export default function ExportBrand() {
   const { key = '' } = useParams()
-  const [brand, setBrand] = useState<ExportBrandPublic | null | undefined>(undefined) // undefined=로딩, null=미개설/없음
+  const [brand, setBrand] = useState<ExportBrandRow | null | undefined>(undefined) // undefined=로딩, null=미개설/없음
   const [products, setProducts] = useState<ExportProduct[]>([])
   const [lang, setLang] = useState<Lang>(detectLang)
   const t = COPY[lang]
@@ -176,15 +253,17 @@ export default function ExportBrand() {
     ;(async () => {
       const { data: rows } = await supabase.from('export_brand_public').select('*')
       if (cancelled) return
-      const list = (rows ?? []) as ExportBrandPublic[]
+      const list = (rows ?? []) as ExportBrandRow[]
       const decoded = norm(decodeURIComponent(key))
       const found = list.find((b) => b.id === key) ?? list.find((b) => norm(b.brand_name) === decoded) ?? null
-      // 등록(가입) 완료한 브랜드만 페이지 오픈 — 미등록 브랜드는 미개설 안내
       if (!found || !isRegistered(found)) { setBrand(null); return }
       setBrand(found)
+      // 번역 컬럼(DDL) 적용 여부에 따라 조회 컬럼을 맞춘다 — 미적용 상태에서도 400 없이 동작
+      const hasI18n = 'export_pitch_i18n' in found
+      const cols = 'id,name,thumbnail_url,price,export_image_urls,export_description_en,is_export_featured' + (hasI18n ? ',export_i18n' : '')
       const { data: prodRows } = await supabase
         .from('products')
-        .select('id,name,thumbnail_url,price,export_image_urls,export_description_en,is_export_featured')
+        .select(cols)
         .eq('partner_id', found.id)
         .eq('status', 'on_sale')
         .eq('is_export_featured', true)
@@ -192,7 +271,7 @@ export default function ExportBrand() {
         .order('created_at', { ascending: false })
         .limit(12)
       if (cancelled) return
-      setProducts((prodRows ?? []) as ExportProduct[])
+      setProducts((prodRows ?? []) as unknown as ExportProduct[])
     })()
     return () => { cancelled = true }
   }, [key])
@@ -202,6 +281,12 @@ export default function ExportBrand() {
   useEffect(() => {
     if (brand) document.title = `${brand.brand_name} — K-Beauty Export | BEAUTYGROUND`
   }, [brand])
+
+  // 콘텐츠 언어 결정 — 저장된 번역이 있으면 그 언어, 없으면 영어(폴백)
+  const pitchText = brand
+    ? (brand.export_pitch_i18n?.[lang]?.trim() || (lang === 'en' ? '' : brand.export_pitch_i18n?.en?.trim() || '') || brand.export_pitch_en || '')
+    : ''
+  const productName = (p: ExportProduct) => p.export_i18n?.name?.[lang]?.trim() || p.export_i18n?.name?.en?.trim() || p.name
 
   if (brand === undefined) {
     return <div className="min-h-screen bg-[#F4F2EE] flex items-center justify-center text-[13px] text-[#9A9488]">Loading…</div>
@@ -241,8 +326,8 @@ export default function ExportBrand() {
             </div>
           )}
           <h1 className="font-serif text-[21px] tracking-[0.08em]">{brand.brand_name}</h1>
-          {brand.export_pitch_en && (
-            <p className="text-[12px] text-[#C8CEDB] mt-2 leading-relaxed">{brand.export_pitch_en}</p>
+          {pitchText && (
+            <p className="text-[12px] text-[#C8CEDB] mt-2 leading-relaxed">{pitchText}</p>
           )}
           {(brand.export_countries || brand.export_moq_notes) && (
             <div className="flex gap-1.5 justify-center flex-wrap mt-3.5">
@@ -283,9 +368,9 @@ export default function ExportBrand() {
                 const img = p.export_image_urls?.[0] ?? p.thumbnail_url ?? ''
                 return (
                   <div key={p.id} className="min-w-[136px] w-[136px] bg-white border border-[#E8E6E1] rounded-2xl overflow-hidden relative shrink-0">
-                    <img src={img} alt={p.name} className="w-full aspect-square object-cover" loading="lazy" />
+                    <img src={img} alt={productName(p)} className="w-full aspect-square object-cover" loading="lazy" />
                     <div className="px-2.5 py-2">
-                      <p className="text-[11px] font-bold leading-[1.35] line-clamp-2">{p.name}</p>
+                      <p className="text-[11px] font-bold leading-[1.35] line-clamp-2">{productName(p)}</p>
                       <p className="text-[9.5px] text-[#B08A4F] font-bold mt-1.5">
                         {p.price ? `${t.retail} ₩${p.price.toLocaleString()}` : t.priceOnRequest}
                       </p>

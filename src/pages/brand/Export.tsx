@@ -92,6 +92,7 @@ export default function BrandExport() {
   const [featureError, setFeatureError] = useState('')
   const [openSlot, setOpenSlot] = useState(1)
   const [copied, setCopied] = useState(false)
+  const [translateNote, setTranslateNote] = useState('')
 
   useEffect(() => {
     let active = true
@@ -279,15 +280,28 @@ export default function BrandExport() {
       setPartner((prev) => (prev ? { ...prev, ...updated } : updated))
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
-      if (firstOpen) {
-        // 실패해도 저장 흐름은 막지 않는다(메일은 부가 기능)
-        try {
-          const { data: sess } = await supabase.auth.getSession()
-          const token = sess.session?.access_token
-          if (token) {
-            void fetch('/api/export-welcome', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
-          }
-        } catch { /* no-op */ }
+      const { data: sess } = await supabase.auth.getSession()
+      const token = sess.session?.access_token
+      if (firstOpen && token) {
+        // 개설 웰컴 메일 — 실패해도 저장 흐름은 막지 않는다
+        void fetch('/api/export-welcome', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
+      }
+      // 다국어 자동 번역 — 한글(또는 영문) 소개가 있으면 9개 언어 번역을 만들어 저장 (바이어 언어 버튼용)
+      if (token && (pitch.trim() || pitchEn.trim())) {
+        setTranslateNote('🌐 바이어용 9개 언어 번역 생성 중… (수 분 내 자동 반영)')
+        fetch('/api/export-translate', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+          .then(async (r) => {
+            if (r.ok) {
+              const d = await r.json()
+              setTranslateNote(`🌐 번역 완료 — 소개${d.pitch ? ' ✓' : ' ✗'} · 상품 ${d.products}개`)
+            } else if (r.status === 503) {
+              setTranslateNote('') // 번역 컬럼 미설정(관리자 SQL 실행 전) — 조용히 넘어감
+            } else {
+              setTranslateNote('🌐 번역 생성 실패 — 다음 저장 때 다시 시도됩니다')
+            }
+            setTimeout(() => setTranslateNote(''), 8000)
+          })
+          .catch(() => setTranslateNote(''))
       }
     } catch {
       setError('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.')
@@ -517,6 +531,7 @@ export default function BrandExport() {
           </p>
         </div>
         {error && <p className="text-[13px] text-red-600 mb-2">{error}</p>}
+        {translateNote && <p className="text-[12.5px] text-[#8B6F3D] bg-[#F8F3EA] border border-[#E9DCC3] rounded-lg px-3 py-2 mb-2">{translateNote}</p>}
         <div className="sticky bottom-4 flex items-center gap-3">
           <button onClick={() => void handleSaveDetails()} disabled={saving}
             className="flex-1 bg-[#1B2537] text-white rounded-xl py-3.5 text-[14px] font-bold shadow-lg hover:opacity-95 disabled:opacity-50">
