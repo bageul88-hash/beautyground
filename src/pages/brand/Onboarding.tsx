@@ -89,7 +89,7 @@ export default function BrandOnboarding() {
                 />
               </div>
               {error && <p className="text-[13px] text-[#FF4757]" role="alert">{error}</p>}
-              <Button type="submit" variant="gold" size="md" disabled={submitting} className="w-full"
+              <Button type="submit" variant="ink" size="md" disabled={submitting} className="w-full"
                 label={submitting ? '생성 중…' : '수출 페이지 만들기'} />
               <p className="text-center text-[12px] text-text-sub pt-1">
                 이미 뷰티그라운드에 입점한 브랜드라면 담당자에게 계정 연결을 요청해 주세요.

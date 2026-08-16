@@ -134,7 +134,7 @@ export default function BrandLogin() {
                   />
                 </div>
                 {error && <p className="text-[13px] text-[#FF4757]" role="alert">{error}</p>}
-                <Button type="submit" variant="gold" size="md" disabled={submitting} className="w-full"
+                <Button type="submit" variant="ink" size="md" disabled={submitting} className="w-full"
                   label={submitting ? '발송 중…' : '이메일로 인증번호 받기'} />
               </form>
             )}
@@ -155,7 +155,7 @@ export default function BrandLogin() {
                   className={`${inputCls} text-center tracking-[0.5em] text-[20px] font-bold`}
                 />
                 {error && <p className="text-[13px] text-[#FF4757]" role="alert">{error}</p>}
-                <Button type="submit" variant="gold" size="md" disabled={submitting} className="w-full"
+                <Button type="submit" variant="ink" size="md" disabled={submitting} className="w-full"
                   label={submitting ? '확인 중…' : '로그인'} />
                 <div className="flex items-center justify-between text-[12.5px] text-text-sub pt-1">
                   <button type="button" className="underline" onClick={() => { setStep('email'); setError(null) }}>
@@ -194,7 +194,7 @@ export default function BrandLogin() {
                   />
                 </div>
                 {error && <p className="text-[13px] text-[#FF4757]" role="alert">{error}</p>}
-                <Button type="submit" variant="gold" size="md" disabled={submitting} className="w-full"
+                <Button type="submit" variant="ink" size="md" disabled={submitting} className="w-full"
                   label={submitting ? '로그인 중…' : '로그인'} />
               </form>
             )}
