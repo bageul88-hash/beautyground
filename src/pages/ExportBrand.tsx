@@ -224,6 +224,7 @@ export default function ExportBrand() {
   const { key = '' } = useParams()
   const [brand, setBrand] = useState<ExportBrandRow | null | undefined>(undefined)
   const [products, setProducts] = useState<ExportProduct[]>([])
+  const [previewOnly, setPreviewOnly] = useState(false)
   const [lang, setLang] = useState<Lang>(detectLang)
   const t = COPY[lang]
 
@@ -234,7 +235,20 @@ export default function ExportBrand() {
       if (cancelled) return
       const list = (rows ?? []) as ExportBrandRow[]
       const decoded = norm(decodeURIComponent(key))
-      const found = list.find((b) => b.id === key) ?? list.find((b) => norm(b.brand_name) === decoded) ?? null
+      let found = list.find((b) => b.id === key) ?? list.find((b) => norm(b.brand_name) === decoded) ?? null
+      // 승인 대기(pending) 브랜드는 공개 뷰에 없다 — 본인 계정으로 로그인한 경우에만 미리보기 허용
+      if (!found) {
+        const { data: auth } = await supabase.auth.getUser()
+        if (auth.user) {
+          const { data: mine } = await supabase.from('partners').select('*').eq('user_id', auth.user.id).maybeSingle()
+          const mineRow = mine as unknown as ExportBrandRow | null
+          if (mineRow && (mineRow.id === key || norm(mineRow.brand_name) === decoded)) {
+            found = mineRow
+            if (!cancelled) setPreviewOnly(true)
+          }
+        }
+      }
+      if (cancelled) return
       if (!found || !isRegistered(found)) { setBrand(null); return }
       setBrand(found)
       const hasI18n = 'export_pitch_i18n' in found
@@ -298,6 +312,13 @@ export default function ExportBrand() {
       `}</style>
 
       <div className="w-full max-w-[430px] bg-white min-h-screen shadow-[0_0_50px_rgba(22,32,47,0.06)] flex flex-col">
+
+        {/* ── 승인 대기 미리보기 안내 — 본인에게만 보이는 상태 ── */}
+        {previewOnly && (
+          <div className="bg-[#111111] text-white text-center px-4 py-2 text-[11px] leading-[1.6]">
+            <span className="text-[#FF8A8A] font-bold">승인 대기 미리보기</span> — 이 페이지는 지금 본인에게만 보입니다. 뷰티그라운드 승인 후 바이어에게 공개됩니다.
+          </div>
+        )}
 
         {/* ── 상단: 플랫폼 표기 + 언어 ── */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
