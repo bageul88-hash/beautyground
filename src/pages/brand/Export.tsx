@@ -284,12 +284,12 @@ export default function BrandExport() {
       const token = sess.session?.access_token
       if (firstOpen && token) {
         // 개설 웰컴 메일 — 실패해도 저장 흐름은 막지 않는다
-        void fetch('/api/export-welcome', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
+        void fetch('/api/export-brand?action=welcome', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
       }
       // 다국어 자동 번역 — 한글(또는 영문) 소개가 있으면 9개 언어 번역을 만들어 저장 (바이어 언어 버튼용)
       if (token && (pitch.trim() || pitchEn.trim())) {
         setTranslateNote('🌐 바이어용 9개 언어 번역 생성 중… (수 분 내 자동 반영)')
-        fetch('/api/export-translate', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+        fetch('/api/export-brand?action=translate', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
           .then(async (r) => {
             if (r.ok) {
               const d = await r.json()
