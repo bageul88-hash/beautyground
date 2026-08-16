@@ -250,7 +250,7 @@ export default function ExportBrand() {
         .order('created_at', { ascending: false })
         .limit(12)
       if (cancelled) return
-      const rows = (prodRows ?? []) as unknown as ExportProduct[]
+      const rows: ExportProduct[] = prodRows ? (prodRows as unknown as ExportProduct[]) : []
       setProducts(rows.filter((p) => (p.export_image_urls?.[0] ?? p.thumbnail_url)))
     })()
     return () => { cancelled = true }
