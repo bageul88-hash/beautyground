@@ -9,7 +9,27 @@
             "command": "bash .claude/hooks/check-unpushed.sh",
             "shell": "bash",
             "timeout": 15,
-            "statusMessage": "미푸시 변경 확인 중..."
+            "statusMessage": "\ubbf8\ud478\uc2dc \ubcc0\uacbd \ud655\uc778 \uc911..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/user/.local/bin/graphify.EXE hook-guard search"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/user/.local/bin/graphify.EXE hook-guard read"
           }
         ]
       }
