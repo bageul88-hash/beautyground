@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/" }]
+  "rewrites": [
+    { "source": "/company", "destination": "/api/company-og" },
+    { "source": "/((?!api/).*)", "destination": "/" }
+  ]
 }
