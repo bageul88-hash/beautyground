@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { ExportBrandPublic } from '../lib/types'
+import CuratorSeal from '../components/export/CuratorSeal'
 
 // 브랜드별 수출 미니페이지(/x/:key) — 해외 바이어·소비자에게 링크/QR 하나로 전달하는 모바일 원페이지.
 // 디자인: "무역 라인시트(line sheet)" — 화이트 지면, 세리프 브랜드명, 헤어라인 괘선, 스펙 테이블.
@@ -184,24 +185,6 @@ interface ExportProduct {
 
 const norm = (s: string) => s.normalize('NFC').toLowerCase().replace(/[\s\-_]/g, '')
 const isRegistered = (b: ExportBrandPublic) => (b.export_pitch_en?.trim() ?? '').length > 0
-
-// 시그니처 — CURATED BY BEAUTYGROUND 원형 인장(직매입 유통사의 보증 도장)
-function CuratorSeal({ size = 92 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" className="seal" aria-hidden>
-      <defs>
-        <path id="sealArc" d="M 50,50 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
-      </defs>
-      <circle cx="50" cy="50" r="47" fill="none" stroke="#A8853F" strokeWidth="1.4" />
-      <circle cx="50" cy="50" r="29" fill="none" stroke="#A8853F" strokeWidth="0.8" />
-      <text fill="#A8853F" fontSize="8.2" letterSpacing="1.8" fontFamily="Georgia, 'Noto Serif KR', serif">
-        <textPath href="#sealArc">CURATED · BEAUTYGROUND · SEOUL · EXPORT ·</textPath>
-      </text>
-      <text x="50" y="47" textAnchor="middle" fill="#A8853F" fontSize="15" fontFamily="Georgia, 'Noto Serif KR', serif">BG</text>
-      <text x="50" y="60" textAnchor="middle" fill="#A8853F" fontSize="5.4" letterSpacing="1.2">EST. 2022</text>
-    </svg>
-  )
-}
 
 function LangButton({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const [open, setOpen] = useState(false)

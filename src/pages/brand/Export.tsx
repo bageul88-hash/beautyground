@@ -10,6 +10,7 @@ import {
   translateText,
 } from '../../lib/partner'
 import type { Partner, Product } from '../../lib/types'
+import CuratorSeal from '../../components/export/CuratorSeal'
 
 // 수출 브랜드 페이지 편집기 (v2, 2026-08-17 재구축 — 리틀리 벤치마킹 후 확정한 틀)
 // 좌측 = 고정 슬롯 아코디언(기본 정보 입력) / 우측 = 바이어에게 보이는 폰 화면 실시간 미리보기.
@@ -541,65 +542,77 @@ export default function BrandExport() {
         </div>
       </div>
 
-      {/* ══════ 우: 폰 미리보기 (실시간) ══════ */}
+      {/* ══════ 우: 폰 미리보기 (실시간) — 바이어 페이지(/x) 라인시트 v3와 동일한 모습 ══════ */}
       <div className="lg:sticky lg:top-6 order-first lg:order-none">
-        <p className="text-[12px] text-[#6B7280] text-center mb-3">바이어에게 보이는 화면 — <b className="text-[#B08A4F]">실시간 미리보기</b></p>
-        <div className="mx-auto w-full max-w-[375px] rounded-[38px] overflow-hidden shadow-[0_24px_60px_rgba(27,37,55,0.22),0_0_0_10px_#1C1E22,0_0_0_12px_#3A3D44]">
-          <div className="h-[560px] overflow-y-auto bg-white [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {/* 히어로 */}
-            <div className="relative bg-gradient-to-br from-[#20293C] via-[#1B2537] to-[#2A3550] text-white text-center px-5 pt-10 pb-5">
-              <span className="absolute top-3 right-3 text-[9px] font-bold text-white/70 bg-white/10 border border-white/20 rounded-full px-2.5 py-1">🌐 English ▾</span>
-              {partner.export_logo_url ? (
-                <img src={partner.export_logo_url} alt="" className="w-14 h-14 rounded-full object-cover bg-white mx-auto mb-2.5 border-2 border-white/20" />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-white text-[#1B2537] font-serif text-[18px] font-bold flex items-center justify-center mx-auto mb-2.5">
-                  {partner.brand_name.charAt(0)}
-                </div>
-              )}
-              <p className="font-serif text-[18px] tracking-wider">{partner.brand_name}</p>
-              {pitchEn.trim() ? (
-                <p className="text-[11px] text-[#C8CEDB] mt-1.5 leading-relaxed">{pitchEn}</p>
-              ) : (
-                <p className="text-[10.5px] text-[#7E8797] mt-1.5 italic">⚠️ 영문 소개가 들어갈 자리입니다 — 저장하면 페이지가 열립니다</p>
-              )}
-              {(countries.trim() || moqNotes.trim()) && (
-                <div className="flex gap-1.5 justify-center flex-wrap mt-3">
-                  {countries.trim() && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#C9A96E]/20 text-[#C9A96E] border border-[#C9A96E]/40">Exporting: {countries}</span>}
-                  {moqNotes.trim() && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#C9A96E]/20 text-[#C9A96E] border border-[#C9A96E]/40">MOQ: {moqNotes.length > 22 ? moqNotes.slice(0, 22) + '…' : moqNotes}</span>}
-                </div>
-              )}
+        <p className="text-[12px] text-[#6B7280] text-center mb-3">바이어에게 보이는 화면 — <b className="text-[#A8853F]">실시간 미리보기</b></p>
+        <div className="mx-auto w-full max-w-[375px] rounded-[38px] overflow-hidden shadow-[0_24px_60px_rgba(22,32,47,0.2),0_0_0_10px_#1C1E22,0_0_0_12px_#3A3D44]">
+          <div className="h-[560px] overflow-y-auto bg-white [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative">
+            {/* 상단: 플랫폼 표기 + 언어 */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-3">
+              <p className="text-[8.5px] tracking-[0.28em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#A8853F]">EXPORT</span></p>
+              <span className="text-[8.5px] tracking-[0.06em] text-[#8A8577] border border-[#E6E3DC] px-2 py-0.5">English ▾</span>
             </div>
-            {/* PROVEN */}
-            <div className="bg-[#141B2B] px-3.5 pt-3 pb-3.5">
-              <p className="text-[8.5px] font-black tracking-[0.2em] text-[#C9A96E] text-center mb-2">✦ PROVEN IN KOREA — BY BEAUTYGROUND</p>
-              <div className="flex gap-1.5">
-                {[['Dept. Store', 'On display in Korea'], [`${featuredCount || products.length} Products`, 'On Beautyground mall'], ['Direct', 'Buy & resell']].map(([v, k]) => (
-                  <div key={k} className="flex-1 bg-white/[0.055] border border-[#C9A96E]/25 rounded-lg px-1 py-2 text-center">
-                    <p className="text-[11px] font-black text-white">{v}</p>
-                    <p className="text-[7.5px] text-[#9AA3B5] mt-0.5">{k}</p>
-                  </div>
-                ))}
+            <div className="mx-4 h-px bg-[#16202F]" />
+            {/* 브랜드 헤더 — 라인시트 표지 */}
+            <div className="px-4 pt-4 pb-4 relative">
+              <div className="pr-16">
+                {partner.export_logo_url && (
+                  <img src={partner.export_logo_url} alt="" className="w-9 h-9 object-cover border border-[#E6E3DC] mb-2.5" />
+                )}
+                <p className="font-serif text-[20px] leading-[1.15] text-[#16202F] break-keep">{partner.brand_name}</p>
+                {pitchEn.trim() ? (
+                  <p className="text-[10px] text-[#5A564B] leading-[1.7] mt-2">{pitchEn}</p>
+                ) : (
+                  <p className="text-[9.5px] text-[#C2410C] leading-[1.6] mt-2">⚠️ 영문 소개가 들어갈 자리입니다 — 저장하면 페이지가 열립니다</p>
+                )}
+                {(countries.trim() || moqNotes.trim()) && (
+                  <p className="text-[8px] tracking-[0.05em] text-[#8A8577] mt-2.5 uppercase">
+                    {countries.trim() && <>Exporting — <span className="text-[#16202F]">{countries}</span></>}
+                    {countries.trim() && moqNotes.trim() && <span className="mx-1.5 text-[#D8D4C9]">|</span>}
+                    {moqNotes.trim() && <>MOQ — <span className="text-[#16202F]">{moqNotes.length > 20 ? moqNotes.slice(0, 20) + '…' : moqNotes}</span></>}
+                  </p>
+                )}
               </div>
+              <div className="absolute top-3 right-3 rotate-[-8deg]"><CuratorSeal size={58} /></div>
             </div>
-            {/* 제품 */}
-            <div className="px-3.5 pt-4">
-              <p className="text-[10px] font-black tracking-[0.16em] text-[#B08A4F] mb-2.5">PRODUCTS</p>
+            {/* PROVEN — 스펙 테이블 */}
+            <div className="px-4 pb-1">
+              <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F] pb-1.5 border-b border-[#16202F]">Proven in Korea</p>
+              <table className="w-full">
+                <tbody>
+                  {[['Retail', 'AK Department Store — on display'], ['Online', 'beautyground.co.kr — selling now'], ['Trade', 'Direct buy & resell by Beautyground']].map(([label, value]) => (
+                    <tr key={label} className="border-b border-[#EBE8E0]">
+                      <td className="py-1.5 pr-2 text-[7.5px] tracking-[0.1em] uppercase text-[#8A8577] whitespace-nowrap align-top w-[54px]">{label}</td>
+                      <td className="py-1.5 text-[9px] text-[#16202F] leading-relaxed">{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* 제품 — 2열 그리드 */}
+            <div className="px-4 pt-4">
+              <div className="flex items-baseline justify-between pb-1.5 border-b border-[#16202F]">
+                <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F]">Products</p>
+                <p className="text-[8px] text-[#B9B4A8]">{String(previewProducts.length).padStart(2, '0')}</p>
+              </div>
               {previewProducts.length === 0 ? (
-                <div className="border border-dashed border-[#C9A96E] bg-[#F8F3EA] rounded-xl py-6 text-center text-[10.5px] text-[#B08A4F] mb-3">
+                <div className="border border-dashed border-[#A8853F] bg-[#FAF9F6] py-5 text-center text-[9px] text-[#A8853F] mt-3 mb-3">
                   ⚠️ 대표상품이 들어갈 자리입니다 — 3번에서 선택해 주세요
                 </div>
               ) : (
-                <div className="flex gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-4 pt-3 pb-3">
                   {previewProducts.map((p) => {
                     const img = drafts[p.id]?.images[0] ?? p.export_image_urls?.[0] ?? p.thumbnail_url ?? ''
                     return (
-                      <div key={p.id} className="min-w-[110px] w-[110px] bg-white border border-[#E8E6E1] rounded-xl overflow-hidden shrink-0">
-                        <img src={img} alt="" className="w-full aspect-square object-cover" />
-                        <div className="px-2 py-1.5">
-                          <p className="text-[9.5px] font-bold leading-tight line-clamp-2">{p.name}</p>
-                          <p className="text-[8.5px] text-[#B08A4F] font-bold mt-1">Wholesale on request</p>
+                      <figure key={p.id}>
+                        <div className="border border-[#E6E3DC] bg-[#FAF9F6]">
+                          <img src={img} alt="" className="w-full aspect-square object-cover mix-blend-multiply" />
                         </div>
-                      </div>
+                        <figcaption className="mt-1.5">
+                          <p className="text-[9px] font-medium text-[#16202F] leading-[1.4] line-clamp-2">{p.name}</p>
+                          <p className="text-[8px] text-[#A8853F] mt-0.5">Wholesale on request</p>
+                        </figcaption>
+                      </figure>
                     )
                   })}
                 </div>
@@ -607,28 +620,26 @@ export default function BrandExport() {
             </div>
             {/* 인증 */}
             {certifications.length > 0 && (
-              <div className="px-3.5 pt-1 pb-2">
-                <p className="text-[10px] font-black tracking-[0.16em] text-[#B08A4F] mb-2">CERTIFICATIONS</p>
-                <div className="flex gap-1 flex-wrap">
-                  {certifications.map((c) => (
-                    <span key={c} className="text-[9px] font-bold text-[#1B2537] bg-white border border-[#E8E6E1] px-2 py-1 rounded-md">✓ {c}</span>
+              <div className="px-4 pt-2 pb-3">
+                <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F] pb-1.5 border-b border-[#16202F]">Certifications</p>
+                <p className="pt-2 text-[9px] text-[#16202F] leading-[1.9]">
+                  {certifications.map((c, i) => (
+                    <span key={c}>{c}{i < certifications.length - 1 && <span className="mx-1.5 text-[#D8D4C9]">·</span>}</span>
                   ))}
-                </div>
+                </p>
               </div>
             )}
-            {/* 듀얼 CTA */}
-            <div className="px-3.5 py-3">
-              <div className="flex gap-1.5">
-                <div className="flex-1 rounded-xl py-2 bg-[#1B2537] text-white text-center">
-                  <p className="text-[10.5px] font-black">🛒 Shop This Brand</p>
-                  <p className="text-[7.5px] text-[#C9A96E]">Beautyground mall</p>
+            {/* 글래스 캡슐 CTA */}
+            <div className="sticky bottom-0 px-3.5 pt-4 pb-3 bg-gradient-to-t from-white via-white/60 to-transparent">
+              <div className="flex gap-2">
+                <div className="flex-1 text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-[#16202F] bg-white/55 border border-white/90 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_14px_rgba(70,90,190,0.14)]">
+                  Shop retail
                 </div>
-                <div className="flex-1 rounded-xl py-2 bg-[#22C15E] text-white text-center">
-                  <p className="text-[10.5px] font-black">💬 Wholesale</p>
-                  <p className="text-[7.5px] opacity-80">Reply within 24h</p>
+                <div className="flex-[1.4] text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-white bg-[#16202F]/80 border border-white/25 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_16px_rgba(22,32,47,0.28)]">
+                  Wholesale inquiry <span className="text-[#C9A96E] text-[7.5px] ml-0.5">24h</span>
                 </div>
               </div>
-              <p className="text-center text-[7.5px] text-[#9A9488] mt-1.5">Retail & export both handled by BEAUTYGROUND, Seoul</p>
+              <p className="text-center text-[7px] text-[#B9B4A8] mt-1.5">Retail and export are both handled by Beautyground, Seoul.</p>
             </div>
           </div>
         </div>
