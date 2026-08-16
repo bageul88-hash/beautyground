@@ -132,7 +132,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .not('used_at', 'is', null)
     .maybeSingle()
   type CouponTemplate = { discount_type: string; discount_value: number; max_discount: number | null; min_order_amount: number }
-  const ct = (usedCoupon as { coupon_templates?: CouponTemplate | null } | null)?.coupon_templates ?? null
+  // supabase-js 타입 추론이 조인 결과를 배열로 보는 것과 실제 단일 객체 응답이 어긋나 unknown 경유 캐스팅(런타임 동작 동일)
+  const ct = (usedCoupon as unknown as { coupon_templates?: CouponTemplate | null } | null)?.coupon_templates ?? null
   let signupCouponDiscount = 0
   let signupFreeShip = false
   if (ct && authoritativeSubtotal >= ct.min_order_amount) {
