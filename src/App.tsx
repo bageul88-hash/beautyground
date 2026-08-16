@@ -66,6 +66,7 @@ import HostProfile from './pages/host/Profile'
 
 // 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
 import BrandLogin from './pages/brand/Login'
+import BrandOnboarding from './pages/brand/Onboarding'
 import BrandRegister from './pages/brand/Register'
 import BrandExportRegister from './pages/brand/ExportRegister'
 import RequireBrandAuth from './components/brand/RequireBrandAuth'
@@ -207,6 +208,8 @@ export default function App() {
             가능 — 단, 수출 전용 계정은 대시보드/판매내역/정산내역(RequireBrand, 판매 파트너만)에는
             접근할 수 없다(2026-08-16, 라이브 판매실적 비공개 원칙). */}
         <Route path="/brand/login" element={<BrandLogin />} />
+        {/* OTP 첫 로그인 계정의 새 브랜드 생성(셀프 가입) — pending 상태로 생성, 관리자 승인 후 공개 */}
+        <Route path="/brand/onboarding" element={<BrandOnboarding />} />
         <Route path="/brand/register/:id" element={<BrandRegister />} />
         <Route path="/brand/export-register/:id" element={<BrandExportRegister />} />
         <Route element={<RequireBrandAuth />}>
