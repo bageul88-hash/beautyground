@@ -27,7 +27,7 @@ interface Copy {
 
 const COPY: Record<Lang, Copy> = {
   ko: {
-    backAll: '← 전체 브랜드로',
+    backAll: '← 뷰티그라운드 수출 소개로',
     exportingToLabel: '수출 중인 국가',
     moqLabel: 'MOQ · 샘플 정책',
     certificationsLabel: '보유 인증',
@@ -37,7 +37,7 @@ const COPY: Record<Lang, Copy> = {
     noProducts: '등록된 대표상품이 아직 없습니다.',
   },
   en: {
-    backAll: '← All Brands',
+    backAll: '← Back to Beautyground Export',
     exportingToLabel: 'Currently Exporting To',
     moqLabel: 'MOQ · Sample Policy',
     certificationsLabel: 'Certifications',
@@ -47,7 +47,7 @@ const COPY: Record<Lang, Copy> = {
     noProducts: 'No featured products yet.',
   },
   ja: {
-    backAll: '← すべてのブランドへ',
+    backAll: '← Beautyground 輸出紹介へ戻る',
     exportingToLabel: '現在の輸出先国',
     moqLabel: 'MOQ・サンプルポリシー',
     certificationsLabel: '取得認証',
@@ -57,7 +57,7 @@ const COPY: Record<Lang, Copy> = {
     noProducts: 'まだ登録された代表商品がありません。',
   },
   zh: {
-    backAll: '← 返回全部品牌',
+    backAll: '← 返回Beautyground出口介绍',
     exportingToLabel: '目前出口至',
     moqLabel: 'MOQ·样品政策',
     certificationsLabel: '认证信息',
@@ -67,7 +67,7 @@ const COPY: Record<Lang, Copy> = {
     noProducts: '暂无已登记的代表产品。',
   },
   es: {
-    backAll: '← Todas las Marcas',
+    backAll: '← Volver a Beautyground Export',
     exportingToLabel: 'Actualmente Exportando A',
     moqLabel: 'MOQ · Política de Muestras',
     certificationsLabel: 'Certificaciones',
