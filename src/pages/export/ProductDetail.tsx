@@ -104,6 +104,7 @@ export default function ExportProductDetail() {
         .select('id,name,thumbnail_url,category,export_image_urls,export_description,export_description_en,partner_id')
         .eq('id', id)
         .eq('is_export_featured', true)
+        .eq('status', 'on_sale')
         .maybeSingle()
       if (cancelled) return
       setProduct((productRow as ProductRow | null) ?? null)
