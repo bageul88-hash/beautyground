@@ -8,6 +8,7 @@ import Export from './pages/Export'
 import ExportProductsList from './pages/export/ProductsList'
 import ExportProductDetail from './pages/export/ProductDetail'
 import ExportBrandDetail from './pages/export/BrandDetail'
+import ExportBrand from './pages/ExportBrand'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
 import AppSearch from './pages/AppSearch'
@@ -153,6 +154,8 @@ export default function App() {
         <Route path="/export/products" element={<ExportProductsList />} />
         <Route path="/export/products/:id" element={<ExportProductDetail />} />
         <Route path="/export/brands/:id" element={<ExportBrandDetail />} />
+        {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙) */}
+        <Route path="/x/:key" element={<ExportBrand />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
