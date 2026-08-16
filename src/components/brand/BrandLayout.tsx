@@ -31,6 +31,7 @@ const EXPORT_ONLY_NAV_ITEMS = [EXPORT_NAV_ITEM]
 // 강조는 원색 1개(signal-blue)만 — 관리자(/admin) AdminLayout.tsx와 동일한 규칙.
 const STATUS_BADGE: Record<string, { className: string; label: string }> = {
   active:    { className: 'bg-signal-blue/10 text-signal-blue', label: '이용중' },
+  pending:   { className: 'bg-quiet text-ink-soft', label: '승인 대기' }, // OTP 셀프 가입 브랜드(2026-08-17)
   suspended: { className: 'bg-quiet text-ink-faint', label: '정지됨' },
 }
 
@@ -65,7 +66,8 @@ export default function BrandLayout() {
     navigate('/brand/login')
   }
 
-  const badge = STATUS_BADGE[partner?.status ?? 'active']
+  // 정의 안 된 상태값이 와도 화면이 죽지 않게 active로 폴백 (pending 미정의로 흰 화면 났던 사고 재발 방지)
+  const badge = STATUS_BADGE[partner?.status ?? 'active'] ?? STATUS_BADGE.active
 
   return (
     <div className="flex min-h-screen bg-paper">
