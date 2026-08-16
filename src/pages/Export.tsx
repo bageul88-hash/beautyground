@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { supabase } from '../lib/supabase'
@@ -6,76 +7,8 @@ import { useShopBrands } from '../hooks/useShopBrands'
 import { PRODUCT_CATEGORIES } from '../lib/types'
 import type { ExportBrandPublic } from '../lib/types'
 import { COMPANY_INFO } from '../lib/companyInfo'
-
-type Lang = 'ko' | 'en' | 'ja' | 'zh' | 'es'
-
-const LANGS: { code: Lang; label: string }[] = [
-  { code: 'ko', label: '한국어' },
-  { code: 'en', label: 'English' },
-  { code: 'ja', label: '日本語' },
-  { code: 'zh', label: '中文' },
-  { code: 'es', label: 'Español' },
-]
-
-// 브라우저 언어를 감지해 초기 표시 언어를 정한다(못 찾으면 영어 — 해외 바이어가 주 타깃).
-function detectLang(): Lang {
-  if (typeof navigator === 'undefined') return 'en'
-  const nl = navigator.language?.toLowerCase() ?? ''
-  if (nl.startsWith('ko')) return 'ko'
-  if (nl.startsWith('ja')) return 'ja'
-  if (nl.startsWith('zh')) return 'zh'
-  if (nl.startsWith('es')) return 'es'
-  return 'en'
-}
-
-// PRODUCT_CATEGORIES(한글, src/lib/types.ts)를 언어별로 매핑 — 이 페이지만의 로컬 상수.
-const CATEGORY_I18N: Record<Lang, Record<string, string>> = {
-  ko: {
-    '스킨케어': '스킨케어',
-    '메이크업': '메이크업',
-    '향수': '향수',
-    '헤어·바디': '헤어·바디',
-    '이너뷰티': '이너뷰티',
-    '뷰티 디바이스': '뷰티 디바이스',
-    '퍼퓸 디퓨저': '퍼퓸 디퓨저',
-  },
-  en: {
-    '스킨케어': 'Skincare',
-    '메이크업': 'Makeup',
-    '향수': 'Fragrance',
-    '헤어·바디': 'Hair & Body',
-    '이너뷰티': 'Inner Beauty',
-    '뷰티 디바이스': 'Beauty Devices',
-    '퍼퓸 디퓨저': 'Home Fragrance',
-  },
-  ja: {
-    '스킨케어': 'スキンケア',
-    '메이크업': 'メイク',
-    '향수': '香水',
-    '헤어·바디': 'ヘア・ボディ',
-    '이너뷰티': 'インナービューティー',
-    '뷰티 디바이스': 'ビューティーデバイス',
-    '퍼퓸 디퓨저': 'ホームフレグランス',
-  },
-  zh: {
-    '스킨케어': '护肤',
-    '메이크업': '彩妆',
-    '향수': '香水',
-    '헤어·바디': '洗护身体',
-    '이너뷰티': '美容内服',
-    '뷰티 디바이스': '美容仪器',
-    '퍼퓸 디퓨저': '家居香氛',
-  },
-  es: {
-    '스킨케어': 'Cuidado de la Piel',
-    '메이크업': 'Maquillaje',
-    '향수': 'Fragancias',
-    '헤어·바디': 'Cabello y Cuerpo',
-    '이너뷰티': 'Belleza Interior',
-    '뷰티 디바이스': 'Dispositivos de Belleza',
-    '퍼퓸 디퓨저': 'Fragancia para el Hogar',
-  },
-}
+import { type Lang, detectLang, CATEGORY_I18N } from '../lib/exportI18n'
+import LanguageSwitcher from '../components/export/LanguageSwitcher'
 
 interface Copy {
   kicker: string
@@ -89,6 +22,7 @@ interface Copy {
   brandsKicker: string
   brandsTitle: string
   brandsBody: string
+  viewAllProducts: string
   exportingToLabel: string
   moqLabel: string
   categoriesKicker: string
@@ -127,6 +61,7 @@ const COPY: Record<Lang, Copy> = {
     brandsKicker: '보유 브랜드',
     brandsTitle: '피처드 브랜드',
     brandsBody: '뷰티그라운드가 직접 매입·판매하는 브랜드 중 일부입니다.',
+    viewAllProducts: '전체 상품 보기 →',
     exportingToLabel: '수출 중인 국가',
     moqLabel: 'MOQ · 샘플 정책',
     categoriesKicker: '카테고리',
@@ -163,6 +98,7 @@ const COPY: Record<Lang, Copy> = {
     brandsKicker: 'Our Brands',
     brandsTitle: 'Featured Brands',
     brandsBody: "A selection of brands we directly buy from and sell — that's Beautyground's portfolio.",
+    viewAllProducts: 'View All Products →',
     exportingToLabel: 'Currently Exporting To',
     moqLabel: 'MOQ · Sample Policy',
     categoriesKicker: 'Categories',
@@ -200,6 +136,7 @@ const COPY: Record<Lang, Copy> = {
     brandsKicker: '取扱ブランド',
     brandsTitle: 'フィーチャーブランド',
     brandsBody: 'Beautygroundが直接買い付け・販売しているブランドの一部です。',
+    viewAllProducts: 'すべての商品を見る →',
     exportingToLabel: '現在の輸出先国',
     moqLabel: 'MOQ・サンプルポリシー',
     categoriesKicker: 'カテゴリー',
@@ -237,6 +174,7 @@ const COPY: Record<Lang, Copy> = {
     brandsKicker: '合作品牌',
     brandsTitle: '精选品牌',
     brandsBody: '以下是Beautyground直接采购并销售的部分品牌。',
+    viewAllProducts: '查看全部产品 →',
     exportingToLabel: '目前出口至',
     moqLabel: 'MOQ·样品政策',
     categoriesKicker: '品类',
@@ -273,6 +211,7 @@ const COPY: Record<Lang, Copy> = {
     brandsKicker: 'Nuestras Marcas',
     brandsTitle: 'Marcas Destacadas',
     brandsBody: 'Una selección de marcas que compramos y vendemos directamente — el portafolio de Beautyground.',
+    viewAllProducts: 'Ver Todos los Productos →',
     exportingToLabel: 'Actualmente Exportando A',
     moqLabel: 'MOQ · Política de Muestras',
     categoriesKicker: 'Categorías',
@@ -297,44 +236,6 @@ const COPY: Record<Lang, Copy> = {
     send: 'Enviar Consulta',
     orEmail: 'O escríbanos directamente a',
   },
-}
-
-function LanguageSwitcher({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-[13px] text-ink-soft hover:text-ink transition-colors px-2.5 py-1.5 rounded-control border border-rule"
-      >
-        <span aria-hidden>🌐</span>
-        {LANGS.find((l) => l.code === lang)?.label ?? lang}
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-44 bg-paper border border-rule rounded-card shadow-lg overflow-hidden z-50">
-            {LANGS.map((l) => (
-              <button
-                key={l.code}
-                type="button"
-                onClick={() => {
-                  setLang(l.code)
-                  setOpen(false)
-                }}
-                className={`w-full text-left px-4 py-2.5 text-[13px] transition-colors ${
-                  l.code === lang ? 'bg-quiet text-ink font-semibold' : 'text-ink-soft hover:bg-quiet'
-                }`}
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  )
 }
 
 interface CatalogItem {
@@ -377,9 +278,13 @@ const EMPTY_FORM: FormState = {
 
 export default function Export() {
   const { brands } = useShopBrands()
+  const [searchParams] = useSearchParams()
+  const productParam = searchParams.get('product')
   const [items, setItems] = useState<CatalogItem[]>([])
   const [brandCards, setBrandCards] = useState<BrandCard[]>([])
-  const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const [form, setForm] = useState<FormState>(() =>
+    productParam ? { ...EMPTY_FORM, message: `Re: ${productParam}\n\n` } : EMPTY_FORM
+  )
   const [categories, setCategories] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -388,6 +293,12 @@ export default function Export() {
 
   const t = COPY[lang]
   const catLabel = (cat: string) => CATEGORY_I18N[lang][cat] ?? cat
+
+  // 상품 상세페이지의 "Request Quote"로 들어온 경우 문의 폼까지 자동 스크롤.
+  useEffect(() => {
+    if (!productParam) return
+    document.getElementById('export-inquiry-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [productParam])
 
   useEffect(() => {
     let cancelled = false
@@ -505,8 +416,15 @@ export default function Export() {
         {/* Featured Brands — 브랜드가 /brand/export에서 입력한 정보 */}
         {brandCards.length > 0 && (
           <section className="max-w-[1080px] mx-auto px-6 py-20">
-            <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
-            <h2 className="text-[24px] sm:text-[28px] font-bold text-ink mb-2">{t.brandsTitle}</h2>
+            <div className="flex items-end justify-between mb-2 gap-4 flex-wrap">
+              <div>
+                <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
+                <h2 className="text-[24px] sm:text-[28px] font-bold text-ink">{t.brandsTitle}</h2>
+              </div>
+              <Link to="/export/products" className="text-[13px] font-semibold text-ink hover:underline whitespace-nowrap">
+                {t.viewAllProducts}
+              </Link>
+            </div>
             <p className="text-ink-soft text-[14px] mb-10">{t.brandsBody}</p>
 
             <div className="grid sm:grid-cols-2 gap-6">
@@ -555,7 +473,11 @@ export default function Export() {
                   {brand.products.length > 0 && (
                     <div className="grid grid-cols-3 gap-2 mt-4">
                       {brand.products.map((product) => (
-                        <figure key={product.id} className="rounded-control overflow-hidden border border-rule">
+                        <Link
+                          key={product.id}
+                          to={`/export/products/${product.id}`}
+                          className="rounded-control overflow-hidden border border-rule block hover:border-ink transition-colors"
+                        >
                           <img
                             src={product.export_image_urls[0] ?? product.thumbnail_url ?? ''}
                             alt={product.name}
@@ -563,7 +485,7 @@ export default function Export() {
                             loading="lazy"
                           />
                           <figcaption className="text-[10.5px] text-ink-soft px-1.5 py-1 truncate">{product.name}</figcaption>
-                        </figure>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -602,7 +524,7 @@ export default function Export() {
         </section>
 
         {/* Inquiry form */}
-        <section className="bg-quiet px-6 py-20">
+        <section id="export-inquiry-form" className="bg-quiet px-6 py-20">
           <div className="max-w-[560px] mx-auto">
             <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.getInTouchKicker}</p>
             <h2 className="text-[24px] sm:text-[28px] font-bold text-ink mb-3">{t.requestCatalogTitle}</h2>

@@ -5,6 +5,8 @@ import { mergeGuestCartToServer } from './lib/cart'
 import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
 import CompanyIntro from './pages/CompanyIntro'
 import Export from './pages/Export'
+import ExportProductsList from './pages/export/ProductsList'
+import ExportProductDetail from './pages/export/ProductDetail'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
 import AppSearch from './pages/AppSearch'
@@ -143,8 +145,12 @@ export default function App() {
         <Route path="/" element={<AppHome />} />
         <Route path="/company" element={<CompanyIntro />} />
         {/* 해외 바이어용 영문 카탈로그+문의 페이지 — beautyground가 직접 수출자(재판매자)로서
-            보유 브랜드를 제안하는 채널. 브랜드 입점신청(중개 성격)과는 다름(2026-08-15). */}
+            보유 브랜드를 제안하는 채널. 브랜드 입점신청(중개 성격)과는 다름(2026-08-15).
+            /export/products(전체 상품)·/export/products/:id(상세)는 2026-08-16 추가 —
+            아몬드뷰티(aamondbeauty.com) 상품상세 구조를 참고해 순서 재구성. */}
         <Route path="/export" element={<Export />} />
+        <Route path="/export/products" element={<ExportProductsList />} />
+        <Route path="/export/products/:id" element={<ExportProductDetail />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
