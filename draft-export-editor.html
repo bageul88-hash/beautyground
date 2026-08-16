@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BEAUTYGROUND EXPORT — 브랜드 페이지 편집기 (시안 v2)</title>
+<title>BEAUTYGROUND EXPORT ??釉뚮옖???섏씠吏 ?몄쭛湲?(?쒖븞 v2)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Marcellus&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -14,25 +14,25 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
 
-/* ── 상단 바 ── */
+/* ?? ?곷떒 諛??? */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line)}
 .brand-logo{font-family:'Marcellus',serif;font-size:17px;letter-spacing:3px;color:var(--navy)}
 .brand-logo b{color:var(--gold);font-weight:400}
 .topbar-note{font-size:12px;color:var(--sub)}
 .save-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 
-/* ── 레이아웃: 좌 편집 / 우 미리보기 ── */
+/* ?? ?덉씠?꾩썐: 醫??몄쭛 / ??誘몃━蹂닿린 ?? */
 .wrap{display:grid;grid-template-columns:minmax(430px,560px) 1fr;max-width:1240px;margin:0 auto;min-height:calc(100vh - 61px)}
 .editor{padding:26px 26px 120px;border-right:1px solid var(--line)}
 .preview-side{display:flex;flex-direction:column;align-items:center;padding:34px 20px;position:sticky;top:0;height:calc(100vh - 61px)}
 
-/* ── 탭 ── */
+/* ?? ???? */
 .tabs{display:flex;gap:6px;background:#ECEAE5;border-radius:12px;padding:5px;margin-bottom:18px;width:fit-content}
 .tab{border:none;background:none;padding:8px 20px;border-radius:9px;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;font-family:inherit;position:relative}
 .tab.active{background:#fff;color:var(--navy);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warn);margin-left:5px;vertical-align:2px}
 
-/* ── 완성도 ── */
+/* ?? ?꾩꽦???? */
 .gauge{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
 .gauge-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
 .gauge-top b{font-size:15px;color:var(--navy)}
@@ -42,7 +42,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .gauge-hint{font-size:12px;color:var(--sub);margin-top:8px}
 .gauge-hint b{color:var(--warn)}
 
-/* ── 슬롯 아코디언 ── */
+/* ?? ?щ’ ?꾩퐫?붿뼵 ?? */
 .slot{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
 .slot.open{border-color:var(--gold-soft);box-shadow:0 4px 18px rgba(176,138,79,.10)}
 .slot-head{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
@@ -71,13 +71,13 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .layout-opt.sel{border-color:var(--gold);color:var(--navy);background:var(--gold-bg)}
 .layout-opt .ico{display:block;font-size:16px;margin-bottom:4px}
 
-/* 뷰티그라운드 자동 관리 영역 안내 */
+/* 酉고떚洹몃씪?대뱶 ?먮룞 愿由??곸뿭 ?덈궡 */
 .locked{background:linear-gradient(135deg,#FBF8F2,#F6F0E4);border:1px solid #E9DCC3;border-radius:14px;padding:14px 18px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
 .locked .ico{font-size:18px}
 .locked b{font-size:13px;color:#8B6F3D;display:block;margin-bottom:3px}
 .locked p{font-size:12px;color:#9A8768;line-height:1.55}
 
-/* ── 바이어 열람 탭 ── */
+/* ?? 諛붿씠???대엺 ???? */
 .analytics{display:none}
 .analytics.show{display:block}
 .editor-page.hide{display:none}
@@ -105,20 +105,20 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .ch-row .v small{color:var(--sub);font-weight:400;margin-left:4px}
 .privacy-note{font-size:11px;color:#9A8768;background:var(--gold-bg);border-radius:10px;padding:10px 14px;line-height:1.6}
 
-/* ── URL 바 ── */
+/* ?? URL 諛??? */
 .urlbar{position:fixed;bottom:0;left:0;width:min(100%,calc((100vw - 1240px)/2 + 560px));background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);padding:13px 26px;display:flex;align-items:center;gap:10px;z-index:50}
 .urlbar .url{flex:1;font-size:13px;color:var(--navy);font-weight:500;background:#F6F4F0;border-radius:8px;padding:9px 14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .urlbar .url b{color:var(--gold)}
 .mini-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;color:var(--navy);font-family:inherit;white-space:nowrap}
 
-/* ── 폰 미리보기 ── */
+/* ?? ??誘몃━蹂닿린 ?? */
 .phone{width:375px;height:calc(100vh - 160px);max-height:740px;background:#fff;border-radius:38px;box-shadow:0 24px 60px rgba(27,37,55,.22),0 0 0 10px #1C1E22,0 0 0 12px #3A3D44;overflow:hidden;position:relative}
 .phone-scroll{height:100%;overflow-y:auto;scrollbar-width:none}
 .phone-scroll::-webkit-scrollbar{display:none}
 .preview-label{font-size:12px;color:var(--sub);margin-bottom:14px;letter-spacing:.5px}
 .preview-label b{color:var(--gold)}
 
-/* 폰 내부 — 바이어/소비자가 보는 페이지 */
+/* ???대? ??諛붿씠???뚮퉬?먭? 蹂대뒗 ?섏씠吏 */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,193,94,.35)}50%{box-shadow:0 0 0 9px rgba(34,193,94,0)}}
@@ -136,7 +136,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-badges{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:13px}
 .p-badge{font-size:10px;font-weight:700;padding:4px 11px;border-radius:14px;background:rgba(201,169,110,.18);color:var(--gold-soft);border:1px solid rgba(201,169,110,.4)}
 
-/* PROVEN IN KOREA — 뷰티그라운드 자동 삽입 */
+/* PROVEN IN KOREA ??酉고떚洹몃씪?대뱶 ?먮룞 ?쎌엯 */
 .p-proven{background:#141B2B;padding:14px 18px 16px}
 .p-proven-title{font-size:9.5px;font-weight:900;letter-spacing:2.5px;color:var(--gold-soft);text-align:center;margin-bottom:10px}
 .p-proven-grid{display:flex;gap:8px}
@@ -165,9 +165,9 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-play:hover{transform:scale(1.1)}
 .p-video small{font-size:10px;color:#8B7B5E;font-weight:700}
 
-/* 큐레이터 코멘트 — 뷰티그라운드 자동 삽입 */
+/* ?먮젅?댄꽣 肄붾찘????酉고떚洹몃씪?대뱶 ?먮룞 ?쎌엯 */
 .p-curator{margin:0 0 16px;background:linear-gradient(135deg,#FBF7EF,#F5EDDD);border-radius:14px;padding:15px 16px;position:relative}
-.p-curator::before{content:'“';position:absolute;top:2px;left:12px;font-family:'Marcellus',serif;font-size:38px;color:var(--gold-soft);opacity:.5}
+.p-curator::before{content:'??;position:absolute;top:2px;left:12px;font-family:'Marcellus',serif;font-size:38px;color:var(--gold-soft);opacity:.5}
 .p-curator p{font-size:11.5px;line-height:1.7;color:#5B4E38;padding-left:18px;font-style:italic}
 .p-curator .who{display:flex;align-items:center;gap:7px;margin-top:9px;padding-left:18px}
 .p-curator .who .avatar{width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--gold-soft);font-size:8px;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif}
@@ -177,7 +177,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-certs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
 .p-cert{font-size:10px;font-weight:700;color:var(--navy);background:#fff;border:1px solid var(--line);padding:5px 11px;border-radius:8px}
 
-/* 듀얼 CTA */
+/* ???CTA */
 .p-cta{position:sticky;bottom:0;background:linear-gradient(0deg,#fff 78%,rgba(255,255,255,0));padding:12px 16px 14px}
 .p-cta-row{display:flex;gap:8px}
 .p-cta-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:13px;padding:11px 8px;cursor:pointer}
@@ -202,49 +202,49 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 
 <div class="topbar">
   <div class="brand-logo">BEAUTYGROUND <b>EXPORT</b></div>
-  <div class="topbar-note">브랜드 페이지 편집기 — 시안 v2</div>
-  <button class="save-btn">저장</button>
+  <div class="topbar-note">釉뚮옖???섏씠吏 ?몄쭛湲????쒖븞 v2</div>
+  <button class="save-btn">???/button>
 </div>
 
 <div class="wrap">
-  <!-- ══════ 좌: 편집/분석 패널 ══════ -->
+  <!-- ?먥븧?먥븧?먥븧 醫? ?몄쭛/遺꾩꽍 ?⑤꼸 ?먥븧?먥븧?먥븧 -->
   <div class="editor">
     <div class="tabs">
-      <button class="tab active" id="tabPage" onclick="showTab('page')">페이지</button>
-      <button class="tab" id="tabStats" onclick="showTab('stats')">바이어 열람<span class="dot"></span></button>
-      <button class="tab">설정</button>
+      <button class="tab active" id="tabPage" onclick="showTab('page')">?섏씠吏</button>
+      <button class="tab" id="tabStats" onclick="showTab('stats')">諛붿씠???대엺<span class="dot"></span></button>
+      <button class="tab">?ㅼ젙</button>
     </div>
 
-    <!-- ── 페이지 탭 ── -->
+    <!-- ?? ?섏씠吏 ???? -->
     <div class="editor-page" id="pagePanel">
       <div class="gauge">
-        <div class="gauge-top"><b>페이지 완성도</b><span id="gaugePct">75%</span></div>
+        <div class="gauge-top"><b>?섏씠吏 ?꾩꽦??/b><span id="gaugePct">75%</span></div>
         <div class="bar"><i id="gaugeBar"></i></div>
-        <div class="gauge-hint">💡 <b>인증서</b>를 추가하면 바이어 노출 등급이 <b>GOLD</b>로 올라갑니다</div>
+        <div class="gauge-hint">?뮕 <b>?몄쬆??/b>瑜?異붽??섎㈃ 諛붿씠???몄텧 ?깃툒??<b>GOLD</b>濡??щ씪媛묐땲??/div>
       </div>
 
       <div class="slot" id="s1">
         <div class="slot-head" onclick="toggle('s1')">
           <div class="slot-num">1</div>
-          <div class="slot-title">브랜드 헤더<small>로고 · 브랜드명 · 한 줄 소개</small></div>
-          <span class="chip ok">완료</span><span class="caret">▼</span>
+          <div class="slot-title">釉뚮옖???ㅻ뜑<small>濡쒓퀬 쨌 釉뚮옖?쒕챸 쨌 ??以??뚭컻</small></div>
+          <span class="chip ok">?꾨즺</span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>브랜드명 <em>영문 — 바이어에게 표시됩니다</em></label>
+          <div class="field"><label>釉뚮옖?쒕챸 <em>?곷Ц ??諛붿씠?댁뿉寃??쒖떆?⑸땲??/em></label>
             <input type="text" id="inName" value="MAKEUP HELPER" oninput="live()"></div>
-          <div class="field"><label>한 줄 소개 <em>EN — 繁中은 자동 번역 후 검수됩니다</em></label>
-            <input type="text" id="inOneliner" value="K-Beauty base makeup specialist since 2009 — Big-size cushions & pacts" oninput="live()"></div>
+          <div class="field"><label>??以??뚭컻 <em>EN ??濚곦릎? ?먮룞 踰덉뿭 ??寃?섎맗?덈떎</em></label>
+            <input type="text" id="inOneliner" value="K-Beauty base makeup specialist since 2009 ??Big-size cushions & pacts" oninput="live()"></div>
         </div>
       </div>
 
       <div class="slot" id="s2">
         <div class="slot-head" onclick="toggle('s2')">
           <div class="slot-num">2</div>
-          <div class="slot-title">뱃지<small>카테고리 · MOQ · 거래 조건</small></div>
-          <span class="chip ok">완료</span><span class="caret">▼</span>
+          <div class="slot-title">諭껋?<small>移댄뀒怨좊━ 쨌 MOQ 쨌 嫄곕옒 議곌굔</small></div>
+          <span class="chip ok">?꾨즺</span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>표시 중인 뱃지</label>
+          <div class="field"><label>?쒖떆 以묒씤 諭껋?</label>
             <div class="p-badges" style="justify-content:flex-start">
               <span class="p-badge" style="color:#8B6F3D;background:var(--gold-bg);border-color:#E2D3B4">Base Makeup</span>
               <span class="p-badge" style="color:#8B6F3D;background:var(--gold-bg);border-color:#E2D3B4">MOQ 100pcs</span>
@@ -257,24 +257,24 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
       <div class="slot open" id="s3">
         <div class="slot-head" onclick="toggle('s3')">
           <div class="slot-num">3</div>
-          <div class="slot-title">제품<small>사진 + 이름 + 용량 — 최소 3개</small></div>
-          <span class="chip ok">5개 등록</span><span class="caret">▼</span>
+          <div class="slot-title">?쒗뭹<small>?ъ쭊 + ?대쫫 + ?⑸웾 ??理쒖냼 3媛?/small></div>
+          <span class="chip ok">5媛??깅줉</span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>제품 사진 <em>탭해서 추가 · 별표 = MAIN 제품</em></label>
+          <div class="field"><label>?쒗뭹 ?ъ쭊 <em>??빐??異붽? 쨌 蹂꾪몴 = MAIN ?쒗뭹</em></label>
             <div class="photo-row">
               <div class="photo" style="background:linear-gradient(135deg,#F2B8C6,#E8919E)"><span class="main-badge">MAIN</span></div>
               <div class="photo" style="background:linear-gradient(135deg,#E8C9B8,#D9A990)"></div>
               <div class="photo" style="background:linear-gradient(135deg,#F5C99B,#EBA96E)"></div>
               <div class="photo" style="background:linear-gradient(135deg,#F0A8B8,#E07A92)"></div>
               <div class="photo" style="background:linear-gradient(135deg,#E88AA0,#D45A78)"></div>
-              <div class="photo add">＋</div>
+              <div class="photo add">竊?/div>
             </div>
           </div>
-          <div class="field"><label>진열 방식</label>
+          <div class="field"><label>吏꾩뿴 諛⑹떇</label>
             <div class="layout-pick">
-              <div class="layout-opt sel" id="loCar" onclick="setLayout('carousel')"><span class="ico">▤▤</span>카드 캐러셀</div>
-              <div class="layout-opt" id="loList" onclick="setLayout('list')"><span class="ico">☰</span>리스트</div>
+              <div class="layout-opt sel" id="loCar" onclick="setLayout('carousel')"><span class="ico">?ㅲ뼡</span>移대뱶 罹먮윭?</div>
+              <div class="layout-opt" id="loList" onclick="setLayout('list')"><span class="ico">??/span>由ъ뒪??/div>
             </div>
           </div>
         </div>
@@ -283,23 +283,23 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
       <div class="slot" id="s4">
         <div class="slot-head" onclick="toggle('s4')">
           <div class="slot-num">4</div>
-          <div class="slot-title">영상<small>제품 사용 영상 — 있으면 노출, 없으면 자동 숨김</small></div>
-          <span class="chip ok">1개</span><span class="caret">▼</span>
+          <div class="slot-title">?곸긽<small>?쒗뭹 ?ъ슜 ?곸긽 ???덉쑝硫??몄텧, ?놁쑝硫??먮룞 ?④?</small></div>
+          <span class="chip ok">1媛?/span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>등록된 영상</label>
-            <input type="text" value="제품 사용 연출 컷.mp4 (12초)" readonly></div>
+          <div class="field"><label>?깅줉???곸긽</label>
+            <input type="text" value="?쒗뭹 ?ъ슜 ?곗텧 而?mp4 (12珥?" readonly></div>
         </div>
       </div>
 
       <div class="slot" id="s5">
         <div class="slot-head" onclick="toggle('s5')">
           <div class="slot-num">5</div>
-          <div class="slot-title">브랜드 스토리<small>3줄 고정 — 길면 바이어가 안 읽습니다</small></div>
-          <span class="chip ok">완료</span><span class="caret">▼</span>
+          <div class="slot-title">釉뚮옖???ㅽ넗由?small>3以?怨좎젙 ??湲몃㈃ 諛붿씠?닿? ???쎌뒿?덈떎</small></div>
+          <span class="chip ok">?꾨즺</span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>스토리 <em>3줄</em></label>
+          <div class="field"><label>?ㅽ넗由?<em>3以?/em></label>
             <textarea rows="3" oninput="live()" id="inStory">Big-size(2X) cushions & pressed powders loved by Korean department store customers. 70% ampoule formula, dermatologically tested. Manufactured by COSMAX & Kolmar Korea.</textarea></div>
         </div>
       </div>
@@ -307,104 +307,104 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
       <div class="slot" id="s6">
         <div class="slot-head" onclick="toggle('s6')">
           <div class="slot-num">6</div>
-          <div class="slot-title">인증 · 연락 창구<small>인증서 파일 · 문의 채널</small></div>
-          <span class="chip warn">인증서 없음</span><span class="caret">▼</span>
+          <div class="slot-title">?몄쬆 쨌 ?곕씫 李쎄뎄<small>?몄쬆???뚯씪 쨌 臾몄쓽 梨꾨꼸</small></div>
+          <span class="chip warn">?몄쬆???놁쓬</span><span class="caret">??/span>
         </div>
         <div class="slot-body">
-          <div class="field"><label>인증 <em>있는 것만 체크 — 바이어 신뢰의 핵심</em></label>
+          <div class="field"><label>?몄쬆 <em>?덈뒗 寃껊쭔 泥댄겕 ??諛붿씠???좊ː???듭떖</em></label>
             <div class="p-certs">
-              <span class="p-cert">✓ Dermatologically Tested</span>
+              <span class="p-cert">??Dermatologically Tested</span>
               <span class="p-cert" style="opacity:.4">CPNP (EU)</span>
               <span class="p-cert" style="opacity:.4">FDA (US)</span>
               <span class="p-cert" style="opacity:.4">HALAL</span>
             </div>
           </div>
-          <div class="field"><label>바이어 문의 수신 <em>뷰티그라운드가 대신 받아 전달합니다</em></label>
-            <input type="text" value="담당자: 한철희 · dsbkorea@hanmail.net" readonly></div>
+          <div class="field"><label>諛붿씠??臾몄쓽 ?섏떊 <em>酉고떚洹몃씪?대뱶媛 ???諛쏆븘 ?꾨떖?⑸땲??/em></label>
+            <input type="text" value="?대떦?? ?쒖쿋??쨌 dsbkorea@hanmail.net" readonly></div>
         </div>
       </div>
 
       <div class="locked">
-        <span class="ico">🔒</span>
+        <span class="ico">?뵏</span>
         <div>
-          <b>실적 · 큐레이터 코멘트 — 뷰티그라운드 자동 관리</b>
-          <p>미리보기의 "PROVEN IN KOREA" 실적과 MD 추천 코멘트는 뷰티그라운드가 백화점·Shopee 실데이터로 자동 삽입합니다. 브랜드는 수정할 수 없으며, 실적이 늘면 자동 갱신됩니다.</p>
+          <b>?ㅼ쟻 쨌 ?먮젅?댄꽣 肄붾찘????酉고떚洹몃씪?대뱶 ?먮룞 愿由?/b>
+          <p>誘몃━蹂닿린??"PROVEN IN KOREA" ?ㅼ쟻怨?MD 異붿쿇 肄붾찘?몃뒗 酉고떚洹몃씪?대뱶媛 諛깊솕?먃룹눥?묐ぐ ?ㅻ뜲?댄꽣濡??먮룞 ?쎌엯?⑸땲?? 釉뚮옖?쒕뒗 ?섏젙?????놁쑝硫? ?ㅼ쟻???섎㈃ ?먮룞 媛깆떊?⑸땲??</p>
         </div>
       </div>
     </div>
 
-    <!-- ── 바이어 열람 탭 ── -->
+    <!-- ?? 諛붿씠???대엺 ???? -->
     <div class="analytics" id="statsPanel">
       <div class="stat-grid">
-        <div class="stat-card"><div class="num">128<small>+41</small></div><div class="lbl">이번 주 페이지 조회</div></div>
-        <div class="stat-card"><div class="num">3</div><div class="lbl">카탈로그 다운로드</div></div>
-        <div class="stat-card"><div class="num">2</div><div class="lbl">바이어 문의 (대응 중)</div></div>
+        <div class="stat-card"><div class="num">128<small>+41</small></div><div class="lbl">?대쾲 二??섏씠吏 議고쉶</div></div>
+        <div class="stat-card"><div class="num">3</div><div class="lbl">移댄깉濡쒓렇 ?ㅼ슫濡쒕뱶</div></div>
+        <div class="stat-card"><div class="num">2</div><div class="lbl">諛붿씠??臾몄쓽 (???以?</div></div>
       </div>
 
       <div class="panel">
-        <h4>최근 바이어 활동 <small>실시간</small></h4>
+        <h4>理쒓렐 諛붿씠???쒕룞 <small>?ㅼ떆媛?/small></h4>
         <div class="feed-item">
-          <span class="flag">🇹🇼</span>
+          <span class="flag">?눢?눥</span>
           <div class="feed-body">
-            <div class="feed-t">대만 · 유통사 <span class="anon">D사</span></div>
-            <div class="feed-d">카탈로그 다운로드 후 MOQ 문의 → <b>뷰티그라운드 수출팀 대응 중</b></div>
+            <div class="feed-t">?留?쨌 ?좏넻??<span class="anon">D??/span></div>
+            <div class="feed-d">移댄깉濡쒓렇 ?ㅼ슫濡쒕뱶 ??MOQ 臾몄쓽 ??<b>酉고떚洹몃씪?대뱶 ?섏텧? ???以?/b></div>
           </div>
-          <span class="feed-time">2시간 전</span>
+          <span class="feed-time">2?쒓컙 ??/span>
         </div>
         <div class="feed-item">
-          <span class="flag">🇹🇭</span>
+          <span class="flag">?눢?눑</span>
           <div class="feed-body">
-            <div class="feed-t">태국 · 리테일러 <span class="anon">S사</span></div>
-            <div class="feed-d">제품 5종 전체 열람 · 영상 재생</div>
+            <div class="feed-t">?쒓뎅 쨌 由ы뀒?쇰윭 <span class="anon">S??/span></div>
+            <div class="feed-d">?쒗뭹 5醫??꾩껜 ?대엺 쨌 ?곸긽 ?ъ깮</div>
           </div>
-          <span class="feed-time">어제</span>
+          <span class="feed-time">?댁젣</span>
         </div>
         <div class="feed-item">
-          <span class="flag">🇸🇬</span>
+          <span class="flag">?눡?눐</span>
           <div class="feed-body">
-            <div class="feed-t">싱가포르 · 방문자</div>
-            <div class="feed-d">틱톡에서 유입 · 페이지 조회</div>
+            <div class="feed-t">?깃??щⅤ 쨌 諛⑸Ц??/div>
+            <div class="feed-d">?깊넚?먯꽌 ?좎엯 쨌 ?섏씠吏 議고쉶</div>
           </div>
-          <span class="feed-time">2일 전</span>
+          <span class="feed-time">2????/span>
         </div>
         <div class="feed-item">
-          <span class="flag">📦</span>
+          <span class="flag">?벀</span>
           <div class="feed-body">
-            <div class="feed-t">바이어 제안서 포함</div>
-            <div class="feed-d">뷰티그라운드가 <b>대만 바이어 제안서</b>에 귀사 제품을 포함해 발송했습니다</div>
+            <div class="feed-t">諛붿씠???쒖븞???ы븿</div>
+            <div class="feed-d">酉고떚洹몃씪?대뱶媛 <b>?留?諛붿씠???쒖븞??/b>??洹???쒗뭹???ы븿??諛쒖넚?덉뒿?덈떎</div>
           </div>
           <span class="feed-time">8/15</span>
         </div>
       </div>
 
       <div class="panel">
-        <h4>노출 채널 <small>지난 30일</small></h4>
-        <div class="ch-row"><span class="ch">🔍 Google 검색</span><span class="v">412<small>노출</small></span></div>
-        <div class="ch-row"><span class="ch">🎵 TikTok</span><span class="v">1,240<small>조회</small></span></div>
-        <div class="ch-row"><span class="ch">▶️ YouTube Shorts</span><span class="v">380<small>조회</small></span></div>
-        <div class="ch-row"><span class="ch">✉️ 바이어 제안서</span><span class="v">2<small>회 포함</small></span></div>
+        <h4>?몄텧 梨꾨꼸 <small>吏??30??/small></h4>
+        <div class="ch-row"><span class="ch">?뵇 Google 寃??/span><span class="v">412<small>?몄텧</small></span></div>
+        <div class="ch-row"><span class="ch">?렦 TikTok</span><span class="v">1,240<small>議고쉶</small></span></div>
+        <div class="ch-row"><span class="ch">?띰툘 YouTube Shorts</span><span class="v">380<small>議고쉶</small></span></div>
+        <div class="ch-row"><span class="ch">?됵툘 諛붿씠???쒖븞??/span><span class="v">2<small>???ы븿</small></span></div>
       </div>
 
       <div class="panel">
-        <h4>구매 전환 <small>소비자 판매</small></h4>
-        <div class="ch-row"><span class="ch">🇰🇷 뷰티그라운드 쇼핑몰</span><span class="v">5<small>건</small></span></div>
-        <div class="ch-row"><span class="ch">🌏 Shopee (7개국)</span><span class="v">12<small>건</small></span></div>
+        <h4>援щℓ ?꾪솚 <small>?뚮퉬???먮ℓ</small></h4>
+        <div class="ch-row"><span class="ch">?눖?눟 酉고떚洹몃씪?대뱶 ?쇳븨紐?/span><span class="v">5<small>嫄?/small></span></div>
+        <div class="ch-row"><span class="ch">?뙊 ?댁쇅 ?뚮퉬??援щℓ</span><span class="v">12<small>嫄?/small></span></div>
       </div>
 
-      <div class="privacy-note">🔐 바이어의 회사명·연락처는 보호를 위해 공개되지 않습니다. 모든 문의는 뷰티그라운드 수출팀이 대응하며, 진행 상황은 이 화면과 주간 리포트 메일로 알려드립니다.</div>
+      <div class="privacy-note">?뵍 諛붿씠?댁쓽 ?뚯궗紐끒룹뿰?쎌쿂??蹂댄샇瑜??꾪빐 怨듦컻?섏? ?딆뒿?덈떎. 紐⑤뱺 臾몄쓽??酉고떚洹몃씪?대뱶 ?섏텧?????묓븯硫? 吏꾪뻾 ?곹솴? ???붾㈃怨?二쇨컙 由ы룷??硫붿씪濡??뚮젮?쒕┰?덈떎.</div>
     </div>
   </div>
 
-  <!-- ══════ 우: 폰 미리보기 ══════ -->
+  <!-- ?먥븧?먥븧?먥븧 ?? ??誘몃━蹂닿린 ?먥븧?먥븧?먥븧 -->
   <div class="preview-side">
-    <div class="preview-label">바이어·소비자에게 보이는 화면 — <b>실시간 미리보기</b></div>
+    <div class="preview-label">諛붿씠?는룹냼鍮꾩옄?먭쾶 蹂댁씠???붾㈃ ??<b>?ㅼ떆媛?誘몃━蹂닿린</b></div>
     <div class="phone"><div class="phone-scroll">
 
       <div class="p-hero">
-        <div class="lang-toggle"><span class="on" onclick="lang(this,'en')">EN</span><span onclick="lang(this,'tw')">繁中</span></div>
+        <div class="lang-toggle"><span class="on" onclick="lang(this,'en')">EN</span><span onclick="lang(this,'tw')">濚곦릎</span></div>
         <div class="p-logo">makeup<br>helper</div>
         <div class="p-name" id="pvName">MAKEUP HELPER</div>
-        <div class="p-oneliner" id="pvOneliner">K-Beauty base makeup specialist since 2009 — Big-size cushions & pacts</div>
+        <div class="p-oneliner" id="pvOneliner">K-Beauty base makeup specialist since 2009 ??Big-size cushions & pacts</div>
         <div class="p-badges">
           <span class="p-badge">Base Makeup</span>
           <span class="p-badge">MOQ 100pcs</span>
@@ -412,13 +412,13 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
         </div>
       </div>
 
-      <!-- 뷰티그라운드 자동 삽입: 실적 -->
+      <!-- 酉고떚洹몃씪?대뱶 ?먮룞 ?쎌엯: ?ㅼ쟻 -->
       <div class="p-proven">
-        <div class="p-proven-title">✦ PROVEN IN KOREA — BY BEAUTYGROUND</div>
+        <div class="p-proven-title">??PROVEN IN KOREA ??BY BEAUTYGROUND</div>
         <div class="p-proven-grid">
           <div class="p-proof"><div class="v">AK Dept.</div><div class="k">On display<br>in-store now</div></div>
-          <div class="p-proof"><div class="v">7 Markets</div><div class="k">Selling on Shopee<br>TW·SG·MY +4</div></div>
-          <div class="p-proof"><div class="v">3,282</div><div class="k">Consumer reviews<br>★ 4.8 avg</div></div>
+          <div class="p-proof"><div class="v">Online Mall</div><div class="k">Selling on<br>Beautyground mall</div></div>
+          <div class="p-proof"><div class="v">3,282</div><div class="k">Consumer reviews<br>??4.8 avg</div></div>
         </div>
       </div>
 
@@ -427,47 +427,47 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
         <div class="p-products" id="pvProducts">
           <div class="p-card"><span class="p-main">MAIN</span>
             <div class="p-swatch" style="background:linear-gradient(135deg,#F2B8C6,#E8919E)"></div>
-            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Rose Glitter · 23g · SPF40</div><div class="p-price">Price on request</div></div></div>
+            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Rose Glitter 쨌 23g 쨌 SPF40</div><div class="p-price">Price on request</div></div></div>
           <div class="p-card">
             <div class="p-swatch" style="background:linear-gradient(135deg,#E8C9B8,#D9A990)"></div>
-            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Rose Latte · 23g · SPF40</div><div class="p-price">Price on request</div></div></div>
+            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Rose Latte 쨌 23g 쨌 SPF40</div><div class="p-price">Price on request</div></div></div>
           <div class="p-card">
             <div class="p-swatch" style="background:linear-gradient(135deg,#F5C99B,#EBA96E)"></div>
-            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Sweet Sofia · 23g · SPF40</div><div class="p-price">Price on request</div></div></div>
+            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Sweet Sofia 쨌 23g 쨌 SPF40</div><div class="p-price">Price on request</div></div></div>
           <div class="p-card">
             <div class="p-swatch" style="background:linear-gradient(135deg,#F0A8B8,#E07A92)"></div>
-            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Lovely Rachel · 23g · SPF40</div><div class="p-price">Price on request</div></div></div>
+            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Lovely Rachel 쨌 23g 쨌 SPF40</div><div class="p-price">Price on request</div></div></div>
           <div class="p-card">
             <div class="p-swatch" style="background:linear-gradient(135deg,#E88AA0,#D45A78)"></div>
-            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Fall In Love · 23g · SPF40</div><div class="p-price">Price on request</div></div></div>
+            <div class="p-info"><div class="p-pname">Ampoule Glow Cushion</div><div class="p-psub">Fall In Love 쨌 23g 쨌 SPF40</div><div class="p-price">Price on request</div></div></div>
         </div>
       </div>
 
       <div class="p-section p-anim">
         <div class="p-sec-title">VIDEO</div>
-        <div class="p-video"><div class="p-play">▶</div><small>Product in use — 12s</small></div>
+        <div class="p-video"><div class="p-play">??/div><small>Product in use ??12s</small></div>
       </div>
 
       <div class="p-section p-anim">
         <div class="p-sec-title">BRAND STORY</div>
-        <!-- 뷰티그라운드 자동 삽입: 큐레이터 코멘트 -->
+        <!-- 酉고떚洹몃씪?대뱶 ?먮룞 ?쎌엯: ?먮젅?댄꽣 肄붾찘??-->
         <div class="p-curator">
           <p>Their 2X big-size cushion is the item our department store customers keep coming back for. One of the most reliable base-makeup lines we carry.</p>
-          <div class="who"><div class="avatar">BG</div><span>BEAUTYGROUND MD · Curated Aug 2026</span></div>
+          <div class="who"><div class="avatar">BG</div><span>BEAUTYGROUND MD 쨌 Curated Aug 2026</span></div>
         </div>
         <div class="p-story" id="pvStory">Big-size(2X) cushions & pressed powders loved by Korean department store customers. 70% ampoule formula, dermatologically tested. Manufactured by COSMAX & Kolmar Korea.</div>
-        <div class="p-certs"><span class="p-cert">✓ Dermatologically Tested</span></div>
+        <div class="p-certs"><span class="p-cert">??Dermatologically Tested</span></div>
       </div>
 
-      <!-- 듀얼 CTA -->
+      <!-- ???CTA -->
       <div class="p-cta">
         <div class="p-cta-row">
-          <div class="p-cta-btn p-cta-shop"><span class="t">🛒 Shop This Brand</span><span class="s">Korea mall · Shopee 7 markets</span></div>
-          <div class="p-cta-btn p-cta-wa"><span class="t">💬 Wholesale</span><span class="s">Reply within 24h</span></div>
+          <div class="p-cta-btn p-cta-shop"><span class="t">?썟 Shop This Brand</span><span class="s">Korea mall 쨌 Shopee 7 markets</span></div>
+          <div class="p-cta-btn p-cta-wa"><span class="t">?뮠 Wholesale</span><span class="s">Reply within 24h</span></div>
         </div>
         <div class="p-cta-sub">Retail & export both handled by BEAUTYGROUND, Seoul</div>
       </div>
-      <div class="p-footer">CURATED & EXPORTED BY <b>BEAUTYGROUND</b> · SEOUL</div>
+      <div class="p-footer">CURATED & EXPORTED BY <b>BEAUTYGROUND</b> 쨌 SEOUL</div>
 
     </div></div>
   </div>
@@ -475,9 +475,9 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 
 <div class="urlbar">
   <div class="url">beautyground.co.kr/x/<b>makeuphelper</b></div>
-  <button class="mini-btn">복사</button>
-  <button class="mini-btn">QR 코드</button>
-  <button class="mini-btn" style="background:var(--gold);color:#fff;border-color:var(--gold)">페이지 열기 ↗</button>
+  <button class="mini-btn">蹂듭궗</button>
+  <button class="mini-btn">QR 肄붾뱶</button>
+  <button class="mini-btn" style="background:var(--gold);color:#fff;border-color:var(--gold)">?섏씠吏 ?닿린 ??/button>
 </div>
 
 <script>
@@ -499,9 +499,9 @@ function showTab(t){
   document.getElementById('statsPanel').classList.toggle('show', t==='stats')
 }
 const TW = {
-  oneliner:'韓國底妝專家 — 2009年創立，大容量氣墊與粉餅',
-  story:'深受韓國百貨公司顧客喜愛的大容量(2X)氣墊與粉餅。70%安瓶精華配方，通過皮膚科測試。由COSMAX與韓國科瑪製造。',
-  sec:{PRODUCTS:'產品', VIDEO:'影片', 'BRAND STORY':'品牌故事'}
+  oneliner:'?볟쐦佯뺝쬆弱덂? ??2009亮닷돲塋뗰펽鸚㎩??뤸간罌딂늾暎됮쨫',
+  story:'曆긷룛?볟쐦?얕꺼?у뤈窈㎩??쒏꽋?꾢ㄷ若백뇧(2X)麗ｅ쥓?뉒쾳繞끹?0%若됬벛暎얕룾?띷뼶竊뚪싮걥??넎燁묉릍屋╉귞뵳COSMAX?뉔윋?뗧쭛?よ＝?졼?,
+  sec:{PRODUCTS:'?℡뱚', VIDEO:'壤긺뎴', 'BRAND STORY':'?곭뎹?끺틟'}
 }
 let enCache=null
 function lang(el,mode){
@@ -517,7 +517,7 @@ function lang(el,mode){
     document.querySelectorAll('.p-sec-title').forEach(t=>{ if(t.dataset.en) t.textContent=t.dataset.en })
   }
 }
-// 제품 캐러셀 자동 흐름 (터치/호버 시 정지)
+// ?쒗뭹 罹먮윭? ?먮룞 ?먮쫫 (?곗튂/?몃쾭 ???뺤?)
 const pv = document.getElementById('pvProducts')
 let autoScroll = setInterval(()=>{
   if(pv.classList.contains('list-mode')) return
@@ -528,3 +528,4 @@ pv.addEventListener('pointerenter', ()=>clearInterval(autoScroll))
 </script>
 </body>
 </html>
+

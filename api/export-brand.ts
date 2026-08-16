@@ -170,7 +170,7 @@ function welcomeHtml(brandName: string, pageUrl: string): string {
           ${row('🔍', '구글 검색 노출', '해외 바이어가 찾는 검색어(K-Beauty supplier 등)에 페이지가 노출되도록 다국어 검색 최적화를 적용합니다.')}
           ${row('🎵', '틱톡 · 유튜브 노출', '등록하신 제품 사진·영상을 숏폼 콘텐츠로 만들어 해외 소비자와 바이어에게 노출합니다.')}
           ${row('✉️', '바이어 직접 제안', '뷰티그라운드 수출팀이 국가별 바이어에게 귀사 제품을 직접 제안합니다. 바이어 문의 응대는 저희가 전담합니다.')}
-          ${row('🛒', '판매 연결', '뷰티그라운드 온라인몰과 Shopee 해외 채널을 통해 소비자 판매로도 연결됩니다.')}
+          ${row('🛒', '판매 연결', '뷰티그라운드 온라인몰을 통해 국내외 소비자 판매로 연결됩니다.')}
         </table>
         <div style="background:#F8F3EA;border:1px solid #E9DCC3;border-radius:12px;padding:12px 16px;margin:16px 0 6px;">
           <p style="margin:0;font-size:12.5px;color:#8B6F3D;line-height:1.7;">
