@@ -116,6 +116,11 @@ export default function BrandExport() {
     if (next) setDrafts((prev) => (prev[product.id] ? prev : { ...prev, [product.id]: draftFrom(product) }))
     try {
       await setMyProductExportFeatured(product.id, next)
+      if (next) {
+        setTimeout(() => {
+          document.getElementById(`export-product-card-${product.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 150)
+      }
     } catch {
       setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, is_export_featured: !next } : p)))
       setFeatureError('저장에 실패했습니다. 다시 시도해 주세요.')
@@ -414,8 +419,17 @@ export default function BrandExport() {
                     className="w-full aspect-square object-cover bg-[#f7f4ef]"
                     loading="lazy"
                   />
-                  {product.is_export_featured && (
+                  {product.is_export_featured ? (
                     <span className="absolute top-2 right-2 bg-[#b8924a] text-white text-[11px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">✓</span>
+                  ) : (
+                    <div className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[11px] font-medium text-center py-1.5">
+                      클릭 → 사진·설명 등록
+                    </div>
+                  )}
+                  {product.is_export_featured && (
+                    <div className="absolute inset-x-0 bottom-0 bg-[#b8924a]/90 text-white text-[11px] font-medium text-center py-1.5">
+                      선택됨 · 아래에서 편집
+                    </div>
                   )}
                 </div>
                 <p className="text-[12px] text-[#111] mt-1.5 px-0.5 truncate">{product.name}</p>
@@ -429,9 +443,9 @@ export default function BrandExport() {
       {featuredProducts.map((product) => {
         const draft = drafts[product.id] ?? draftFrom(product)
         return (
-          <div key={product.id} className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
+          <div key={product.id} id={`export-product-card-${product.id}`} className="bg-white rounded-[14px] border-2 border-[#b8924a] p-6 mb-6 scroll-mt-6">
             <p className="text-[14px] font-semibold text-[#111] mb-1">{product.name}</p>
-            <p className="text-[12px] text-[#9a9080] mb-4">수출용 사진·설명 (소비자용 상품 정보와 별개로 저장됩니다)</p>
+            <p className="text-[12px] text-[#9a9080] mb-4">수출용 사진·설명 (소비자용 상품 정보와 별개로 저장됩니다) — 여기서 직접 사진을 올려주세요.</p>
 
             <p className="text-[13px] text-[#9a9080] mb-2">사진 ({draft.images.length}/{MAX_PRODUCT_IMAGES})</p>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
