@@ -5,9 +5,6 @@ import { mergeGuestCartToServer } from './lib/cart'
 import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
 import CompanyIntro from './pages/CompanyIntro'
 import Export from './pages/Export'
-import ExportProductsList from './pages/export/ProductsList'
-import ExportProductDetail from './pages/export/ProductDetail'
-import ExportBrandDetail from './pages/export/BrandDetail'
 import ExportBrand from './pages/ExportBrand'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
@@ -151,10 +148,8 @@ export default function App() {
             /export/products(전체 상품)·/export/products/:id(상세)는 2026-08-16 추가 —
             아몬드뷰티(aamondbeauty.com) 상품상세 구조를 참고해 순서 재구성. */}
         <Route path="/export" element={<Export />} />
-        <Route path="/export/products" element={<ExportProductsList />} />
-        <Route path="/export/products/:id" element={<ExportProductDetail />} />
-        <Route path="/export/brands/:id" element={<ExportBrandDetail />} />
-        {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙) */}
+        {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙).
+            구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />
 
         {/* 법적 고지 */}

@@ -421,16 +421,14 @@ export default function Export() {
                 <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
                 <h2 className="text-[24px] sm:text-[28px] font-bold text-ink">{t.brandsTitle}</h2>
               </div>
-              <Link to="/export/products" className="text-[13px] font-semibold text-ink hover:underline whitespace-nowrap">
-                {t.viewAllProducts}
-              </Link>
             </div>
             <p className="text-ink-soft text-[14px] mb-10">{t.brandsBody}</p>
 
             <div className="grid sm:grid-cols-2 gap-6">
               {brandCards.map((brand) => (
                 <div key={brand.id} className="border border-rule rounded-card p-6">
-                  <Link to={`/export/brands/${brand.id}`} className="flex items-center gap-3 mb-4 group w-fit">
+                  {/* 브랜드별 수출 미니페이지(/x/:key)로 연결 — 구 상세 틀(/export/brands)은 2026-08-17 삭제 */}
+                  <Link to={`/x/${brand.id}`} className="flex items-center gap-3 mb-4 group w-fit">
                     {brand.export_logo_url ? (
                       <img
                         src={brand.export_logo_url}
@@ -475,7 +473,7 @@ export default function Export() {
                       {brand.products.map((product) => (
                         <Link
                           key={product.id}
-                          to={`/export/products/${product.id}`}
+                          to={`/x/${brand.id}`}
                           className="rounded-control overflow-hidden border border-rule block hover:border-ink transition-colors"
                         >
                           <img
