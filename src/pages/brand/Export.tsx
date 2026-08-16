@@ -58,14 +58,14 @@ function Slot({
   open: boolean; onToggle: () => void; children: React.ReactNode
 }) {
   return (
-    <div className={`bg-white rounded-lg border mb-2 overflow-hidden transition-colors ${open ? 'border-[#16202F] shadow-[0_4px_18px_rgba(22,32,47,0.07)]' : 'border-[#E8E6E1]'}`}>
+    <div className={`bg-white rounded-lg border mb-2 overflow-hidden transition-colors ${open ? 'border-[#111111] shadow-[0_4px_16px_rgba(0,0,0,0.06)]' : 'border-[#E8E6E1]'}`}>
       <button type="button" onClick={onToggle} className="w-full flex items-center gap-3 px-4 py-3 text-left">
-        <span className={`w-[26px] h-[26px] rounded-full text-white text-[12px] font-bold flex items-center justify-center shrink-0 bg-[#16202F]`}>{num}</span>
+        <span className={`w-[26px] h-[26px] rounded-full text-white text-[12px] font-bold flex items-center justify-center shrink-0 bg-[#111111]`}>{num}</span>
         <span className="flex-1">
-          <span className="block text-[14px] font-bold text-[#23272F]">{title}</span>
+          <span className="block text-[14px] font-bold text-[#111111]">{title}</span>
           <span className="block text-[11px] text-[#6B7280] mt-0.5">{sub}</span>
         </span>
-        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${chipTone === 'ok' ? 'bg-[#E8F3EC] text-[#2E7D4F]' : 'bg-[#FDEEE4] text-[#C2410C]'}`}>{chip}</span>
+        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${chipTone === 'ok' ? 'bg-[#E8F3EC] text-[#2E7D4F]' : 'bg-[#FDECEC] text-[#E53E3E]'}`}>{chip}</span>
         <span className={`text-[10px] text-[#B9B5AD] transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
       {open && <div className="px-4 pb-4 pt-1 border-t border-dashed border-[#E8E6E1]">{children}</div>}
@@ -401,7 +401,7 @@ export default function BrandExport() {
     setTimeout(() => setCopied(false), 1800)
   }
 
-  const inputCls = 'w-full px-3 py-2 border border-[#E8E6E1] rounded-md text-[13px] text-[#23272F] placeholder:text-[#c4bcae] bg-[#FBFAF8] focus:outline-none focus:border-[#16202F] transition-colors'
+  const inputCls = 'w-full px-3 py-2 border border-[#E8E6E1] rounded-md text-[13px] text-[#111111] placeholder:text-[#c4bcae] bg-[#FBFAF8] focus:outline-none focus:border-[#111111] transition-colors'
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,600px)_400px] gap-8 items-start justify-center">
@@ -410,11 +410,11 @@ export default function BrandExport() {
         {/* 완성도 게이지 */}
         <div className="bg-white rounded-lg border border-[#E8E6E1] px-4 py-3.5 mb-3">
           <div className="flex items-baseline justify-between mb-2">
-            <p className="text-[15px] font-bold text-[#1B2537]">수출 페이지 완성도</p>
-            <span className="text-[13px] font-bold text-[#16202F]">{completion}%</span>
+            <p className="text-[15px] font-bold text-[#111111]">수출 페이지 완성도</p>
+            <span className="text-[13px] font-bold text-[#E53E3E]">{completion}%</span>
           </div>
           <div className="h-2 bg-[#EFEDE8] rounded-full overflow-hidden">
-            <i className="block h-full rounded-full bg-[#16202F] transition-all duration-500" style={{ width: `${completion}%` }} />
+            <i className="block h-full rounded-full bg-[#E53E3E] transition-all duration-500" style={{ width: `${completion}%` }} />
           </div>
           <p className="text-[12px] text-[#6B7280] mt-2">💡 {nextHint}</p>
           {draftRestored && (
@@ -444,14 +444,14 @@ export default function BrandExport() {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleLogoUpload(f); e.target.value = '' }} />
             </label>
           </div>
-          <p className="text-[12px] font-bold text-[#1B2537] mb-1.5">브랜드 소개 (한글)</p>
+          <p className="text-[12px] font-bold text-[#111111] mb-1.5">브랜드 소개 (한글)</p>
           <textarea value={pitch} onChange={(e) => setPitch(e.target.value)} rows={3}
             placeholder="예: OO은 2020년 설립된 스킨케어 브랜드로, 핵심 성분과 대표 제품, 국내 실적을 담아 소개해 주세요."
             className={`${inputCls} resize-none mb-3`} />
           <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[12px] font-bold text-[#1B2537]">영문 소개 <span className="text-[#C2410C]">*</span> <span className="font-normal text-[#6B7280]">— 바이어에게 표시</span></p>
+            <p className="text-[12px] font-bold text-[#111111]">영문 소개 <span className="text-[#E53E3E]">*</span> <span className="font-normal text-[#6B7280]">— 바이어에게 표시</span></p>
             <button type="button" onClick={() => void handleTranslatePitch()} disabled={translatingPitch || !pitch.trim()}
-              className="text-[12px] text-[#16202F] font-bold underline underline-offset-2 disabled:opacity-40">
+              className="text-[12px] text-[#111111] font-bold underline underline-offset-2 disabled:opacity-40">
               {translatingPitch ? '번역 중…' : '한글 소개 번역하기 →'}
             </button>
           </div>
@@ -466,20 +466,20 @@ export default function BrandExport() {
           chip={certifications.length > 0 || moqNotes.trim() ? '완료' : '비어있음'} chipTone={certifications.length > 0 || moqNotes.trim() ? 'ok' : 'warn'}
           open={openSlot === 2} onToggle={() => setOpenSlot(openSlot === 2 ? 0 : 2)}
         >
-          <p className="text-[12px] font-bold text-[#1B2537] mt-4 mb-2">보유 인증 <span className="font-normal text-[#6B7280]">— 있는 것만, 바이어 신뢰의 핵심</span></p>
+          <p className="text-[12px] font-bold text-[#111111] mt-4 mb-2">보유 인증 <span className="font-normal text-[#6B7280]">— 있는 것만, 바이어 신뢰의 핵심</span></p>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {CERTIFICATION_OPTIONS.map((cert) => {
               const active = certifications.includes(cert)
               return (
                 <button key={cert} type="button" onClick={() => toggleCert(cert)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] border transition-colors ${active ? 'bg-[#16202F] text-white border-[#16202F]' : 'bg-white text-[#6B7280] border-[#E8E6E1] hover:border-[#16202F]'}`}>
+                  className={`px-3 py-1.5 rounded-full text-[12px] border transition-colors ${active ? 'bg-[#111111] text-white border-[#111111]' : 'bg-white text-[#6B7280] border-[#E8E6E1] hover:border-[#111111]'}`}>
                   {cert}
                 </button>
               )
             })}
             {certifications.filter((c) => !CERTIFICATION_OPTIONS.includes(c)).map((cert) => (
               <button key={cert} type="button" onClick={() => toggleCert(cert)} title="클릭하면 삭제됩니다"
-                className="px-3 py-1.5 rounded-full text-[12px] border bg-[#16202F] text-white border-[#16202F] flex items-center gap-1">
+                className="px-3 py-1.5 rounded-full text-[12px] border bg-[#111111] text-white border-[#111111] flex items-center gap-1">
                 {cert}<span aria-hidden>×</span>
               </button>
             ))}
@@ -490,19 +490,19 @@ export default function BrandExport() {
                     if (e.key === 'Enter') { e.preventDefault(); addCustomCert() }
                     if (e.key === 'Escape') { setAddingCert(false); setCustomCertInput('') }
                   }}
-                  placeholder="예: GMP" className="px-3 py-1.5 border border-[#16202F] rounded-full text-[12px] focus:outline-none w-[120px]" />
-                <button type="button" onClick={addCustomCert} className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-[#16202F] text-white">추가</button>
+                  placeholder="예: GMP" className="px-3 py-1.5 border border-[#111111] rounded-full text-[12px] focus:outline-none w-[120px]" />
+                <button type="button" onClick={addCustomCert} className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-[#111111] text-white">추가</button>
               </span>
             ) : (
               <button type="button" onClick={() => setAddingCert(true)}
-                className="px-3 py-1.5 rounded-full text-[12px] border border-dashed border-[#c4bcae] text-[#9a9080] hover:border-[#16202F] hover:text-[#16202F]">
+                className="px-3 py-1.5 rounded-full text-[12px] border border-dashed border-[#c4bcae] text-[#9a9080] hover:border-[#111111] hover:text-[#111111]">
                 + 추가
               </button>
             )}
           </div>
-          <p className="text-[12px] font-bold text-[#1B2537] mb-1.5">이미 수출 중인 국가 <span className="font-normal text-[#6B7280]">(있다면)</span></p>
+          <p className="text-[12px] font-bold text-[#111111] mb-1.5">이미 수출 중인 국가 <span className="font-normal text-[#6B7280]">(있다면)</span></p>
           <input value={countries} onChange={(e) => setCountries(e.target.value)} placeholder="예: Japan, Vietnam" className={`${inputCls} mb-3`} />
-          <p className="text-[12px] font-bold text-[#1B2537] mb-1.5">MOQ · 샘플 정책</p>
+          <p className="text-[12px] font-bold text-[#111111] mb-1.5">MOQ · 샘플 정책</p>
           <textarea value={moqNotes} onChange={(e) => setMoqNotes(e.target.value)} rows={2}
             placeholder="예: 100 pcs / SKU, 샘플 제공 가능(수량 협의)" className={`${inputCls} resize-none`} />
         </Slot>
@@ -524,7 +524,7 @@ export default function BrandExport() {
               className={inputCls}
             />
             <button type="button" onClick={() => void handleAddProduct()} disabled={addingProduct || !newProductName.trim()}
-              className="shrink-0 bg-[#16202F] text-white rounded-md px-4 text-[12.5px] font-bold disabled:opacity-40">
+              className="shrink-0 bg-[#111111] text-white rounded-md px-4 text-[12.5px] font-bold disabled:opacity-40">
               {addingProduct ? '추가 중…' : '+ 제품 추가'}
             </button>
           </div>
@@ -538,7 +538,7 @@ export default function BrandExport() {
                 return (
                   <div key={product.id} className="relative">
                     <button type="button" onClick={() => void toggleFeatured(product)}
-                      className={`w-full text-left rounded-[10px] border-2 overflow-hidden transition-colors ${product.is_export_featured ? 'border-[#16202F]' : 'border-transparent hover:border-[#E8E6E1]'}`}>
+                      className={`w-full text-left rounded-[10px] border-2 overflow-hidden transition-colors ${product.is_export_featured ? 'border-[#111111]' : 'border-transparent hover:border-[#E8E6E1]'}`}>
                       <div className="relative">
                         {img ? (
                           <img src={img} alt={product.name} className="w-full aspect-square object-cover bg-[#f7f4ef]" loading="lazy" />
@@ -548,7 +548,7 @@ export default function BrandExport() {
                           </div>
                         )}
                         {product.is_export_featured && (
-                          <span className="absolute top-1.5 right-1.5 bg-[#16202F] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">✓</span>
+                          <span className="absolute top-1.5 right-1.5 bg-[#111111] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">✓</span>
                         )}
                       </div>
                       <p className="text-[11px] text-[#23272F] mt-1 px-0.5 truncate">{product.name}</p>
@@ -602,7 +602,7 @@ export default function BrandExport() {
                   <div className="flex items-center justify-between mb-1.5">
                     <p className="text-[11.5px] text-[#6B7280]">영문 설명</p>
                     <button type="button" onClick={() => void handleTranslate(product.id)} disabled={draft.translating || !draft.description.trim()}
-                      className="text-[11.5px] text-[#16202F] font-bold underline underline-offset-2 disabled:opacity-40">
+                      className="text-[11.5px] text-[#111111] font-bold underline underline-offset-2 disabled:opacity-40">
                       {draft.translating ? '번역 중…' : '번역하기 →'}
                     </button>
                   </div>
@@ -611,10 +611,10 @@ export default function BrandExport() {
                   {draft.error && <p className="text-[12px] text-red-600 mb-1.5">{draft.error}</p>}
                   <div className="flex items-center gap-2.5">
                     <button onClick={() => void handleSaveProduct(product.id)} disabled={draft.saving}
-                      className="bg-[#16202F] text-white rounded-md px-3.5 py-1.5 text-[12px] font-bold disabled:opacity-50">
+                      className="bg-[#111111] text-white rounded-md px-3.5 py-1.5 text-[12px] font-bold disabled:opacity-50">
                       {draft.saving ? '저장 중…' : '이 상품 저장'}
                     </button>
-                    {draft.saved && <span className="text-[12px] text-[#16202F] font-bold">저장되었습니다 ✓</span>}
+                    {draft.saved && <span className="text-[12px] text-[#111111] font-bold">저장되었습니다 ✓</span>}
                   </div>
                 </div>
               )
@@ -634,10 +634,10 @@ export default function BrandExport() {
         {translateNote && <p className="text-[12.5px] text-[#5A564B] bg-[#FAF9F6] border border-[#E6E3DC] rounded-lg px-3 py-2 mb-2">{translateNote}</p>}
         <div className="sticky bottom-4 flex items-center gap-3">
           <button onClick={() => void handleSaveDetails()} disabled={saving}
-            className="flex-1 bg-[#16202F] text-white rounded-lg py-3 text-[13.5px] font-bold shadow-md hover:opacity-95 disabled:opacity-50">
+            className="flex-1 bg-[#E53E3E] text-white rounded-lg py-3 text-[13.5px] font-bold shadow-md hover:opacity-95 disabled:opacity-50">
             {saving ? '저장 중…' : '브랜드 정보 저장'}
           </button>
-          {saved && <span className="text-[13px] text-[#16202F] font-bold whitespace-nowrap">저장 완료 ✓</span>}
+          {saved && <span className="text-[13px] text-[#111111] font-bold whitespace-nowrap">저장 완료 ✓</span>}
         </div>
       </div>
 
@@ -649,7 +649,7 @@ export default function BrandExport() {
           <div className="h-[780px] max-h-[calc(100vh-170px)] min-h-[560px] overflow-y-auto bg-white [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative flex flex-col">
             {/* 상단: 플랫폼 표기 + 언어 */}
             <div className="flex items-center justify-between px-4 pt-4 pb-3">
-              <p className="text-[8.5px] tracking-[0.28em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#A8853F]">EXPORT</span></p>
+              <p className="text-[8.5px] tracking-[0.28em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#E53E3E]">EXPORT</span></p>
               <span className="text-[8.5px] tracking-[0.06em] text-[#8A8577] border border-[#E6E3DC] px-2 py-0.5">English ▾</span>
             </div>
             <div className="mx-4 h-px bg-[#16202F]" />
@@ -663,7 +663,7 @@ export default function BrandExport() {
                 {pitchEn.trim() ? (
                   <p className="text-[10px] text-[#5A564B] leading-[1.7] mt-2">{pitchEn}</p>
                 ) : (
-                  <p className="text-[9.5px] text-[#C2410C] leading-[1.6] mt-2">⚠️ 영문 소개가 들어갈 자리입니다 — 저장하면 페이지가 열립니다</p>
+                  <p className="text-[9.5px] text-[#E53E3E] leading-[1.6] mt-2">⚠️ 영문 소개가 들어갈 자리입니다 — 저장하면 페이지가 열립니다</p>
                 )}
                 {(countries.trim() || moqNotes.trim()) && (
                   <p className="text-[8px] tracking-[0.05em] text-[#8A8577] mt-2.5 uppercase">
@@ -677,7 +677,7 @@ export default function BrandExport() {
             </div>
             {/* PROVEN — 스펙 테이블 */}
             <div className="px-4 pb-1">
-              <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F] pb-1.5 border-b border-[#16202F]">Proven in Korea</p>
+              <p className="text-[8px] tracking-[0.24em] uppercase text-[#111111] pb-1.5 border-b border-[#111111]">Proven in Korea</p>
               <table className="w-full">
                 <tbody>
                   {[['Retail', 'AK Department Store — on display'], ['Online', 'beautyground.co.kr — selling now'], ['Trade', 'Direct buy & resell by Beautyground']].map(([label, value]) => (
@@ -692,7 +692,7 @@ export default function BrandExport() {
             {/* 제품 — 2열 그리드 */}
             <div className="px-4 pt-4">
               <div className="flex items-baseline justify-between pb-1.5 border-b border-[#16202F]">
-                <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F]">Products</p>
+                <p className="text-[8px] tracking-[0.24em] uppercase text-[#111111]">Products</p>
                 <p className="text-[8px] text-[#B9B4A8]">{String(previewProducts.length).padStart(2, '0')}</p>
               </div>
               {previewProducts.length === 0 ? (
@@ -710,7 +710,7 @@ export default function BrandExport() {
                         </div>
                         <figcaption className="mt-1.5">
                           <p className="text-[9px] font-medium text-[#16202F] leading-[1.4] line-clamp-2">{p.name}</p>
-                          <p className="text-[8px] text-[#A8853F] mt-0.5">Wholesale on request</p>
+                          <p className="text-[8px] text-[#E53E3E] mt-0.5">Wholesale on request</p>
                         </figcaption>
                       </figure>
                     )
@@ -721,7 +721,7 @@ export default function BrandExport() {
             {/* 인증 */}
             {certifications.length > 0 && (
               <div className="px-4 pt-2 pb-3">
-                <p className="text-[8px] tracking-[0.24em] uppercase text-[#A8853F] pb-1.5 border-b border-[#16202F]">Certifications</p>
+                <p className="text-[8px] tracking-[0.24em] uppercase text-[#111111] pb-1.5 border-b border-[#111111]">Certifications</p>
                 <p className="pt-2 text-[9px] text-[#16202F] leading-[1.9]">
                   {certifications.map((c, i) => (
                     <span key={c}>{c}{i < certifications.length - 1 && <span className="mx-1.5 text-[#D8D4C9]">·</span>}</span>
@@ -736,8 +736,8 @@ export default function BrandExport() {
                 <div className="flex-1 text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-[#16202F] bg-white/55 border border-white/90 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_14px_rgba(70,90,190,0.14)]">
                   Shop retail
                 </div>
-                <div className="flex-[1.4] text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-white bg-[#16202F]/80 border border-white/25 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_16px_rgba(22,32,47,0.28)]">
-                  Wholesale inquiry <span className="text-[#C9A96E] text-[7.5px] ml-0.5">24h</span>
+                <div className="flex-[1.4] text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_16px_rgba(229,62,62,0.28)]">
+                  Wholesale inquiry <span className="text-white/80 text-[7.5px] ml-0.5">24h</span>
                 </div>
               </div>
               <p className="text-center text-[7px] text-[#B9B4A8] mt-1.5">Retail and export are both handled by Beautyground, Seoul.</p>
@@ -747,15 +747,15 @@ export default function BrandExport() {
 
         {/* URL 바 */}
         <div className="mt-3.5 flex items-center gap-2 max-w-[375px] mx-auto">
-          <div className="flex-1 bg-white border border-[#E8E6E1] rounded-[10px] px-3 py-2.5 text-[12px] text-[#1B2537] font-medium truncate">
+          <div className="flex-1 bg-white border border-[#E8E6E1] rounded-[10px] px-3 py-2.5 text-[12px] text-[#111111] font-medium truncate">
             {pageUrl}
           </div>
-          <button type="button" onClick={copyUrl} className="border border-[#E8E6E1] bg-white rounded-[10px] px-3 py-2.5 text-[12px] font-bold text-[#1B2537] whitespace-nowrap">
+          <button type="button" onClick={copyUrl} className="border border-[#E8E6E1] bg-white rounded-[10px] px-3 py-2.5 text-[12px] font-bold text-[#111111] whitespace-nowrap">
             {copied ? '복사됨 ✓' : '복사'}
           </button>
           {pageOpen ? (
             <a href={`https://${pageUrl}`} target="_blank" rel="noreferrer"
-              className="bg-[#16202F] text-white rounded-[10px] px-3 py-2.5 text-[12px] font-bold whitespace-nowrap">
+              className="bg-[#111111] text-white rounded-[10px] px-3 py-2.5 text-[12px] font-bold whitespace-nowrap">
               열기 ↗
             </a>
           ) : (

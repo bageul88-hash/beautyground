@@ -7,9 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Marcellus&display=swap" rel="stylesheet">
 <style>
 :root{
-  --gold:#B08A4F; --gold-soft:#C9A96E; --gold-bg:#F8F3EA;
-  --navy:#1B2537; --ink:#23272F; --sub:#6B7280; --line:#E8E6E1;
-  --bg:#F4F2EE; --card:#FFFFFF; --ok:#2E7D4F; --warn:#C2410C; --wa:#22C15E;
+  --gold:#111111; --gold-soft:#555555; --gold-bg:#F6F6F6; --red:#E53E3E;
+  --navy:#111111; --ink:#111111; --sub:#6B7280; --line:#E5E5E5;
+  --bg:#FFFFFF; --card:#FFFFFF; --ok:#2E7D4F; --warn:#E53E3E; --wa:#22C15E;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
@@ -17,9 +17,9 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 /* ── 상단 바 ── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line)}
 .brand-logo{font-family:'Marcellus',serif;font-size:17px;letter-spacing:3px;color:var(--navy)}
-.brand-logo b{color:var(--gold);font-weight:400}
+.brand-logo b{color:var(--red);font-weight:400}
 .topbar-note{font-size:12px;color:var(--sub)}
-.save-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.save-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 
 /* ── 레이아웃: 좌 편집 / 우 미리보기 ── */
 .wrap{display:grid;grid-template-columns:minmax(430px,560px) 1fr;max-width:1240px;margin:0 auto;min-height:calc(100vh - 61px)}
@@ -36,15 +36,15 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .gauge{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
 .gauge-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
 .gauge-top b{font-size:15px;color:var(--navy)}
-.gauge-top span{font-size:12px;color:var(--gold);font-weight:700}
+.gauge-top span{font-size:12px;color:var(--red);font-weight:700}
 .bar{height:8px;background:#EFEDE8;border-radius:6px;overflow:hidden}
-.bar i{display:block;height:100%;width:75%;background:linear-gradient(90deg,var(--gold-soft),var(--gold));border-radius:6px;transition:width .4s}
+.bar i{display:block;height:100%;width:75%;background:var(--red);border-radius:6px;transition:width .4s}
 .gauge-hint{font-size:12px;color:var(--sub);margin-top:8px}
 .gauge-hint b{color:var(--warn)}
 
 /* ── 슬롯 아코디언 ── */
 .slot{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
-.slot.open{border-color:var(--gold-soft);box-shadow:0 4px 18px rgba(176,138,79,.10)}
+.slot.open{border-color:#111111;box-shadow:0 4px 16px rgba(0,0,0,.06)}
 .slot-head{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
 .slot-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .slot.open .slot-num{background:var(--gold)}
@@ -65,7 +65,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .photo-row{display:flex;gap:8px;flex-wrap:wrap}
 .photo{width:64px;height:64px;border-radius:10px;background-size:cover;background-position:center;position:relative;border:1px solid var(--line)}
 .photo.add{display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--gold-soft);color:var(--gold);font-size:20px;cursor:pointer;background:var(--gold-bg)}
-.photo .main-badge{position:absolute;top:-6px;left:-6px;background:var(--gold);color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px}
+.photo .main-badge{position:absolute;top:-6px;left:-6px;background:var(--red);color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px}
 .layout-pick{display:flex;gap:8px}
 .layout-opt{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;background:#FBFAF8}
 .layout-opt.sel{border-color:var(--gold);color:var(--navy);background:var(--gold-bg)}
@@ -101,14 +101,14 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .ch-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
 .ch-row:last-child{border-bottom:none}
 .ch-row .ch{font-weight:700;color:var(--navy)}
-.ch-row .v{font-weight:900;color:var(--gold)}
+.ch-row .v{font-weight:900;color:var(--red)}
 .ch-row .v small{color:var(--sub);font-weight:400;margin-left:4px}
-.privacy-note{font-size:11px;color:#9A8768;background:var(--gold-bg);border-radius:10px;padding:10px 14px;line-height:1.6}
+.privacy-note{font-size:11px;color:#6B7280;background:var(--gold-bg);border-radius:10px;padding:10px 14px;line-height:1.6}
 
 /* ── URL 바 ── */
 .urlbar{position:fixed;bottom:0;left:0;width:min(100%,calc((100vw - 1240px)/2 + 560px));background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);padding:13px 26px;display:flex;align-items:center;gap:10px;z-index:50}
 .urlbar .url{flex:1;font-size:13px;color:var(--navy);font-weight:500;background:#F6F4F0;border-radius:8px;padding:9px 14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.urlbar .url b{color:var(--gold)}
+.urlbar .url b{color:var(--red)}
 .mini-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;color:var(--navy);font-family:inherit;white-space:nowrap}
 
 /* ── 폰 미리보기 ── */
@@ -125,24 +125,24 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-anim{animation:fadeUp .6s both}
 .p-anim:nth-child(2){animation-delay:.08s}.p-anim:nth-child(3){animation-delay:.16s}
 
-.p-hero{background:linear-gradient(160deg,#20293C 0%,#1B2537 60%,#2A3550 100%);color:#fff;padding:46px 22px 24px;text-align:center;position:relative}
-.p-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-soft),#F0DDB8,var(--gold-soft),transparent);background-size:200% 100%;animation:shimmer 3.5s linear infinite}
-.lang-toggle{position:absolute;top:14px;right:14px;display:flex;background:rgba(255,255,255,.12);border-radius:16px;padding:2px}
-.lang-toggle span{font-size:10px;font-weight:700;padding:4px 10px;border-radius:14px;cursor:pointer;color:rgba(255,255,255,.55)}
+.p-hero{background:#FFFFFF;color:#111111;padding:46px 22px 24px;text-align:center;position:relative;border-bottom:1px solid #111111}
+.p-hero::after{content:none}
+.lang-toggle{position:absolute;top:14px;right:14px;display:flex;background:#F2F2F2;border-radius:16px;padding:2px}
+.lang-toggle span{font-size:10px;font-weight:700;padding:4px 10px;border-radius:14px;cursor:pointer;color:#8A8A8A}
 .lang-toggle span.on{background:var(--gold);color:#fff}
-.p-logo{width:64px;height:64px;border-radius:50%;background:#fff;color:var(--navy);font-family:'Marcellus',serif;font-size:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 11px;letter-spacing:.5px;text-align:center;line-height:1.2;padding:6px}
+.p-logo{width:64px;height:64px;border-radius:50%;background:#fff;color:#111111;border:1px solid #111111;font-family:'Marcellus',serif;font-size:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 11px;letter-spacing:.5px;text-align:center;line-height:1.2;padding:6px}
 .p-name{font-family:'Marcellus',serif;font-size:21px;letter-spacing:1.5px}
-.p-oneliner{font-size:12px;color:#C8CEDB;margin-top:7px;line-height:1.5}
+.p-oneliner{font-size:12px;color:#555555;margin-top:7px;line-height:1.5}
 .p-badges{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:13px}
-.p-badge{font-size:10px;font-weight:700;padding:4px 11px;border-radius:14px;background:rgba(201,169,110,.18);color:var(--gold-soft);border:1px solid rgba(201,169,110,.4)}
+.p-badge{font-size:10px;font-weight:700;padding:4px 11px;border-radius:14px;background:#FFFFFF;color:#111111;border:1px solid #CFCFCF}
 
 /* PROVEN IN KOREA — 뷰티그라운드 자동 삽입 */
-.p-proven{background:#141B2B;padding:14px 18px 16px}
+.p-proven{background:#FFFFFF;border-bottom:1px solid #E5E5E5;padding:14px 18px 16px}
 .p-proven-title{font-size:9.5px;font-weight:900;letter-spacing:2.5px;color:var(--gold-soft);text-align:center;margin-bottom:10px}
 .p-proven-grid{display:flex;gap:8px}
-.p-proof{flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(201,169,110,.22);border-radius:11px;padding:10px 6px;text-align:center}
-.p-proof .v{font-size:14px;font-weight:900;color:#fff}
-.p-proof .k{font-size:8.5px;color:#9AA3B5;margin-top:3px;line-height:1.4;letter-spacing:.3px}
+.p-proof{flex:1;background:#FAFAFA;border:1px solid #E5E5E5;border-radius:11px;padding:10px 6px;text-align:center}
+.p-proof .v{font-size:14px;font-weight:900;color:#111111}
+.p-proof .k{font-size:8.5px;color:#6B7280;margin-top:3px;line-height:1.4;letter-spacing:.3px}
 
 .p-section{padding:20px 18px 4px}
 .p-sec-title{font-size:11px;font-weight:900;letter-spacing:2px;color:var(--gold);margin-bottom:12px}
@@ -157,23 +157,23 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-info{padding:9px 11px}
 .p-pname{font-size:11.5px;font-weight:700;line-height:1.35}
 .p-psub{font-size:10px;color:var(--sub);margin-top:3px}
-.p-price{font-size:10px;color:var(--gold);font-weight:700;margin-top:5px}
-.p-main{position:absolute;top:8px;left:8px;background:var(--gold);color:#fff;font-size:8.5px;font-weight:900;padding:2px 7px;border-radius:6px;letter-spacing:.5px;z-index:1}
+.p-price{font-size:10px;color:var(--red);font-weight:700;margin-top:5px}
+.p-main{position:absolute;top:8px;left:8px;background:var(--red);color:#fff;font-size:8.5px;font-weight:900;padding:2px 7px;border-radius:6px;letter-spacing:.5px;z-index:1}
 
-.p-video{background:linear-gradient(135deg,#F6EFE3,#EFE4D0);border-radius:14px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+.p-video{background:#F6F6F6;border:1px solid #E5E5E5;border-radius:14px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
 .p-play{width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;padding-left:3px;cursor:pointer;transition:transform .2s}
 .p-play:hover{transform:scale(1.1)}
-.p-video small{font-size:10px;color:#8B7B5E;font-weight:700}
+.p-video small{font-size:10px;color:#6B7280;font-weight:700}
 
 /* 큐레이터 코멘트 — 뷰티그라운드 자동 삽입 */
-.p-curator{margin:0 0 16px;background:linear-gradient(135deg,#FBF7EF,#F5EDDD);border-radius:14px;padding:15px 16px;position:relative}
+.p-curator{margin:0 0 16px;background:#FAFAFA;border:1px solid #E5E5E5;border-radius:14px;padding:15px 16px;position:relative}
 .p-curator::before{content:'“';position:absolute;top:2px;left:12px;font-family:'Marcellus',serif;font-size:38px;color:var(--gold-soft);opacity:.5}
-.p-curator p{font-size:11.5px;line-height:1.7;color:#5B4E38;padding-left:18px;font-style:italic}
+.p-curator p{font-size:11.5px;line-height:1.7;color:#333333;padding-left:18px;font-style:italic}
 .p-curator .who{display:flex;align-items:center;gap:7px;margin-top:9px;padding-left:18px}
-.p-curator .who .avatar{width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--gold-soft);font-size:8px;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif}
-.p-curator .who span{font-size:9.5px;color:#8B7B5E;font-weight:700}
+.p-curator .who .avatar{width:22px;height:22px;border-radius:50%;background:#111111;color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif}
+.p-curator .who span{font-size:9.5px;color:#6B7280;font-weight:700}
 
-.p-story{font-size:12px;line-height:1.75;color:#4B5563;background:#FAF8F4;border-left:3px solid var(--gold-soft);padding:13px 15px;border-radius:0 12px 12px 0;margin-bottom:16px}
+.p-story{font-size:12px;line-height:1.75;color:#333333;background:#FAFAFA;border-left:3px solid #111111;padding:13px 15px;border-radius:0 12px 12px 0;margin-bottom:16px}
 .p-certs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
 .p-cert{font-size:10px;font-weight:700;color:var(--navy);background:#fff;border:1px solid var(--line);padding:5px 11px;border-radius:8px}
 
@@ -184,8 +184,8 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .p-cta-btn .t{font-size:12.5px;font-weight:900;letter-spacing:.2px}
 .p-cta-btn .s{font-size:8.5px;opacity:.75;font-weight:500}
 .p-cta-shop{background:var(--navy);color:#fff}
-.p-cta-shop .s{color:#C9A96E;opacity:1}
-.p-cta-wa{background:var(--wa);color:#fff;animation:pulse 2.6s infinite}
+.p-cta-shop .s{color:#fff;opacity:.75}
+.p-cta-wa{background:var(--wa);color:#fff}
 .p-cta-sub{text-align:center;font-size:9px;color:var(--sub);margin-top:7px}
 .p-footer{text-align:center;font-size:9px;color:#B4AFA6;padding:6px 0 20px;letter-spacing:1.5px}
 .p-footer b{font-family:'Marcellus',serif;color:var(--gold)}
@@ -246,9 +246,9 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
         <div class="slot-body">
           <div class="field"><label>표시 중인 뱃지</label>
             <div class="p-badges" style="justify-content:flex-start">
-              <span class="p-badge" style="color:#8B6F3D;background:var(--gold-bg);border-color:#E2D3B4">Base Makeup</span>
-              <span class="p-badge" style="color:#8B6F3D;background:var(--gold-bg);border-color:#E2D3B4">MOQ 100pcs</span>
-              <span class="p-badge" style="color:#8B6F3D;background:var(--gold-bg);border-color:#E2D3B4">Made in Korea</span>
+              <span class="p-badge" style="color:#111111;background:#FFFFFF;border-color:#CFCFCF">Base Makeup</span>
+              <span class="p-badge" style="color:#111111;background:#FFFFFF;border-color:#CFCFCF">MOQ 100pcs</span>
+              <span class="p-badge" style="color:#111111;background:#FFFFFF;border-color:#CFCFCF">Made in Korea</span>
             </div>
           </div>
         </div>
@@ -462,8 +462,8 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
       <!-- 듀얼 CTA -->
       <div class="p-cta">
         <div class="p-cta-row">
-          <div class="p-cta-btn p-cta-shop"><span class="t">🛒 Shop This Brand</span><span class="s">Beautyground online mall</span></div>
-          <div class="p-cta-btn p-cta-wa"><span class="t">💬 Wholesale</span><span class="s">Reply within 24h</span></div>
+          <div class="p-cta-btn p-cta-shop"><span class="t">Shop This Brand</span><span class="s">Beautyground online mall</span></div>
+          <div class="p-cta-btn p-cta-wa"><span class="t">Wholesale Inquiry</span><span class="s">Reply within 24h</span></div>
         </div>
         <div class="p-cta-sub">Retail & export both handled by BEAUTYGROUND, Seoul</div>
       </div>
@@ -477,7 +477,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
   <div class="url">beautyground.co.kr/x/<b>makeuphelper</b></div>
   <button class="mini-btn">복사</button>
   <button class="mini-btn">QR 코드</button>
-  <button class="mini-btn" style="background:var(--gold);color:#fff;border-color:var(--gold)">페이지 열기 ↗</button>
+  <button class="mini-btn" style="background:var(--red);color:#fff;border-color:var(--red)">페이지 열기 ↗</button>
 </div>
 
 <script>

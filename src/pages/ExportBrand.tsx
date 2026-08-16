@@ -276,7 +276,7 @@ export default function ExportBrand() {
         <CuratorSeal size={72} />
         <p className="font-serif text-[19px] text-[#16202F] leading-snug">{COPY[lang].notFoundTitle}</p>
         <p className="text-[13px] text-[#8A8577] leading-relaxed max-w-[300px]">{COPY[lang].notFoundBody}</p>
-        <Link to="/export" className="mt-3 text-[12px] tracking-[0.1em] text-[#16202F] border-b border-[#16202F] pb-0.5 hover:text-[#A8853F] hover:border-[#A8853F] transition-colors">
+        <Link to="/export" className="mt-3 text-[12px] tracking-[0.1em] text-[#16202F] border-b border-[#16202F] pb-0.5 hover:text-[#E53E3E] hover:border-[#E53E3E] transition-colors">
           {COPY[lang].notFoundCta} →
         </Link>
       </div>
@@ -301,7 +301,7 @@ export default function ExportBrand() {
 
         {/* ── 상단: 플랫폼 표기 + 언어 ── */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
-          <p className="text-[10.5px] tracking-[0.3em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#A8853F]">EXPORT</span></p>
+          <p className="text-[10.5px] tracking-[0.3em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#E53E3E]">EXPORT</span></p>
           <LangButton lang={lang} setLang={setLang} />
         </div>
         <div className="mx-6 h-px bg-[#16202F] rule-draw" />
@@ -329,7 +329,7 @@ export default function ExportBrand() {
 
         {/* ── PROVEN IN KOREA — 스펙 테이블 (뷰티그라운드 자동 삽입, DB 사실만) ── */}
         <section className="px-6 pb-2 sheet-in">
-          <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#A8853F] pb-2 border-b border-[#16202F]">{t.proven}</p>
+          <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#111111] pb-2 border-b border-[#111111]">{t.proven}</p>
           <table className="w-full">
             <tbody>
               {t.provenRows.map(([label, value]) => (
@@ -346,7 +346,7 @@ export default function ExportBrand() {
         {products.length > 0 && (
           <section className="px-6 pt-6 sheet-in">
             <div className="flex items-baseline justify-between pb-2 border-b border-[#16202F]">
-              <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#A8853F]">{t.products}</p>
+              <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#111111]">{t.products}</p>
               <p className="text-[10.5px] text-[#B9B4A8]">{String(products.length).padStart(2, '0')}</p>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-6 pt-4">
@@ -362,7 +362,7 @@ export default function ExportBrand() {
                       <p className="text-[10.5px] text-[#8A8577] mt-1">
                         {p.price ? `${t.retail} ₩${p.price.toLocaleString()}` : ''}
                       </p>
-                      <p className="text-[10.5px] text-[#A8853F] mt-0.5">{t.priceOnRequest}</p>
+                      <p className="text-[10.5px] text-[#E53E3E] mt-0.5">{t.priceOnRequest}</p>
                     </figcaption>
                   </figure>
                 )
@@ -374,7 +374,7 @@ export default function ExportBrand() {
         {/* ── 인증 ── */}
         {certs.length > 0 && (
           <section className="px-6 pt-7 sheet-in">
-            <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#A8853F] pb-2 border-b border-[#16202F]">{t.certs}</p>
+            <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#111111] pb-2 border-b border-[#111111]">{t.certs}</p>
             <p className="pt-3 text-[12.5px] text-[#16202F] leading-[2]">
               {certs.map((c, i) => (
                 <span key={c}>
@@ -399,9 +399,9 @@ export default function ExportBrand() {
             </Link>
             <Link
               to="/export"
-              className="flex-[1.4] text-center rounded-full py-3.5 text-[12.5px] tracking-[0.06em] text-white bg-[#16202F]/80 border border-white/25 backdrop-blur-[20px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_22px_rgba(22,32,47,0.28)] hover:bg-[#16202F]/90 active:opacity-90 transition-colors"
+              className="flex-[1.4] text-center rounded-full py-3.5 text-[12.5px] tracking-[0.06em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[20px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_22px_rgba(229,62,62,0.28)] hover:bg-[#E53E3E] active:opacity-90 transition-colors"
             >
-              {t.wholesaleBtn} <span className="text-[#C9A96E] ml-1 text-[10px]">{t.wholesaleSub}</span>
+              {t.wholesaleBtn} <span className="text-white/80 ml-1 text-[10px]">{t.wholesaleSub}</span>
             </Link>
           </div>
           <p className="text-center text-[9.5px] text-[#B9B4A8] mt-2.5">{t.ctaSub}</p>
