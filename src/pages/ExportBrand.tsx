@@ -239,17 +239,19 @@ export default function ExportBrand() {
       setBrand(found)
       const hasI18n = 'export_pitch_i18n' in found
       const cols = 'id,name,thumbnail_url,price,export_image_urls,export_description_en,is_export_featured' + (hasI18n ? ',export_i18n' : '')
+      // hidden = 셀프 가입 브랜드가 만든 수출 전용 상품(쇼핑몰 비노출) — 수출 페이지에는 노출된다.
+      // 이미지가 하나도 없는 상품은 라인시트에 빈 칸이 생기므로 클라이언트에서 걸러낸다.
       const { data: prodRows } = await supabase
         .from('products')
         .select(cols)
         .eq('partner_id', found.id)
-        .eq('status', 'on_sale')
+        .in('status', ['on_sale', 'hidden'])
         .eq('is_export_featured', true)
-        .not('thumbnail_url', 'is', null)
         .order('created_at', { ascending: false })
         .limit(12)
       if (cancelled) return
-      setProducts((prodRows ?? []) as unknown as ExportProduct[])
+      const rows = (prodRows ?? []) as unknown as ExportProduct[]
+      setProducts(rows.filter((p) => (p.export_image_urls?.[0] ?? p.thumbnail_url)))
     })()
     return () => { cancelled = true }
   }, [key])

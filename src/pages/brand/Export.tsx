@@ -23,7 +23,7 @@ const MAX_PRODUCT_IMAGES = 9
 
 type ProductRow = Pick<
   Product,
-  'id' | 'name' | 'thumbnail_url' | 'is_export_featured' | 'export_image_urls' | 'export_description' | 'export_description_en'
+  'id' | 'name' | 'thumbnail_url' | 'status' | 'is_export_featured' | 'export_image_urls' | 'export_description' | 'export_description_en'
 >
 
 interface ProductDraft {
@@ -94,6 +94,9 @@ export default function BrandExport() {
   const [openSlot, setOpenSlot] = useState(1)
   const [copied, setCopied] = useState(false)
   const [translateNote, setTranslateNote] = useState('')
+  const [newProductName, setNewProductName] = useState('')
+  const [addingProduct, setAddingProduct] = useState(false)
+  const [draftRestored, setDraftRestored] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -107,11 +110,26 @@ export default function BrandExport() {
         setCertifications(p.export_certifications ?? [])
         setCountries(p.export_countries ?? '')
         setMoqNotes(p.export_moq_notes ?? '')
+        // 자동 임시저장본 복원 — 저장 안 하고 나갔다 와도 이어서 작업 (localStorage, 저장 성공 시 비움)
+        try {
+          const raw = localStorage.getItem(`bg_export_draft_${p.id}`)
+          if (raw) {
+            const d = JSON.parse(raw)
+            if (typeof d.pitch === 'string') setPitch(d.pitch)
+            if (typeof d.pitchEn === 'string') setPitchEn(d.pitchEn)
+            if (Array.isArray(d.certifications)) setCertifications(d.certifications)
+            if (typeof d.countries === 'string') setCountries(d.countries)
+            if (typeof d.moqNotes === 'string') setMoqNotes(d.moqNotes)
+            setDraftRestored(true)
+            setTimeout(() => setDraftRestored(false), 6000)
+          }
+        } catch { /* 무시 */ }
+        // hidden = 셀프 가입 브랜드가 직접 만든 수출 전용 상품(쇼핑몰 비노출) — 함께 불러온다
         const { data } = await supabase
           .from('products')
-          .select('id,name,thumbnail_url,is_export_featured,export_image_urls,export_description,export_description_en')
+          .select('id,name,thumbnail_url,status,is_export_featured,export_image_urls,export_description,export_description_en')
           .eq('partner_id', p.id)
-          .eq('status', 'on_sale')
+          .in('status', ['on_sale', 'hidden'])
           .order('name')
         if (active) {
           const rows = (data ?? []) as ProductRow[]
@@ -180,6 +198,50 @@ export default function BrandExport() {
 
   const patchDraft = (productId: string, patch: Partial<ProductDraft>) => {
     setDrafts((prev) => ({ ...prev, [productId]: { ...prev[productId], ...patch } }))
+  }
+
+  // 자동 임시저장 — 입력 후 0.8초 지나면 브라우저에 보관 (저장 성공 시 handleSaveDetails에서 비움)
+  useEffect(() => {
+    if (!partner || loading) return
+    const id = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          `bg_export_draft_${partner.id}`,
+          JSON.stringify({ pitch, pitchEn, certifications, countries, moqNotes, ts: Date.now() })
+        )
+      } catch { /* 저장공간 부족 등은 무시 */ }
+    }, 800)
+    return () => clearTimeout(id)
+  }, [partner, loading, pitch, pitchEn, certifications, countries, moqNotes])
+
+  // 셀프 가입 브랜드의 수출 전용 상품 직접 추가 (status=hidden — 쇼핑몰에는 노출되지 않음)
+  const handleAddProduct = async () => {
+    const name = newProductName.trim()
+    if (!name || addingProduct) return
+    setAddingProduct(true)
+    setFeatureError('')
+    const { data, error: rpcError } = await supabase.rpc('create_my_export_product', { p_name: name })
+    setAddingProduct(false)
+    if (rpcError || !data) {
+      setFeatureError(rpcError?.message?.includes('제품명') ? rpcError.message : '제품 추가에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+      return
+    }
+    const row = data as ProductRow
+    setProducts((prev) => [row, ...prev])
+    setDrafts((prev) => ({ ...prev, [row.id]: draftFrom(row) }))
+    setNewProductName('')
+  }
+
+  // 직접 만든 수출 전용 상품 삭제 (hidden 상품만 — 쇼핑몰 판매 상품은 불가)
+  const handleDeleteProduct = async (product: ProductRow) => {
+    if (!confirm(`'${product.name}' 제품을 삭제할까요? 등록한 사진·설명도 함께 사라집니다.`)) return
+    const { error: rpcError } = await supabase.rpc('delete_my_export_product', { p_product_id: product.id })
+    if (rpcError) {
+      setFeatureError('삭제에 실패했습니다.')
+      return
+    }
+    setProducts((prev) => prev.filter((p) => p.id !== product.id))
+    setDrafts((prev) => { const n = { ...prev }; delete n[product.id]; return n })
   }
 
   const handleLogoUpload = async (file: File) => {
@@ -281,6 +343,8 @@ export default function BrandExport() {
       setPartner((prev) => (prev ? { ...prev, ...updated } : updated))
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
+      // 서버 저장 성공 → 브라우저 임시저장본은 역할 끝
+      try { localStorage.removeItem(`bg_export_draft_${updated.id}`) } catch { /* no-op */ }
       const { data: sess } = await supabase.auth.getSession()
       const token = sess.session?.access_token
       if (firstOpen && token) {
@@ -353,6 +417,9 @@ export default function BrandExport() {
             <i className="block h-full rounded-full bg-[#16202F] transition-all duration-500" style={{ width: `${completion}%` }} />
           </div>
           <p className="text-[12px] text-[#6B7280] mt-2">💡 {nextHint}</p>
+          {draftRestored && (
+            <p className="text-[11.5px] text-[#2E7D4F] mt-1.5">이전에 작성하던 내용(임시저장)을 불러왔습니다 — 저장 버튼을 눌러야 페이지에 반영됩니다.</p>
+          )}
         </div>
 
         {/* 슬롯 1 — 브랜드 헤더 */}
@@ -446,23 +513,55 @@ export default function BrandExport() {
           chip={featuredCount > 0 ? `${featuredCount}개 선택` : '비어있음'} chipTone={featuredCount > 0 ? 'ok' : 'warn'}
           open={openSlot === 3} onToggle={() => setOpenSlot(openSlot === 3 ? 0 : 3)}
         >
-          {featureError && <p className="text-[12.5px] text-red-600 mt-3">{featureError}</p>}
+          {/* 제품 직접 추가 — 쇼핑몰 상품이 없는 셀프 가입 브랜드도 여기서 만든다 (수출 전용, 쇼핑몰 비노출) */}
+          <div className="flex gap-2 mt-4">
+            <input
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleAddProduct() } }}
+              placeholder="제품명 입력 후 추가 (예: 앰플 글로우 쿠션 23g)"
+              maxLength={80}
+              className={inputCls}
+            />
+            <button type="button" onClick={() => void handleAddProduct()} disabled={addingProduct || !newProductName.trim()}
+              className="shrink-0 bg-[#16202F] text-white rounded-md px-4 text-[12.5px] font-bold disabled:opacity-40">
+              {addingProduct ? '추가 중…' : '+ 제품 추가'}
+            </button>
+          </div>
+          {featureError && <p className="text-[12.5px] text-red-600 mt-2.5">{featureError}</p>}
           {products.length === 0 ? (
-            <p className="text-[13px] text-[#9a9080] py-6 text-center">판매중인 상품이 없습니다.</p>
+            <p className="text-[12.5px] text-[#9a9080] py-5 text-center">아직 제품이 없습니다 — 위에서 제품명을 입력해 추가해 주세요.</p>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 mt-4">
-              {products.map((product) => (
-                <button key={product.id} type="button" onClick={() => void toggleFeatured(product)}
-                  className={`text-left rounded-[10px] border-2 overflow-hidden transition-colors ${product.is_export_featured ? 'border-[#16202F]' : 'border-transparent hover:border-[#E8E6E1]'}`}>
-                  <div className="relative">
-                    <img src={product.thumbnail_url ?? ''} alt={product.name} className="w-full aspect-square object-cover bg-[#f7f4ef]" loading="lazy" />
-                    {product.is_export_featured && (
-                      <span className="absolute top-1.5 right-1.5 bg-[#16202F] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">✓</span>
+              {products.map((product) => {
+                const img = product.thumbnail_url ?? product.export_image_urls?.[0] ?? ''
+                return (
+                  <div key={product.id} className="relative">
+                    <button type="button" onClick={() => void toggleFeatured(product)}
+                      className={`w-full text-left rounded-[10px] border-2 overflow-hidden transition-colors ${product.is_export_featured ? 'border-[#16202F]' : 'border-transparent hover:border-[#E8E6E1]'}`}>
+                      <div className="relative">
+                        {img ? (
+                          <img src={img} alt={product.name} className="w-full aspect-square object-cover bg-[#f7f4ef]" loading="lazy" />
+                        ) : (
+                          <div className="w-full aspect-square bg-[#FAF9F6] border-b border-[#E8E6E1] flex items-center justify-center text-[10px] text-[#9a9080] px-1 text-center">
+                            4번에서 사진을<br />올려주세요
+                          </div>
+                        )}
+                        {product.is_export_featured && (
+                          <span className="absolute top-1.5 right-1.5 bg-[#16202F] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">✓</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#23272F] mt-1 px-0.5 truncate">{product.name}</p>
+                    </button>
+                    {product.status === 'hidden' && (
+                      <button type="button" onClick={() => void handleDeleteProduct(product)} aria-label="제품 삭제"
+                        className="absolute -top-1.5 -left-1.5 bg-white border border-[#E8E6E1] text-[#9a9080] hover:text-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center shadow-sm">
+                        ✕
+                      </button>
                     )}
                   </div>
-                  <p className="text-[11px] text-[#23272F] mt-1 px-0.5 truncate">{product.name}</p>
-                </button>
-              ))}
+                )
+              })}
             </div>
           )}
         </Slot>
