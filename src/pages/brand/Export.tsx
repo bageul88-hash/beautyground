@@ -266,6 +266,8 @@ export default function BrandExport() {
     setSaving(true)
     setError('')
     setSaved(false)
+    // 이번 저장으로 페이지가 "처음 개설"되는지(빈 영문 소개 → 채움) — 개설 웰컴 메일 1회 발송 트리거
+    const firstOpen = !(partner?.export_pitch_en?.trim() ?? '') && pitchEn.trim().length > 0
     try {
       const updated = await updateMyExportDetails({
         pitch: pitch.trim(),
@@ -277,6 +279,16 @@ export default function BrandExport() {
       setPartner((prev) => (prev ? { ...prev, ...updated } : updated))
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
+      if (firstOpen) {
+        // 실패해도 저장 흐름은 막지 않는다(메일은 부가 기능)
+        try {
+          const { data: sess } = await supabase.auth.getSession()
+          const token = sess.session?.access_token
+          if (token) {
+            void fetch('/api/export-welcome', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+          }
+        } catch { /* no-op */ }
+      }
     } catch {
       setError('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
