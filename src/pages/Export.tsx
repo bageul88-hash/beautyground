@@ -4,6 +4,7 @@ import Footer from '../components/layout/Footer'
 import { supabase } from '../lib/supabase'
 import { useShopBrands } from '../hooks/useShopBrands'
 import { PRODUCT_CATEGORIES } from '../lib/types'
+import type { ExportBrandPublic } from '../lib/types'
 import { COMPANY_INFO } from '../lib/companyInfo'
 
 type Lang = 'ko' | 'en' | 'ja' | 'zh' | 'es'
@@ -85,6 +86,11 @@ interface Copy {
   stat2Label: string
   stat3Value: string
   stat3Label: string
+  brandsKicker: string
+  brandsTitle: string
+  brandsBody: string
+  exportingToLabel: string
+  moqLabel: string
   categoriesKicker: string
   categoriesTitle: string
   getInTouchKicker: string
@@ -118,6 +124,11 @@ const COPY: Record<Lang, Copy> = {
     stat2Label: '설립 · 백화점 매장 운영',
     stat3Value: '직접',
     stat3Label: '매입 후 재판매 — 중개 아님',
+    brandsKicker: '보유 브랜드',
+    brandsTitle: '피처드 브랜드',
+    brandsBody: '뷰티그라운드가 직접 매입·판매하는 브랜드 중 일부입니다.',
+    exportingToLabel: '수출 중인 국가',
+    moqLabel: 'MOQ · 샘플 정책',
     categoriesKicker: '카테고리',
     categoriesTitle: '취급 카테고리',
     getInTouchKicker: '문의하기',
@@ -149,6 +160,11 @@ const COPY: Record<Lang, Copy> = {
     stat2Label: 'Founded · Department Store Shops',
     stat3Value: 'Direct',
     stat3Label: 'Buy & Resell — Not a Marketplace',
+    brandsKicker: 'Our Brands',
+    brandsTitle: 'Featured Brands',
+    brandsBody: "A selection of brands we directly buy from and sell — that's Beautyground's portfolio.",
+    exportingToLabel: 'Currently Exporting To',
+    moqLabel: 'MOQ · Sample Policy',
     categoriesKicker: 'Categories',
     categoriesTitle: 'What We Carry',
     getInTouchKicker: 'Get In Touch',
@@ -181,6 +197,11 @@ const COPY: Record<Lang, Copy> = {
     stat2Label: '設立 · 百貨店店舗運営',
     stat3Value: '直接',
     stat3Label: '買取・再販売 — 仲介ではありません',
+    brandsKicker: '取扱ブランド',
+    brandsTitle: 'フィーチャーブランド',
+    brandsBody: 'Beautygroundが直接買い付け・販売しているブランドの一部です。',
+    exportingToLabel: '現在の輸出先国',
+    moqLabel: 'MOQ・サンプルポリシー',
     categoriesKicker: 'カテゴリー',
     categoriesTitle: '取扱カテゴリー',
     getInTouchKicker: 'お問い合わせ',
@@ -213,6 +234,11 @@ const COPY: Record<Lang, Copy> = {
     stat2Label: '成立 · 百货公司门店运营',
     stat3Value: '直营',
     stat3Label: '买断后转售 — 非中介平台',
+    brandsKicker: '合作品牌',
+    brandsTitle: '精选品牌',
+    brandsBody: '以下是Beautyground直接采购并销售的部分品牌。',
+    exportingToLabel: '目前出口至',
+    moqLabel: 'MOQ·样品政策',
     categoriesKicker: '品类',
     categoriesTitle: '我们经营的品类',
     getInTouchKicker: '联系我们',
@@ -244,6 +270,11 @@ const COPY: Record<Lang, Copy> = {
     stat2Label: 'Fundada · Tiendas en Grandes Almacenes',
     stat3Value: 'Directo',
     stat3Label: 'Compra y Reventa — No Somos un Marketplace',
+    brandsKicker: 'Nuestras Marcas',
+    brandsTitle: 'Marcas Destacadas',
+    brandsBody: 'Una selección de marcas que compramos y vendemos directamente — el portafolio de Beautyground.',
+    exportingToLabel: 'Actualmente Exportando A',
+    moqLabel: 'MOQ · Política de Muestras',
     categoriesKicker: 'Categorías',
     categoriesTitle: 'Lo Que Ofrecemos',
     getInTouchKicker: 'Contáctenos',
@@ -313,6 +344,19 @@ interface CatalogItem {
   category: string | null
 }
 
+interface FeaturedProduct {
+  id: string
+  name: string
+  thumbnail_url: string | null
+  export_image_urls: string[]
+  export_description_en: string | null
+  partner_id: string
+}
+
+interface BrandCard extends ExportBrandPublic {
+  products: FeaturedProduct[]
+}
+
 interface FormState {
   company_name: string
   contact_name: string
@@ -334,6 +378,7 @@ const EMPTY_FORM: FormState = {
 export default function Export() {
   const { brands } = useShopBrands()
   const [items, setItems] = useState<CatalogItem[]>([])
+  const [brandCards, setBrandCards] = useState<BrandCard[]>([])
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [categories, setCategories] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -355,6 +400,29 @@ export default function Export() {
         .order('created_at', { ascending: false })
         .limit(12)
       if (!cancelled) setItems((data ?? []) as CatalogItem[])
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  // 브랜드가 /brand/export에서 입력한 정보(로고·영문소개·인증·대표상품)를 공개 페이지에 노출.
+  // export_brand_public 뷰는 anon 조회 가능한 안전한 컬럼만 담고 있음(supabase/partners_export_pitch_en.sql).
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const [{ data: brandRows }, { data: productRows }] = await Promise.all([
+        supabase.from('export_brand_public').select('*'),
+        supabase
+          .from('products')
+          .select('id,name,thumbnail_url,export_image_urls,export_description_en,partner_id')
+          .eq('is_export_featured', true)
+          .eq('status', 'on_sale'),
+      ])
+      if (cancelled) return
+      const products = (productRows ?? []) as FeaturedProduct[]
+      const cards = ((brandRows ?? []) as ExportBrandPublic[])
+        .map((b) => ({ ...b, products: products.filter((p) => p.partner_id === b.id) }))
+        .filter((b) => (b.export_pitch_en?.trim() ?? '').length > 0 || b.products.length > 0)
+      setBrandCards(cards)
     })()
     return () => { cancelled = true }
   }, [])
@@ -433,6 +501,77 @@ export default function Export() {
             </div>
           </div>
         </section>
+
+        {/* Featured Brands — 브랜드가 /brand/export에서 입력한 정보 */}
+        {brandCards.length > 0 && (
+          <section className="max-w-[1080px] mx-auto px-6 py-20">
+            <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
+            <h2 className="text-[24px] sm:text-[28px] font-bold text-ink mb-2">{t.brandsTitle}</h2>
+            <p className="text-ink-soft text-[14px] mb-10">{t.brandsBody}</p>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              {brandCards.map((brand) => (
+                <div key={brand.id} className="border border-rule rounded-card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    {brand.export_logo_url ? (
+                      <img
+                        src={brand.export_logo_url}
+                        alt={brand.brand_name}
+                        className="w-11 h-11 rounded-full object-cover border border-rule"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-quiet flex items-center justify-center text-[16px] font-bold text-ink-soft">
+                        {brand.brand_name.charAt(0)}
+                      </div>
+                    )}
+                    <p className="text-[16px] font-bold text-ink">{brand.brand_name}</p>
+                  </div>
+
+                  {brand.export_certifications.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {brand.export_certifications.map((cert) => (
+                        <span key={cert} className="px-2.5 py-1 rounded-pill text-[11px] border border-rule text-ink-soft">
+                          {cert}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {brand.export_pitch_en && (
+                    <p className="text-[13.5px] text-ink-soft leading-relaxed mb-3">{brand.export_pitch_en}</p>
+                  )}
+
+                  {brand.export_countries && (
+                    <p className="text-[12px] text-ink-faint mb-1">
+                      {t.exportingToLabel}: <span className="text-ink-soft">{brand.export_countries}</span>
+                    </p>
+                  )}
+                  {brand.export_moq_notes && (
+                    <p className="text-[12px] text-ink-faint mb-4">
+                      {t.moqLabel}: <span className="text-ink-soft">{brand.export_moq_notes}</span>
+                    </p>
+                  )}
+
+                  {brand.products.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mt-4">
+                      {brand.products.map((product) => (
+                        <figure key={product.id} className="rounded-control overflow-hidden border border-rule">
+                          <img
+                            src={product.export_image_urls[0] ?? product.thumbnail_url ?? ''}
+                            alt={product.name}
+                            className="w-full aspect-square object-cover"
+                            loading="lazy"
+                          />
+                          <figcaption className="text-[10.5px] text-ink-soft px-1.5 py-1 truncate">{product.name}</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Category showcase */}
         <section className="max-w-[1080px] mx-auto px-6 py-20">

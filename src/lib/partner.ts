@@ -24,12 +24,14 @@ export async function getMyPartner(): Promise<Partner | null> {
 // supabase/partners_export_details.sql — update_my_partner_export_pitch를 대체)
 export async function updateMyExportDetails(details: {
   pitch: string
+  pitchEn: string
   certifications: string[]
   countries: string
   moqNotes: string
 }): Promise<Partner> {
   const { data, error } = await supabase.rpc('update_my_partner_export_details', {
     p_pitch: details.pitch,
+    p_pitch_en: details.pitchEn,
     p_certifications: details.certifications,
     p_countries: details.countries,
     p_moq_notes: details.moqNotes,

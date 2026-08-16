@@ -87,6 +87,7 @@ export interface Partner {
   status: 'active' | 'suspended'
   commission_rate: number
   export_pitch: string | null // 브랜드가 직접 쓰는 수출 제안용 소개글 (supabase/partners_export_pitch.sql)
+  export_pitch_en: string | null // export_pitch의 영문 번역 (supabase/partners_export_pitch_en.sql) — 공개 /export 페이지에 노출
   // 수출 상세정보 (supabase/partners_export_details.sql)
   export_certifications: string[]
   export_countries: string | null // 이미 수출 중인 국가(자유서술)
@@ -266,6 +267,18 @@ export interface ExportInquiry {
   message: string | null
   status: 'new' | 'contacted' | 'closed' // new=신규, contacted=연락완료, closed=종료
   created_at: string
+}
+
+// 공개 /export 페이지의 "Featured Brands" 섹션용 — export_brand_public 뷰(민감 컬럼 제외,
+// supabase/partners_export_pitch_en.sql)에서 anon으로 직접 조회.
+export interface ExportBrandPublic {
+  id: string
+  brand_name: string
+  export_logo_url: string | null
+  export_pitch_en: string | null
+  export_certifications: string[]
+  export_countries: string | null
+  export_moq_notes: string | null
 }
 
 // 해외 바이어 타겟(아웃바운드 CRM, /admin/export-buyers, supabase/export_buyers.sql) — 관리자 전용.

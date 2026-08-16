@@ -47,6 +47,8 @@ function draftFrom(p: ProductRow): ProductDraft {
 export default function BrandExport() {
   const [partner, setPartner] = useState<Partner | null>(null)
   const [pitch, setPitch] = useState('')
+  const [pitchEn, setPitchEn] = useState('')
+  const [translatingPitch, setTranslatingPitch] = useState(false)
   const [certifications, setCertifications] = useState<string[]>([])
   const [addingCert, setAddingCert] = useState(false)
   const [customCertInput, setCustomCertInput] = useState('')
@@ -69,6 +71,7 @@ export default function BrandExport() {
       setPartner(p)
       if (p) {
         setPitch(p.export_pitch ?? '')
+        setPitchEn(p.export_pitch_en ?? '')
         setCertifications(p.export_certifications ?? [])
         setCountries(p.export_countries ?? '')
         setMoqNotes(p.export_moq_notes ?? '')
@@ -199,6 +202,20 @@ export default function BrandExport() {
     }
   }
 
+  const handleTranslatePitch = async () => {
+    if (!pitch.trim()) return
+    setTranslatingPitch(true)
+    setError('')
+    try {
+      const translated = await translateText(pitch.trim())
+      setPitchEn(translated)
+    } catch {
+      setError('번역에 실패했습니다.')
+    } finally {
+      setTranslatingPitch(false)
+    }
+  }
+
   const handleSaveDetails = async () => {
     setSaving(true)
     setError('')
@@ -206,6 +223,7 @@ export default function BrandExport() {
     try {
       const updated = await updateMyExportDetails({
         pitch: pitch.trim(),
+        pitchEn: pitchEn.trim(),
         certifications,
         countries: countries.trim(),
         moqNotes: moqNotes.trim(),
@@ -278,12 +296,31 @@ export default function BrandExport() {
 
       {/* 브랜드 소개글 */}
       <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
-        <p className="text-[14px] font-semibold text-[#111] mb-3">브랜드 소개글</p>
+        <p className="text-[14px] font-semibold text-[#111] mb-3">브랜드 소개글 (한글)</p>
         <textarea
           value={pitch}
           onChange={(e) => setPitch(e.target.value)}
           rows={8}
           placeholder="예: [브랜드명]은 20XX년 설립된 [카테고리] 브랜드로, [핵심 성분/기술]을 담은 [대표 제품]으로 국내에서 [실적]을 쌓아왔습니다..."
+          className="w-full px-4 py-3 border border-[#e5e0d8] rounded-[10px] text-[14px] text-[#111] placeholder:text-[#c4bcae] focus:outline-none focus:border-[#b8924a] transition-colors resize-none mb-4"
+        />
+
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[14px] font-semibold text-[#111]">영문 소개글</p>
+          <button
+            type="button"
+            onClick={() => void handleTranslatePitch()}
+            disabled={translatingPitch || !pitch.trim()}
+            className="text-[12px] text-[#b8924a] font-medium hover:underline disabled:opacity-40 disabled:no-underline"
+          >
+            {translatingPitch ? '번역 중…' : '한글 소개글 번역하기 →'}
+          </button>
+        </div>
+        <textarea
+          value={pitchEn}
+          onChange={(e) => setPitchEn(e.target.value)}
+          rows={8}
+          placeholder="번역하기를 누르면 자동으로 채워집니다. 직접 수정도 가능합니다. 이 내용이 공개 수출 페이지에 해외 바이어에게 노출됩니다."
           className="w-full px-4 py-3 border border-[#e5e0d8] rounded-[10px] text-[14px] text-[#111] placeholder:text-[#c4bcae] focus:outline-none focus:border-[#b8924a] transition-colors resize-none"
         />
       </div>
