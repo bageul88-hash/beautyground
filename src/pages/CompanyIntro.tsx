@@ -18,8 +18,8 @@ const BUSINESS = [
   },
   {
     no: '02',
-    title: '글로벌 유통 · 수출',
-    desc: '미국 TJX·Costco, 일본 로프트(LOFT), 베트남 Guardian, 중국 KKV 등 해외 대형 채널과 Amazon·Qoo10·Shopee 이커머스를 통해 K-Beauty 브랜드의 해외 진출을 연계합니다.',
+    title: '라이브커머스 채널 운영',
+    desc: '국내 백화점 현장 라이브부터 대만·싱가포르·말레이시아 등 해외 라이브커머스 채널까지, K-Beauty 브랜드의 실시간 판매와 해외 진출을 함께 연계합니다.',
   },
   {
     no: '03',
@@ -30,7 +30,7 @@ const BUSINESS = [
 
 const HISTORY = [
   { year: '2022', title: '법인 설립 및 오프라인 매장 오픈', desc: '(주)뷰티그라운드 법인 설립 · AK플라자 뷰티 편집샵 오픈' },
-  { year: '2023', title: '백화점 팝업스토어 확대 & 글로벌 진출', desc: '롯데 잠실점, 수원 AK 서현, 현대 판교 등 팝업 진행 · Amazon · Qoo10 · Shopee 진출' },
+  { year: '2023', title: '백화점 팝업스토어 확대', desc: '롯데 잠실점, 수원 AK 서현, 현대 판교 등 팝업 진행' },
   { year: '2024', title: '글로벌 유통 오프라인 대형 채널 확장', desc: '미국 TJX · Costco / 일본 로프트(LOFT) / 베트남 Guardian / 중국 KKV · SANFU 진출' },
   { year: '2025', title: '브랜드 총판 대행 확대 및 채널 확장', desc: '브랜드 마케팅 및 유통 대행 확대' },
   { year: '2026', title: '백화점 매장 확장 및 AI 마케팅 도입', desc: '백화점 편집샵 매장 본격 확장(AK백화점, 롯데 등) · AI 기반 데이터 마케팅 도입' },
@@ -44,7 +44,7 @@ const PORTFOLIO = [
 
 const ROADMAP = [
   { when: '2026년 7월', what: 'AK플라자 수원역점 오픈 — 운영 중', highlight: true },
-  { when: '2026년 10월', what: '뷰티그라운드 플래그십 강남 역삼점 오픈', highlight: true },
+  { when: '2026년 10월', what: '현대 백화점 비클린 팝업 진행 예정', highlight: true },
   { when: '2027년', what: 'AK 분당 서현 · 롯데 영등포 · 신세계 영등포 확장 추진', highlight: false },
 ]
 
