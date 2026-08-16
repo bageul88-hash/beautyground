@@ -340,7 +340,7 @@ export default function BrandExport() {
   const inputCls = 'w-full px-3.5 py-2.5 border border-[#E8E6E1] rounded-[10px] text-[13.5px] text-[#23272F] placeholder:text-[#c4bcae] bg-[#FBFAF8] focus:outline-none focus:border-[#16202F] transition-colors'
 
   return (
-    <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+    <div className="grid lg:grid-cols-[minmax(0,600px)_400px] gap-8 items-start justify-center">
       {/* ══════ 좌: 기본 정보 입력 (고정 슬롯) ══════ */}
       <div>
         {/* 완성도 게이지 */}
@@ -546,8 +546,8 @@ export default function BrandExport() {
       <div className="lg:sticky lg:top-6 order-first lg:order-none">
         <p className="text-[12px] text-[#6B7280] text-center mb-3">바이어에게 보이는 화면 — <b className="text-[#16202F]">실시간 미리보기</b></p>
         <div className="mx-auto w-full max-w-[375px] rounded-[38px] overflow-hidden shadow-[0_24px_60px_rgba(22,32,47,0.2),0_0_0_10px_#1C1E22,0_0_0_12px_#3A3D44]">
-          {/* 실제 모바일 비율(≈375×780)에 맞춘 세로 길이 — 화면이 낮으면 그만큼만 줄어든다 */}
-          <div className="h-[780px] max-h-[calc(100vh-170px)] min-h-[560px] overflow-y-auto bg-white [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative">
+          {/* 실제 모바일 비율(≈375×780) — 콘텐츠가 짧아도 CTA가 폰 하단에 붙도록 flex 컬럼로 채운다 */}
+          <div className="h-[780px] max-h-[calc(100vh-170px)] min-h-[560px] overflow-y-auto bg-white [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative flex flex-col">
             {/* 상단: 플랫폼 표기 + 언어 */}
             <div className="flex items-center justify-between px-4 pt-4 pb-3">
               <p className="text-[8.5px] tracking-[0.28em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#A8853F]">EXPORT</span></p>
@@ -630,6 +630,7 @@ export default function BrandExport() {
                 </p>
               </div>
             )}
+            <div className="flex-1" />
             {/* 글래스 캡슐 CTA */}
             <div className="sticky bottom-0 px-3.5 pt-4 pb-3 bg-gradient-to-t from-white via-white/60 to-transparent">
               <div className="flex gap-2">

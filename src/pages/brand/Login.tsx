@@ -40,7 +40,8 @@ export default function BrandLogin() {
       navigate('/brand/onboarding')
       return
     }
-    navigate(isExportOnly ? '/brand/export' : '/brand/dashboard')
+    // 셀프 가입 수출 브랜드(pending)는 쇼핑몰 메뉴(대시보드 등)가 없으므로 수출 소개로 바로
+    navigate(isExportOnly || partner.status === 'pending' ? '/brand/export' : '/brand/dashboard')
   }
 
   const sendCode = async (e?: React.FormEvent) => {

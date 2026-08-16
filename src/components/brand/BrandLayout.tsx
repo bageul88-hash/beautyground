@@ -59,7 +59,9 @@ export default function BrandLayout() {
     })
   }, [])
 
-  const navItems = isExportOnly ? EXPORT_ONLY_NAV_ITEMS : FULL_NAV_ITEMS
+  // 대시보드·판매내역·정산내역은 온라인 쇼핑몰(라이브 판매) 채널 메뉴 — 셀프 가입 수출 브랜드(pending)에게는
+  // 채널 콘텐츠 격리 원칙(2026-08-17)에 따라 수출 소개만 노출한다.
+  const navItems = isExportOnly || partner?.status === 'pending' ? EXPORT_ONLY_NAV_ITEMS : FULL_NAV_ITEMS
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
