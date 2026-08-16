@@ -430,7 +430,7 @@ export default function Export() {
             <div className="grid sm:grid-cols-2 gap-6">
               {brandCards.map((brand) => (
                 <div key={brand.id} className="border border-rule rounded-card p-6">
-                  <div className="flex items-center gap-3 mb-4">
+                  <Link to={`/export/brands/${brand.id}`} className="flex items-center gap-3 mb-4 group w-fit">
                     {brand.export_logo_url ? (
                       <img
                         src={brand.export_logo_url}
@@ -442,8 +442,8 @@ export default function Export() {
                         {brand.brand_name.charAt(0)}
                       </div>
                     )}
-                    <p className="text-[16px] font-bold text-ink">{brand.brand_name}</p>
-                  </div>
+                    <p className="text-[16px] font-bold text-ink group-hover:underline">{brand.brand_name}</p>
+                  </Link>
 
                   {brand.export_certifications.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">

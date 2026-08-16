@@ -179,7 +179,7 @@ export default function ExportProductDetail() {
               <div>
                 {/* 2) 제품명 · 브랜드명 · 카테고리 */}
                 {brand && (
-                  <Link to="/export" className="text-[13px] font-semibold text-ink-soft hover:text-ink transition-colors">
+                  <Link to={`/export/brands/${brand.id}`} className="text-[13px] font-semibold text-ink-soft hover:text-ink transition-colors">
                     {brand.brand_name}
                   </Link>
                 )}

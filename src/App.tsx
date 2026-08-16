@@ -7,6 +7,7 @@ import CompanyIntro from './pages/CompanyIntro'
 import Export from './pages/Export'
 import ExportProductsList from './pages/export/ProductsList'
 import ExportProductDetail from './pages/export/ProductDetail'
+import ExportBrandDetail from './pages/export/BrandDetail'
 import AppHome from './pages/AppHome'
 import AppCategory from './pages/AppCategory'
 import AppSearch from './pages/AppSearch'
@@ -151,6 +152,7 @@ export default function App() {
         <Route path="/export" element={<Export />} />
         <Route path="/export/products" element={<ExportProductsList />} />
         <Route path="/export/products/:id" element={<ExportProductDetail />} />
+        <Route path="/export/brands/:id" element={<ExportBrandDetail />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
