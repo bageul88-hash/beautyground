@@ -307,6 +307,23 @@ export default function BrandExport() {
       await updateMyProductExportContent(productId, draft.images, draft.description.trim(), draft.descriptionEn.trim())
       patchDraft(productId, { saving: false, saved: true })
       setTimeout(() => patchDraft(productId, { saved: false }), 2500)
+      // 상품 다국어 번역 — 브랜드 저장 이후에 추가된 상품도 9개 언어가 생기도록 저장 때마다 갱신
+      const { data: sess } = await supabase.auth.getSession()
+      const token = sess.session?.access_token
+      if (token) {
+        setTranslateNote('🌐 상품 다국어 번역 생성 중… (수 분 내 자동 반영)')
+        fetch('/api/export-brand?action=translate', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+          .then(async (r) => {
+            if (r.ok) {
+              const d = await r.json()
+              setTranslateNote(`🌐 번역 완료 — 상품 ${d.products}개`)
+            } else {
+              setTranslateNote('')
+            }
+            setTimeout(() => setTranslateNote(''), 8000)
+          })
+          .catch(() => setTranslateNote(''))
+      }
     } catch {
       patchDraft(productId, { saving: false, error: '저장에 실패했습니다.' })
     }

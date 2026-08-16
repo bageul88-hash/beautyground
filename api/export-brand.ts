@@ -142,52 +142,52 @@ async function translateHandler(req: VercelRequest, res: VercelResponse) {
 
 // ══════════ 2) 개설 웰컴 메일 ══════════
 function welcomeHtml(brandName: string, pageUrl: string): string {
-  const gold = '#B08A4F'
-  const navy = '#1B2537'
+  const red = '#E53E3E'
+  const ink = '#111111'
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(pageUrl)}`
   const row = (icon: string, title: string, body: string) => `
     <tr><td style="padding:10px 0;border-bottom:1px dashed #E8E6E1;">
-      <p style="margin:0;font-size:14px;font-weight:700;color:${navy};">${icon} ${title}</p>
+      <p style="margin:0;font-size:14px;font-weight:700;color:${ink};">${icon} ${title}</p>
       <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.7;">${body}</p>
     </td></tr>`
   return `
-  <div style="font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F4F2EE;padding:28px 14px;">
-    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;border:1px solid #E8E6E1;">
-      <div style="background:linear-gradient(135deg,#20293C,#1B2537 60%,#2A3550);color:#fff;text-align:center;padding:34px 24px 26px;">
-        <p style="margin:0;font-size:12px;letter-spacing:4px;color:${gold};">BEAUTYGROUND EXPORT</p>
-        <h1 style="margin:12px 0 0;font-size:21px;">🎉 ${brandName} 수출 페이지가 개설되었습니다</h1>
-        <p style="margin:10px 0 0;font-size:13px;color:#C8CEDB;line-height:1.7;">
+  <div style="font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#FFFFFF;padding:28px 14px;">
+    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;border:1px solid #E5E5E5;">
+      <div style="background:#FFFFFF;color:${ink};text-align:center;padding:34px 24px 26px;border-bottom:1px solid ${ink};">
+        <p style="margin:0;font-size:12px;letter-spacing:4px;color:${red};">BEAUTYGROUND EXPORT</p>
+        <h1 style="margin:12px 0 0;font-size:21px;color:${ink};">${brandName} 수출 페이지가 개설되었습니다</h1>
+        <p style="margin:10px 0 0;font-size:13px;color:#555555;line-height:1.7;">
           이제 해외 바이어와 소비자에게 ${brandName}을(를) 소개할<br/>전용 페이지가 생겼습니다.
         </p>
-        <a href="${pageUrl}" style="display:inline-block;margin-top:18px;background:${gold};color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 28px;border-radius:24px;">내 수출 페이지 열어보기 →</a>
-        <p style="margin:10px 0 0;font-size:11px;color:#8B94A5;">${pageUrl}</p>
+        <a href="${pageUrl}" style="display:inline-block;margin-top:18px;background:${red};color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 28px;border-radius:24px;">내 수출 페이지 열어보기 →</a>
+        <p style="margin:10px 0 0;font-size:11px;color:#888888;">${pageUrl}</p>
       </div>
 
       <div style="padding:26px 26px 8px;">
-        <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:${navy};">앞으로 뷰티그라운드가 하는 일</p>
-        <p style="margin:0 0 10px;font-size:12.5px;color:#9A9488;">등록하신 페이지는 아래 채널로 노출되며, 성과는 있는 그대로 알려드립니다.</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:${ink};">앞으로 뷰티그라운드가 하는 일</p>
+        <p style="margin:0 0 10px;font-size:12.5px;color:#888888;">등록하신 페이지는 아래 채널로 노출되며, 성과는 있는 그대로 알려드립니다.</p>
         <table style="width:100%;border-collapse:collapse;">
           ${row('🔍', '구글 검색 노출', '해외 바이어가 찾는 검색어(K-Beauty supplier 등)에 페이지가 노출되도록 다국어 검색 최적화를 적용합니다.')}
           ${row('🎵', '틱톡 · 유튜브 노출', '등록하신 제품 사진·영상을 숏폼 콘텐츠로 만들어 해외 소비자와 바이어에게 노출합니다.')}
           ${row('✉️', '바이어 직접 제안', '뷰티그라운드 수출팀이 국가별 바이어에게 귀사 제품을 직접 제안합니다. 바이어 문의 응대는 저희가 전담합니다.')}
           ${row('🛒', '판매 연결', '뷰티그라운드 온라인몰을 통해 국내외 소비자 판매로 연결됩니다.')}
         </table>
-        <div style="background:#F8F3EA;border:1px solid #E9DCC3;border-radius:12px;padding:12px 16px;margin:16px 0 6px;">
-          <p style="margin:0;font-size:12.5px;color:#8B6F3D;line-height:1.7;">
-            💡 <b>완성도가 높을수록 더 많이 노출됩니다.</b> 제품 사진(각 상품 3장 이상)·영상·인증 정보를
-            채워주세요. 페이지는 언제든 <a href="${SITE}/brand/export" style="color:${gold};">브랜드 센터</a>에서 직접 수정할 수 있습니다.
+        <div style="background:#F6F6F6;border:1px solid #E5E5E5;border-radius:12px;padding:12px 16px;margin:16px 0 6px;">
+          <p style="margin:0;font-size:12.5px;color:#333333;line-height:1.7;">
+            <b style="color:${red};">완성도가 높을수록 더 많이 노출됩니다.</b> 제품 사진(각 상품 3장 이상)·영상·인증 정보를
+            채워주세요. 페이지는 언제든 <a href="${SITE}/brand/export" style="color:${red};">브랜드 센터</a>에서 직접 수정할 수 있습니다.
           </p>
         </div>
       </div>
 
       <div style="text-align:center;padding:8px 24px 24px;">
-        <img src="${qr}" alt="QR" width="120" height="120" style="border:1px solid #E8E6E1;border-radius:12px;"/>
-        <p style="margin:8px 0 0;font-size:11px;color:#9A9488;">명함·상담 시 QR로 바로 보여주세요</p>
+        <img src="${qr}" alt="QR" width="120" height="120" style="border:1px solid #E5E5E5;border-radius:12px;"/>
+        <p style="margin:8px 0 0;font-size:11px;color:#888888;">명함·상담 시 QR로 바로 보여주세요</p>
       </div>
 
-      <div style="background:#141B2B;color:#9AA3B5;text-align:center;padding:16px;font-size:11px;line-height:1.7;">
+      <div style="background:${ink};color:#CCCCCC;text-align:center;padding:16px;font-size:11px;line-height:1.7;">
         바이어 발굴·컨택·협상은 뷰티그라운드 수출팀이 전담하며,<br/>열람·문의 현황은 브랜드 센터와 리포트 메일로 알려드립니다.<br/>
-        <span style="color:${gold};letter-spacing:2px;">BEAUTYGROUND · SEOUL</span>
+        <span style="color:#FFFFFF;letter-spacing:2px;">BEAUTYGROUND · SEOUL</span>
       </div>
     </div>
   </div>`
