@@ -337,8 +337,12 @@ export default function LiveMain() {
                       <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
                     )}
                     <span
-                      className={`absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full ${
-                        live?.status === 'live' ? 'bg-gradient-to-r from-live-start to-live-end' : 'bg-bg-overlay/70'
+                      className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded-full ${
+                        live?.status === 'live'
+                          ? 'text-white bg-gradient-to-r from-live-start to-live-end'
+                          : live
+                            ? 'text-white bg-bg-overlay/70'
+                            : 'text-black/60 bg-white border border-black/[0.06]'
                       }`}
                     >
                       {statusLabel}
