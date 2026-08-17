@@ -50,6 +50,7 @@ export default function AppCategory() {
                 {cat.id === 'perfume' && '오 드 퍼퓸, 오 드 뚜왈렛, 바디미스트'}
                 {cat.id === 'hair' && '샴푸, 트리트먼트, 헤어오일'}
                 {cat.id === 'body' && '바디워시, 바디로션, 핸드크림'}
+                {cat.id === 'device' && '고주파, 페이스·바디 디바이스'}
               </p>
             </div>
             <span className="text-ink-faint text-lg shrink-0" aria-hidden="true">›</span>

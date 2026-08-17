@@ -47,6 +47,7 @@ export const CATEGORIES: CategoryChip[] = [
   { id: 'perfume', label: '향수', icon: '💧', bg: '#E1F5EE', color: '#0F6E56' },
   { id: 'hair', label: '헤어케어', icon: '✂️', bg: '#FAEEDA', color: '#854F0B' },
   { id: 'body', label: '바디케어', icon: '🤍', bg: '#E6F1FB', color: '#185FA5' },
+  { id: 'device', label: '뷰티 디바이스', icon: '⚡', bg: '#F2F0EA', color: '#5B4E38' },
 ]
 
 export const DEPT_CARDS: DeptCard[] = [

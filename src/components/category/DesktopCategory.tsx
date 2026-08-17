@@ -9,6 +9,7 @@ const DESCRIPTIONS: Record<string, string> = {
   perfume: '오 드 퍼퓸, 오 드 뚜왈렛, 바디미스트',
   hair: '샴푸, 트리트먼트, 헤어오일',
   body: '바디워시, 바디로션, 핸드크림',
+  device: '고주파, 페이스·바디 디바이스',
 }
 
 // PC 버전 — 카테고리 목록. 모바일의 세로 리스트를 넓은 화면에서는 카드 그리드로 펼친다.

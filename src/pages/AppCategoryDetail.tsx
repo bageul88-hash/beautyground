@@ -18,6 +18,7 @@ const SLUG_TO_CATEGORY: Record<string, string> = {
   perfume: '향수',
   hair: '헤어·바디',
   body: '헤어·바디',
+  device: '뷰티 디바이스',
 }
 
 const SORT_OPTIONS: { label: string; value: ShopSort }[] = [
