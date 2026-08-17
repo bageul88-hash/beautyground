@@ -258,7 +258,9 @@ export default function AppOrder() {
   // 결제 직전 실제 적용 여부는 handlePay 에서 서버(redeem_live_coupon 등)로 원자적으로 확정됨 — 이건 화면 미리보기용
   const couponPreview = liveCoupon && couponEligible(liveCoupon, subtotal) ? couponDiscountAmount(liveCoupon, subtotal) : 0
   const signupCouponPreview = selectedCoupon ? couponDiscountFor(selectedCoupon, subtotal) : 0
-  const pointsPreview = usePoints ? Math.min(pointsBalance, subtotal - couponPreview - signupCouponPreview) : 0
+  // 적립금은 3만원 이상 구매에만 사용 가능 (2026-08-18 정책 — 서버 payment-complete에서도 동일 검증)
+  const pointsEligible = subtotal >= 30000
+  const pointsPreview = usePoints && pointsEligible ? Math.min(pointsBalance, subtotal - couponPreview - signupCouponPreview) : 0
   const total = subtotal + deliveryFee - couponPreview - signupCouponPreview - pointsPreview
 
   const fullAddress = [address, addressDetail].map((s) => s.trim()).filter(Boolean).join(' ')
@@ -731,9 +733,12 @@ export default function AppOrder() {
             </div>
           )}
           {pointsBalance > 0 && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
-              <span className="text-[13px] text-ink-soft">보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용</span>
+            <label className={`flex items-center gap-2 ${pointsEligible ? 'cursor-pointer' : 'opacity-50'}`}>
+              <input type="checkbox" checked={usePoints && pointsEligible} disabled={!pointsEligible} onChange={(e) => setUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
+              <span className="text-[13px] text-ink-soft">
+                보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용
+                {!pointsEligible && <span className="text-[11.5px] text-ink-faint ml-1">(3만원 이상 구매 시 사용 가능)</span>}
+              </span>
             </label>
           )}
         </div>

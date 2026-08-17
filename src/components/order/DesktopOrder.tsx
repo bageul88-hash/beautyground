@@ -269,9 +269,12 @@ export default function DesktopOrder({
                 </select>
               )}
               {pointsBalance > 0 && (
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={usePoints} onChange={(e) => onUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
-                  <span className="text-[13px] text-ink-soft">보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용</span>
+                <label className={`flex items-center gap-2 ${subtotalForCoupon >= 30000 ? 'cursor-pointer' : 'opacity-50'}`}>
+                  <input type="checkbox" checked={usePoints && subtotalForCoupon >= 30000} disabled={subtotalForCoupon < 30000} onChange={(e) => onUsePoints(e.target.checked)} className="w-4 h-4 accent-ink" />
+                  <span className="text-[13px] text-ink-soft">
+                    보유 적립금 {pointsBalance.toLocaleString('ko-KR')}P 사용
+                    {subtotalForCoupon < 30000 && <span className="text-[11.5px] text-ink-faint ml-1">(3만원 이상 구매 시 사용 가능)</span>}
+                  </span>
                 </label>
               )}
             </div>

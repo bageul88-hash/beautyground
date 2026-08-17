@@ -122,7 +122,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .select('amount')
     .eq('payment_id', paymentId)
     .lt('amount', 0)
-  const pointsDiscount = (pointRows ?? []).reduce((s, r) => s + Math.abs((r as { amount: number }).amount), 0)
+  let pointsDiscount = (pointRows ?? []).reduce((s, r) => s + Math.abs((r as { amount: number }).amount), 0)
+
+  // 적립금 사용 조건: 3만원 이상 구매에만 허용 (2026-08-18 대표님 확정) — 미달이면 차감분을 되돌리고 미적용 처리
+  const POINTS_MIN_ORDER = 30000
+  if (pointsDiscount > 0 && authoritativeSubtotal < POINTS_MIN_ORDER) {
+    await supabase.from('point_transactions').delete().eq('payment_id', paymentId).lt('amount', 0)
+    pointsDiscount = 0
+  }
 
   // 5) 가입 쿠폰(첫구매 등) 사용분 = user_coupons에서 이 결제로 확정된 쿠폰을 조회해 서버가 직접 재계산(클라이언트 금액 불신).
   const { data: usedCoupon } = await supabase
