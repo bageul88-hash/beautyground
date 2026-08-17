@@ -8,6 +8,7 @@ import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import { comma, formatLiveSchedTime } from '../lib/format'
 import { useShopLives } from '../hooks/useShopLives'
+import { useSaleProducts } from '../hooks/useSaleProducts'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
 // 공유한다. 라이브에서 들어온 구매는 live_id로 태깅되어 정산·통계에서 구분된다(AppOrder.tsx).
@@ -17,27 +18,6 @@ import { useShopLives } from '../hooks/useShopLives'
 // 이 페이지에서 전혀 쓰지 않는다 — 색은 tailwind.config.ts의 brand-pink/live-start/live-end/
 // bg-overlay/bg-card/card-border(목업 designTokens.js와 1:1 동일)만 사용, 그 외는 black/white/
 // #666666 리터럴로 목업과 동일하게 맞춘다.
-
-// 할인 특가 상품 — 대표님 직접 지정 6개 (2026-08-12), 이 순서 그대로 노출.
-// 자동 선정(할인율순)이 아니라 고정 큐레이션. 변경 시 이 배열만 수정.
-// ⑤⑥: 목록 마지막 줄("...선쿠션 SPF50+카무카무 멜팅 클렌징 밤 80ml 세트")을 "6개"라고
-// 확인해주셔서 선쿠션 단품 + 클렌징 밤 단품 2개로 해석해 적용 (묶음 세트 상품 350689be 아님).
-const SALE_PRODUCT_IDS = [
-  '3a4db46e-612b-456d-ac92-7ee0c23ce909', // 하이드라 15 히아루론산 솔루션 30ml
-  '5c8dd76f-9495-4ba1-b7b5-4dbd653a6dbf', // 저자극 효소클렌저(파우더워시)
-  '799f9295-c391-4872-af46-3f77ebbf7539', // 나비클 퓨어워터 클렌징폼 약산성 거품 세안 150ml
-  'fb9bd00e-1532-46d3-abe9-d44b61f1b3a9', // 키위글로우 비건 제주 연꽃 마일드 각질케어 70송이 토너패드
-  '77d37fad-eec3-4cfc-86c8-ad37c6615050', // 메이크업헬퍼 비건 에센스 톤업 선쿠션 SPF50+PA++++ (15,900원 55%)
-  '7d279a94-0da1-436c-8925-95a09ac45708', // 메이크업헬퍼 카무카무 브라이트닝 클렌징 밤 80ml (11,900원 46%)
-]
-
-interface SaleProduct {
-  id: string
-  name: string
-  price: number
-  sale_price: number | null
-  thumbnail_url: string | null
-}
 
 const STORES: { key: 'hyundai' | 'ak' | 'lotte'; name: string; logo: string }[] = [
   { key: 'hyundai', name: '현대백화점', logo: '/images/memberships/hyundai.png' },
@@ -62,24 +42,8 @@ export default function LiveMain() {
   const [brandNames, setBrandNames] = useState<Record<string, string>>({})
   const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
   const [loading, setLoading] = useState(true)
-  const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([])
-  const [saleLoading, setSaleLoading] = useState(true)
-
-  // 할인 특가: 지정된 5개를 지정 순서 그대로
-  useEffect(() => {
-    let active = true
-    ;(async () => {
-      const { data } = await supabase.from('products')
-        .select('id, name, price, sale_price, thumbnail_url')
-        .in('id', SALE_PRODUCT_IDS)
-        .eq('status', 'on_sale')
-      if (!active) return
-      const byId = Object.fromEntries(((data ?? []) as SaleProduct[]).map((p) => [p.id, p]))
-      setSaleProducts(SALE_PRODUCT_IDS.map((id) => byId[id]).filter(Boolean))
-      setSaleLoading(false)
-    })()
-    return () => { active = false }
-  }, [])
+  // 할인 특가: 실제 sale_price가 걸린 상품을 할인율 높은 순으로 (홈 화면과 동일한 정의/훅 재사용)
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
 
   useEffect(() => {
     let active = true
@@ -400,7 +364,12 @@ export default function LiveMain() {
           <>
             <div className="mt-8 mx-4 border-t border-card-border" aria-hidden="true" />
             <section className="pt-8 px-4">
-              <h2 className="text-base font-bold text-black mb-4">할인 특가</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold text-black">할인 특가</h2>
+                <Link to="/live/sale" className="text-xs text-[#666666] focus:outline-none focus-visible:shadow-ring">
+                  전체보기 →
+                </Link>
+              </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                 {saleProducts.map((p) => (
                   <Link key={p.id} to={`/app/product/${p.id}`} data-product-id={p.id} className="text-left focus:outline-none focus-visible:shadow-ring">

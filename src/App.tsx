@@ -89,6 +89,7 @@ import DeptLives from './pages/dept/Lives'
 // 구매자 라이브 (Supabase 연동)
 import LiveMain from './pages/LiveMain'
 import LiveSchedule from './pages/LiveSchedule'
+import LiveSale from './pages/LiveSale'
 import ShopLiveWatch from './pages/app/ShopLiveWatch'
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
@@ -232,6 +233,7 @@ export default function App() {
             게이트 없이 공개(온라인몰 메인과 별개의 독립 진입점). */}
         <Route path="/live" element={<LiveMain />} />
         <Route path="/live/schedule" element={<LiveSchedule />} />
+        <Route path="/live/sale" element={<LiveSale />} />
         {/* 백화점 지역 담당자용 — 지점별 계정 로그인(2026-08-15, 예전 코드 게이트 대체) */}
         <Route path="/dept/login" element={<DeptLogin />} />
         <Route path="/dept/register/:id" element={<DeptRegister />} />
