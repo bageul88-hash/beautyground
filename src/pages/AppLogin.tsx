@@ -60,7 +60,13 @@ export default function AppLogin() {
     setError('')
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
-      options: { redirectTo: `${window.location.origin}${from}`, scopes: 'profile_nickname' },
+      options: {
+        redirectTo: `${window.location.origin}${from}`,
+        // account_email: 혜택 중복지급 차단 기준 / plusfriends: 채널 추가 상태 조회
+        scopes: 'profile_nickname account_email plusfriends',
+        // 동의 화면에 "카카오톡 채널 추가" 체크 노출 (뷰티그라운드 채널 _vnwfX)
+        queryParams: { channel_public_id: '_vnwfX' },
+      },
     })
     if (oauthError) setError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
   }
