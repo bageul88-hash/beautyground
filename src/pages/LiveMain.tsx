@@ -326,19 +326,15 @@ export default function LiveMain() {
                   type="button"
                   onClick={() => setSearchParams(isActive ? {} : { dept: store.key })}
                   className={`text-left rounded-2xl overflow-hidden bg-bg-card border transition-colors ${
-                    isActive ? 'border-black' : 'border-card-border'
+                    isActive ? 'border-black' : 'border-black/[0.04]'
                   }`}
                 >
                   <div className="flex items-center justify-center px-3 py-2">
                     <img src={store.logo} alt={store.name} className="h-5 w-auto object-contain" />
                   </div>
                   <div className="relative aspect-square bg-white">
-                    {live?.thumbnail_url ? (
+                    {live?.thumbnail_url && (
                       <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-40" />
-                      </div>
                     )}
                     <span
                       className={`absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full ${
