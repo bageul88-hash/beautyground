@@ -39,13 +39,14 @@ interface SaleProduct {
   thumbnail_url: string | null
 }
 
-const STORES: { key: 'hyundai' | 'ak'; name: string; logo: string }[] = [
+const STORES: { key: 'hyundai' | 'ak' | 'lotte'; name: string; logo: string }[] = [
   { key: 'hyundai', name: '현대백화점', logo: '/images/memberships/hyundai.png' },
   { key: 'ak', name: 'AK플라자', logo: '/images/memberships/ak.png' },
+  { key: 'lotte', name: '롯데백화점', logo: '/images/memberships/lotte.svg' },
 ]
 
 // 우선순위: 진행중 라이브 > 가장 이른 예정 라이브 > 없음("방송 준비중")
-function pickForDept(lives: Live[], dept: 'hyundai' | 'ak') {
+function pickForDept(lives: Live[], dept: 'hyundai' | 'ak' | 'lotte') {
   const deptLives = lives.filter((l) => l.dept_key === dept)
   return deptLives.find((l) => l.status === 'live') ?? deptLives[0] ?? null
 }
@@ -236,7 +237,7 @@ export default function LiveMain() {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3 ${STORES.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
             {STORES.map((store) => {
               const live = pickForDept(allLives, store.key)
               const isActive = dept === store.key
@@ -250,9 +251,8 @@ export default function LiveMain() {
                     isActive ? 'border-black' : 'border-card-border'
                   }`}
                 >
-                  <div className="flex items-center gap-2 px-3 py-2">
-                    <img src={store.logo} alt="" className="h-4 w-auto object-contain" />
-                    <span className="text-[11px] font-bold text-black">{store.name}</span>
+                  <div className="flex items-center justify-center px-3 py-2">
+                    <img src={store.logo} alt={store.name} className="h-5 w-auto object-contain" />
                   </div>
                   <div className="relative aspect-square bg-white">
                     {live?.thumbnail_url ? (
