@@ -325,24 +325,22 @@ export default function LiveMain() {
                   key={store.key}
                   type="button"
                   onClick={() => setSearchParams(isActive ? {} : { dept: store.key })}
-                  className={`text-left rounded-2xl overflow-hidden bg-bg-card border transition-colors ${
-                    isActive ? 'border-black' : 'border-black/[0.04]'
+                  className={`relative text-left rounded-2xl overflow-hidden bg-white border transition-colors ${
+                    isActive ? 'border-black' : 'border-black/10'
                   }`}
                 >
-                  <div className="flex items-center justify-center px-3 py-2">
+                  {live?.thumbnail_url && (
+                    <img src={live.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                  <div className="relative flex flex-col items-center gap-5 px-3 py-7">
                     <img src={store.logo} alt={store.name} className="h-5 w-auto object-contain" />
-                  </div>
-                  <div className="relative aspect-square bg-white">
-                    {live?.thumbnail_url && (
-                      <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    )}
                     <span
-                      className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded-full ${
+                      className={`text-[11px] font-bold px-4 py-2 rounded-full ${
                         live?.status === 'live'
                           ? 'text-white bg-gradient-to-r from-live-start to-live-end'
                           : live
                             ? 'text-white bg-bg-overlay/70'
-                            : 'text-black/60 bg-white border border-black/[0.06]'
+                            : 'text-text-sub bg-cream-2'
                       }`}
                     >
                       {statusLabel}
