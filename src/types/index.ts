@@ -1,6 +1,6 @@
 export type DeptKey = 'lotte' | 'shinsegae' | 'hyundai'
 export type AgeGroup = '30s' | '40s' | '50s'
-export type CategoryId = 'skincare' | 'makeup' | 'perfume' | 'hair' | 'body'
+export type CategoryId = 'skincare' | 'makeup' | 'perfume' | 'hair' | 'body' | 'device'
 
 export interface LiveSlide {
   id: number
