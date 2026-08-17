@@ -225,58 +225,6 @@ export default function LiveMain() {
 
       <main className="bg-white pb-2">
         <section className="pt-4 px-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[13px] font-bold text-black">백화점 라이브</h2>
-            {dept && (
-              <button
-                type="button"
-                onClick={() => setSearchParams({})}
-                className="text-[12px] font-bold text-[#666666]"
-              >
-                전체보기 ›
-              </button>
-            )}
-          </div>
-          <div className={`grid gap-3 ${STORES.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-            {STORES.map((store) => {
-              const live = pickForDept(allLives, store.key)
-              const isActive = dept === store.key
-              const statusLabel = live?.status === 'live' ? 'LIVE' : live ? '방송 예정' : '방송 준비중'
-              return (
-                <button
-                  key={store.key}
-                  type="button"
-                  onClick={() => setSearchParams(isActive ? {} : { dept: store.key })}
-                  className={`text-left rounded-2xl overflow-hidden bg-bg-card border transition-colors ${
-                    isActive ? 'border-black' : 'border-card-border'
-                  }`}
-                >
-                  <div className="flex items-center justify-center px-3 py-2">
-                    <img src={store.logo} alt={store.name} className="h-5 w-auto object-contain" />
-                  </div>
-                  <div className="relative aspect-square bg-white">
-                    {live?.thumbnail_url ? (
-                      <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-40" />
-                      </div>
-                    )}
-                    <span
-                      className={`absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full ${
-                        live?.status === 'live' ? 'bg-gradient-to-r from-live-start to-live-end' : 'bg-bg-overlay/70'
-                      }`}
-                    >
-                      {statusLabel}
-                    </span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </section>
-
-        <section className="pt-5 px-4">
           {loading ? (
             <p className="text-[13px] text-[#666666] py-8 text-center">불러오는 중…</p>
           ) : carouselItems.length === 0 ? (
@@ -351,6 +299,59 @@ export default function LiveMain() {
               })}
             </div>
           )}
+        </section>
+
+        <div className="mt-6 mx-4 border-t border-card-border" aria-hidden="true" />
+        <section className="pt-6 px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-bold text-black">백화점 라이브</h2>
+            {dept && (
+              <button
+                type="button"
+                onClick={() => setSearchParams({})}
+                className="text-[12px] font-bold text-[#666666]"
+              >
+                전체보기 ›
+              </button>
+            )}
+          </div>
+          <div className={`grid gap-3 ${STORES.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+            {STORES.map((store) => {
+              const live = pickForDept(allLives, store.key)
+              const isActive = dept === store.key
+              const statusLabel = live?.status === 'live' ? 'LIVE' : live ? '방송 예정' : '방송 준비중'
+              return (
+                <button
+                  key={store.key}
+                  type="button"
+                  onClick={() => setSearchParams(isActive ? {} : { dept: store.key })}
+                  className={`text-left rounded-2xl overflow-hidden bg-bg-card border transition-colors ${
+                    isActive ? 'border-black' : 'border-card-border'
+                  }`}
+                >
+                  <div className="flex items-center justify-center px-3 py-2">
+                    <img src={store.logo} alt={store.name} className="h-5 w-auto object-contain" />
+                  </div>
+                  <div className="relative aspect-square bg-white">
+                    {live?.thumbnail_url ? (
+                      <img src={live.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img src="/images/bg-logo-mark.png" alt="" className="w-8 h-8 object-contain opacity-40" />
+                      </div>
+                    )}
+                    <span
+                      className={`absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-1 rounded-full ${
+                        live?.status === 'live' ? 'bg-gradient-to-r from-live-start to-live-end' : 'bg-bg-overlay/70'
+                      }`}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </section>
 
         {!loading && scheduled.length > 0 && (
