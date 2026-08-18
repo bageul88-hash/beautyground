@@ -33,7 +33,7 @@ export default function AppHeader() {
             환영합니다, {name}님
           </span>
         ) : (
-          <span className="font-sans text-[19px] font-bold text-ink tracking-[-0.01em]">뷰티그라운드</span>
+          <img src="/images/logo-gold.png" alt="뷰티그라운드" className="h-8 w-auto object-contain" />
         )}
       </Link>
       <Link

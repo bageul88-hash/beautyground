@@ -17,8 +17,8 @@ export default function DesktopHeader() {
   return (
     <header className="bg-paper border-b border-rule sticky top-0 z-50">
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
-          뷰티그라운드
+        <Link to="/app/home" aria-label="뷰티그라운드 홈">
+          <img src="/images/logo-gold.png" alt="뷰티그라운드" className="h-9 w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/app/wishlist" aria-label="찜" className="text-ink">
