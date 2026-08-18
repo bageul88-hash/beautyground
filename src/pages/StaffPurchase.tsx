@@ -31,8 +31,7 @@ export default function StaffPurchase() {
   const [products, setProducts] = useState<StaffProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState<Record<string, number>>({}) // product_id -> qty
-  const [step, setStep] = useState<'browse' | 'detail' | 'checkout' | 'done'>('browse')
-  const [detailId, setDetailId] = useState<string | null>(null)
+  const [step, setStep] = useState<'browse' | 'checkout' | 'done'>('browse')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -200,46 +199,39 @@ export default function StaffPurchase() {
                   const base = p.sale_price ?? p.price
                   const qty = cart[p.id] ?? 0
                   return (
-                    <li key={p.id} className="flex gap-3 px-4 py-3">
-                      <button
-                        onClick={() => {
-                          setDetailId(p.id)
-                          setStep('detail')
-                        }}
+                    <li key={p.id} className="flex gap-3.5 px-4 py-3.5">
+                      <a
+                        href={`/app/product/${p.id}`}
+                        target="_blank"
+                        rel="noreferrer"
                         className="flex-shrink-0"
                       >
                         {p.thumbnail_url ? (
-                          <img src={p.thumbnail_url} alt="" className="w-24 h-24 rounded-control object-cover" />
+                          <img src={p.thumbnail_url} alt="" className="w-32 h-32 rounded-control object-cover" />
                         ) : (
-                          <div className="w-24 h-24 rounded-control bg-quiet" />
+                          <div className="w-32 h-32 rounded-control bg-quiet" />
                         )}
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <button
-                          onClick={() => {
-                            setDetailId(p.id)
-                            setStep('detail')
-                          }}
-                          className="text-left w-full"
-                        >
-                          <p className="text-[11px] text-ink-faint font-semibold">{p.brand_name}</p>
-                          <p className="text-[13px] text-ink line-clamp-2">{p.name}</p>
-                          <div className="mt-1 flex items-baseline gap-1.5">
-                            <span className="text-[11.5px] text-ink-faint line-through">{won(base)}</span>
-                            <span className="text-[14.5px] font-bold text-signal-blue">{won(p.employee_price)}</span>
+                      </a>
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <a href={`/app/product/${p.id}`} target="_blank" rel="noreferrer">
+                          <p className="text-[11.5px] text-ink-faint font-semibold">{p.brand_name}</p>
+                          <p className="text-[14px] text-ink line-clamp-2 mt-0.5">{p.name}</p>
+                          <div className="mt-1.5 flex items-baseline gap-1.5">
+                            <span className="text-[12px] text-ink-faint line-through">{won(base)}</span>
+                            <span className="text-[16px] font-bold text-signal-blue">{won(p.employee_price)}</span>
                           </div>
-                        </button>
-                        <div className="mt-2 flex items-center gap-2">
+                        </a>
+                        <div className="mt-2.5 flex items-center gap-2">
                           <button
                             onClick={() => setQty(p.id, qty - 1)}
-                            className="w-7 h-7 rounded-control border border-rule text-ink-soft"
+                            className="w-8 h-8 rounded-control border border-rule text-ink-soft"
                           >
                             −
                           </button>
-                          <span className="w-6 text-center text-[13px]">{qty}</span>
+                          <span className="w-7 text-center text-[13.5px]">{qty}</span>
                           <button
                             onClick={() => setQty(p.id, qty + 1)}
-                            className="w-7 h-7 rounded-control border border-rule text-ink-soft"
+                            className="w-8 h-8 rounded-control border border-rule text-ink-soft"
                           >
                             +
                           </button>
@@ -267,71 +259,6 @@ export default function StaffPurchase() {
             )}
           </>
         )}
-
-        {step === 'detail' && (() => {
-          const p = products.find((x) => x.id === detailId)
-          if (!p) return null
-          const base = p.sale_price ?? p.price
-          const qty = cart[p.id] ?? 0
-          return (
-            <div className="pb-24">
-              <div className="p-4">
-                <button onClick={() => setStep('browse')} className="text-[12.5px] text-ink-faint">
-                  ← 목록으로
-                </button>
-              </div>
-              {p.thumbnail_url ? (
-                <img src={p.thumbnail_url} alt="" className="w-full aspect-square object-cover" />
-              ) : (
-                <div className="w-full aspect-square bg-quiet" />
-              )}
-              <div className="p-4 space-y-2">
-                <p className="text-[12px] text-ink-faint font-semibold">{p.brand_name}</p>
-                <p className="text-[15px] text-ink">{p.name}</p>
-                <div className="flex items-baseline gap-2 pt-1">
-                  <span className="text-[13px] text-ink-faint line-through">{won(base)}</span>
-                  <span className="text-[18px] font-bold text-signal-blue">{won(p.employee_price)}</span>
-                </div>
-                <div className="flex items-center gap-3 pt-3">
-                  <button
-                    onClick={() => setQty(p.id, qty - 1)}
-                    className="w-9 h-9 rounded-control border border-rule text-ink-soft text-[16px]"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center text-[15px]">{qty}</span>
-                  <button
-                    onClick={() => setQty(p.id, qty + 1)}
-                    className="w-9 h-9 rounded-control border border-rule text-ink-soft text-[16px]"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-paper border-t border-rule p-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11.5px] text-ink-faint">{cartItems.length}개 상품</p>
-                  <p className="text-[15px] font-bold text-ink">{won(total)}</p>
-                </div>
-                {qty === 0 ? (
-                  <button
-                    onClick={() => setQty(p.id, 1)}
-                    className="px-5 py-2.5 rounded-control bg-ink text-paper text-[13.5px] font-bold"
-                  >
-                    담기
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setStep('checkout')}
-                    className="px-5 py-2.5 rounded-control bg-ink text-paper text-[13.5px] font-bold"
-                  >
-                    주문하기
-                  </button>
-                )}
-              </div>
-            </div>
-          )
-        })()}
 
         {step === 'checkout' && (
           <div className="p-4 space-y-3">
