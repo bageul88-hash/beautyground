@@ -132,6 +132,14 @@ export default function StaffPurchase() {
             카드결제 없이 무통장입금으로만 진행됩니다. 아래 목록에 없는 상품은 원가 정보가 없어 직원가를
             적용할 수 없는 브랜드입니다.
           </p>
+          <a
+            href="/app/category"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-control border border-rule px-3 py-2 text-[12.5px] font-semibold text-ink-soft"
+          >
+            🗂️ 브랜드·카테고리 둘러보기 (일반가로 표시됨 — 참고용)
+          </a>
         </header>
 
         {step === 'browse' && (
