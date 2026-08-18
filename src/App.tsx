@@ -17,6 +17,7 @@ import AppMyPage from './pages/AppMyPage'
 import AppCart from './pages/AppCart'
 import AppOrder from './pages/AppOrder'
 import AppOrders from './pages/AppOrders'
+import StaffPurchase from './pages/StaffPurchase'
 import AppGuestOrder from './pages/AppGuestOrder'
 import AppLogin from './pages/AppLogin'
 import AppSignup from './pages/AppSignup'
@@ -154,6 +155,9 @@ export default function App() {
         {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙).
             구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />
+
+        {/* 직원 전용 구매 링크 — 카드결제 없이 무통장입금 전용, employee_price 있는 상품만 노출 (2026-08-19) */}
+        <Route path="/staff/:key" element={<StaffPurchase />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
