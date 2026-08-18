@@ -119,6 +119,9 @@ export default function AppLogin() {
           아직 계정이 없으신가요?{' '}
           <Link to="/app/signup" state={{ from }} className="text-ink font-bold focus:outline-none focus-visible:shadow-ring">회원가입</Link>
         </p>
+        <p className="text-center text-[12.5px] text-ink-faint">
+          <Link to="/app/guest-order" className="underline underline-offset-2 focus:outline-none focus-visible:shadow-ring">비회원 주문 조회</Link>
+        </p>
       </form>
     </>
   )

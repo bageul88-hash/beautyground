@@ -238,7 +238,7 @@ export default function AppProductDetail() {
 
   const onBuy = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 구매할 수 없습니다'); return }
-    if (!(await requireLogin('buy'))) return
+    // 비회원 구매 허용(2026-08-18) — 로그인 없이 바로 주문서로 (장바구니·찜은 회원 전용 유지)
     navigate('/app/order', {
       state: {
         items: [

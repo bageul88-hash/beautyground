@@ -59,6 +59,8 @@ export default function AppOrder() {
   const [itemNotices, setItemNotices] = useState<string[]>([]) // 가격변경/수량조정 등 안내
   const [blockedNames, setBlockedNames] = useState<string[]>([]) // 품절/판매종료로 주문 불가
   const [checkedAuth, setCheckedAuth] = useState(false)
+  // 비회원 주문(2026-08-18): 로그인 없이 배송지 입력만으로 구매 — 적립금·쿠폰·배송지저장은 회원 전용
+  const [isGuest, setIsGuest] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -92,7 +94,7 @@ export default function AppOrder() {
     new URLSearchParams(window.location.search).get('paymentId') ? 'verifying' : 'idle'
   )
   const [message, setMessage] = useState('')
-  const [doneOrder, setDoneOrder] = useState<{ orderName: string; amount: number } | null>(null)
+  const [doneOrder, setDoneOrder] = useState<{ orderName: string; amount: number; paymentId: string } | null>(null)
   const [liveCoupon, setLiveCoupon] = useState<LiveCoupon | null>(null)
 
   // 적립금·가입 쿠폰(첫구매 등 공용 혜택) — 라이브 쿠폰과 별개, 동시 사용 가능
@@ -151,7 +153,15 @@ export default function AppOrder() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!active) return
       if (!session) {
-        navigate('/app/login', { state: { from: '/app/order' }, replace: true })
+        // 비회원 주문 허용 — 배송지 직접 입력, 혜택(적립금·쿠폰·배송지저장)은 미적용
+        const reval = await revalidateItems(initialItems)
+        if (!active) return
+        setIsGuest(true)
+        setSaveNewAddress(false)
+        setItems(reval.items)
+        setItemNotices(reval.notices)
+        setBlockedNames(reval.blocked)
+        setCheckedAuth(true)
         return
       }
       const meta = session.user.user_metadata as { name?: string; phone?: string } | undefined
@@ -236,9 +246,12 @@ export default function AppOrder() {
           .select('order_name, amount')
           .eq('payment_id', paymentId)
         const rows = (data ?? []) as { order_name: string | null; amount: number }[]
-        const amount = rows.reduce((s, r) => s + r.amount, 0)
-        const orderName = rows[0]?.order_name ?? '주문 상품'
-        setDoneOrder({ orderName, amount })
+        // 비회원은 RLS로 주문행 조회가 안 되므로 화면 state로 요약 구성(동기 결제 흐름에선 state가 살아있음)
+        const stateAmount = items.reduce((s, i) => s + i.price * i.quantity, 0)
+        const stateName = items.length > 1 ? `${items[0].name} 외 ${items.length - 1}건` : items[0]?.name ?? '주문 상품'
+        const amount = rows.length > 0 ? rows.reduce((s, r) => s + r.amount, 0) : stateAmount
+        const orderName = rows[0]?.order_name ?? stateName
+        setDoneOrder({ orderName, amount, paymentId })
         setStatus('done')
       } else {
         setStatus('error')
@@ -291,8 +304,8 @@ export default function AppOrder() {
       return
     }
 
-    // 새로 입력한(=저장된 배송지 아닌) 주소면 다음에 쓰게 저장
-    if (!selectedAddressId && saveNewAddress) {
+    // 새로 입력한(=저장된 배송지 아닌) 주소면 다음에 쓰게 저장 (회원 전용)
+    if (!isGuest && !selectedAddressId && saveNewAddress) {
       await addAddress({ recipientName: name.trim(), phone: phone.trim(), address: fullAddress, makeDefault: savedAddresses.length === 0 })
     }
 
@@ -485,9 +498,18 @@ export default function AppOrder() {
         <h1 className="text-[24px] font-bold text-ink mb-2">주문이 완료되었습니다</h1>
         <p className="text-ink-soft text-[14px] leading-relaxed mb-2">{doneOrder.orderName}</p>
         <p className="text-[16px] font-bold tabular-nums text-ink mb-8">{doneOrder.amount.toLocaleString('ko-KR')}원 결제 완료</p>
+        {isGuest && (
+          <div className="w-full max-w-xs border border-rule px-4 py-3.5 mb-6 text-left">
+            <p className="text-[11.5px] text-ink-faint mb-1">비회원 주문번호 — 주문 조회에 필요하니 보관해 주세요</p>
+            <p className="text-[12.5px] font-bold text-ink break-all select-all">{doneOrder.paymentId}</p>
+          </div>
+        )}
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button onClick={() => navigate('/app/orders')} className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring">
-            주문 내역 확인
+          <button
+            onClick={() => (isGuest ? navigate(`/app/guest-order?no=${encodeURIComponent(doneOrder.paymentId)}`) : navigate('/app/orders'))}
+            className="w-full rounded-control bg-ink text-paper font-bold text-[15px] py-4 focus:outline-none focus-visible:shadow-ring"
+          >
+            {isGuest ? '주문 조회하기' : '주문 내역 확인'}
           </button>
           {/* 라이브커머스와 온라인몰 메인은 서로 독립된 흐름 — 라이브 구매(liveId 있음)는 라이브커머스로,
               일반 구매는 온라인 메인으로 돌려보낸다(라이브 구매자가 온라인 메인으로 빠지지 않게) */}
@@ -565,6 +587,7 @@ export default function AppOrder() {
         onAddressDetail={editField(setAddressDetail)}
         saveNewAddress={saveNewAddress}
         onSaveNewAddress={setSaveNewAddress}
+        isGuest={isGuest}
         deliveryMemo={deliveryMemo}
         onDeliveryMemo={setDeliveryMemo}
         items={items}
@@ -624,10 +647,22 @@ export default function AppOrder() {
       <div className="bg-paper px-5 py-5 border-b border-rule space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-bold text-ink">배송지</h2>
-          <button type="button" onClick={() => navigate('/app/addresses')} className="text-[12px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
-            배송지 관리
-          </button>
+          {!isGuest && (
+            <button type="button" onClick={() => navigate('/app/addresses')} className="text-[12px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
+              배송지 관리
+            </button>
+          )}
         </div>
+
+        {isGuest && (
+          <div className="border border-rule bg-quiet px-4 py-3 text-[12.5px] text-ink-soft leading-relaxed">
+            비회원으로 주문합니다. 주문 완료 화면의 <strong className="text-ink">주문번호와 연락처</strong>로 배송 조회가 가능합니다.{' '}
+            <button type="button" onClick={() => navigate('/app/login', { state: { from: '/app/order' } })} className="text-ink font-bold underline underline-offset-2 focus:outline-none">
+              로그인
+            </button>
+            하면 적립금·쿠폰 혜택을 받을 수 있어요.
+          </div>
+        )}
 
         {savedAddresses.length > 0 && (
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -674,7 +709,7 @@ export default function AppOrder() {
           />
         )}
 
-        {!selectedAddressId && (
+        {!isGuest && !selectedAddressId && (
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={saveNewAddress} onChange={(e) => setSaveNewAddress(e.target.checked)} className="w-4 h-4 accent-ink" />
             <span className="text-[13px] text-ink-soft">이 배송지 저장하기</span>

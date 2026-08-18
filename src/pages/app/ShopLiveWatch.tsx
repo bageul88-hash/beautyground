@@ -277,12 +277,7 @@ export default function ShopLiveWatch() {
   const goToOrder = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!buyProduct || !live) return
-    // 비로그인이면 로그인 페이지로 보내고, 로그인 후 이 라이브로 복귀 (상품상세와 동일 관례)
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      navigate('/app/login', { state: { from: `/app/live/${live.id}` } })
-      return
-    }
+    // 비회원 구매 허용(2026-08-18) — 로그인 없이 바로 주문서로. 주문서에서 로그인 유도만 한다.
     const qty = quantity < 1 ? 1 : quantity
     navigate('/app/order', {
       state: {

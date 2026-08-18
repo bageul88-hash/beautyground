@@ -36,6 +36,7 @@ interface Props {
   onAddressDetail: (v: string) => void
   saveNewAddress: boolean
   onSaveNewAddress: (v: boolean) => void
+  isGuest?: boolean
   deliveryMemo: string
   onDeliveryMemo: (v: string) => void
   items: OrderItem[]
@@ -78,6 +79,7 @@ export default function DesktopOrder({
   onAddressDetail,
   saveNewAddress,
   onSaveNewAddress,
+  isGuest,
   deliveryMemo,
   onDeliveryMemo,
   items,
@@ -142,10 +144,18 @@ export default function DesktopOrder({
           <div className="bg-paper border border-rule px-6 py-6 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-[15px] font-bold text-ink">배송지</h2>
-              <Link to="/app/addresses" className="text-[12px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
-                배송지 관리
-              </Link>
+              {!isGuest && (
+                <Link to="/app/addresses" className="text-[12px] text-ink-soft focus:outline-none focus-visible:shadow-ring">
+                  배송지 관리
+                </Link>
+              )}
             </div>
+
+            {isGuest && (
+              <div className="border border-rule bg-quiet px-4 py-3 text-[12.5px] text-ink-soft leading-relaxed">
+                비회원으로 주문합니다. 주문 완료 화면의 <strong className="text-ink">주문번호와 연락처</strong>로 배송 조회가 가능합니다.
+              </div>
+            )}
 
             {savedAddresses.length > 0 && (
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -194,7 +204,7 @@ export default function DesktopOrder({
               />
             )}
 
-            {!selectedAddressId && (
+            {!isGuest && !selectedAddressId && (
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={saveNewAddress} onChange={(e) => onSaveNewAddress(e.target.checked)} className="w-4 h-4 accent-ink" />
                 <span className="text-[13px] text-ink-soft">이 배송지 저장하기</span>

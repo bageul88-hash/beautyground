@@ -17,6 +17,7 @@ import AppMyPage from './pages/AppMyPage'
 import AppCart from './pages/AppCart'
 import AppOrder from './pages/AppOrder'
 import AppOrders from './pages/AppOrders'
+import AppGuestOrder from './pages/AppGuestOrder'
 import AppLogin from './pages/AppLogin'
 import AppSignup from './pages/AppSignup'
 import AppNaverCallback from './pages/AppNaverCallback'
@@ -255,6 +256,7 @@ export default function App() {
         <Route path="/app/cart" element={<AppCart />} />
         <Route path="/app/order" element={<AppOrder />} />
         <Route path="/app/orders" element={<AppOrders />} />
+        <Route path="/app/guest-order" element={<AppGuestOrder />} />
         <Route path="/app/login" element={<AppLogin />} />
         <Route path="/app/signup" element={<AppSignup />} />
         {/* 이메일 가입 버튼은 뺐지만(2026-08-15, 카카오만 신규가입), URL 직접 접근으로
