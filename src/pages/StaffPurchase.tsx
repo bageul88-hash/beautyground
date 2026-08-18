@@ -19,6 +19,7 @@ interface StaffProduct {
   employee_price: number
   partner_id: string | null
   stock: number
+  brand_name: string
 }
 
 const won = (n: number) => n.toLocaleString('ko-KR') + '원'
@@ -39,20 +40,42 @@ export default function StaffPurchase() {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [orderTotal, setOrderTotal] = useState(0)
+  const [search, setSearch] = useState('')
+  const [brandFilter, setBrandFilter] = useState('전체')
 
   useEffect(() => {
     if (!allowed) return
     ;(async () => {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, thumbnail_url, price, sale_price, employee_price, partner_id, stock')
+        .select('id, name, thumbnail_url, price, sale_price, employee_price, partner_id, stock, partners(brand_name)')
         .not('employee_price', 'is', null)
         .eq('status', 'on_sale')
         .order('name')
-      if (!error && data) setProducts(data as StaffProduct[])
+      if (!error && data) {
+        setProducts(
+          (data as unknown as (StaffProduct & { partners: { brand_name: string } | null })[]).map((p) => ({
+            ...p,
+            brand_name: p.partners?.brand_name || '기타',
+          }))
+        )
+      }
       setLoading(false)
     })()
   }, [allowed])
+
+  const brands = useMemo(
+    () => ['전체', ...Array.from(new Set(products.map((p) => p.brand_name))).sort()],
+    [products]
+  )
+  const visibleProducts = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return products.filter((p) => {
+      if (brandFilter !== '전체' && p.brand_name !== brandFilter) return false
+      if (q && !p.name.toLowerCase().includes(q) && !p.brand_name.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [products, search, brandFilter])
 
   const cartItems = useMemo(
     () =>
@@ -144,13 +167,35 @@ export default function StaffPurchase() {
 
         {step === 'browse' && (
           <>
+            <div className="px-4 py-3 border-b border-rule space-y-2 sticky top-0 bg-paper z-10">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="🔍 브랜드·상품명 검색"
+                className="w-full rounded-control bg-paper border border-rule px-3.5 py-2.5 text-[13.5px]"
+              />
+              <select
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                className="w-full rounded-control bg-paper border border-rule px-3.5 py-2.5 text-[13.5px]"
+              >
+                {brands.map((b) => (
+                  <option key={b} value={b}>
+                    {b === '전체' ? `전체 브랜드 (${products.length})` : b}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {loading ? (
               <p className="p-6 text-center text-[13px] text-ink-faint">불러오는 중…</p>
             ) : products.length === 0 ? (
               <p className="p-6 text-center text-[13px] text-ink-faint">현재 직원가 상품이 없습니다.</p>
+            ) : visibleProducts.length === 0 ? (
+              <p className="p-6 text-center text-[13px] text-ink-faint">검색 결과가 없습니다.</p>
             ) : (
               <ul className="divide-y divide-rule">
-                {products.map((p) => {
+                {visibleProducts.map((p) => {
                   const base = p.sale_price ?? p.price
                   const qty = cart[p.id] ?? 0
                   return (
@@ -159,6 +204,7 @@ export default function StaffPurchase() {
                         <img src={p.thumbnail_url} alt="" className="w-16 h-16 rounded-control object-cover flex-shrink-0" />
                       )}
                       <div className="flex-1 min-w-0">
+                        <p className="text-[11px] text-ink-faint font-semibold">{p.brand_name}</p>
                         <p className="text-[13px] text-ink line-clamp-2">{p.name}</p>
                         <div className="mt-1 flex items-baseline gap-1.5">
                           <span className="text-[11.5px] text-ink-faint line-through">{won(base)}</span>
