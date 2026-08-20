@@ -1,8 +1,12 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { COMPANY_INFO } from '../lib/companyInfo'
+
+// 블라인드 처리 — 일반 방문자에게 노출 안 함(2026-08-20, 대표님 지시).
+// 다시 열려면 이 값을 true로. 페이지·라우트는 삭제하지 않음(나중에 링크 공유 필요).
+const COMPANY_PAGE_ENABLED = false
 
 const STATS = [
   { value: '30+', label: '취급 브랜드' },
@@ -54,14 +58,18 @@ const sectionTitle = 'text-[13px] font-bold text-gold tracking-[0.2em] uppercase
 const h2 = 'font-serif text-[26px] sm:text-[32px] font-bold text-text mt-2 mb-10'
 
 export default function CompanyIntro() {
-  // 직접 URL 공유용 페이지 — 검색엔진 색인·비의도적 발견 방지(블라인드 처리). 링크 자체는 유지.
+  // 직접 URL 공유용 페이지 — 검색엔진 색인·비의도적 발견 방지(블라인드 처리 중엔 무의미하지만
+  // 재활성화 시를 위해 유지). Hooks 규칙상 조건부 return보다 먼저 호출.
   useEffect(() => {
+    if (!COMPANY_PAGE_ENABLED) return
     const meta = document.createElement('meta')
     meta.name = 'robots'
     meta.content = 'noindex, nofollow'
     document.head.appendChild(meta)
     return () => { document.head.removeChild(meta) }
   }, [])
+
+  if (!COMPANY_PAGE_ENABLED) return <Navigate to="/" replace />
 
   return (
     <>
