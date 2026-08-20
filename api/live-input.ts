@@ -49,19 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  // 로그인한 파트너 본인 확인 (Supabase 액세스 토큰)
-  const token = String(req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) {
-    res.status(401).json({ ok: false, reason: '로그인이 필요합니다.' })
-    return
-  }
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
-  const { data: userData } = await supabase.auth.getUser(token)
-  const user = userData?.user
-  if (!user) {
-    res.status(401).json({ ok: false, reason: '세션이 만료되었습니다. 다시 로그인해 주세요.' })
-    return
-  }
 
   let body: unknown = req.body
   if (typeof body === 'string') {
@@ -71,45 +59,83 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body = {}
     }
   }
-  const liveId =
+  const hostToken =
+    req.method === 'GET'
+      ? String(req.query.hostToken ?? '')
+      : String((body as { hostToken?: string } | null)?.hostToken ?? '')
+  let liveId =
     req.method === 'GET'
       ? String(req.query.liveId ?? '')
       : String((body as { liveId?: string } | null)?.liveId ?? '')
-  if (!liveId) {
-    res.status(400).json({ ok: false, reason: 'liveId 가 필요합니다.' })
-    return
+
+  let authorized = false
+
+  if (hostToken) {
+    // 링크(토큰) 방식 — 로그인 없이 진행자 본인 확인. 유효성(기간·종료여부)은 RPC 안에서 검사.
+    const { data: liveRow, error: rpcErr } = await supabase.rpc('get_live_by_host_token', {
+      p_token: hostToken,
+    })
+    if (rpcErr || !liveRow) {
+      res.status(403).json({ ok: false, reason: rpcErr?.message ?? '유효하지 않은 링크입니다.' })
+      return
+    }
+    liveId = liveRow.id
+    authorized = true
+  } else {
+    // 로그인한 파트너/진행자 본인 확인 (Supabase 액세스 토큰) — 기존 방식(관리자·브랜드센터용)
+    const token = String(req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      res.status(401).json({ ok: false, reason: '로그인이 필요합니다.' })
+      return
+    }
+    const { data: userData } = await supabase.auth.getUser(token)
+    const user = userData?.user
+    if (!user) {
+      res.status(401).json({ ok: false, reason: '세션이 만료되었습니다. 다시 로그인해 주세요.' })
+      return
+    }
+    if (!liveId) {
+      res.status(400).json({ ok: false, reason: 'liveId 가 필요합니다.' })
+      return
+    }
+    const { data: live } = await supabase
+      .from('lives')
+      .select('id, title, partner_id, host_id, stream_uid')
+      .eq('id', liveId)
+      .single()
+    if (!live) {
+      res.status(404).json({ ok: false, reason: '라이브를 찾을 수 없습니다.' })
+      return
+    }
+    if (live.partner_id) {
+      const { data: partner } = await supabase
+        .from('partners')
+        .select('id, user_id')
+        .eq('id', live.partner_id)
+        .single()
+      if (partner && partner.user_id === user.id) authorized = true
+    }
+    if (!authorized && live.host_id) {
+      const { data: host } = await supabase
+        .from('hosts')
+        .select('id, user_id')
+        .eq('id', live.host_id)
+        .single()
+      if (host && host.user_id === user.id) authorized = true
+    }
+    if (!authorized) {
+      res.status(403).json({ ok: false, reason: '본인 라이브만 관리할 수 있습니다.' })
+      return
+    }
   }
 
   const { data: live } = await supabase
     .from('lives')
-    .select('id, title, partner_id, host_id, stream_uid')
+    .select('id, title, stream_uid')
     .eq('id', liveId)
     .single()
   if (!live) {
     res.status(404).json({ ok: false, reason: '라이브를 찾을 수 없습니다.' })
-    return
-  }
-
-  // 방송 채널 관리 권한: 브랜드(파트너) 본인 또는 이 라이브에 지정된 진행자(host) 본인
-  let authorized = false
-  if (live.partner_id) {
-    const { data: partner } = await supabase
-      .from('partners')
-      .select('id, user_id')
-      .eq('id', live.partner_id)
-      .single()
-    if (partner && partner.user_id === user.id) authorized = true
-  }
-  if (!authorized && live.host_id) {
-    const { data: host } = await supabase
-      .from('hosts')
-      .select('id, user_id')
-      .eq('id', live.host_id)
-      .single()
-    if (host && host.user_id === user.id) authorized = true
-  }
-  if (!authorized) {
-    res.status(403).json({ ok: false, reason: '본인 라이브만 관리할 수 있습니다.' })
     return
   }
 

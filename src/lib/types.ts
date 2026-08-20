@@ -75,6 +75,9 @@ export interface Live {
   duration_minutes?: number | null
   // 백화점 태그 (supabase/lives_dept_key.sql) — 홈 화면 백화점별 방송 박스/필터, /dept 담당자 페이지용
   dept_key?: 'hyundai' | 'ak' | null
+  // 진행자 로그인 없는 링크 방송용 토큰 (supabase/lives_host_token.sql) — /host/go/:token
+  // 공개 select 정책에는 절대 포함시키지 않음. get_live_by_host_token RPC로만 조회.
+  host_token?: string
   created_at: string
 }
 
