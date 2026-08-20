@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useIsStaff } from '../lib/staff'
 import { searchAddress } from '../lib/daumPostcode'
 
-// 직원 전용 구매 링크 — /staff/:key (key가 STAFF_LINK_KEY와 일치할 때만 접근 가능).
+// 직원 전용 구매 — /app/staff-buy (로그인 + 직원 등급(app_staff, supabase/staff_members.sql)일 때만 접근).
+// 예전엔 비밀 링크(/staff/:key) 방식이었으나 2026-08-20 회원등급 방식으로 전환(관리자 회원관리에서 지정).
 // 일반 몰과 완전히 분리된 화면: 카드결제(PortOne) 없이 무통장입금(계좌이체) 전용.
 // 상품가는 products.employee_price(=10% 마진만 남기고 브랜드 정산수수료율 기준으로 계산한 직원가,
 // supabase/staff_employee_pricing.sql 참고)가 채워진 상품만 노출한다.
-const STAFF_LINK_KEY = 'bgcrew0819'
+// 주문 접수는 /api/staff-order(ERP erp_sales·재고차감까지 함께 처리)로 보낸다.
 const COMPANY_BANK = '기업은행 341-123997-04-011 (예금주: 뷰티그라운드)'
 
 interface StaffProduct {
@@ -25,8 +27,10 @@ interface StaffProduct {
 const won = (n: number) => n.toLocaleString('ko-KR') + '원'
 
 export default function StaffPurchase() {
-  const { key } = useParams<{ key: string }>()
-  const allowed = key === STAFF_LINK_KEY
+  const navigate = useNavigate()
+  const { loading: staffLoading, isStaff } = useIsStaff()
+  const [checkedAuth, setCheckedAuth] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const [products, setProducts] = useState<StaffProduct[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,6 +46,22 @@ export default function StaffPurchase() {
   const [orderTotal, setOrderTotal] = useState(0)
   const [search, setSearch] = useState('')
   const [brandFilter, setBrandFilter] = useState('전체')
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!active) return
+      setLoggedIn(!!session)
+      const meta = session?.user.user_metadata as { name?: string; phone?: string } | undefined
+      if (meta?.name) setName(meta.name)
+      if (meta?.phone) setPhone(meta.phone)
+      setCheckedAuth(true)
+    })()
+    return () => { active = false }
+  }, [])
+
+  const allowed = checkedAuth && !staffLoading && loggedIn && isStaff
 
   useEffect(() => {
     if (!allowed) return
@@ -105,43 +125,59 @@ export default function StaffPurchase() {
     }
     setSubmitting(true)
     setMessage('')
-    const paymentId = `staff_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
-    const orderName =
-      cartItems.length > 1
-        ? `[직원가] ${cartItems[0].product.name} 외 ${cartItems.length - 1}건`
-        : `[직원가] ${cartItems[0].product.name}`
-    const fullMemo = `배송지: ${address} ${addressDetail}`.trim() + (memo.trim() ? `\n${memo.trim()}` : '')
 
-    const rows = cartItems.map((c) => ({
-      payment_id: paymentId,
-      order_name: orderName,
+    const items = cartItems.map((c) => ({
       product_id: c.product.id,
       partner_id: c.product.partner_id,
-      live_id: null,
-      quantity: c.qty,
-      amount: c.product.employee_price * c.qty,
-      buyer_name: name.trim(),
-      buyer_phone: phone.trim(),
-      buyer_email: null,
-      status: 'pending' as const,
-      user_id: null,
-      delivery_memo: fullMemo,
+      name: c.product.name,
+      brand_name: c.product.brand_name,
+      qty: c.qty,
+      employee_price: c.product.employee_price,
+      normal_price: c.product.sale_price ?? c.product.price,
     }))
 
-    const { error } = await supabase.from('orders').insert(rows)
-    setSubmitting(false)
-    if (error) {
-      setMessage(`주문 접수 실패: ${error.message}`)
-      return
+    try {
+      const res = await fetch('/api/staff-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, name: name.trim(), phone: phone.trim(), address: address.trim(), addressDetail, memo }),
+      })
+      const json = await res.json()
+      if (!json?.ok) {
+        setSubmitting(false)
+        setMessage(json?.reason || '주문 접수에 실패했습니다.')
+        return
+      }
+      setOrderTotal(total)
+      setStep('done')
+    } catch {
+      setMessage('주문 접수 요청에 실패했습니다.')
     }
-    setOrderTotal(total)
-    setStep('done')
+    setSubmitting(false)
   }
 
-  if (!allowed) {
+  if (!checkedAuth || staffLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-quiet text-ink-faint text-[14px]">불러오는 중...</div>
+  }
+
+  if (!loggedIn) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-quiet text-center px-6">
+        <p className="text-[14px] text-ink-soft">직원 전용 구매는 로그인 후 이용할 수 있어요.</p>
+        <button
+          onClick={() => navigate('/app/login', { state: { from: '/app/staff-buy' } })}
+          className="px-5 py-2.5 rounded-control bg-ink text-paper text-[13.5px] font-bold"
+        >
+          로그인하기
+        </button>
+      </div>
+    )
+  }
+
+  if (!isStaff) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-quiet text-ink-faint text-[14px]">
-        페이지를 찾을 수 없습니다.
+        직원 전용 페이지입니다.
       </div>
     )
   }

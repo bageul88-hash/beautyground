@@ -85,8 +85,14 @@ interface TierFormState {
 
 const EMPTY_TIER_FORM: TierFormState = { id: null, tierKey: '', label: '', minSpent: '', rewardRate: '', color: '#8E9199', bg: '#F4F5F7' }
 
+interface StaffRow {
+  email: string
+  note: string | null
+  created_at: string
+}
+
 export default function AdminMembers() {
-  const [tab, setTab] = useState<'members' | 'tiers'>('members')
+  const [tab, setTab] = useState<'members' | 'tiers' | 'staff'>('members')
 
   // ── 회원 목록 ──
   const [members, setMembers] = useState<MemberRow[]>([])
@@ -203,6 +209,50 @@ export default function AdminMembers() {
     void loadTiers()
   }
 
+  // ── 직원 등급 지정 (app_staff) ──
+  const [staffList, setStaffList] = useState<StaffRow[]>([])
+  const [staffLoading, setStaffLoading] = useState(true)
+  const [staffError, setStaffError] = useState('')
+  const [staffEmail, setStaffEmail] = useState('')
+  const [staffNote, setStaffNote] = useState('')
+  const [staffSubmitting, setStaffSubmitting] = useState(false)
+
+  const loadStaff = async () => {
+    setStaffLoading(true)
+    setStaffError('')
+    const { data, error: err } = await supabase.rpc('admin_list_staff')
+    if (err) {
+      setStaffError(`직원 목록 조회 실패: ${err.message} (supabase/staff_members.sql 적용 여부 확인)`)
+      setStaffLoading(false)
+      return
+    }
+    setStaffList((data ?? []) as StaffRow[])
+    setStaffLoading(false)
+  }
+
+  useEffect(() => { if (tab === 'staff') void loadStaff() }, [tab])
+
+  const handleAddStaff = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!staffEmail.trim()) return
+    setStaffSubmitting(true)
+    setStaffError('')
+    const { error: err } = await supabase.rpc('admin_set_staff', { p_email: staffEmail.trim(), p_note: staffNote.trim() || null })
+    setStaffSubmitting(false)
+    if (err) {
+      setStaffError(`지정 실패: ${err.message}`)
+      return
+    }
+    setStaffEmail('')
+    setStaffNote('')
+    void loadStaff()
+  }
+
+  const handleRemoveStaff = async (email: string) => {
+    await supabase.rpc('admin_remove_staff', { p_email: email })
+    void loadStaff()
+  }
+
   return (
     <>
       <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
@@ -216,7 +266,7 @@ export default function AdminMembers() {
         </p>
 
         <div className="flex gap-1 mb-6 border-b border-rule">
-          {(['members', 'tiers'] as const).map((t) => (
+          {(['members', 'tiers', 'staff'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -224,7 +274,7 @@ export default function AdminMembers() {
                 tab === t ? 'border-ink text-ink' : 'border-transparent text-ink-faint hover:text-ink-soft'
               }`}
             >
-              {t === 'members' ? '회원 목록' : '등급 설정'}
+              {t === 'members' ? '회원 목록' : t === 'tiers' ? '등급 설정' : '직원 지정'}
             </button>
           ))}
         </div>
@@ -309,7 +359,7 @@ export default function AdminMembers() {
               </div>
             )}
           </>
-        ) : (
+        ) : tab === 'tiers' ? (
           <>
             <p className="text-[13px] text-ink-soft mb-6">
               고객의 누적 구매금액이 기준 금액 이상이면 해당 등급이 적용됩니다. 저장 후 고객 화면(마이페이지)에는
@@ -411,6 +461,68 @@ export default function AdminMembers() {
                               <IconTrash size={16} />
                             </button>
                           </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-[13px] text-ink-soft mb-6">
+              여기에 지정된 이메일로 로그인하면 일반 로그인만으로 <a href="/app/staff-buy" target="_blank" rel="noreferrer" className="underline">직원 전용 구매 페이지</a>가 즉시 열립니다.
+              (products.employee_price가 있는 상품만 노출, 무통장입금 전용)
+            </p>
+
+            <form onSubmit={handleAddStaff} className="bg-paper border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">이메일</label>
+                <input
+                  value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)}
+                  placeholder="staff@example.com" className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">메모(선택)</label>
+                <input
+                  value={staffNote} onChange={(e) => setStaffNote(e.target.value)}
+                  placeholder="예: 광명점 김OO" className={inputCls}
+                />
+              </div>
+              <Button type="submit" variant="accent" size="sm" label={staffSubmitting ? '지정 중...' : '직원 지정'} disabled={staffSubmitting} />
+            </form>
+
+            {staffError && (
+              <div className="bg-paper border border-signal-red text-signal-red text-[13px] px-4 py-3 mb-5">{staffError}</div>
+            )}
+
+            {staffLoading ? (
+              <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
+            ) : staffList.length === 0 ? (
+              <div className="py-20 text-center text-[14px] text-ink-faint">지정된 직원이 없습니다.</div>
+            ) : (
+              <div className="bg-paper border border-rule overflow-x-auto">
+                <table className="w-full text-[13px] text-left">
+                  <thead>
+                    <tr className="border-b border-rule text-ink-soft">
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">이메일</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">메모</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">지정일</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {staffList.map((s) => (
+                      <tr key={s.email} className="border-b border-rule last:border-b-0">
+                        <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{s.email}</td>
+                        <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{s.note || '-'}</td>
+                        <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(s.created_at)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <button onClick={() => void handleRemoveStaff(s.email)} className="text-ink-faint hover:text-signal-red" aria-label="해제">
+                            <IconTrash size={16} />
+                          </button>
                         </td>
                       </tr>
                     ))}

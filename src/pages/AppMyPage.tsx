@@ -11,6 +11,7 @@ import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } f
 import { getMyPointsBalance, getMyValidCoupons } from '../lib/rewards'
 import { IconUser } from '../components/common/Icon'
 import { useIsAdmin } from '../lib/useIsAdmin'
+import { useIsStaff } from '../lib/staff'
 
 // 실제 로그인 사용자 프로필 (포인트/쿠폰은 supabase/signup_bonus.sql 적용 후 실제 지급값)
 interface RealUser {
@@ -50,6 +51,7 @@ export default function AppMyPage() {
   const navigate = useNavigate()
   const { mode, isDesktop, toggle } = useViewMode()
   const { isAdmin } = useIsAdmin()
+  const { isStaff } = useIsStaff()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
   const [tiers, setTiers] = useState<MembershipTier[]>([])
@@ -121,6 +123,7 @@ export default function AppMyPage() {
           loggedIn={loggedIn}
           onLogout={handleLogout}
           isAdmin={isAdmin}
+          isStaff={isStaff}
         />
         {toast && (
           <div className="fixed left-1/2 -translate-x-1/2 bottom-10 z-50 rounded-control bg-ink text-paper text-[13px] px-4 py-2.5" role="status">
@@ -283,6 +286,19 @@ export default function AppMyPage() {
           </button>
         ))}
       </div>
+
+      {/* 직원 전용 바로가기 — app_staff 지정 계정에만 노출(관리자 회원관리 > 직원 지정) */}
+      {isStaff && (
+        <div className="mt-2 bg-paper">
+          <button
+            onClick={() => navigate('/app/staff-buy')}
+            className="w-full flex items-center justify-between px-5 py-4 border-b border-rule last:border-0 focus:outline-none focus-visible:shadow-ring"
+          >
+            <span className="text-[14px] text-ink font-bold">🏷️ 직원 전용 구매</span>
+            <span className="text-ink-faint" aria-hidden="true">›</span>
+          </button>
+        </div>
+      )}
 
       {/* 관리자 전용 바로가기 — 일반 고객에게는 노출 안 됨 */}
       {isAdmin && (

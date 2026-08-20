@@ -65,6 +65,7 @@ import HostLives from './pages/host/Lives'
 import HostLiveSales from './pages/host/LiveSales'
 import HostSettlementPage from './pages/host/Settlement'
 import HostProfile from './pages/host/Profile'
+import HostGoLive from './pages/host/GoLive'
 
 // 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
 import BrandLogin from './pages/brand/Login'
@@ -156,8 +157,9 @@ export default function App() {
             구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />
 
-        {/* 직원 전용 구매 링크 — 카드결제 없이 무통장입금 전용, employee_price 있는 상품만 노출 (2026-08-19) */}
-        <Route path="/staff/:key" element={<StaffPurchase />} />
+        {/* 직원 전용 구매 — 로그인 + 직원 등급(app_staff)일 때만 접근, 카드결제 없이 무통장입금 전용.
+            2026-08-19 비밀 링크(/staff/:key)로 시작 → 2026-08-20 회원등급 방식으로 전환(관리자 회원관리에서 지정) */}
+        <Route path="/app/staff-buy" element={<StaffPurchase />} />
 
         {/* 법적 고지 */}
         <Route path="/terms" element={<Terms />} />
@@ -192,6 +194,10 @@ export default function App() {
             링크가 없어도 직접 URL로 열리던 이 두 페이지도 관리자 전용으로 막음. */}
         <Route path="/host/register" element={<LiveGate><HostRegister /></LiveGate>} />
         <Route path="/host/login" element={<LiveGate><HostLogin /></LiveGate>} />
+
+        {/* 링크 하나로 방송 송출(2026-08-20) — 계정 없이 lives.host_token 링크만으로 접근.
+            토큰 자체가 인증 수단이라 LiveGate로 한 번 더 감싸지 않음(불필요한 마찰). */}
+        <Route path="/host/go/:token" element={<HostGoLive />} />
 
         <Route element={<RequireHostAuth />}>
           {/* RequireHost: 로그인만으로는 일반 고객도 URL 직접입력으로 페이지 껍데기가 열렸기에,
