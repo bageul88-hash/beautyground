@@ -1,10 +1,11 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { COMPANY_INFO } from '../lib/companyInfo'
 
 const STATS = [
-  { value: '30+', label: '파트너 브랜드' },
+  { value: '30+', label: '취급 브랜드' },
   { value: '8개국', label: '글로벌 유통 네트워크' },
   { value: '2022', label: '법인 설립 · 백화점 편집샵 오픈' },
   { value: '2026.10', label: '강남 플래그십 오픈 예정' },
@@ -23,8 +24,8 @@ const BUSINESS = [
   },
   {
     no: '03',
-    title: '브랜드 파트너십 · 마케팅',
-    desc: '브랜드 총판·유통 대행과 SNS 바이럴, 카카오 CRM 연계 마케팅으로 파트너 브랜드의 국내외 성장을 함께 만듭니다.',
+    title: 'SNS·CRM 마케팅',
+    desc: 'SNS 바이럴, 카카오 CRM 연계 마케팅으로 취급 브랜드의 국내외 성장을 지원합니다.',
   },
 ]
 
@@ -53,6 +54,15 @@ const sectionTitle = 'text-[13px] font-bold text-gold tracking-[0.2em] uppercase
 const h2 = 'font-serif text-[26px] sm:text-[32px] font-bold text-text mt-2 mb-10'
 
 export default function CompanyIntro() {
+  // 직접 URL 공유용 페이지 — 검색엔진 색인·비의도적 발견 방지(블라인드 처리). 링크 자체는 유지.
+  useEffect(() => {
+    const meta = document.createElement('meta')
+    meta.name = 'robots'
+    meta.content = 'noindex, nofollow'
+    document.head.appendChild(meta)
+    return () => { document.head.removeChild(meta) }
+  }, [])
+
   return (
     <>
       <GNB />

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /company
 
 Sitemap: https://beautyground.co.kr/api/sitemap.xml
