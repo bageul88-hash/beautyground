@@ -125,10 +125,10 @@ export default function HostGoLive() {
       await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp })
 
       // 실제 송출이 열렸으니 시청 화면에 노출되도록 상태 전환
-      await fetch('/api/live-go-live', {
+      await fetch('/api/live-input', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hostToken: token }),
+        body: JSON.stringify({ hostToken: token, markLive: true }),
       }).catch(() => {})
       setLive((prev) => (prev ? { ...prev, status: 'live' } : prev))
 

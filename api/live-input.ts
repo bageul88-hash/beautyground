@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 // 라이브 송출 채널(Cloudflare Stream Live Input) 발급·조회.
 //   GET  ?liveId=<id> : 내 라이브의 송출 주소(RTMPS)·스트림키·연결상태 조회
 //   POST {liveId}     : 채널 생성 + lives.stream_uid 저장 (이미 있으면 기존 채널 반환)
+//   POST {hostToken, markLive:true} : 상태를 live로 전환만 함(채널 생성 없이) — 진행자가
+//     브라우저에서 실제 WebRTC 송출을 시작한 직후 호출. Vercel Hobby 플랜 서버리스 함수
+//     12개 제한 때문에 별도 api/live-go-live.ts로 안 두고 여기 합침(2026-08-20).
 // 스트림 키는 DB에 저장하지 않고 매번 Cloudflare에서 조회한다
 // (lives 테이블은 소비자도 읽는 공개 테이블이라 키를 넣으면 방송 탈취 위험).
 const SUPABASE_URL =
@@ -63,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     req.method === 'GET'
       ? String(req.query.hostToken ?? '')
       : String((body as { hostToken?: string } | null)?.hostToken ?? '')
+  const markLive = req.method === 'POST' && (body as { markLive?: boolean } | null)?.markLive === true
   let liveId =
     req.method === 'GET'
       ? String(req.query.liveId ?? '')
@@ -81,6 +85,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     liveId = liveRow.id
     authorized = true
+
+    if (markLive) {
+      const { error: upErr } = await supabase
+        .from('lives')
+        .update({ status: 'live' })
+        .eq('id', liveId)
+        .neq('status', 'ended')
+      if (upErr) {
+        res.status(500).json({ ok: false, reason: '상태 변경에 실패했습니다.' })
+        return
+      }
+      res.status(200).json({ ok: true })
+      return
+    }
   } else {
     // 로그인한 파트너/진행자 본인 확인 (Supabase 액세스 토큰) — 기존 방식(관리자·브랜드센터용)
     const token = String(req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
