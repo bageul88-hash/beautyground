@@ -152,14 +152,18 @@ export default function AppMyPage() {
               <button
                 onClick={() => setShowTierGuide((v) => !v)}
                 className="text-[11px] font-bold px-2.5 py-0.5 rounded-control border focus:outline-none focus-visible:shadow-ring"
-                style={{
-                  backgroundColor: membership?.tier.bg ?? '#F4F5F7',
-                  color: membership?.tier.color ?? '#8E9199',
-                  borderColor: membership?.tier.color ?? '#E3E5E9',
-                }}
+                style={
+                  isStaff
+                    ? { backgroundColor: '#EAF0FF', color: '#0047FF', borderColor: '#0047FF' }
+                    : {
+                        backgroundColor: membership?.tier.bg ?? '#F4F5F7',
+                        color: membership?.tier.color ?? '#8E9199',
+                        borderColor: membership?.tier.color ?? '#E3E5E9',
+                      }
+                }
                 aria-label="회원 등급 안내 보기"
               >
-                {membership?.tier.label ?? 'BASIC'}
+                {isStaff ? '직원' : membership?.tier.label ?? 'BASIC'}
               </button>
             </div>
             <p className="text-[13px] text-ink-soft mt-0.5">{user.email}</p>
