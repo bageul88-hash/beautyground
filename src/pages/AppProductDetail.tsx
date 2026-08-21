@@ -20,7 +20,7 @@ import ImagePlaceholder from '../components/common/ImagePlaceholder'
 import ScrollToTopButton from '../components/common/ScrollToTopButton'
 import CartCountBadge from '../components/common/CartCountBadge'
 
-const DETAIL_TABS = ['상품정보', '성분', '배송/교환/환불']
+const DETAIL_TABS = ['상품정보', '성분', '결제/배송/교환·반품정보']
 
 // 소비자 상세 렌더링용 통합 뷰모델 (DB 상품 / 목데이터 공통)
 interface ProductView {
@@ -479,6 +479,7 @@ export default function AppProductDetail() {
           {activeTab === 1 && <p>전성분은 제품 포장을 참조해 주세요.</p>}
           {activeTab === 2 && (
             <div className="space-y-2">
+              <p>• 결제수단: 신용카드</p>
               <p>• 배송기간: 주문 후 1~2 영업일 출고</p>
               <p>• {SHIPPING_NOTICE}</p>
               <p>• 주문취소: 상품 발송 전 마이페이지 또는 고객센터를 통해 즉시 취소 가능</p>
