@@ -193,7 +193,13 @@ export default function DesktopHome({
         <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">
           {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} 시즌` : '지금 확인할 상품'}
         </p>
-        {sideList.length === 0 ? (
+        {prodLoading ? (
+          <div className="grid grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-square bg-quiet animate-pulse" />
+            ))}
+          </div>
+        ) : sideList.length === 0 ? (
           <p className="text-[13px] text-ink-faint">등록된 상품이 없습니다</p>
         ) : (
           <div className="grid grid-cols-4 gap-x-6 gap-y-8 border-t border-rule">

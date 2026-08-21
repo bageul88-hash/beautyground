@@ -59,6 +59,7 @@ export default function HomeBody({
         id="home-recommended"
         title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
         products={recommended}
+        loading={prodLoading}
         onProductClick={onProductClick}
       />
       <ProductRail
