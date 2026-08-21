@@ -20,7 +20,7 @@ import ImagePlaceholder from '../components/common/ImagePlaceholder'
 import ScrollToTopButton from '../components/common/ScrollToTopButton'
 import CartCountBadge from '../components/common/CartCountBadge'
 
-const DETAIL_TABS = ['상품정보', '성분', '배송/반품']
+const DETAIL_TABS = ['상품정보', '성분', '배송/교환/환불']
 
 // 소비자 상세 렌더링용 통합 뷰모델 (DB 상품 / 목데이터 공통)
 interface ProductView {
@@ -478,9 +478,11 @@ export default function AppProductDetail() {
             {activeTab === 1 && <p>전성분은 제품 포장을 참조해 주세요.</p>}
             {activeTab === 2 && (
               <div className="space-y-2">
-                <p>• 배송: 주문 후 1~2 영업일 출고</p>
+                <p>• 배송기간: 주문 후 1~2 영업일 출고</p>
                 <p>• {SHIPPING_NOTICE}</p>
-                <p>• 반품: 수령 후 7일 이내 가능 (개봉 상품 반품 불가)</p>
+                <p>• 주문취소: 상품 발송 전 마이페이지 또는 고객센터를 통해 즉시 취소 가능</p>
+                <p>• 교환/반품: 상품 수령 후 7일 이내 가능 (단순 변심 시 왕복 배송비 고객 부담, 개봉·사용한 상품은 제한될 수 있음)</p>
+                <p>• 환불: 반품 상품 확인 후 3영업일 이내 결제수단으로 환급</p>
               </div>
             )}
           </div>
