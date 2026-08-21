@@ -26,7 +26,7 @@ export default function AppHome() {
   const navigate = useNavigate()
   const { products, recommended, seasonLabel, loading: prodLoading } = useHomeProductSections()
   const { categories } = useShopCategories()
-  const { banners } = useHeroBanners()
+  const { banners, loading: bannerLoading } = useHeroBanners()
   const { products: saleProducts, loading: saleLoading } = useSaleProducts()
   const { brands, loading: brandsLoading } = useShopBrands()
   const { mode, isDesktop, toggle } = useViewMode()
@@ -64,6 +64,7 @@ export default function AppHome() {
         <HomeBody
           marqueeItems={[]}
           banners={banners}
+          bannerLoading={bannerLoading}
           recommended={recommended}
           seasonLabel={seasonLabel}
           products={products}

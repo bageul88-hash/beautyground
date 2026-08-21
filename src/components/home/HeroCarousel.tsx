@@ -10,7 +10,7 @@ import ImagePlaceholder from '../common/ImagePlaceholder'
 // 레퍼런스가 다음 카드를 살짝 걸쳐 보여주는 이유는 "옆으로 밀 수 있다"는 걸 손으로 말하기 위함이라
 // 카드 폭을 100%가 아닌 86%로 두고(다음 카드가 우측에 자연히 피크), 네이티브 스크롤 스냅으로
 // 실제 손가락 드래그가 되게 한다.
-export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
+export default function HeroCarousel({ banners, loading }: { banners: HeroBanner[]; loading?: boolean }) {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
   const scrollerRef = useRef<HTMLDivElement | null>(null)
@@ -92,6 +92,17 @@ export default function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
   const pauseAutoplay = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
+  }
+
+  // 배너를 아직 불러오는 중일 때는(count===0이 "진짜로 없음"인지 "로딩 중"인지 구분 안 되면)
+  // 아래 마케팅 카피 대신 중립적인 스켈레톤을 보여준다 — 신상품/추천상품 레일과 같은 이유로,
+  // 새로고침 직후 잠깐 이 카피만 보이는 현상이 PG 심사관 눈엔 콘텐츠 미비로 비칠 수 있어 수정.
+  if (loading) {
+    return (
+      <section className="px-4 pt-4 pb-1">
+        <div className="aspect-[4/3] bg-quiet animate-pulse rounded-control" />
+      </section>
+    )
   }
 
   if (count === 0) {

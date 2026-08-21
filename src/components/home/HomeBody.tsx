@@ -10,6 +10,7 @@ import type { ShopBrand } from '../../hooks/useShopBrands'
 interface HomeBodyProps {
   marqueeItems: string[]
   banners: HeroBanner[]
+  bannerLoading?: boolean
   recommended: ShopProduct[]
   seasonLabel: string | null
   products: ShopProduct[]
@@ -29,6 +30,7 @@ interface HomeBodyProps {
 export default function HomeBody({
   marqueeItems,
   banners,
+  bannerLoading,
   recommended,
   seasonLabel,
   products,
@@ -41,7 +43,7 @@ export default function HomeBody({
     <>
       <MarqueeBar items={marqueeItems} />
       <AppHeader />
-      <HeroCarousel banners={banners} />
+      <HeroCarousel banners={banners} loading={bannerLoading} />
       <TrustStrip />
 
       {/* 추천 상품·신상품·할인은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
