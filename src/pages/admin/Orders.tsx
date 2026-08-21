@@ -9,12 +9,20 @@ type OrderRow = Order & { products: { name: string } | null; partners: { brand_n
 
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: '전체' },
+  { value: 'pending', label: '입금대기' },
   { value: 'paid', label: '결제완료' },
   { value: 'cancel_requested', label: '취소요청' },
   { value: 'shipped', label: '배송중' },
   { value: 'done', label: '완료' },
   { value: 'cancelled', label: '취소' },
 ]
+
+// payment_id가 "staff_"로 시작하면 직원 전용 구매(/app/staff-buy)의 무통장입금 주문,
+// 그 외 값이 있으면 이니시스 카드결제. 무통장입금은 PG 없이도 지금 바로 운영 가능하다.
+const paymentMethod = (o: OrderRow): '무통장입금' | '카드결제' | '-' => {
+  if (!o.payment_id) return '-'
+  return o.payment_id.startsWith('staff_') ? '무통장입금' : '카드결제'
+}
 
 // 강조는 원색 1개(signal-blue)만 — 취소요청(고객 대응 필요)만 danger(red)로 눈에 띄게, 나머지는 회색 톤.
 const STATUS_BADGE: Partial<Record<Order['status'], { label: string; className: string }>> = {
@@ -28,7 +36,8 @@ const STATUS_BADGE: Partial<Record<Order['status'], { label: string; className: 
 }
 
 const STATUS_OPTIONS: { value: Order['status']; label: string }[] = [
-  { value: 'paid', label: '결제완료' },
+  { value: 'pending', label: '입금대기' },
+  { value: 'paid', label: '결제완료(입금확인)' },
   { value: 'cancel_requested', label: '취소요청(고객)' },
   { value: 'shipped', label: '배송중' },
   { value: 'done', label: '완료' },
@@ -56,6 +65,12 @@ export default function AdminOrders() {
   useEffect(() => { void load() }, [])
 
   const cancelRequestedCount = orders.filter((o) => o.status === 'cancel_requested').length
+  const pendingCount = orders.filter((o) => o.status === 'pending').length
+  const paidStatuses: Order['status'][] = ['paid', 'shipped', 'done']
+  const paidOrders = orders.filter((o) => paidStatuses.includes(o.status))
+  const cancelledOrders = orders.filter((o) => o.status === 'cancelled')
+  const totalPaidAmount = paidOrders.reduce((sum, o) => sum + o.amount, 0)
+  const totalCancelledAmount = cancelledOrders.reduce((sum, o) => sum + o.amount, 0)
 
   const confirmCancel = async (order: OrderRow) => {
     const paid = ['paid', 'cancel_requested', 'shipped', 'done'].includes(order.status)
@@ -100,7 +115,8 @@ export default function AdminOrders() {
       !q ||
       (o.buyer_name ?? '').toLowerCase().includes(q) ||
       (o.products?.name ?? '').toLowerCase().includes(q) ||
-      (o.partners?.brand_name ?? '').toLowerCase().includes(q)
+      (o.partners?.brand_name ?? '').toLowerCase().includes(q) ||
+      (o.payment_id ?? '').toLowerCase().includes(q)
     return matchStatus && matchSearch
   })
 
@@ -114,10 +130,37 @@ export default function AdminOrders() {
         <h1 className="text-[22px] font-bold text-ink mb-2">전체 주문 관리</h1>
         <p className="text-[13px] text-ink-soft mb-6">
           전체 브랜드의 주문을 한 곳에서 확인·처리합니다.
+          {pendingCount > 0 && (
+            <span className="ml-2 text-signal-blue font-semibold">입금확인 필요 {pendingCount}건</span>
+          )}
           {cancelRequestedCount > 0 && (
             <span className="ml-2 text-signal-red font-semibold">취소요청 {cancelRequestedCount}건 대기 중</span>
           )}
         </p>
+
+        {/* 결제 현황 요약 — PG(이니시스) 승인 전까지는 실제 결제완료 건수가 0일 수 있음 */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+          <div className="bg-paper border border-rule rounded-md px-4 py-3">
+            <p className="text-[11.5px] text-ink-faint mb-1">결제완료 매출</p>
+            <p className="text-[16px] font-bold text-ink">{won(totalPaidAmount)}</p>
+          </div>
+          <div className="bg-paper border border-rule rounded-md px-4 py-3">
+            <p className="text-[11.5px] text-ink-faint mb-1">결제완료 건수</p>
+            <p className="text-[16px] font-bold text-ink">{paidOrders.length}건</p>
+          </div>
+          <div className="bg-paper border border-rule rounded-md px-4 py-3">
+            <p className="text-[11.5px] text-ink-faint mb-1">입금대기(무통장)</p>
+            <p className={`text-[16px] font-bold ${pendingCount > 0 ? 'text-signal-blue' : 'text-ink'}`}>{pendingCount}건</p>
+          </div>
+          <div className="bg-paper border border-rule rounded-md px-4 py-3">
+            <p className="text-[11.5px] text-ink-faint mb-1">취소요청 대기</p>
+            <p className={`text-[16px] font-bold ${cancelRequestedCount > 0 ? 'text-signal-red' : 'text-ink'}`}>{cancelRequestedCount}건</p>
+          </div>
+          <div className="bg-paper border border-rule rounded-md px-4 py-3">
+            <p className="text-[11.5px] text-ink-faint mb-1">취소·환불 누계</p>
+            <p className="text-[16px] font-bold text-ink">{won(totalCancelledAmount)}</p>
+          </div>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-5">
           <div className="relative flex-1">
@@ -125,7 +168,7 @@ export default function AdminOrders() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="구매자명·상품명·브랜드명 검색"
+              placeholder="구매자명·상품명·브랜드명·결제ID 검색"
               className="w-full pl-9 pr-4 py-2.5 border border-rule rounded-control text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper"
             />
           </div>
@@ -167,6 +210,8 @@ export default function AdminOrders() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">연락처</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수량</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">금액</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">결제수단</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">결제ID</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
                 </tr>
@@ -186,6 +231,14 @@ export default function AdminOrders() {
                       <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{o.buyer_phone ?? '-'}</td>
                       <td className="px-4 py-3 text-ink text-center">{o.quantity}</td>
                       <td className="px-4 py-3 text-ink font-semibold whitespace-nowrap">{won(o.amount)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`text-[12px] ${paymentMethod(o) === '무통장입금' ? 'text-ink-soft font-semibold' : 'text-ink-faint'}`}>
+                          {paymentMethod(o)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-ink-faint whitespace-nowrap max-w-[140px] truncate" title={o.payment_id ?? ''}>
+                        {o.payment_id ?? '-'}
+                      </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium ${badge.className}`}>{badge.label}</span>
                         {o.tracking_number && (
