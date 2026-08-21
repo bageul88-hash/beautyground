@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 
 // 홈 히어로 배너: 관리자가 고른 상품을 화이트 카드로 노출(흰 배경+검정 텍스트+검정 CTA 알약).
 // 2026-08-08 대표님 확정 레퍼런스(쇼핑몰예시.jpg) 픽셀 실측으로 그린 그라데이션 카드를 만들었다가,
@@ -168,9 +169,10 @@ export default function HeroCarousel({ banners, loading }: { banners: HeroBanner
                     우하단(카드 모서리에 실제로 걸치는 쪽)은 그대로 두고 상단·좌측 가장자리만 마스크로 자연스럽게 페이드아웃. */}
                 <div className="pointer-events-none absolute bottom-0 right-0 h-[85%] w-[44%]">
                   {product.thumbnail_url ? (
-                    <img
+                    <Thumb
                       src={product.thumbnail_url}
                       alt=""
+                      size={600}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       className="h-full w-full object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.18)]"
                       style={{
@@ -207,9 +209,10 @@ export default function HeroCarousel({ banners, loading }: { banners: HeroBanner
               >
                 <div className="aspect-square bg-quiet">
                   {custom.image_url ? (
-                    <img
+                    <Thumb
                       src={custom.image_url}
                       alt={custom.headline ?? ''}
+                      size={600}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       className="h-full w-full object-cover"
                     />

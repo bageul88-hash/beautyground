@@ -17,6 +17,7 @@ import ProductQnA from '../components/product/ProductQnA'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/Icon'
 import { IconSend2, IconBrandFacebook, IconBrandX, IconLink } from '@tabler/icons-react'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
+import Thumb from '../components/common/Thumb'
 import ScrollToTopButton from '../components/common/ScrollToTopButton'
 import CartCountBadge from '../components/common/CartCountBadge'
 
@@ -354,9 +355,11 @@ export default function AppProductDetail() {
       {view.images.length > 0 ? (
         <div className="px-4 pt-4">
           <div className="aspect-square max-h-[560px] rounded-card bg-quiet flex items-center justify-center overflow-hidden">
-            <img
+            <Thumb
               src={view.images[Math.min(activeImg, view.images.length - 1)]}
               alt={view.name}
+              size={800}
+              loading="eager"
               className="w-full h-full object-contain"
             />
           </div>

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import AppFrame from '../components/layout/AppFrame'
 import BackHeader from '../components/layout/BackHeader'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
+import Thumb from '../components/common/Thumb'
 import { IconSearch, IconClose } from '../components/common/Icon'
 import { supabase } from '../lib/supabase'
 import { won } from '../lib/format'
@@ -177,7 +178,7 @@ export default function AppSearch() {
                 >
                   <div className="aspect-square bg-quiet overflow-hidden">
                     {p.thumbnail_url ? (
-                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      <Thumb src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <ImagePlaceholder />
                     )}

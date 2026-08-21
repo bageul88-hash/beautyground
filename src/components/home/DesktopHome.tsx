@@ -5,6 +5,7 @@ import PromoBar from './PromoBar'
 import TrustStrip from './TrustStrip'
 import CategoryRecommend from './CategoryRecommend'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 
@@ -107,7 +108,7 @@ export default function DesktopHome({
                     style={{ scrollSnapAlign: 'start' }}
                   >
                     {image ? (
-                      <img src={image} alt="" className="w-full h-full object-cover" />
+                      <Thumb src={image} alt="" size={600} loading="eager" className="w-full h-full object-cover" />
                     ) : (
                       <ImagePlaceholder />
                     )}
@@ -168,7 +169,7 @@ export default function DesktopHome({
                 >
                   <div className="w-full aspect-square bg-quiet overflow-hidden">
                     {p.thumbnail_url ? (
-                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      <Thumb src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <ImagePlaceholder />
                     )}
@@ -214,7 +215,7 @@ export default function DesktopHome({
                 >
                   <div className="w-full aspect-square bg-quiet overflow-hidden">
                     {p.thumbnail_url ? (
-                      <img src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      <Thumb src={p.thumbnail_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <ImagePlaceholder />
                     )}
@@ -263,7 +264,7 @@ export default function DesktopHome({
                 <button key={p.id} onClick={() => onProductClick(p.id)} className="text-left border-b border-rule pb-4">
                   <div className="aspect-square bg-quiet overflow-hidden">
                     {p.thumbnail_url ? (
-                      <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
+                      <Thumb src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
                       <ImagePlaceholder />
                     )}

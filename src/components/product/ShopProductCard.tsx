@@ -1,6 +1,7 @@
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import { comma } from '../../lib/format'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 
 // 소비자 상품 카드 — 썸네일 / 상품명 2줄 / 리뷰(있으면) / 가격.
 // 「생방송 슬레이트」 월드: 면은 직각, 그림자 없음, 가격은 폭 고정(tabular) 숫자.
@@ -20,10 +21,9 @@ export default function ShopProductCard({ product }: { product: ShopProduct }) {
       {/* 1) 썸네일 */}
       <div className="relative aspect-square overflow-hidden bg-quiet">
         {product.thumbnail_url ? (
-          <img
+          <Thumb
             src={product.thumbnail_url}
             alt={product.name}
-            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useIsStaff } from '../lib/staff'
 import { searchAddress } from '../lib/daumPostcode'
+import Thumb from '../components/common/Thumb'
 
 // 직원 전용 구매 — /app/staff-buy (로그인 + 직원 등급(app_staff, supabase/staff_members.sql)일 때만 접근).
 // 예전엔 비밀 링크(/staff/:key) 방식이었으나 2026-08-20 회원등급 방식으로 전환(관리자 회원관리에서 지정).
@@ -243,7 +244,7 @@ export default function StaffPurchase() {
                         className="flex-shrink-0"
                       >
                         {p.thumbnail_url ? (
-                          <img src={p.thumbnail_url} alt="" className="w-32 h-32 rounded-control object-cover" />
+                          <Thumb src={p.thumbnail_url} alt="" size={256} className="w-32 h-32 rounded-control object-cover" />
                         ) : (
                           <div className="w-32 h-32 rounded-control bg-quiet" />
                         )}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import { comma } from '../../lib/format'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 
 interface ProductRailProps {
   id: string
@@ -125,10 +126,9 @@ export default function ProductRail({
                     aria-label={product.name}
                   >
                     {product.thumbnail_url ? (
-                      <img
+                      <Thumb
                         src={product.thumbnail_url}
                         alt={product.name}
-                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     ) : (

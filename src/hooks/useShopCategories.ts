@@ -12,18 +12,16 @@ export function useShopCategories() {
     let cancelled = false
 
     ;(async () => {
-      const results = await Promise.all(
-        PRODUCT_CATEGORIES.map(async (cat) => {
-          const { count } = await supabase
-            .from('products')
-            .select('id', { count: 'exact', head: true })
-            .eq('status', 'on_sale')
-            .eq('category', cat)
-          return { cat, count: count ?? 0 }
-        })
-      )
+      // 카테고리당 1번씩(예전엔 8번) 왕복하는 대신, category 컬럼만 한 번에 받아
+      // 어떤 카테고리에 상품이 1개 이상 있는지 클라이언트에서 판별한다 — 정확한 개수는
+      // 필요 없고 "0개인지 아닌지"만 필요하므로 이걸로 충분하다(2026-08-21 모바일 로딩속도 개선).
+      const { data } = await supabase
+        .from('products')
+        .select('category')
+        .eq('status', 'on_sale')
       if (cancelled) return
-      setCategories(results.filter((r) => r.count > 0).map((r) => r.cat))
+      const present = new Set((data ?? []).map((r) => r.category).filter(Boolean))
+      setCategories(PRODUCT_CATEGORIES.filter((cat) => present.has(cat)))
       setLoading(false)
     })()
 

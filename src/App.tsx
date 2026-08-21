@@ -1,99 +1,105 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { mergeGuestCartToServer } from './lib/cart'
 import { logVisitOnce, syncAttributionToUser } from './lib/attribution'
-import CompanyIntro from './pages/CompanyIntro'
-import Export from './pages/Export'
-import ExportBrand from './pages/ExportBrand'
-import AppHome from './pages/AppHome'
-import AppCategory from './pages/AppCategory'
-import AppSearch from './pages/AppSearch'
-import AppCategoryDetail from './pages/AppCategoryDetail'
-import AppBrandDetail from './pages/AppBrandDetail'
-import AppProductDetail from './pages/AppProductDetail'
-import AppProductReviews from './pages/AppProductReviews'
-import AppMyPage from './pages/AppMyPage'
-import AppCart from './pages/AppCart'
-import AppOrder from './pages/AppOrder'
-import AppOrders from './pages/AppOrders'
-import StaffPurchase from './pages/StaffPurchase'
-import AppGuestOrder from './pages/AppGuestOrder'
-import AppLogin from './pages/AppLogin'
-import AppSignup from './pages/AppSignup'
-import AppNaverCallback from './pages/AppNaverCallback'
-import AppAccount from './pages/AppAccount'
-import AppAddresses from './pages/AppAddresses'
-import AppWishlist from './pages/AppWishlist'
-import AppBenefits from './pages/AppBenefits'
-import AppSkinTest from './pages/AppSkinTest'
+
+// 페이지 전체를 React.lazy로 분리한다 — 예전엔 관리자·브랜드·백화점·호스트 포털까지
+// 60여 개 페이지가 전부 하나의 JS 번들(1MB+)로 묶여, 홈 화면 첫 방문자도 이 전부를
+// 내려받은 뒤에야 화면이 뜨는 구조였음. 모바일 4G 환경에서 번들 로딩만 2초 넘게 걸리는 게
+// 확인돼(2026-08-21 실측), 실제 방문 라우트의 코드만 그때그때 받도록 분리(코드 스플리팅).
+// 레이아웃/가드 컴포넌트(RequireAdmin 등)는 크기가 작아 그대로 즉시 로드한다.
+const AppHome = lazy(() => import('./pages/AppHome'))
+const CompanyIntro = lazy(() => import('./pages/CompanyIntro'))
+const Export = lazy(() => import('./pages/Export'))
+const ExportBrand = lazy(() => import('./pages/ExportBrand'))
+const AppCategory = lazy(() => import('./pages/AppCategory'))
+const AppSearch = lazy(() => import('./pages/AppSearch'))
+const AppCategoryDetail = lazy(() => import('./pages/AppCategoryDetail'))
+const AppBrandDetail = lazy(() => import('./pages/AppBrandDetail'))
+const AppProductDetail = lazy(() => import('./pages/AppProductDetail'))
+const AppProductReviews = lazy(() => import('./pages/AppProductReviews'))
+const AppMyPage = lazy(() => import('./pages/AppMyPage'))
+const AppCart = lazy(() => import('./pages/AppCart'))
+const AppOrder = lazy(() => import('./pages/AppOrder'))
+const AppOrders = lazy(() => import('./pages/AppOrders'))
+const StaffPurchase = lazy(() => import('./pages/StaffPurchase'))
+const AppGuestOrder = lazy(() => import('./pages/AppGuestOrder'))
+const AppLogin = lazy(() => import('./pages/AppLogin'))
+const AppSignup = lazy(() => import('./pages/AppSignup'))
+const AppNaverCallback = lazy(() => import('./pages/AppNaverCallback'))
+const AppAccount = lazy(() => import('./pages/AppAccount'))
+const AppAddresses = lazy(() => import('./pages/AppAddresses'))
+const AppWishlist = lazy(() => import('./pages/AppWishlist'))
+const AppBenefits = lazy(() => import('./pages/AppBenefits'))
+const AppSkinTest = lazy(() => import('./pages/AppSkinTest'))
 
 // 법적 고지
-import Terms from './pages/legal/Terms'
-import Privacy from './pages/legal/Privacy'
-import Company from './pages/legal/Company'
+const Terms = lazy(() => import('./pages/legal/Terms'))
+const Privacy = lazy(() => import('./pages/legal/Privacy'))
+const Company = lazy(() => import('./pages/legal/Company'))
 
 // 관리자 — 매입 후 직접 판매하는 구조라 브랜드사가 직접 관리하는 파트너센터는 없음(2026-08-08 폐지)
 import RequireAdmin from './components/admin/RequireAdmin'
 import AdminLayout from './components/admin/AdminLayout'
-import AdminHome from './pages/admin/Home'
-import AdminHosts from './pages/admin/Hosts'
-import AdminCommissionTiers from './pages/admin/CommissionTiers'
-import AdminHostSettlements from './pages/admin/HostSettlements'
-import AdminPartners from './pages/admin/Partners'
-import AdminPartnerSettlements from './pages/admin/PartnerSettlements'
-import AdminDeptAccounts from './pages/admin/DeptAccounts'
-import AdminMembers from './pages/admin/Members'
-import AdminOrders from './pages/admin/Orders'
-import AdminProducts from './pages/admin/Products'
-import AdminLives from './pages/admin/Lives'
-import AdminCoupons from './pages/admin/Coupons'
-import AdminExportInquiries from './pages/admin/ExportInquiries'
-import AdminExportBuyers from './pages/admin/ExportBuyers'
-import AdminMarketing from './pages/admin/Marketing'
-import AdminTheme from './pages/admin/Theme'
+const AdminHome = lazy(() => import('./pages/admin/Home'))
+const AdminHosts = lazy(() => import('./pages/admin/Hosts'))
+const AdminCommissionTiers = lazy(() => import('./pages/admin/CommissionTiers'))
+const AdminHostSettlements = lazy(() => import('./pages/admin/HostSettlements'))
+const AdminPartners = lazy(() => import('./pages/admin/Partners'))
+const AdminPartnerSettlements = lazy(() => import('./pages/admin/PartnerSettlements'))
+const AdminDeptAccounts = lazy(() => import('./pages/admin/DeptAccounts'))
+const AdminMembers = lazy(() => import('./pages/admin/Members'))
+const AdminOrders = lazy(() => import('./pages/admin/Orders'))
+const AdminProducts = lazy(() => import('./pages/admin/Products'))
+const AdminLives = lazy(() => import('./pages/admin/Lives'))
+const AdminCoupons = lazy(() => import('./pages/admin/Coupons'))
+const AdminExportInquiries = lazy(() => import('./pages/admin/ExportInquiries'))
+const AdminExportBuyers = lazy(() => import('./pages/admin/ExportBuyers'))
+const AdminMarketing = lazy(() => import('./pages/admin/Marketing'))
+const AdminTheme = lazy(() => import('./pages/admin/Theme'))
 import { useMallTheme } from './hooks/useMallTheme'
 
 // 진행자(라이브 호스트) 인증/전용 (RequireHostAuth + RequireHost + HostLayout)
-import HostRegister from './pages/host/Register'
-import HostLogin from './pages/host/Login'
+const HostRegister = lazy(() => import('./pages/host/Register'))
+const HostLogin = lazy(() => import('./pages/host/Login'))
 import RequireHostAuth from './components/host/RequireHostAuth'
 import RequireHost from './components/host/RequireHost'
 import HostLayout from './components/host/HostLayout'
-import HostDashboard from './pages/host/Dashboard'
-import HostLives from './pages/host/Lives'
-import HostLiveSales from './pages/host/LiveSales'
-import HostSettlementPage from './pages/host/Settlement'
-import HostProfile from './pages/host/Profile'
-import HostGoLive from './pages/host/GoLive'
+const HostDashboard = lazy(() => import('./pages/host/Dashboard'))
+const HostLives = lazy(() => import('./pages/host/Lives'))
+const HostLiveSales = lazy(() => import('./pages/host/LiveSales'))
+const HostSettlementPage = lazy(() => import('./pages/host/Settlement'))
+const HostProfile = lazy(() => import('./pages/host/Profile'))
+const HostGoLive = lazy(() => import('./pages/host/GoLive'))
 
 // 브랜드사(파트너) 읽기 전용 포털 (RequireBrandAuth + RequireBrand + BrandLayout)
-import BrandLogin from './pages/brand/Login'
-import BrandOnboarding from './pages/brand/Onboarding'
-import BrandRegister from './pages/brand/Register'
-import BrandExportRegister from './pages/brand/ExportRegister'
+const BrandLogin = lazy(() => import('./pages/brand/Login'))
+const BrandOnboarding = lazy(() => import('./pages/brand/Onboarding'))
+const BrandRegister = lazy(() => import('./pages/brand/Register'))
+const BrandExportRegister = lazy(() => import('./pages/brand/ExportRegister'))
 import RequireBrandAuth from './components/brand/RequireBrandAuth'
 import RequireBrand from './components/brand/RequireBrand'
 import RequireBrandOrExportContact from './components/brand/RequireBrandOrExportContact'
 import BrandLayout from './components/brand/BrandLayout'
-import BrandDashboard from './pages/brand/Dashboard'
-import BrandLiveSales from './pages/brand/LiveSales'
-import BrandSettlement from './pages/brand/Settlement'
-import BrandExport from './pages/brand/Export'
+const BrandDashboard = lazy(() => import('./pages/brand/Dashboard'))
+const BrandLiveSales = lazy(() => import('./pages/brand/LiveSales'))
+const BrandSettlement = lazy(() => import('./pages/brand/Settlement'))
+const BrandExport = lazy(() => import('./pages/brand/Export'))
 
 // 백화점 담당자 포털 (RequireDeptAuth + RequireDept) — 2026-08-15: 코드 게이트 대신 지점별 계정 로그인
-import DeptLogin from './pages/dept/Login'
-import DeptRegister from './pages/dept/Register'
+const DeptLogin = lazy(() => import('./pages/dept/Login'))
+const DeptRegister = lazy(() => import('./pages/dept/Register'))
 import RequireDeptAuth from './components/dept/RequireDeptAuth'
 import RequireDept from './components/dept/RequireDept'
-import DeptSales from './pages/dept/Sales'
-import DeptLives from './pages/dept/Lives'
+const DeptSales = lazy(() => import('./pages/dept/Sales'))
+const DeptLives = lazy(() => import('./pages/dept/Lives'))
 
 // 구매자 라이브 (Supabase 연동)
-import LiveMain from './pages/LiveMain'
-import LiveSchedule from './pages/LiveSchedule'
-import LiveSale from './pages/LiveSale'
-import ShopLiveWatch from './pages/app/ShopLiveWatch'
+const LiveMain = lazy(() => import('./pages/LiveMain'))
+const LiveSchedule = lazy(() => import('./pages/LiveSchedule'))
+const LiveSale = lazy(() => import('./pages/LiveSale'))
+const ShopLiveWatch = lazy(() => import('./pages/app/ShopLiveWatch'))
 import LiveGate from './components/app/LiveGate'
 import ScrollRestoration from './components/layout/ScrollRestoration'
 
@@ -142,6 +148,7 @@ export default function App() {
           {welcomeToast}
         </div>
       )}
+      <Suspense fallback={null}>
       <Routes>
         {/* 메인 = 소비자 쇼핑 홈. /partners·/proposal(예전 "입점 브랜드 모집" B2B 랜딩페이지)은
             매입 후 직접 판매하는 구조로 확정되며 완전 삭제(2026-08-10) — PG(NHN KCP) 심사에서
@@ -283,6 +290,7 @@ export default function App() {
         {/* fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

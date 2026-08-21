@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 import { useCategoryRecommendations } from '../../hooks/useCategoryRecommendations'
 
 const won = (n: number) => n.toLocaleString('ko-KR')
@@ -53,7 +54,7 @@ export default function CategoryRecommend({
               <button key={p.id} onClick={() => onProductClick(p.id)} className="text-left border-b border-rule pb-4">
                 <div className="aspect-square bg-quiet overflow-hidden">
                   {p.thumbnail_url ? (
-                    <img src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
+                    <Thumb src={p.thumbnail_url} alt={p.name} className="w-full h-full object-cover" />
                   ) : (
                     <ImagePlaceholder />
                   )}

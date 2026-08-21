@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ImagePlaceholder from '../common/ImagePlaceholder'
+import Thumb from '../common/Thumb'
 import ReviewSummary from './ReviewSummary'
 import ProductQnA from './ProductQnA'
 import CategoryTabBar from './CategoryTabBar'
@@ -87,9 +88,11 @@ export default function DesktopProductDetail({
             <div className="p-6">
               <div className="max-w-[520px] mx-auto">
                 <div className="aspect-square bg-quiet overflow-hidden">
-                  <img
+                  <Thumb
                     src={view.images[Math.min(activeImg, view.images.length - 1)]}
                     alt={view.name}
+                    size={800}
+                    loading="eager"
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -102,7 +105,7 @@ export default function DesktopProductDetail({
                         className={`w-16 h-16 overflow-hidden border-2 focus:outline-none focus-visible:shadow-ring ${i === activeImg ? 'border-ink' : 'border-rule'}`}
                         aria-label={`${i + 1}번째 이미지`}
                       >
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <Thumb src={url} alt="" size={128} className="w-full h-full object-cover" />
                       </button>
                     ))}
                   </div>
