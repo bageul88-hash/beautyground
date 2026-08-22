@@ -116,7 +116,7 @@ export default function Privacy() {
               <p>
                 개인정보 보호와 관련한 문의, 불만 처리, 피해 구제 신청은 아래로 연락해 주시기 바랍니다.
                 <br />
-                개인정보 보호책임자: {COMPANY_INFO.ceo}(대표) · 이메일: {COMPANY_INFO.csEmail} · 전화: {COMPANY_INFO.csPhone}
+                개인정보 보호책임자: {COMPANY_INFO.privacyOfficer} · 이메일: {COMPANY_INFO.csEmail} · 전화: {COMPANY_INFO.csPhone}
               </p>
             </section>
             <section>

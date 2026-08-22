@@ -50,7 +50,7 @@ export default function Footer() {
         <div className="mt-4 text-[12px] text-ink-faint leading-relaxed">
           <p>{COMPANY_INFO.name} | 대표: {COMPANY_INFO.ceo} | 사업자등록번호: {COMPANY_INFO.bizNumber}</p>
           <p>통신판매업신고: {COMPANY_INFO.mailOrderNumber} | 주소: {COMPANY_INFO.address}</p>
-          <p>고객센터: {COMPANY_INFO.csPhone} | 이메일: {COMPANY_INFO.csEmail}</p>
+          <p>소비자상담실: {COMPANY_INFO.csPhone} ({COMPANY_INFO.csHours}) | 이메일: {COMPANY_INFO.csEmail}</p>
         </div>
 
         <p className="mt-6 text-[12px] text-ink-faint">

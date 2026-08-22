@@ -254,7 +254,7 @@ export default function DesktopOrder({
             <p className="text-[11px] text-ink-faint mt-4 pt-3 border-t border-rule leading-relaxed">
               {COMPANY_INFO.name} | 대표: {COMPANY_INFO.ceo} | 사업자등록번호: {COMPANY_INFO.bizNumber} | 통신판매업신고: {COMPANY_INFO.mailOrderNumber}
               <br />
-              {COMPANY_INFO.address} | 고객센터: {COMPANY_INFO.csPhone}
+              {COMPANY_INFO.address} | 소비자상담실: {COMPANY_INFO.csPhone} ({COMPANY_INFO.csHours})
             </p>
           </div>
         </div>

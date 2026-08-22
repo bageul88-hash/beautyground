@@ -5,10 +5,11 @@ import { COMPANY_INFO } from '../../lib/companyInfo'
 const ROWS: [string, string][] = [
   ['상호명', COMPANY_INFO.name],
   ['대표자', COMPANY_INFO.ceo],
+  ['개인정보보호책임자', COMPANY_INFO.privacyOfficer],
   ['사업자등록번호', COMPANY_INFO.bizNumber],
   ['통신판매업신고번호', COMPANY_INFO.mailOrderNumber],
   ['사업장 주소', COMPANY_INFO.address],
-  ['고객센터', COMPANY_INFO.csPhone],
+  ['소비자상담실', `${COMPANY_INFO.csPhone} (${COMPANY_INFO.csHours})`],
   ['이메일', COMPANY_INFO.csEmail],
 ]
 

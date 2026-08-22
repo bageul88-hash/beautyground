@@ -17,13 +17,13 @@ export default function AppFooter() {
         <nav className="flex items-center gap-4 text-[13px] font-semibold text-ink-soft pb-5 border-b border-rule" aria-label="하단 메뉴">
           <Link to="/app/login" className="hover:text-ink transition-colors">로그인</Link>
           {sep}
-          <a href={`tel:${COMPANY_INFO.csPhone}`} className="hover:text-ink transition-colors">고객센터</a>
+          <a href={`tel:${COMPANY_INFO.csPhone}`} className="hover:text-ink transition-colors">소비자상담실</a>
         </nav>
 
         {/* 사업자 정보 */}
         <div className="pt-5 text-[11.5px] text-ink-faint leading-[1.75]">
           <p className="text-ink-soft font-semibold text-[12.5px] mb-1">{COMPANY_INFO.name}</p>
-          <p>대표이사 {COMPANY_INFO.ceo} · 사업자등록번호 {COMPANY_INFO.bizNumber}</p>
+          <p>대표이사 {COMPANY_INFO.ceo} · 개인정보보호책임자 {COMPANY_INFO.privacyOfficer} · 사업자등록번호 {COMPANY_INFO.bizNumber}</p>
           <p>
             통신판매업신고 {COMPANY_INFO.mailOrderNumber}{' '}
             <a
@@ -35,16 +35,18 @@ export default function AppFooter() {
               사업자정보확인
             </a>
           </p>
+          <p>대표전화 {COMPANY_INFO.csPhone} · 대표메일 {COMPANY_INFO.csEmail}</p>
           <p>주소 {COMPANY_INFO.address}</p>
           <p>호스팅제공자 Vercel Inc.</p>
         </div>
 
-        {/* 고객센터 (호스팅제공자 아래) */}
+        {/* 소비자상담실 (호스팅제공자 아래) */}
         <div className="mt-5 text-[11.5px] text-ink-faint leading-[1.75]">
-          <p className="text-ink-soft font-semibold text-[12.5px] mb-1">고객센터</p>
+          <p className="text-ink-soft font-semibold text-[12.5px] mb-1">소비자상담실</p>
           <p>
             <a href={`tel:${COMPANY_INFO.csPhone}`} className="text-ink-soft">{COMPANY_INFO.csPhone}</a>
           </p>
+          <p>운영시간 {COMPANY_INFO.csHours}</p>
         </div>
 
         {/* 법적 링크 */}
