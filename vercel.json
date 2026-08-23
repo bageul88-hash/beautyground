@@ -4,6 +4,6 @@
     { "source": "/((?!api/).*)", "destination": "/" }
   ],
   "crons": [
-    { "path": "/api/gov-support-sync", "schedule": "10 0 * * *" }
+    { "path": "/api/company-og?job=gov-support-sync", "schedule": "10 0 * * *" }
   ]
 }
