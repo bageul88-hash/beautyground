@@ -10,7 +10,7 @@ export type PartnerHubCategory = 'gov_support' | 'dept_store' | 'operations'
 
 export const CATEGORY_META: Record<PartnerHubCategory, { slug: string; label: string; short: string; emoji: string }> = {
   gov_support: { slug: 'gov-support', label: '정부지원사업', short: '뷰티 브랜드를 위한 정부·지자체 지원사업 정보', emoji: '🏛' },
-  dept_store: { slug: 'dept-store', label: '백화점 입점', short: '백화점 입점 절차와 준비사항 안내', emoji: '🏢' },
+  dept_store: { slug: 'dept-store', label: '백화점 팝업 입점', short: '백화점 팝업 입점 절차와 준비사항 안내', emoji: '🏢' },
   operations: { slug: 'operations', label: '브랜드 운영정보', short: '인증·유통·마케팅 등 브랜드 운영에 도움되는 정보', emoji: '📋' },
 }
 
