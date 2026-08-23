@@ -8,6 +8,7 @@ import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { addToCart } from '../lib/cart'
 import { isWished, addWish, removeWish } from '../lib/wishlist'
+import { getMyMembership } from '../lib/membership'
 import type { Product, ScrapedReview, ReviewSummaryData } from '../lib/types'
 import { ALL_PRODUCTS, SHIPPING_NOTICE } from '../constants'
 import ProductInfoTable from '../components/product/ProductInfoTable'
@@ -124,6 +125,14 @@ export default function AppProductDetail() {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<ProductView | null>(null)
   const [toast, setToast] = useState('')
+  // 내 등급 적립률 — 비로그인/조회실패면 최저등급(BASIC) 적립률로 안전하게 표시
+  const [rewardRate, setRewardRate] = useState(1)
+
+  useEffect(() => {
+    let active = true
+    getMyMembership().then((m) => { if (active) setRewardRate(m.tier.rewardRate) })
+    return () => { active = false }
+  }, [])
 
   // DB 상품 우선 로드, 숫자 id(목데이터)면 목데이터 폴백
   useEffect(() => {
@@ -239,6 +248,12 @@ export default function AppProductDetail() {
 
   const onBuy = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 구매할 수 없습니다'); return }
+    // 바로구매도 장바구니에 같이 담아 헤더 카트 배지 숫자가 즉시 반영되게 함(전환율 개선,
+    // 2026-08-23 대표님 지시) + 결제 중단 시 상품이 장바구니에 남아있는 부가효과.
+    // 이미 장바구니에 같은 상품이 있으면 수량이 합산되는데, 결제 완료 시 이 cart_item_id
+    // 행 전체가 삭제되므로 "장바구니에 미리 담아둔 수량"과 "지금 바로구매하는 수량"이 겹치는
+    // 극히 드문 경우엔 장바구니의 기존 수량까지 함께 삭제된다(알려진 한계, 낮은 우선순위).
+    const { cartItemId } = await addToCart(id, quantity)
     // 비회원 구매 허용(2026-08-18) — 로그인 없이 바로 주문서로 (장바구니·찜은 회원 전용 유지)
     navigate('/app/order', {
       state: {
@@ -249,6 +264,7 @@ export default function AppProductDetail() {
             price: view.price,
             quantity,
             thumbnail: view.images[0] ?? null,
+            cart_item_id: cartItemId,
           },
         ],
       },
@@ -291,6 +307,7 @@ export default function AppProductDetail() {
           toggleWish={toggleWish}
           onBuy={onBuy}
           onAddToCart={onAddToCart}
+          rewardRate={rewardRate}
         />
       </>
     )
@@ -413,6 +430,7 @@ export default function AppProductDetail() {
           salePrice={view.price}
           brand={view.brand || undefined}
           showPrice={false}
+          rewardRate={rewardRate}
           className="mt-4"
         />
 

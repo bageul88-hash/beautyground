@@ -7,6 +7,7 @@ interface ProductInfoTableProps {
   brand?: string
   madeIn?: string
   showPrice?: boolean // 소비자가·판매가 행 표시 여부(가격이 위에 따로 있으면 false)
+  rewardRate?: number // 내 등급 적립률(%) — 지정하면 "적립" 행 노출(2026-08-23 실적립 활성화)
   className?: string
 }
 
@@ -18,6 +19,7 @@ export default function ProductInfoTable({
   brand,
   madeIn = MADE_IN,
   showPrice = true,
+  rewardRate,
   className = '',
 }: ProductInfoTableProps) {
   const hasDiscount = salePrice < consumerPrice
@@ -34,6 +36,15 @@ export default function ProductInfoTable({
     : []
   const rows: Array<[string, ReactNode]> = [
     ...priceRows,
+    ...(rewardRate
+      ? [[
+          '적립',
+          <span>
+            <span className="font-bold text-accent-deep">{Math.round((salePrice * rewardRate) / 100).toLocaleString('ko-KR')}원</span>
+            <span className="text-ink-faint"> ({rewardRate}% 적립)</span>
+          </span>,
+        ] as [string, ReactNode]]
+      : []),
     ...(brand ? [['브랜드', brand] as [string, ReactNode]] : []),
     ['제조국', madeIn],
     [

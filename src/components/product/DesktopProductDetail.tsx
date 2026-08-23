@@ -7,6 +7,7 @@ import ProductQnA from './ProductQnA'
 import CategoryTabBar from './CategoryTabBar'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../common/Icon'
 import CartCountBadge from '../common/CartCountBadge'
+import ProductInfoTable from './ProductInfoTable'
 import { SHIPPING_NOTICE } from '../../constants'
 import type { ReviewSummaryData, ScrapedReview } from '../../lib/types'
 
@@ -38,6 +39,7 @@ interface Props {
   toggleWish: () => void
   onBuy: () => void
   onAddToCart: () => void
+  rewardRate: number
 }
 
 // PC 상품상세 — 기존 「생방송 슬레이트」 규칙 유지(흰 배경, 직각, 그림자 없음, tabular 숫자).
@@ -55,6 +57,7 @@ export default function DesktopProductDetail({
   toggleWish,
   onBuy,
   onAddToCart,
+  rewardRate,
 }: Props) {
   const navigate = useNavigate()
   const [activeImg, setActiveImg] = useState(0)
@@ -184,6 +187,15 @@ export default function DesktopProductDetail({
           )}
 
           <p className="mt-4 text-[12px] text-ink-faint">{SHIPPING_NOTICE}</p>
+
+          <ProductInfoTable
+            consumerPrice={view.originalPrice ?? view.price}
+            salePrice={view.price}
+            brand={view.brand || undefined}
+            showPrice={false}
+            rewardRate={rewardRate}
+            className="mt-4"
+          />
 
           <div className="mt-6 flex items-center justify-between py-4 border-t border-b border-rule">
             <span className="text-[14px] font-bold text-ink">수량</span>

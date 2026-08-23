@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import { COMPANY_INFO } from '../lib/companyInfo'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 import { getAddresses, addAddress, type Address } from '../lib/addresses'
+import { clearCartItems } from '../lib/cart'
 import { searchAddress } from '../lib/daumPostcode'
 import type { LiveCoupon } from '../lib/types'
 import { couponDiscountAmount, couponEligible, couponLabel, couponSoldOut } from '../lib/coupons'
@@ -235,10 +236,10 @@ export default function AppOrder() {
       })
       const json = await res.json()
       if (json?.ok) {
-        // 장바구니에서 온 항목이면 결제 완료된 것만 장바구니에서 제거
+        // 장바구니에서 온 항목이면 결제 완료된 것만 장바구니에서 제거 (게스트 장바구니 포함)
         const cartItemIds = items.map((i) => i.cart_item_id).filter((v): v is string => !!v)
         if (cartItemIds.length > 0) {
-          await supabase.from('cart_items').delete().in('id', cartItemIds)
+          await clearCartItems(cartItemIds)
         }
         // 성공 요약: DB에서 실제 저장된 주문행으로 재구성(리다이렉트 복귀 시 items state 유실 대비)
         const { data } = await supabase

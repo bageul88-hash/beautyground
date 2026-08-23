@@ -65,8 +65,8 @@ export async function getCart(): Promise<CartLine[]> {
     .map((i) => ({ id: `guest:${i.product_id}`, quantity: i.quantity, product: byId.get(i.product_id) as Product }))
 }
 
-// 담기: 이미 있으면 수량 합산
-export async function addToCart(productId: string, quantity = 1): Promise<{ error?: string }> {
+// 담기: 이미 있으면 수량 합산. cartItemId를 반환 — "구매하기"가 결제 완료 후 정리할 때 씀.
+export async function addToCart(productId: string, quantity = 1): Promise<{ error?: string; cartItemId?: string }> {
   const userId = await currentUserId()
 
   if (!userId) {
@@ -75,7 +75,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<{ erro
     if (ex) ex.quantity += quantity
     else items.push({ product_id: productId, quantity })
     writeGuest(items)
-    return {}
+    return { cartItemId: `guest:${productId}` }
   }
 
   const { data: existing } = await supabase
@@ -86,21 +86,24 @@ export async function addToCart(productId: string, quantity = 1): Promise<{ erro
     .maybeSingle()
 
   if (existing) {
+    const existingId = (existing as { id: string }).id
     const { error } = await supabase
       .from('cart_items')
       .update({ quantity: (existing as { quantity: number }).quantity + quantity })
-      .eq('id', (existing as { id: string }).id)
+      .eq('id', existingId)
     if (error) return { error: error.message }
     window.dispatchEvent(new Event('bg-cart-changed'))
-    return {}
+    return { cartItemId: existingId }
   }
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from('cart_items')
     .insert({ user_id: userId, product_id: productId, quantity })
+    .select('id')
+    .single()
   if (error) return { error: error.message }
   window.dispatchEvent(new Event('bg-cart-changed'))
-  return {}
+  return { cartItemId: (inserted as { id: string }).id }
 }
 
 export async function updateCartQuantity(cartItemId: string, quantity: number): Promise<void> {

@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1) 이 결제(payment_id)에 속한 주문행 전부 조회 (장바구니 다건 주문은 상품별로 여러 행)
   const { data: orderRows, error: selErr } = await supabase
     .from('orders')
-    .select('id, product_id, quantity, amount, status, order_name, buyer_name, buyer_email, live_id, products(name, price, sale_price)')
+    .select('id, product_id, quantity, amount, status, order_name, buyer_name, buyer_email, live_id, user_id, products(name, price, sale_price)')
     .eq('payment_id', paymentId)
 
   if (selErr || !orderRows || orderRows.length === 0) {
@@ -218,6 +218,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('[payment-complete] order update failed', updErr)
     res.status(200).json({ ok: false, reason: '주문 상태 업데이트에 실패했습니다.' })
     return
+  }
+
+  // 4.5) 구매 적립금 지급 — 회원등급(membership_tiers.reward_rate)만큼 실결제금액 기준 적립
+  // (2026-08-23 대표님 확정: BASIC 1%부터 시작). 비회원(게스트) 주문은 적립 대상 아님.
+  // 등급은 "이 주문 이전까지의" 누적 결제금액 기준으로 산정(이번 주문으로 오른 등급은 다음 구매부터 적용).
+  // 실패해도 결제 성공 응답에는 영향 주지 않음(포인트는 나중에 수기 보정 가능, 결제 자체가 우선).
+  const buyerUserId = (orderRows.find((r) => r.user_id)?.user_id as string | undefined) ?? null
+  if (buyerUserId && paidAmount > 0) {
+    try {
+      const { data: tiers } = await supabase
+        .from('membership_tiers')
+        .select('min_spent, reward_rate')
+        .order('min_spent', { ascending: false })
+      const { data: priorOrders } = await supabase
+        .from('orders')
+        .select('amount, product_id, order_name')
+        .eq('user_id', buyerUserId)
+        .in('status', ['paid', 'shipped', 'done'])
+        .neq('payment_id', paymentId)
+      const priorSpent = ((priorOrders ?? []) as { amount: number; product_id: string | null; order_name: string | null }[])
+        .filter((o) => o.product_id && o.order_name !== '배송비')
+        .reduce((s, o) => s + (o.amount || 0), 0)
+      const tierList = (tiers ?? []) as { min_spent: number; reward_rate: number }[]
+      const rewardRate = tierList.find((t) => priorSpent >= t.min_spent)?.reward_rate ?? 0
+      const rewardPoints = Math.round((paidAmount * rewardRate) / 100)
+      if (rewardPoints > 0) {
+        await supabase.from('point_transactions').insert({
+          user_id: buyerUserId,
+          amount: rewardPoints,
+          reason: 'purchase_reward',
+          payment_id: paymentId,
+          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+      }
+    } catch (e) {
+      console.error('[payment-complete] purchase reward grant failed', e)
+    }
   }
 
   // 5) 재고 차감 (배송비 행은 product_id 가 없으므로 제외)
