@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { ExportBrandPublic } from '../lib/types'
 import CuratorSeal from '../components/export/CuratorSeal'
@@ -222,6 +222,7 @@ function LangButton({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
 
 export default function ExportBrand() {
   const { key = '' } = useParams()
+  const navigate = useNavigate()
   const [brand, setBrand] = useState<ExportBrandRow | null | undefined>(undefined)
   const [products, setProducts] = useState<ExportProduct[]>([])
   const [previewOnly, setPreviewOnly] = useState(false)
@@ -320,9 +321,24 @@ export default function ExportBrand() {
           </div>
         )}
 
-        {/* ── 상단: 플랫폼 표기 + 언어 ── */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4">
-          <p className="text-[10.5px] tracking-[0.3em] text-[#8A8577]">BEAUTYGROUND <span className="text-[#E53E3E]">EXPORT</span></p>
+        {/* ── 상단: 뒤로가기 + 홈 + 플랫폼 표기 + 언어 ── */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              aria-label="이전 페이지로"
+              className="text-[#8A8577] hover:text-[#16202F] transition-colors text-[15px] shrink-0"
+            >
+              ←
+            </button>
+            <Link
+              to="/export"
+              className="text-[10.5px] tracking-[0.3em] text-[#8A8577] hover:text-[#16202F] transition-colors truncate"
+            >
+              BEAUTYGROUND <span className="text-[#E53E3E]">EXPORT</span>
+            </Link>
+          </div>
           <LangButton lang={lang} setLang={setLang} />
         </div>
         <div className="mx-6 h-px bg-[#16202F] rule-draw" />
