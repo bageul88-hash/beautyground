@@ -2,5 +2,8 @@
   "rewrites": [
     { "source": "/company", "destination": "/api/company-og" },
     { "source": "/((?!api/).*)", "destination": "/" }
+  ],
+  "crons": [
+    { "path": "/api/gov-support-sync", "schedule": "10 0 * * *" }
   ]
 }
