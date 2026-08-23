@@ -6,10 +6,10 @@ import DesktopAuthLayout from '../components/auth/DesktopAuthLayout'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
-// 회원가입 진입 화면 — 신규 가입은 카카오만 받는다(대표님 지시 2026-08-15: 구매자는 카카오나
-// 휴대폰인증으로만). 휴대폰인증은 SMS API 미도입으로 보류라 지금은 카카오만 노출.
-// 네이버(api/auth-naver.ts + AppNaverCallback.tsx)·이메일(AppSignupEmail.tsx) 가입 버튼은
-// 여기서 뺐을 뿐 코드 자체는 남겨둠 — 기존 이메일/비번 가입자는 AppLogin.tsx에서 계속 로그인 가능.
+// 회원가입 진입 화면 — 카카오 + 네이버(2026-08-24 재노출). 휴대폰(SMS) 인증 가입은
+// 여전히 SMS API 미도입으로 보류라 대신 비회원 주문조회(연락처 기반)로 안내.
+// 이메일(AppSignupEmail.tsx) 가입 버튼은 여기서 뺐을 뿐 코드 자체는 남겨둠 — 기존
+// 이메일/비번 가입자는 AppLogin.tsx에서 계속 로그인 가능.
 export default function AppSignup() {
   const location = useLocation()
   const { mode, isDesktop, toggle } = useViewMode()
@@ -31,6 +31,26 @@ export default function AppSignup() {
     if (error) setNotice('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
   }
 
+  // 네이버는 Supabase 공식 지원 밖이라 커스텀 OAuth — state/from을 sessionStorage에 저장해두고
+  // 콜백(AppNaverCallback.tsx)에서 CSRF 대조 후 /api/auth-naver 로 code를 넘겨 세션을 완성한다.
+  const handleNaver = () => {
+    setNotice('')
+    const clientId = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined
+    if (!clientId) {
+      setNotice('네이버 로그인이 아직 설정되지 않았습니다.')
+      return
+    }
+    const state = crypto.randomUUID()
+    sessionStorage.setItem('naver_oauth_state', state)
+    sessionStorage.setItem('naver_oauth_from', from)
+    const url = new URL('https://nid.naver.com/oauth2.0/authorize')
+    url.searchParams.set('response_type', 'code')
+    url.searchParams.set('client_id', clientId)
+    url.searchParams.set('redirect_uri', `${window.location.origin}/app/auth/naver/callback`)
+    url.searchParams.set('state', state)
+    window.location.href = url.toString()
+  }
+
   const formContent = (
     <>
       <div className="rounded-control border border-rule p-6 space-y-3">
@@ -49,11 +69,33 @@ export default function AppSignup() {
           </svg>
           카카오 1초 회원가입
         </button>
+
+        {/* 네이버 — 공식 버튼 규격(#03C75A 배경 + 흰 텍스트) */}
+        <button
+          type="button"
+          onClick={handleNaver}
+          className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 text-paper focus:outline-none focus-visible:shadow-ring"
+          style={{ backgroundColor: '#03C75A' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#fff" d="M13.6 12.5 8.9 5.5H4.9v13h4.5v-7l4.7 7h4v-13h-4.5v7Z" />
+          </svg>
+          네이버로 시작하기
+        </button>
       </div>
 
       {notice && (
         <p className="text-center text-[13px] text-ink-faint mt-4" role="status">{notice}</p>
       )}
+
+      {/* 휴대폰 인증 회원가입은 SMS API 미도입으로 보류 — 대신 비회원도 주문번호+연락처로
+          자기 주문을 조회할 수 있는 기존 기능으로 안내(2026-08-24 대표님 지시) */}
+      <p className="text-center text-[13px] text-ink-faint mt-4">
+        회원가입 없이 확인하실래요?{' '}
+        <Link to="/app/guest-order" className="text-ink-soft font-bold underline focus:outline-none focus-visible:shadow-ring">
+          비회원 주문조회(연락처)
+        </Link>
+      </p>
 
       <p className="text-center text-[13px] text-ink-soft mt-6">
         이미 쇼핑몰 회원이세요?{' '}
