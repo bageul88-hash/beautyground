@@ -13,6 +13,9 @@ const AppHome = lazy(() => import('./pages/AppHome'))
 const CompanyIntro = lazy(() => import('./pages/CompanyIntro'))
 const Export = lazy(() => import('./pages/Export'))
 const ExportBrand = lazy(() => import('./pages/ExportBrand'))
+const PartnerHub = lazy(() => import('./pages/PartnerHub'))
+const PartnerHubList = lazy(() => import('./pages/PartnerHubList'))
+const PartnerHubDetail = lazy(() => import('./pages/PartnerHubDetail'))
 const AppCategory = lazy(() => import('./pages/AppCategory'))
 const AppSearch = lazy(() => import('./pages/AppSearch'))
 const AppCategoryDetail = lazy(() => import('./pages/AppCategoryDetail'))
@@ -56,6 +59,7 @@ const AdminLives = lazy(() => import('./pages/admin/Lives'))
 const AdminCoupons = lazy(() => import('./pages/admin/Coupons'))
 const AdminExportInquiries = lazy(() => import('./pages/admin/ExportInquiries'))
 const AdminExportBuyers = lazy(() => import('./pages/admin/ExportBuyers'))
+const AdminPartnerHubPosts = lazy(() => import('./pages/admin/PartnerHubPosts'))
 const AdminMarketing = lazy(() => import('./pages/admin/Marketing'))
 const AdminTheme = lazy(() => import('./pages/admin/Theme'))
 import { useMallTheme } from './hooks/useMallTheme'
@@ -163,6 +167,14 @@ export default function App() {
         {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙).
             구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />
+        {/* 브랜드 파트너 허브(2026-08-24) — 입점·비입점 브랜드 누구나 로그인 없이 열람하는 정보
+            페이지(정부지원사업/백화점 입점/브랜드 운영정보 + /export 링크). 신청·입점 폼이 전혀
+            없는 일방향 정보 제공 페이지라, 2026-08-10에 PG 심사에서 "중개플랫폼"으로 오인되어
+            삭제된 옛 /partners·/proposal("입점 브랜드 모집", 신청 폼이 있었음)과는 이름만 같고
+            성격이 다르다 — 헷갈리지 말 것. */}
+        <Route path="/partners" element={<PartnerHub />} />
+        <Route path="/partners/:category" element={<PartnerHubList />} />
+        <Route path="/partners/:category/:id" element={<PartnerHubDetail />} />
 
         {/* 직원 전용 구매 — 로그인 + 직원 등급(app_staff)일 때만 접근, 카드결제 없이 무통장입금 전용.
             2026-08-19 비밀 링크(/staff/:key)로 시작 → 2026-08-20 회원등급 방식으로 전환(관리자 회원관리에서 지정) */}
@@ -191,6 +203,7 @@ export default function App() {
             <Route path="/admin/coupons" element={<AdminCoupons />} />
             <Route path="/admin/export-inquiries" element={<AdminExportInquiries />} />
             <Route path="/admin/export-buyers" element={<AdminExportBuyers />} />
+            <Route path="/admin/partner-hub-posts" element={<AdminPartnerHubPosts />} />
             <Route path="/admin/marketing" element={<AdminMarketing />} />
             <Route path="/admin/theme" element={<AdminTheme />} />
           </Route>

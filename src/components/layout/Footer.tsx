@@ -7,6 +7,8 @@ const FOOTER_LINKS = [
   { href: '/privacy', label: '개인정보처리방침' },
   // 해외 바이어용 — 브랜드 모집이 아니라 뷰티그라운드가 직접 수출자로서 제안하는 채널(2026-08-15)
   { href: '/export', label: 'For Global Partners' },
+  // 브랜드 파트너 허브 — 입점·비입점 브랜드 누구나 열람하는 정보 페이지(신청 폼 없음, 2026-08-24)
+  { href: '/partners', label: '브랜드 파트너 허브' },
 ]
 
 const LEGAL_LINKS = [

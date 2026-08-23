@@ -15,6 +15,7 @@ import {
   IconBuildingStore,
   IconWorld,
   IconTargetArrow,
+  IconClipboardList,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
@@ -49,6 +50,7 @@ const NAV_GROUPS = [
     items: [
       { label: '브랜드 관리', to: '/admin/partners', icon: IconBuildingStore },
       { label: '브랜드 정산 관리', to: '/admin/partner-settlements', icon: IconCashBanknote },
+      { label: '파트너 허브 콘텐츠', to: '/admin/partner-hub-posts', icon: IconClipboardList },
     ],
   },
   {
