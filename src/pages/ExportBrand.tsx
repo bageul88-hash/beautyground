@@ -331,7 +331,9 @@ export default function ExportBrand() {
         <header className="px-6 pt-7 pb-6 relative sheet-in">
           <div className="pr-24">
             {brand.export_logo_url && (
-              <img src={brand.export_logo_url} alt="" className="w-12 h-12 object-cover border border-[#E6E3DC] mb-4" />
+              <div className="h-12 max-w-[180px] flex items-center border border-[#E6E3DC] px-2 mb-4">
+                <img src={brand.export_logo_url} alt="" className="max-h-9 max-w-full w-auto object-contain" />
+              </div>
             )}
             <h1 className="font-serif text-[30px] leading-[1.15] text-[#16202F] break-keep">{brand.brand_name}</h1>
             {pitchText && (
