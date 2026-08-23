@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopAuthLayout from '../components/auth/DesktopAuthLayout'
+import AppFooter from '../components/layout/AppFooter'
+import Footer from '../components/layout/Footer'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 
@@ -109,6 +111,7 @@ export default function AppSignup() {
       <>
         <ViewModeToggle mode={mode} onToggle={toggle} />
         <DesktopAuthLayout title="회원가입">{formContent}</DesktopAuthLayout>
+        <Footer />
       </>
     )
   }
@@ -116,12 +119,13 @@ export default function AppSignup() {
   return (
     <div className="min-h-screen bg-quiet md:py-6">
     <ViewModeToggle mode={mode} onToggle={toggle} />
-    <div className="max-w-[480px] mx-auto bg-paper min-h-screen md:min-h-0 md:border md:border-rule">
+    <div className="max-w-[480px] mx-auto bg-paper md:border md:border-rule">
       <BackHeader title="" />
       <div className="px-6 py-10">
         <h1 className="text-[24px] font-bold text-ink text-center mb-8">회원가입</h1>
         {formContent}
       </div>
+      <AppFooter />
     </div>
     </div>
   )
