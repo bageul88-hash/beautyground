@@ -2,8 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import { IconCart, IconClose, IconMinus, IconPlus } from '../common/Icon'
 import DesktopHeader from '../layout/DesktopHeader'
 import DesktopFooter from '../layout/DesktopFooter'
+import ProductRail from '../home/ProductRail'
 import { FREE_SHIPPING_THRESHOLD } from '../../constants'
 import type { CartLine } from '../../lib/cart'
+import type { ShopProduct } from '../../hooks/useShopProducts'
 
 interface Props {
   lines: CartLine[]
@@ -19,6 +21,8 @@ interface Props {
   deliveryFee: number
   total: number
   onOrder: () => void
+  recommended: ShopProduct[]
+  recLoading: boolean
 }
 
 // PC 버전 — 왼쪽에 상품 목록, 오른쪽에 스크롤해도 고정되는 주문 요약 패널(구매 흐름 최종 단계라
@@ -37,6 +41,8 @@ export default function DesktopCart({
   deliveryFee,
   total,
   onOrder,
+  recommended,
+  recLoading,
 }: Props) {
   const navigate = useNavigate()
 
@@ -191,6 +197,16 @@ export default function DesktopCart({
               </button>
             </div>
           </div>
+        )}
+
+        {recommended.length > 0 && (
+          <ProductRail
+            id="cart-recommend-desktop"
+            title="이 상품과 잘 어울려요"
+            products={recommended}
+            loading={recLoading}
+            onProductClick={(id) => navigate(`/app/product/${id}`)}
+          />
         )}
       </div>
 

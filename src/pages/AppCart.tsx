@@ -5,9 +5,11 @@ import BottomNav from '../components/layout/BottomNav'
 import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCart from '../components/cart/DesktopCart'
+import ProductRail from '../components/home/ProductRail'
 import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../lib/cart'
+import { useCartRecommendations } from '../hooks/useCartRecommendations'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 import { IconCart, IconClose, IconMinus, IconPlus } from '../components/common/Icon'
 
@@ -81,6 +83,11 @@ export default function AppCart() {
   const deliveryFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const total = subtotal + deliveryFee
 
+  // 담긴 상품과 같은 카테고리에서 추천 — 장바구니 담긴 상품은 추천에서 제외
+  const cartCategories = lines.map((l) => l.product.category).filter((c): c is string => !!c)
+  const cartProductIds = lines.map((l) => l.product.id)
+  const { products: recommended, loading: recLoading } = useCartRecommendations(cartCategories, cartProductIds)
+
   const goOrder = async () => {
     // 주문(결제) 시점에만 로그인 요구 — 비로그인이면 로그인으로 보냄(게스트 장바구니는 localStorage에 유지됨).
     const { data: { session } } = await supabase.auth.getSession()
@@ -137,6 +144,8 @@ export default function AppCart() {
           deliveryFee={deliveryFee}
           total={total}
           onOrder={goOrder}
+          recommended={recommended}
+          recLoading={recLoading}
         />
       </>
     )
@@ -293,6 +302,15 @@ export default function AppCart() {
               </button>
             </div>
           </div>
+          {recommended.length > 0 && (
+            <ProductRail
+              id="cart-recommend"
+              title="이 상품과 잘 어울려요"
+              products={recommended}
+              loading={recLoading}
+              onProductClick={(id) => navigate(`/app/product/${id}`)}
+            />
+          )}
         </>
       )}
 
