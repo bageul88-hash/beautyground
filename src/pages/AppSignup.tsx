@@ -33,7 +33,8 @@ export default function AppSignup() {
     if (error) setNotice('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
   }
 
-  // 네이버 Client ID/Secret 실제 값 등록 완료(2026-08-24) — 빌드 캐시 무효화용 재배포 트리거.
+  // 네이버 앱을 회사 계정으로 재등록(2026-08-24) — 개인계정 앱은 client info invalid 오류로 실패,
+  // 회사 계정 신규 등록 후 정상 확인(YEG1xy5kENWD037qOt3T). 빌드 캐시 무효화용 재배포 트리거.
   // 네이버는 Supabase 공식 지원 밖이라 커스텀 OAuth — state/from을 sessionStorage에 저장해두고
   // 콜백(AppNaverCallback.tsx)에서 CSRF 대조 후 /api/auth-naver 로 code를 넘겨 세션을 완성한다.
   const handleNaver = () => {
