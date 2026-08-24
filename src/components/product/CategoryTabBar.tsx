@@ -33,11 +33,13 @@ export default function CategoryTabBar({
   )
 
   return (
-    <nav className={`sticky ${stickyTop} z-40 bg-paper border-b border-rule`}>
+    <nav className={`relative sticky ${stickyTop} z-40 bg-paper border-b border-rule`}>
       <div className="max-w-[1200px] mx-auto flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2.5">
         {chip('전체', active == null, () => go(null))}
         {categories.map((cat) => chip(cat, active === cat, () => go(cat)))}
       </div>
+      {/* 마지막 탭이 화면 끝에 딱 붙어 잘린 것처럼 보인다는 지적(2026-08-25)으로 스크롤 힌트용 페이드 추가 */}
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-paper to-transparent" aria-hidden="true" />
     </nav>
   )
 }

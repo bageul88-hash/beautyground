@@ -116,9 +116,10 @@ export default function AppCategoryDetail() {
         }
       />
 
-      {/* 카테고리 탭 */}
+      {/* 카테고리 탭 — 가로 스크롤 가능한데 마지막 탭이 화면 끝에 딱 붙어 잘린 것처럼 보인다는
+          지적(2026-08-25)으로 오른쪽에 스크롤 힌트용 페이드 그라데이션 추가 */}
       <nav
-        className="bg-paper border-b border-rule sticky top-14 z-20"
+        className="relative bg-paper border-b border-rule sticky top-14 z-20"
         aria-label="카테고리"
       >
         <div className="flex gap-2 px-4 py-2.5 overflow-x-auto scrollbar-hide">
@@ -138,6 +139,7 @@ export default function AppCategoryDetail() {
             )
           })}
         </div>
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-paper to-transparent" aria-hidden="true" />
       </nav>
 
       {/* 정렬 바 */}
