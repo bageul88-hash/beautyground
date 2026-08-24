@@ -56,11 +56,19 @@ export default function PartnerHub() {
       {/* 가벼운 전용 상단바 — 공용 GNB 대신(앱 보기 링크 불필요) */}
       <header className="shrink-0 border-b border-rule px-6 h-14 flex items-center justify-between">
         <Link to="/" className="text-[16px] font-bold text-ink">뷰티그라운드</Link>
-        {visitorCount !== null && (
-          <p className="px-3 py-1 rounded-pill border border-rule text-[11.5px] text-ink-soft">
-            누적 방문자 <span className="font-bold text-ink">{comma(visitorCount)}</span>명
-          </p>
-        )}
+        <div className="flex items-center gap-3">
+          {visitorCount !== null && (
+            <p className="px-3 py-1 rounded-pill border border-rule text-[11.5px] text-ink-soft">
+              누적 방문자 <span className="font-bold text-ink">{comma(visitorCount)}</span>명
+            </p>
+          )}
+          <Link
+            to="/brand/login"
+            className="px-3.5 py-1.5 rounded-pill bg-ink text-paper text-[12px] font-semibold hover:opacity-90 transition-opacity"
+          >
+            회원사 가입·로그인
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 min-h-0 flex flex-col items-center justify-center px-6 py-6 overflow-y-auto">
