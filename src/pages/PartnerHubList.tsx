@@ -4,6 +4,7 @@ import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { CATEGORY_META, fetchPostsByCategory, slugToCategory, type PartnerHubPost } from '../lib/partnerHub'
 import { fetchGovSupportPrograms, type GovSupportCategory, type GovSupportProgram } from '../lib/govSupport'
+import { fetchMilitaryPxNotices, type MilitaryPxNotice } from '../lib/militaryPx'
 
 function formatDate(iso: string) {
   const d = new Date(iso)
@@ -93,6 +94,63 @@ function GovSupportFeed() {
   )
 }
 
+function MilitaryPxFeed() {
+  const [notices, setNotices] = useState<MilitaryPxNotice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [q, setQ] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const rows = await fetchMilitaryPxNotices()
+      if (!cancelled) { setNotices(rows); setLoading(false) }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const visible = useMemo(() => {
+    const query = q.trim().toLowerCase()
+    return notices.filter((n) => !query || n.title.toLowerCase().includes(query))
+  }, [notices, q])
+
+  return (
+    <section className="max-w-[720px] mx-auto px-6 pt-12">
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="공고 제목 검색"
+        className="w-full mb-8 px-4 py-2.5 border border-rule rounded-control text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper"
+      />
+
+      {loading ? (
+        <p className="text-ink-soft text-[14px] text-center py-10">불러오는 중…</p>
+      ) : visible.length === 0 ? (
+        <p className="text-ink-soft text-[14px] text-center py-10">조건에 맞는 공고가 없습니다.</p>
+      ) : (
+        <ul className="flex flex-col gap-3 mb-4">
+          {visible.map((n) => (
+            <li key={n.id}>
+              <a
+                href={n.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block border border-rule rounded-card px-5 py-4 hover:border-ink transition-colors"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-[15px] font-semibold text-ink truncate">{n.title}</p>
+                  {n.reg_date && (
+                    <span className="text-[12px] text-ink-faint whitespace-nowrap shrink-0">{n.reg_date}</span>
+                  )}
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export default function PartnerHubList() {
   const { category = '' } = useParams()
   const cat = slugToCategory(category)
@@ -131,12 +189,13 @@ export default function PartnerHubList() {
         </section>
 
         {cat === 'gov_support' && <GovSupportFeed />}
+        {cat === 'military_px' && <MilitaryPxFeed />}
 
         <section className="max-w-[720px] mx-auto px-6 py-12">
           {loading ? (
             <p className="text-ink-soft text-[14px] text-center py-16">불러오는 중…</p>
           ) : posts.length === 0 ? (
-            cat === 'gov_support' ? null : (
+            cat === 'gov_support' || cat === 'military_px' ? null : (
               <p className="text-ink-soft text-[14px] text-center py-16">아직 등록된 글이 없습니다.</p>
             )
           ) : (

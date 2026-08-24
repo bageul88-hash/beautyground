@@ -4,6 +4,7 @@
     { "source": "/((?!api/).*)", "destination": "/" }
   ],
   "crons": [
-    { "path": "/api/company-og?job=gov-support-sync", "schedule": "10 0 * * *" }
+    { "path": "/api/company-og?job=gov-support-sync", "schedule": "10 0 * * *" },
+    { "path": "/api/export-brand?action=military-px-sync", "schedule": "20 0 * * *" }
   ]
 }

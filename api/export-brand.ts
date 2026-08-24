@@ -15,6 +15,9 @@ const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const GMAIL_USER = process.env.GMAIL_USER || ''
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || ''
 const GEMINI_KEY = process.env.GEMINI_API_KEY || ''
+const CRON_SECRET = process.env.CRON_SECRET
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID
 const SITE = 'https://beautyground.co.kr'
 
 // ── 공통: 토큰 → 본인 브랜드 확인 (판매 파트너 계정 또는 수출 전용 계정) ──
@@ -346,11 +349,99 @@ async function hubLogoutHandler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ ok: true })
 }
 
+// ══════════ 4) 국군복지단 PX(WA몰) 입찰정보 자동수집 — welfare.mil.kr ══════════
+// gov-support-sync(company-og.ts)와 같은 이유로 여기 얹었다: Vercel Hobby 12개 함수 제한 때문에
+// 새 파일을 못 만들어서, 이미 있는 export-brand.ts에 크론 액션으로 추가(2026-08-24).
+// welfare.mil.kr 입찰정보 게시판은(기업마당과 마찬가지로) 정적 서버렌더링 HTML이라 fetch+정규식으로
+// 충분히 파싱 가능함을 실제 HTML 확인 후 진행(헤드리스 브라우저 불필요).
+interface MilitaryPxItem {
+  bmSerial: string
+  title: string
+  regDate: string | null
+  url: string
+}
+
+async function sendTelegram(text: string) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return
+  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text }),
+  }).catch(() => {})
+}
+
+async function fetchMilitaryPxList(): Promise<MilitaryPxItem[]> {
+  const res = await fetch('https://www.welfare.mil.kr/board/board.do?m_code=124&be_id=c_bid', {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+  })
+  const html = await res.text()
+  const items: MilitaryPxItem[] = []
+  const rowRe = /<tr>([\s\S]*?)<\/tr>/g
+  let m: RegExpExecArray | null
+  while ((m = rowRe.exec(html))) {
+    const row = m[1]
+    const linkM = row.match(/bm_serial=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/)
+    if (!linkM) continue
+    const [, bmSerial, rawTitle] = linkM
+    const title = rawTitle.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+    const tds = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)).map((t) => t[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim())
+    // tds: [0]번호 [1]제목(위에서 별도 추출) [2]글쓴이 [3]등록일 [4]조회
+    const regDate = tds[3]?.match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? null
+    items.push({
+      bmSerial,
+      title,
+      regDate,
+      url: `https://www.welfare.mil.kr/board/board.do?forwardName=board.view&be_id=c_bid&bm_serial=${bmSerial}&m_code=124`,
+    })
+  }
+  return items
+}
+
+async function militaryPxSyncHandler(req: VercelRequest, res: VercelResponse) {
+  if (CRON_SECRET && req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
+    return res.status(401).json({ ok: false, error: 'unauthorized' })
+  }
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
+
+  let items: MilitaryPxItem[] = []
+  try {
+    items = await fetchMilitaryPxList()
+  } catch (e) {
+    console.error('[military-px-sync] 조회 실패:', e)
+    return res.status(500).json({ ok: false, error: '게시판 조회 실패' })
+  }
+
+  const { data: existingRows } = await supabase.from('military_px_notices').select('bm_serial')
+  const existingIds = new Set((existingRows ?? []).map((r) => r.bm_serial as string))
+  const newItems = items.filter((it) => !existingIds.has(it.bmSerial))
+
+  if (items.length > 0) {
+    const { error } = await supabase.from('military_px_notices').upsert(
+      items.map((it) => ({ bm_serial: it.bmSerial, title: it.title, reg_date: it.regDate, url: it.url })),
+      { onConflict: 'bm_serial' }
+    )
+    if (error) return res.status(500).json({ ok: false, error: error.message })
+  }
+
+  if (newItems.length > 0) {
+    let msg = `📢 국군복지단 PX 신규 공고 ${newItems.length}건 (/partners/military-px 반영됨)\n\n`
+    for (const it of newItems.slice(0, 10)) msg += `• ${it.title}\n  ${it.url}\n\n`
+    if (newItems.length > 10) msg += `...외 ${newItems.length - 10}건`
+    await sendTelegram(msg.trim())
+  }
+
+  return res.status(200).json({ ok: true, checked: items.length, new: newItems.length })
+}
+
 // ── 액션 라우터 ──
+// military-px-sync는 Vercel Cron이 GET으로 호출하므로(다른 액션은 전부 브라우저 fetch POST)
+// 아래에서 메서드 체크보다 먼저 분기한다 — company-og.ts의 job 분기와 같은 이유.
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'POST only' })
-  if (!SERVICE_ROLE) return res.status(503).json({ message: '서버 설정이 없습니다' })
   const action = String(req.query.action || '')
+  if (!SERVICE_ROLE) return res.status(503).json({ message: '서버 설정이 없습니다' })
+  if (action === 'military-px-sync') return militaryPxSyncHandler(req, res)
+
+  if (req.method !== 'POST') return res.status(405).json({ message: 'POST only' })
   if (action === 'welcome') return welcomeHandler(req, res)
   if (action === 'translate') return translateHandler(req, res)
   if (action === 'hub-send-code') return hubSendCodeHandler(req, res)
