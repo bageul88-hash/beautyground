@@ -67,6 +67,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const email: string | undefined = profile.email
   const name: string | undefined = profile.name || profile.nickname
   const naverId: string = profile.id
+  // 어뷰징 방지(카카오/네이버 이중가입 차단, block_duplicate_phone_signup 트리거)용 —
+  // 네이버 앱에 휴대전화번호 제공 동의를 필수로 걸어뒀으므로 응답에 mobile이 온다(2026-08-24 확인 필요).
+  const phone: string | undefined = profile.mobile
 
   if (!email) {
     res.status(400).json({
@@ -82,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { error: createErr } = await supabase.auth.admin.createUser({
     email,
     email_confirm: true,
-    user_metadata: { name, naver_id: naverId, provider: 'naver' },
+    user_metadata: { name, phone, naver_id: naverId, provider: 'naver' },
   })
   if (createErr && !/already.*registered|already exists/i.test(createErr.message || '')) {
     console.error('[auth-naver] createUser failed', createErr)
