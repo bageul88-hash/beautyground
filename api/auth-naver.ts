@@ -90,16 +90,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  // 4) magiclink용 hashed_token 발급 — 프론트에서 verifyOtp로 교환해 세션 완성
+  // 4) 세션 발급용 OTP 코드 생성 — 프론트에서 verifyOtp(type:'email')로 교환해 세션 완성.
+  // ⚠️ type:'magiclink' + hashed_token 조합은 verifyOtp에서 항상 otp_expired로 실패함(실측 확인,
+  // 2026-08-24) — type:'email' + email_otp(6자리) 조합만 정상 동작.
   const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email,
   })
-  if (linkErr || !linkData?.properties?.hashed_token) {
+  if (linkErr || !linkData?.properties?.email_otp) {
     console.error('[auth-naver] generateLink failed', linkErr)
     res.status(500).json({ ok: false, reason: '로그인 토큰 발급에 실패했습니다.' })
     return
   }
 
-  res.status(200).json({ ok: true, email, tokenHash: linkData.properties.hashed_token })
+  res.status(200).json({ ok: true, email, emailOtp: linkData.properties.email_otp })
 }

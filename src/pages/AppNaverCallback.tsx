@@ -43,8 +43,8 @@ export default function AppNaverCallback() {
         }
         const { error: verifyError } = await supabase.auth.verifyOtp({
           email: json.email,
-          token: json.tokenHash,
-          type: 'magiclink',
+          token: json.emailOtp,
+          type: 'email',
         })
         if (verifyError) {
           setError('로그인 세션 생성에 실패했습니다.')
