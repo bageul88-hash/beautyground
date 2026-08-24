@@ -9,6 +9,27 @@ function formatDate(iso: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
+const URL_RE = /(https?:\/\/[^\s)]+)/g
+
+function linkifyBody(body: string) {
+  const parts = body.split(URL_RE)
+  return parts.map((part, i) =>
+    part.startsWith('http://') || part.startsWith('https://') ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-signal-blue underline underline-offset-2 hover:text-ink break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  )
+}
+
 export default function PartnerHubDetail() {
   const { category = '', id = '' } = useParams()
   const cat = slugToCategory(category)
@@ -56,7 +77,7 @@ export default function PartnerHubDetail() {
               {post.thumbnail_url && (
                 <img src={post.thumbnail_url} alt="" className="w-full rounded-card border border-rule mb-8 object-cover" />
               )}
-              <div className="whitespace-pre-wrap text-[15px] text-ink-soft leading-[1.9]">{post.body}</div>
+              <div className="whitespace-pre-wrap text-[15px] text-ink-soft leading-[1.9]">{linkifyBody(post.body)}</div>
             </article>
           )}
         </div>
