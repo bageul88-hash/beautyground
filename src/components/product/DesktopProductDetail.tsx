@@ -9,7 +9,7 @@ import { IconHeart, IconCart, IconMinus, IconPlus } from '../common/Icon'
 import CartCountBadge from '../common/CartCountBadge'
 import ProductInfoTable from './ProductInfoTable'
 import { SHIPPING_NOTICE } from '../../constants'
-import type { ReviewSummaryData, ScrapedReview } from '../../lib/types'
+import type { ProductOption, ReviewSummaryData, ScrapedReview } from '../../lib/types'
 
 const DETAIL_TABS = ['상품정보', '성분', '결제/배송/교환·반품정보']
 
@@ -37,6 +37,9 @@ interface Props {
   total: number
   wished: boolean
   toggleWish: () => void
+  options: ProductOption[]
+  selectedOption: string
+  setSelectedOption: (v: string) => void
   onBuy: () => void
   onAddToCart: () => void
   rewardRate: number
@@ -55,6 +58,9 @@ export default function DesktopProductDetail({
   total,
   wished,
   toggleWish,
+  options,
+  selectedOption,
+  setSelectedOption,
   onBuy,
   onAddToCart,
   rewardRate,
@@ -197,6 +203,25 @@ export default function DesktopProductDetail({
             className="mt-4"
           />
 
+          {options.length > 0 && (
+            <div className="mt-6">
+              <label htmlFor="product-option-desktop" className="text-[14px] font-bold text-ink block mb-2">옵션</label>
+              <select
+                id="product-option-desktop"
+                value={selectedOption}
+                onChange={(e) => setSelectedOption(e.target.value)}
+                className="w-full rounded-control bg-paper border border-rule px-3.5 py-3 text-[14px] text-ink focus:outline-none focus-visible:shadow-ring"
+              >
+                <option value="">옵션을 선택해 주세요</option>
+                {options.map((o) => (
+                  <option key={o.id} value={o.label} disabled={!o.in_stock}>
+                    {o.label}{!o.in_stock ? ' (품절)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="mt-6 flex items-center justify-between py-4 border-t border-b border-rule">
             <span className="text-[14px] font-bold text-ink">수량</span>
             <div className="flex items-center gap-3">
@@ -228,17 +253,17 @@ export default function DesktopProductDetail({
           <div className="mt-5 flex items-center gap-2.5">
             <button
               onClick={onAddToCart}
-              disabled={view.soldOut}
+              disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="flex-1 rounded-control border border-rule text-ink font-bold text-[14px] py-3.5 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             >
               장바구니
             </button>
             <button
               onClick={onBuy}
-              disabled={view.soldOut}
+              disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="flex-1 rounded-control bg-ink text-paper font-bold text-[14px] py-3.5 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             >
-              {view.soldOut ? '일시 품절' : '구매하기'}
+              {view.soldOut ? '일시 품절' : options.length > 0 && !selectedOption ? '옵션 선택' : '구매하기'}
             </button>
           </div>
         </div>

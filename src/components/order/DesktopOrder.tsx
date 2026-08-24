@@ -12,6 +12,7 @@ interface OrderItem {
   quantity: number
   thumbnail?: string | null
   cart_item_id?: string
+  option_label?: string | null
 }
 
 const field =
@@ -225,12 +226,13 @@ export default function DesktopOrder({
             <h2 className="text-[15px] font-bold text-ink mb-3">주문 상품 ({items.length})</h2>
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.product_id} className="flex items-center gap-3">
+                <div key={`${item.product_id}:${item.option_label ?? ''}`} className="flex items-center gap-3">
                   <div className="w-16 h-16 overflow-hidden bg-quiet flex-shrink-0">
                     {item.thumbnail && <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-bold text-ink truncate">{item.name}</p>
+                    {item.option_label && <p className="text-[12px] text-ink-faint mt-0.5">옵션: {item.option_label}</p>}
                     <div className="flex items-center justify-between mt-0.5">
                       <span className="text-[12.5px] text-ink-soft">수량 {item.quantity}개</span>
                       <span className="text-[14px] font-bold tabular-nums text-ink">{(item.price * item.quantity).toLocaleString('ko-KR')}원</span>

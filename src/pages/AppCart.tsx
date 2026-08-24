@@ -104,6 +104,7 @@ export default function AppCart() {
           quantity: l.quantity,
           thumbnail: l.product.thumbnail_url,
           cart_item_id: l.id,
+          option_label: l.optionLabel,
         })),
       },
     })
@@ -226,6 +227,9 @@ export default function AppCart() {
                           <IconClose className="w-4 h-4" />
                         </button>
                       </div>
+                      {line.optionLabel && (
+                        <p className="text-[11.5px] text-ink-faint mt-0.5">옵션: {line.optionLabel}</p>
+                      )}
                       {unavailable ? (
                         <p className="text-[12px] text-signal-red mt-2">현재 구매할 수 없는 상품이에요 (품절/판매중지)</p>
                       ) : (

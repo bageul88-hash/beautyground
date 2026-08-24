@@ -223,7 +223,10 @@ export default function AdminOrders() {
                     <tr key={o.id} className="border-b border-rule last:border-b-0">
                       <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(o.created_at)}</td>
                       <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{o.partners?.brand_name ?? '-'}</td>
-                      <td className="px-4 py-3 text-ink max-w-[160px] truncate">{o.products?.name ?? '-'}</td>
+                      <td className="px-4 py-3 text-ink max-w-[160px] truncate">
+                        {o.products?.name ?? '-'}
+                        {o.option_label && <p className="text-[11px] text-ink-faint truncate">옵션: {o.option_label}</p>}
+                      </td>
                       <td className="px-4 py-3 text-ink whitespace-nowrap">
                         {o.buyer_name ?? '-'}
                         {o.delivery_memo && <p className="text-[11px] text-ink-faint truncate max-w-[160px]" title={o.delivery_memo}>📝 {o.delivery_memo}</p>}

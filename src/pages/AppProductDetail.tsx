@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase'
 import { addToCart } from '../lib/cart'
 import { isWished, addWish, removeWish } from '../lib/wishlist'
 import { getMyMembership } from '../lib/membership'
-import type { Product, ScrapedReview, ReviewSummaryData } from '../lib/types'
+import type { Product, ProductOption, ScrapedReview, ReviewSummaryData } from '../lib/types'
 import { ALL_PRODUCTS, SHIPPING_NOTICE } from '../constants'
 import ProductInfoTable from '../components/product/ProductInfoTable'
 import CategoryTabBar from '../components/product/CategoryTabBar'
@@ -95,6 +95,8 @@ export default function AppProductDetail() {
   const location = useLocation()
   const { mode, isDesktop, toggle } = useViewMode()
   const [quantity, setQuantity] = useState(1)
+  const [options, setOptions] = useState<ProductOption[]>([])
+  const [selectedOption, setSelectedOption] = useState<string>('')
   const [activeTab, setActiveTab] = useState(0)
   const [activeImg, setActiveImg] = useState(0)
   const [wished, setWished] = useState(false)
@@ -151,6 +153,12 @@ export default function AppProductDetail() {
           }
           if (active) { setView(fromDbProduct(p, brand)); setLoading(false) }
           isWished(id).then((w) => { if (active) setWished(w) })
+          supabase
+            .from('product_options')
+            .select('*')
+            .eq('product_id', id)
+            .order('sort_order', { ascending: true })
+            .then(({ data: opts }) => { if (active) setOptions((opts ?? []) as ProductOption[]) })
           return
         }
       }
@@ -248,12 +256,14 @@ export default function AppProductDetail() {
 
   const onBuy = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 구매할 수 없습니다'); return }
+    if (options.length > 0 && !selectedOption) { showToast('옵션을 선택해 주세요'); return }
     // 바로구매도 장바구니에 같이 담아 헤더 카트 배지 숫자가 즉시 반영되게 함(전환율 개선,
     // 2026-08-23 대표님 지시) + 결제 중단 시 상품이 장바구니에 남아있는 부가효과.
     // 이미 장바구니에 같은 상품이 있으면 수량이 합산되는데, 결제 완료 시 이 cart_item_id
     // 행 전체가 삭제되므로 "장바구니에 미리 담아둔 수량"과 "지금 바로구매하는 수량"이 겹치는
     // 극히 드문 경우엔 장바구니의 기존 수량까지 함께 삭제된다(알려진 한계, 낮은 우선순위).
-    const { cartItemId } = await addToCart(id, quantity)
+    const optionLabel = selectedOption || null
+    const { cartItemId } = await addToCart(id, quantity, optionLabel)
     // 비회원 구매 허용(2026-08-18) — 로그인 없이 바로 주문서로 (장바구니·찜은 회원 전용 유지)
     navigate('/app/order', {
       state: {
@@ -265,6 +275,7 @@ export default function AppProductDetail() {
             quantity,
             thumbnail: view.images[0] ?? null,
             cart_item_id: cartItemId,
+            option_label: optionLabel,
           },
         ],
       },
@@ -273,8 +284,9 @@ export default function AppProductDetail() {
 
   const onAddToCart = async () => {
     if (!isDbProduct || !id) { showToast('목데이터 상품은 담을 수 없습니다'); return }
+    if (options.length > 0 && !selectedOption) { showToast('옵션을 선택해 주세요'); return }
     // 장바구니는 로그인 없이 담을 수 있다(게스트 장바구니). 로그인은 결제 시점에만.
-    const { error } = await addToCart(id, quantity)
+    const { error } = await addToCart(id, quantity, selectedOption || null)
     showToast(error ? '장바구니 담기에 실패했습니다' : '장바구니에 담았습니다')
   }
 
@@ -305,6 +317,9 @@ export default function AppProductDetail() {
           total={total}
           wished={wished}
           toggleWish={toggleWish}
+          options={options}
+          selectedOption={selectedOption}
+          setSelectedOption={setSelectedOption}
           onBuy={onBuy}
           onAddToCart={onAddToCart}
           rewardRate={rewardRate}
@@ -434,6 +449,26 @@ export default function AppProductDetail() {
           className="mt-4"
         />
 
+        {/* 옵션 선택 (색상 등) — 있는 상품만 노출, 선택 전엔 담기/구매 불가 */}
+        {options.length > 0 && (
+          <div className="mt-5 pt-4 border-t border-rule">
+            <label htmlFor="product-option" className="text-[14px] font-bold text-ink block mb-2">옵션</label>
+            <select
+              id="product-option"
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+              className="w-full rounded-control bg-paper border border-rule px-3.5 py-3 text-[14px] text-ink focus:outline-none focus-visible:shadow-ring"
+            >
+              <option value="">옵션을 선택해 주세요</option>
+              {options.map((o) => (
+                <option key={o.id} value={o.label} disabled={!o.in_stock}>
+                  {o.label}{!o.in_stock ? ' (품절)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* 수량 선택 */}
         <div className="mt-5 flex items-center justify-between py-4 border-t border-b border-rule">
           <span className="text-[14px] font-bold text-ink">수량</span>
@@ -530,7 +565,7 @@ export default function AppProductDetail() {
             </div>
             <button
               onClick={onAddToCart}
-              disabled={view.soldOut}
+              disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="shrink-0 rounded-pill border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
               aria-label="장바구니 담기"
             >
@@ -538,10 +573,10 @@ export default function AppProductDetail() {
             </button>
             <button
               onClick={onBuy}
-              disabled={view.soldOut}
+              disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="flex-1 rounded-pill bg-accent text-paper font-bold text-[14px] py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
             >
-              {view.soldOut ? '일시 품절' : '구매하기'}
+              {view.soldOut ? '일시 품절' : options.length > 0 && !selectedOption ? '옵션을 선택해 주세요' : '구매하기'}
             </button>
           </div>
         </div>

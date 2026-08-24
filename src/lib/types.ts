@@ -35,6 +35,15 @@ export interface Product {
   created_at: string
 }
 
+// 상품 옵션(색상 등, supabase/product_options.sql) — 없는 상품은 옵션 없이 바로 구매
+export interface ProductOption {
+  id: string
+  product_id: string
+  label: string
+  sort_order: number
+  in_stock: boolean
+}
+
 // 리뷰 사진 1건 (썸네일 클릭 시 모달에 본문 표시)
 export interface ReviewPhoto {
   url: string
@@ -183,6 +192,7 @@ export interface Order {
   amount: number
   // pending/failed = 결제 시도 단계, cancel_requested = 고객 취소요청(관리자 승인 시 cancelled)
   status: 'pending' | 'failed' | 'paid' | 'shipped' | 'done' | 'cancelled' | 'cancel_requested'
+  option_label?: string | null // 선택한 옵션(색상 등, supabase/product_options.sql) — 없으면 옵션 없는 상품
   delivery_memo?: string | null
   tracking_number?: string | null
   tracking_carrier?: string | null

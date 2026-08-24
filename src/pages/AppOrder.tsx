@@ -25,6 +25,7 @@ interface OrderItem {
   quantity: number
   thumbnail?: string | null
   cart_item_id?: string
+  option_label?: string | null
 }
 
 type Status = 'idle' | 'paying' | 'verifying' | 'done' | 'error'
@@ -382,6 +383,7 @@ export default function AppOrder() {
       status: 'pending',
       user_id: user?.id ?? null,
       delivery_memo: memo,
+      option_label: i.option_label ?? null,
     }))
     // 배송비도 한 행으로 반영(상품 없는 배송비 행) — 합계 검증(payment-complete)과 일치시키기 위함
     if (deliveryFee > 0) {
@@ -399,6 +401,7 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+        option_label: null,
       })
     }
     if (couponDiscount > 0) {
@@ -416,6 +419,7 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+        option_label: null,
       })
     }
     if (redeemedPoints > 0) {
@@ -433,6 +437,7 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+        option_label: null,
       })
     }
     if (redeemedCouponId && signupCouponPreview > 0) {
@@ -450,6 +455,7 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+        option_label: null,
       })
     }
 
@@ -457,6 +463,11 @@ export default function AppOrder() {
     if (insErr && /delivery_memo/i.test(insErr.message)) {
       // orders_customer_flow.sql 미실행 환경 폴백 — 요청사항 없이라도 주문은 진행
       const fallbackRows = rows.map(({ delivery_memo: _m, ...rest }) => rest)
+      ;({ error: insErr } = await supabase.from('orders').insert(fallbackRows))
+    }
+    if (insErr && /option_label/i.test(insErr.message)) {
+      // product_options.sql 미실행 환경 폴백 — 옵션 정보 없이라도 주문은 진행
+      const fallbackRows = rows.map(({ option_label: _o, ...rest }) => rest)
       ;({ error: insErr } = await supabase.from('orders').insert(fallbackRows))
     }
     if (insErr) {
@@ -731,12 +742,13 @@ export default function AppOrder() {
         <h2 className="text-[15px] font-bold text-ink mb-3">주문 상품 ({items.length})</h2>
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.product_id} className="flex items-center gap-3">
+            <div key={`${item.product_id}:${item.option_label ?? ''}`} className="flex items-center gap-3">
               <div className="w-14 h-14 overflow-hidden bg-quiet flex-shrink-0">
                 {item.thumbnail && <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-bold text-ink truncate">{item.name}</p>
+                {item.option_label && <p className="text-[11.5px] text-ink-faint mt-0.5">옵션: {item.option_label}</p>}
                 <div className="flex items-center justify-between mt-0.5">
                   <span className="text-[12px] text-ink-soft">수량 {item.quantity}개</span>
                   <span className="text-[13px] font-bold tabular-nums text-ink">{(item.price * item.quantity).toLocaleString('ko-KR')}원</span>
