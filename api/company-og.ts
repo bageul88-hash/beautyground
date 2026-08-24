@@ -64,11 +64,12 @@ async function fetchBizinfoList(keyword: string): Promise<BizinfoItem[]> {
     items.push({
       pblancId,
       title,
+      // tds: [0]순번 [1]분야 [2]제목(앵커, linkM으로 별도 추출) [3]신청기간 [4]소관부처·지자체 [5]사업수행기관 [6]등록일 [7]조회수
       category: tds[1] || null,
-      applyPeriod: tds[2] || null,
-      region: tds[3] || null,
-      org: tds[4] || null,
-      regDate: toIsoDate(tds[5] || null),
+      applyPeriod: tds[3] || null,
+      region: tds[4] || null,
+      org: tds[5] || null,
+      regDate: toIsoDate(tds[6] || null),
       url: `https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=${pblancId}`,
     })
   }
@@ -122,7 +123,7 @@ async function runGovSupportSync(req: VercelRequest, res: VercelResponse) {
         reg_date: it.regDate,
         url: it.url,
       })),
-      { onConflict: 'pblancid', ignoreDuplicates: true }
+      { onConflict: 'pblancid' }
     )
     if (error) {
       res.status(500).json({ ok: false, error: error.message })
