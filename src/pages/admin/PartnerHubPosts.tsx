@@ -26,6 +26,7 @@ const CATEGORY_FILTERS: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: '전체' },
   { value: 'gov_support', label: CATEGORY_META.gov_support.label },
   { value: 'dept_store', label: CATEGORY_META.dept_store.label },
+  { value: 'military_px', label: CATEGORY_META.military_px.label },
   { value: 'operations', label: CATEGORY_META.operations.label },
 ]
 

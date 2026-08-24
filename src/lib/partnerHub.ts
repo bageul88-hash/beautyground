@@ -6,12 +6,13 @@ import { supabase } from './supabase'
 // "세션당 1회 증가"가 항상 막힌다.
 const PARTNER_HUB_VISIT_KEY = 'bg_partner_hub_visit_v1'
 
-export type PartnerHubCategory = 'gov_support' | 'dept_store' | 'operations'
+export type PartnerHubCategory = 'gov_support' | 'dept_store' | 'operations' | 'military_px'
 
 export const CATEGORY_META: Record<PartnerHubCategory, { slug: string; label: string; short: string; emoji: string }> = {
   gov_support: { slug: 'gov-support', label: '정부지원사업', short: '뷰티 브랜드를 위한 정부·지자체 지원사업 정보', emoji: '🏛' },
   dept_store: { slug: 'dept-store', label: '백화점 팝업 입점', short: '백화점 팝업 입점 절차와 준비사항 안내', emoji: '🏢' },
   operations: { slug: 'operations', label: '브랜드 운영정보', short: '인증·유통·마케팅 등 브랜드 운영에 도움되는 정보', emoji: '📋' },
+  military_px: { slug: 'military-px', label: '국군복지단 PX', short: 'WA몰(군 복지 온라인쇼핑몰) 입점 절차 안내', emoji: '🎖' },
 }
 
 export function slugToCategory(slug: string): PartnerHubCategory | null {

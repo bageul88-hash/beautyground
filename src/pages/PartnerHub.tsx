@@ -18,7 +18,7 @@ import { comma } from '../lib/format'
 // 한 화면에 다 들어오는 대시보드형 레이아웃(2026-08-24, 대표님 지시) — 스크롤 없이 핵심(타일 4개)이
 // 바로 보이게. 그래서 표준 GNB/Footer 대신 이 페이지 전용의 가벼운 상단바만 쓴다(공용 GNB의
 // "앱 보기" 링크는 소비자 쇼핑몰용이라 이 페이지엔 불필요 — 그래서 GNB를 아예 재사용하지 않음).
-const CATEGORY_ORDER: PartnerHubCategory[] = ['gov_support', 'dept_store', 'operations']
+const CATEGORY_ORDER: PartnerHubCategory[] = ['gov_support', 'dept_store', 'military_px', 'operations']
 const LATEST_LIMIT = 3
 
 function formatDate(iso: string) {
@@ -79,7 +79,7 @@ export default function PartnerHub() {
           </div>
 
           {/* 카테고리 타일 */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
             <Link
               to="/export"
               className="border border-rule rounded-card p-4 hover:border-ink transition-colors text-center"
