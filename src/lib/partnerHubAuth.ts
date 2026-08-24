@@ -26,7 +26,7 @@ export function clearStoredSession() {
 }
 
 export async function sendLoginCode(email: string): Promise<{ ok: boolean; message?: string }> {
-  const res = await fetch('/api/partner-hub-auth?action=send-code', {
+  const res = await fetch('/api/export-brand?action=hub-send-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
@@ -36,7 +36,7 @@ export async function sendLoginCode(email: string): Promise<{ ok: boolean; messa
 }
 
 export async function verifyLoginCode(email: string, code: string): Promise<{ ok: boolean; message?: string }> {
-  const res = await fetch('/api/partner-hub-auth?action=verify-code', {
+  const res = await fetch('/api/export-brand?action=hub-verify-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code }),
@@ -53,7 +53,7 @@ export async function verifyLoginCode(email: string, code: string): Promise<{ ok
 export async function refreshSession(): Promise<PartnerHubSession | null> {
   const stored = getStoredSession()
   if (!stored) return null
-  const res = await fetch('/api/partner-hub-auth?action=me', {
+  const res = await fetch('/api/export-brand?action=hub-me', {
     method: 'POST',
     headers: { Authorization: `Bearer ${stored.token}` },
   })
@@ -70,7 +70,7 @@ export async function refreshSession(): Promise<PartnerHubSession | null> {
 export async function logout(): Promise<void> {
   const stored = getStoredSession()
   if (stored) {
-    await fetch('/api/partner-hub-auth?action=logout', {
+    await fetch('/api/export-brand?action=hub-logout', {
       method: 'POST',
       headers: { Authorization: `Bearer ${stored.token}` },
     }).catch(() => {})
