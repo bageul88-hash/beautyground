@@ -8,6 +8,14 @@ import {
   type PartnerHubPost,
   type PartnerHubCategory,
 } from '../lib/partnerHub'
+import {
+  getStoredSession,
+  refreshSession,
+  sendLoginCode,
+  verifyLoginCode,
+  logout,
+  type PartnerHubSession,
+} from '../lib/partnerHubAuth'
 import { comma } from '../lib/format'
 
 // 브랜드 파트너 허브 — 입점사·비입점사 누구나 로그인 없이 열람 가능한 정보 페이지.
@@ -18,6 +26,9 @@ import { comma } from '../lib/format'
 // 한 화면에 다 들어오는 대시보드형 레이아웃(2026-08-24, 대표님 지시) — 스크롤 없이 핵심(타일 4개)이
 // 바로 보이게. 그래서 표준 GNB/Footer 대신 이 페이지 전용의 가벼운 상단바만 쓴다(공용 GNB의
 // "앱 보기" 링크는 소비자 쇼핑몰용이라 이 페이지엔 불필요 — 그래서 GNB를 아예 재사용하지 않음).
+//
+// 회원가입: 쇼핑몰 회원가입(Supabase Auth, auth.users)과 완전히 독립된 전용 계정 시스템
+// (partnerHubAuth.ts + api/partner-hub-auth.ts) — 이메일 인증코드만으로 가입/로그인(2026-08-24).
 const CATEGORY_ORDER: PartnerHubCategory[] = ['gov_support', 'dept_store', 'military_px', 'operations']
 const LATEST_LIMIT = 3
 
@@ -26,10 +37,95 @@ function formatDate(iso: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
+function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (s: PartnerHubSession) => void }) {
+  const [step, setStep] = useState<'email' | 'code'>('email')
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSendCode = async () => {
+    if (submitting) return
+    setSubmitting(true)
+    setError('')
+    const result = await sendLoginCode(email.trim())
+    setSubmitting(false)
+    if (!result.ok) { setError(result.message || '인증코드 발송에 실패했습니다.'); return }
+    setStep('code')
+  }
+
+  const handleVerify = async () => {
+    if (submitting) return
+    setSubmitting(true)
+    setError('')
+    const result = await verifyLoginCode(email.trim(), code.trim())
+    setSubmitting(false)
+    if (!result.ok) { setError(result.message || '인증코드가 올바르지 않습니다.'); return }
+    const session = getStoredSession()
+    if (session) onSuccess(session)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6" onClick={onClose}>
+      <div className="bg-paper rounded-card p-6 w-full max-w-[360px]" onClick={(e) => e.stopPropagation()}>
+        <p className="text-[15px] font-bold text-ink mb-1">회원사 가입·로그인</p>
+        <p className="text-[12px] text-ink-soft mb-5">쇼핑몰 회원과는 별개의 파트너 허브 전용 계정입니다. 이메일 인증만으로 가입됩니다.</p>
+
+        {step === 'email' ? (
+          <>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="이메일 주소"
+              className="w-full px-4 py-2.5 border border-rule rounded-control text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper mb-3"
+            />
+            {error && <p className="text-[12px] text-signal-red mb-3">{error}</p>}
+            <button
+              type="button"
+              onClick={() => void handleSendCode()}
+              disabled={submitting || !email.trim()}
+              className="w-full bg-ink text-paper rounded-control py-2.5 text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {submitting ? '발송 중…' : '인증코드 받기'}
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-[12px] text-ink-soft mb-3"><b className="text-ink">{email}</b> 로 받은 6자리 코드를 입력해 주세요.</p>
+            <input
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="123456"
+              className="w-full px-4 py-2.5 border border-rule rounded-control text-[16px] text-center tracking-[0.4em] font-bold text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors bg-paper mb-3"
+            />
+            {error && <p className="text-[12px] text-signal-red mb-3">{error}</p>}
+            <button
+              type="button"
+              onClick={() => void handleVerify()}
+              disabled={submitting || code.length !== 6}
+              className="w-full bg-ink text-paper rounded-control py-2.5 text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 mb-2"
+            >
+              {submitting ? '확인 중…' : '확인'}
+            </button>
+            <button type="button" onClick={() => { setStep('email'); setError('') }} className="w-full text-[12px] text-ink-soft underline">
+              이메일 다시 입력
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function PartnerHub() {
   const [visitorCount, setVisitorCount] = useState<number | null>(null)
   const [latestPosts, setLatestPosts] = useState<PartnerHubPost[]>([])
   const [loadingPosts, setLoadingPosts] = useState(true)
+  const [session, setSession] = useState<PartnerHubSession | null>(getStoredSession)
+  const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -51,6 +147,20 @@ export default function PartnerHub() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const fresh = await refreshSession()
+      if (!cancelled) setSession(fresh)
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const handleLogout = async () => {
+    await logout()
+    setSession(null)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-paper overflow-hidden">
       {/* 가벼운 전용 상단바 — 공용 GNB 대신(앱 보기 링크 불필요) */}
@@ -62,12 +172,26 @@ export default function PartnerHub() {
               누적 방문자 <span className="font-bold text-ink">{comma(visitorCount)}</span>명
             </p>
           )}
-          <Link
-            to="/brand/login"
-            className="px-3.5 py-1.5 rounded-pill bg-ink text-paper text-[12px] font-semibold hover:opacity-90 transition-opacity"
-          >
-            회원사 가입·로그인
-          </Link>
+          {session ? (
+            <div className="flex items-center gap-2">
+              <p className="text-[12px] text-ink-soft">{session.email}</p>
+              <button
+                type="button"
+                onClick={() => void handleLogout()}
+                className="px-3 py-1.5 rounded-pill border border-rule text-[12px] text-ink-soft hover:border-ink hover:text-ink transition-colors"
+              >
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowLogin(true)}
+              className="px-3.5 py-1.5 rounded-pill bg-ink text-paper text-[12px] font-semibold hover:opacity-90 transition-opacity"
+            >
+              회원사 가입·로그인
+            </button>
+          )}
         </div>
       </header>
 
@@ -139,6 +263,13 @@ export default function PartnerHub() {
           </div>
         </div>
       </main>
+
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onSuccess={(s) => { setSession(s); setShowLogin(false) }}
+        />
+      )}
     </div>
   )
 }
