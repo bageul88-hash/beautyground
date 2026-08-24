@@ -7,6 +7,7 @@ import { streamIframeSrc } from '../../lib/cloudflare'
 import { useLiveChat } from '../../hooks/useLiveChat'
 import { useStreamStatus } from '../../hooks/useStreamStatus'
 import { useLiveHearts } from '../../hooks/useLiveHearts'
+import { subscribeToPush } from '../../lib/pushNotifications'
 import { IconHeartFilled, IconSend2, IconUserCircle, IconBrandFacebook, IconBrandX, IconLink, IconBellPlus, IconBellFilled } from '@tabler/icons-react'
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
 import DesktopLiveWatch from '../../components/live/DesktopLiveWatch'
@@ -144,6 +145,8 @@ export default function ShopLiveWatch() {
     } else {
       setIsFollowing(true)
       await supabase.from('partner_follows').insert([{ user_id: session.user.id, partner_id: live.partner_id }])
+      // 팔로우한 브랜드가 다음에 라이브를 켜면 실제 알림이 오도록 푸시 구독 유도. 거부/미지원이면 조용히 무시.
+      void subscribeToPush()
     }
   }
 
