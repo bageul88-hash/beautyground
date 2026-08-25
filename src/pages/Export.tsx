@@ -469,20 +469,29 @@ export default function Export() {
                   )}
 
                   {brand.products.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mt-4">
+                    <div className="grid grid-cols-2 gap-3 mt-4">
                       {brand.products.map((product) => (
                         <Link
                           key={product.id}
                           to={`/x/${brand.id}`}
-                          className="rounded-control overflow-hidden border border-rule block hover:border-ink transition-colors"
+                          className="rounded-card overflow-hidden border border-rule block hover:border-ink transition-colors group/card"
                         >
-                          <img
-                            src={product.export_image_urls[0] ?? product.thumbnail_url ?? ''}
-                            alt={product.name}
-                            className="w-full aspect-square object-cover"
-                            loading="lazy"
-                          />
-                          <figcaption className="text-[10.5px] text-ink-soft px-1.5 py-1 truncate">{product.name}</figcaption>
+                          <div className="aspect-square bg-quiet overflow-hidden">
+                            <img
+                              src={product.export_image_urls[0] ?? product.thumbnail_url ?? ''}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="px-2.5 py-2">
+                            <p className="text-[12px] font-semibold text-ink leading-snug line-clamp-2 group-hover/card:underline">
+                              {product.name}
+                            </p>
+                            {product.export_description_en && (
+                              <p className="text-[11px] text-ink-faint mt-1 line-clamp-1">{product.export_description_en}</p>
+                            )}
+                          </div>
                         </Link>
                       ))}
                     </div>
@@ -509,12 +518,17 @@ export default function Export() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {items.map((item) => (
                 <figure key={item.id} className="rounded-card overflow-hidden border border-rule">
-                  <img
-                    src={item.thumbnail_url ?? ''}
-                    alt={item.name}
-                    className="w-full aspect-square object-cover"
-                    loading="lazy"
-                  />
+                  <div className="aspect-square bg-quiet overflow-hidden">
+                    <img
+                      src={item.thumbnail_url ?? ''}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <figcaption className="text-[12px] font-medium text-ink px-2.5 py-2 leading-snug line-clamp-2">
+                    {item.name}
+                  </figcaption>
                 </figure>
               ))}
             </div>

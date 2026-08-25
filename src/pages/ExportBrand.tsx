@@ -43,6 +43,7 @@ function detectLang(): Lang {
 
 interface Copy {
   products: string
+  fromBrand: string
   certs: string
   proven: string
   provenRows: [string, string][] // [라벨, 값] — 라인시트 스펙 테이블
@@ -65,7 +66,7 @@ const mkProven = (retailV: string, onlineV: string, tradeV: string, labels: [str
 
 const COPY: Record<Lang, Copy> = {
   en: {
-    products: 'Products', certs: 'Certifications', proven: 'Proven in Korea',
+    products: 'Products', fromBrand: 'From the Brand', certs: 'Certifications', proven: 'Proven in Korea',
     provenRows: mkProven('AK Department Store — on display', 'beautyground.co.kr — selling now', 'Direct buy & resell by Beautyground', ['Retail', 'Online', 'Trade']),
     priceOnRequest: 'Wholesale on request', retail: 'Korea retail',
     shopBtn: 'Shop retail', wholesaleBtn: 'Wholesale inquiry', wholesaleSub: 'Reply within 24h',
@@ -75,7 +76,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'Browse the export catalog',
   },
   zh_tw: {
-    products: '產品', certs: '認證', proven: '韓國實績',
+    products: '產品', fromBrand: '品牌故事', certs: '認證', proven: '韓國實績',
     provenRows: mkProven('AK百貨 — 門市陳列中', 'beautyground.co.kr — 販售中', 'Beautyground 直接買斷再販售', ['零售', '線上', '交易']),
     priceOnRequest: '批發價格請洽詢', retail: '韓國零售價',
     shopBtn: '前往選購', wholesaleBtn: '批發洽詢', wholesaleSub: '24小時內回覆',
@@ -85,7 +86,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: '瀏覽出口型錄',
   },
   zh_cn: {
-    products: '产品', certs: '认证', proven: '韩国实绩',
+    products: '产品', fromBrand: '品牌故事', certs: '认证', proven: '韩国实绩',
     provenRows: mkProven('AK百货 — 门店陈列中', 'beautyground.co.kr — 在售', 'Beautyground 直接买断再销售', ['零售', '线上', '交易']),
     priceOnRequest: '批发价格请咨询', retail: '韩国零售价',
     shopBtn: '前往选购', wholesaleBtn: '批发咨询', wholesaleSub: '24小时内回复',
@@ -95,7 +96,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: '浏览出口目录',
   },
   ja: {
-    products: '商品', certs: '認証', proven: '韓国での実績',
+    products: '商品', fromBrand: 'ブランドストーリー', certs: '認証', proven: '韓国での実績',
     provenRows: mkProven('AK百貨店 — 店頭陳列中', 'beautyground.co.kr — 販売中', 'Beautyground が直接買付・再販売', ['小売', 'オンライン', '取引']),
     priceOnRequest: '卸価格はお問い合わせください', retail: '韓国小売価格',
     shopBtn: '購入ページへ', wholesaleBtn: '卸売のお問い合わせ', wholesaleSub: '24時間以内に返信',
@@ -105,7 +106,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: '輸出カタログを見る',
   },
   ms: {
-    products: 'Produk', certs: 'Pensijilan', proven: 'Terbukti di Korea',
+    products: 'Produk', fromBrand: 'Daripada Jenama', certs: 'Pensijilan', proven: 'Terbukti di Korea',
     provenRows: mkProven('Gedung AK — dipamerkan', 'beautyground.co.kr — dijual sekarang', 'Belian terus & jualan semula oleh Beautyground', ['Runcit', 'Dalam talian', 'Dagangan']),
     priceOnRequest: 'Harga borong atas permintaan', retail: 'Runcit Korea',
     shopBtn: 'Beli runcit', wholesaleBtn: 'Pertanyaan borong', wholesaleSub: 'Balas dalam 24 jam',
@@ -115,7 +116,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'Lihat katalog eksport',
   },
   id: {
-    products: 'Produk', certs: 'Sertifikasi', proven: 'Terbukti di Korea',
+    products: 'Produk', fromBrand: 'Dari Brand', certs: 'Sertifikasi', proven: 'Terbukti di Korea',
     provenRows: mkProven('AK Dept. Store — dipajang', 'beautyground.co.kr — dijual sekarang', 'Dibeli langsung & dijual kembali oleh Beautyground', ['Ritel', 'Online', 'Perdagangan']),
     priceOnRequest: 'Harga grosir sesuai permintaan', retail: 'Ritel Korea',
     shopBtn: 'Beli ritel', wholesaleBtn: 'Pertanyaan grosir', wholesaleSub: 'Dibalas dalam 24 jam',
@@ -125,7 +126,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'Lihat katalog ekspor',
   },
   vi: {
-    products: 'Sản phẩm', certs: 'Chứng nhận', proven: 'Kiểm chứng tại Hàn Quốc',
+    products: 'Sản phẩm', fromBrand: 'Từ thương hiệu', certs: 'Chứng nhận', proven: 'Kiểm chứng tại Hàn Quốc',
     provenRows: mkProven('TTTM AK — đang trưng bày', 'beautyground.co.kr — đang bán', 'Beautyground mua đứt & bán lại trực tiếp', ['Bán lẻ', 'Trực tuyến', 'Giao dịch']),
     priceOnRequest: 'Giá sỉ theo yêu cầu', retail: 'Giá lẻ Hàn Quốc',
     shopBtn: 'Mua lẻ', wholesaleBtn: 'Hỏi giá sỉ', wholesaleSub: 'Phản hồi trong 24h',
@@ -135,7 +136,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'Xem danh mục xuất khẩu',
   },
   th: {
-    products: 'สินค้า', certs: 'การรับรอง', proven: 'พิสูจน์แล้วในเกาหลี',
+    products: 'สินค้า', fromBrand: 'จากแบรนด์', certs: 'การรับรอง', proven: 'พิสูจน์แล้วในเกาหลี',
     provenRows: mkProven('ห้าง AK — วางจำหน่ายอยู่', 'beautyground.co.kr — กำลังขาย', 'Beautyground ซื้อขาดและขายต่อโดยตรง', ['ค้าปลีก', 'ออนไลน์', 'การค้า']),
     priceOnRequest: 'ราคาส่งสอบถามได้', retail: 'ราคาปลีกเกาหลี',
     shopBtn: 'ซื้อปลีก', wholesaleBtn: 'สอบถามราคาส่ง', wholesaleSub: 'ตอบกลับภายใน 24 ชม.',
@@ -145,7 +146,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'ดูแคตตาล็อกส่งออก',
   },
   ru: {
-    products: 'Продукция', certs: 'Сертификаты', proven: 'Проверено в Корее',
+    products: 'Продукция', fromBrand: 'От бренда', certs: 'Сертификаты', proven: 'Проверено в Корее',
     provenRows: mkProven('Универмаг AK — представлено', 'beautyground.co.kr — в продаже', 'Прямая закупка и перепродажа Beautyground', ['Розница', 'Онлайн', 'Торговля']),
     priceOnRequest: 'Оптовая цена по запросу', retail: 'Розница в Корее',
     shopBtn: 'Купить в розницу', wholesaleBtn: 'Оптовый запрос', wholesaleSub: 'Ответ в течение 24 ч',
@@ -155,7 +156,7 @@ const COPY: Record<Lang, Copy> = {
     notFoundCta: 'Смотреть экспортный каталог',
   },
   ko: {
-    products: '제품', certs: '인증', proven: 'Proven in Korea',
+    products: '제품', fromBrand: '브랜드 스토리', certs: '인증', proven: 'Proven in Korea',
     provenRows: mkProven('AK백화점 — 매장 진열 중', 'beautyground.co.kr — 판매 중', '뷰티그라운드 직매입 후 재판매', ['오프라인', '온라인', '거래방식']),
     priceOnRequest: '도매가 문의', retail: '한국 소비자가',
     shopBtn: '구매하기', wholesaleBtn: '도매 문의', wholesaleSub: '24시간 내 회신',
@@ -406,6 +407,20 @@ export default function ExportBrand() {
                   </figure>
                 )
               })}
+            </div>
+          </section>
+        )}
+
+        {/* ── 브랜드 스토리 사진 — 캡션 없이 사진만(최대 5장), 하나도 없으면 섹션 자체를 숨긴다 ── */}
+        {brand.export_story_images && brand.export_story_images.length > 0 && (
+          <section className="px-6 pt-7 sheet-in">
+            <p className="text-[10.5px] tracking-[0.28em] uppercase text-[#111111] pb-2 border-b border-[#111111]">{t.fromBrand}</p>
+            <div className="grid grid-cols-2 gap-3 pt-4">
+              {brand.export_story_images.map((url, i) => (
+                <div key={url + i} className="border border-[#E6E3DC] bg-[#FAF9F6]">
+                  <img src={url} alt="" className="w-full aspect-square object-cover" loading="lazy" />
+                </div>
+              ))}
             </div>
           </section>
         )}

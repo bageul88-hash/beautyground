@@ -93,6 +93,14 @@ export async function updateMyExportLogo(logoUrl: string): Promise<Partner> {
   return data as Partner
 }
 
+// 브랜드 스토리 사진(캡션 없음, 최대 5장) 저장 (update_my_partner_export_story_images RPC,
+// supabase/partners_export_story_images.sql)
+export async function updateMyExportStoryImages(images: string[]): Promise<Partner> {
+  const { data, error } = await supabase.rpc('update_my_partner_export_story_images', { p_images: images })
+  if (error) throw error
+  return data as Partner
+}
+
 // 수출용 이미지 1장을 product-images 버킷의 export/<partnerId>/... 경로에 업로드하고 공개 URL 반환.
 // storage RLS가 이 경로 접두사만 본인 partner_id로 제한(products_export_content.sql).
 export async function uploadExportImage(file: File, partnerId: string, folder: string): Promise<string> {

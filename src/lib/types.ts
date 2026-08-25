@@ -105,6 +105,7 @@ export interface Partner {
   export_countries: string | null // 이미 수출 중인 국가(자유서술)
   export_moq_notes: string | null // 최소주문수량·샘플 정책 등
   export_logo_url: string | null // 브랜드 BI 로고 (supabase/partners_export_logo.sql)
+  export_story_images: string[] // 캡션 없는 브랜드 스토리 사진, 최대 5장 (supabase/partners_export_story_images.sql)
   created_at: string
 }
 
@@ -292,6 +293,7 @@ export interface ExportBrandPublic {
   export_certifications: string[]
   export_countries: string | null
   export_moq_notes: string | null
+  export_story_images: string[]
 }
 
 // 해외 바이어 타겟(아웃바운드 CRM, /admin/export-buyers, supabase/export_buyers.sql) — 관리자 전용.

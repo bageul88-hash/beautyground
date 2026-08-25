@@ -6,6 +6,7 @@ import {
   setMyProductExportFeatured,
   updateMyProductExportContent,
   updateMyExportLogo,
+  updateMyExportStoryImages,
   uploadExportImage,
   translateText,
 } from '../../lib/partner'
@@ -20,6 +21,7 @@ import CuratorSeal from '../../components/export/CuratorSeal'
 const CERTIFICATION_OPTIONS = ['CPNP(EU)', 'FDA(US)', '비건', '할랄', '유기농', 'ISO22716', '동물실험 안전']
 const MAX_FEATURED = 5
 const MAX_PRODUCT_IMAGES = 9
+const MAX_STORY_IMAGES = 5
 
 type ProductRow = Pick<
   Product,
@@ -84,6 +86,9 @@ export default function BrandExport() {
   const [countries, setCountries] = useState('')
   const [moqNotes, setMoqNotes] = useState('')
   const [logoUploading, setLogoUploading] = useState(false)
+  const [storyImages, setStoryImages] = useState<string[]>([])
+  const [storyUploading, setStoryUploading] = useState(false)
+  const [storyError, setStoryError] = useState('')
   const [products, setProducts] = useState<ProductRow[]>([])
   const [drafts, setDrafts] = useState<Record<string, ProductDraft>>({})
   const [loading, setLoading] = useState(true)
@@ -110,6 +115,7 @@ export default function BrandExport() {
         setCertifications(p.export_certifications ?? [])
         setCountries(p.export_countries ?? '')
         setMoqNotes(p.export_moq_notes ?? '')
+        setStoryImages(p.export_story_images ?? [])
         // 자동 임시저장본 복원 — 저장 안 하고 나갔다 와도 이어서 작업 (localStorage, 저장 성공 시 비움)
         try {
           const raw = localStorage.getItem(`bg_export_draft_${p.id}`)
@@ -256,6 +262,44 @@ export default function BrandExport() {
       setError('로고 업로드에 실패했습니다.')
     } finally {
       setLogoUploading(false)
+    }
+  }
+
+  // 브랜드 스토리 사진 — 캡션 없이 사진만, 업로드/삭제 즉시 저장(로고와 동일한 방식)
+  const handleAddStoryImages = async (files: FileList) => {
+    if (!partner) return
+    const remaining = MAX_STORY_IMAGES - storyImages.length
+    if (remaining <= 0) {
+      setStoryError(`사진은 최대 ${MAX_STORY_IMAGES}장까지 등록할 수 있습니다.`)
+      return
+    }
+    setStoryUploading(true)
+    setStoryError('')
+    try {
+      const toUpload = Array.from(files).slice(0, remaining)
+      const urls = await Promise.all(toUpload.map((f) => uploadExportImage(f, partner.id, 'story')))
+      const next = [...storyImages, ...urls]
+      setStoryImages(next)
+      const updated = await updateMyExportStoryImages(next)
+      setPartner(updated)
+    } catch {
+      setStoryError('사진 업로드에 실패했습니다.')
+    } finally {
+      setStoryUploading(false)
+    }
+  }
+
+  const removeStoryImage = async (url: string) => {
+    if (!partner) return
+    const prev = storyImages
+    const next = storyImages.filter((u) => u !== url)
+    setStoryImages(next)
+    try {
+      const updated = await updateMyExportStoryImages(next)
+      setPartner(updated)
+    } catch {
+      setStoryImages(prev)
+      setStoryError('삭제에 실패했습니다.')
     }
   }
 
@@ -639,6 +683,31 @@ export default function BrandExport() {
           )}
         </Slot>
 
+        {/* 슬롯 5 — 브랜드 스토리 사진 (캡션 없음, 업로드 즉시 저장) */}
+        <Slot
+          num={5} title="브랜드 스토리 사진" sub={`캡션 없이 사진만 — 최대 ${MAX_STORY_IMAGES}장, 올리면 바로 반영됩니다`}
+          chip={storyImages.length > 0 ? `${storyImages.length}장 등록` : '비어있음'} chipTone={storyImages.length > 0 ? 'ok' : 'warn'}
+          open={openSlot === 5} onToggle={() => setOpenSlot(openSlot === 5 ? 0 : 5)}
+        >
+          <div className="grid grid-cols-5 gap-1.5 mt-4">
+            {storyImages.map((url) => (
+              <div key={url} className="relative">
+                <img src={url} alt="" className="w-full aspect-square object-cover rounded-[8px] border border-[#E8E6E1]" />
+                <button type="button" onClick={() => void removeStoryImage(url)}
+                  className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]" aria-label="삭제">✕</button>
+              </div>
+            ))}
+            {storyImages.length < MAX_STORY_IMAGES && (
+              <label className="aspect-square rounded-[8px] border border-dashed border-[#D8D4C9] bg-[#FAF9F6] flex items-center justify-center cursor-pointer">
+                <span className="text-[13px] text-[#8A8577] font-bold">{storyUploading ? '…' : '＋'}</span>
+                <input type="file" accept="image/*" multiple className="hidden" disabled={storyUploading}
+                  onChange={(e) => { if (e.target.files?.length) void handleAddStoryImages(e.target.files); e.target.value = '' }} />
+              </label>
+            )}
+          </div>
+          {storyError && <p className="text-[12px] text-red-600 mt-2">{storyError}</p>}
+        </Slot>
+
         {/* 안내 + 브랜드 정보 저장 */}
         <div className="bg-[#FAF9F6] border border-[#E6E3DC] rounded-lg px-4 py-3 mb-3 flex gap-3 items-start">
           <span className="text-[16px]">🔒</span>
@@ -735,6 +804,19 @@ export default function BrandExport() {
                 </div>
               )}
             </div>
+            {/* 브랜드 스토리 사진 — 캡션 없음 */}
+            {storyImages.length > 0 && (
+              <div className="px-4 pt-4 pb-1">
+                <p className="text-[8px] tracking-[0.24em] uppercase text-[#111111] pb-1.5 border-b border-[#111111]">From the Brand</p>
+                <div className="grid grid-cols-2 gap-2 pt-3">
+                  {storyImages.map((url) => (
+                    <div key={url} className="border border-[#E6E3DC] bg-[#FAF9F6]">
+                      <img src={url} alt="" className="w-full aspect-square object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* 인증 */}
             {certifications.length > 0 && (
               <div className="px-4 pt-2 pb-3">
