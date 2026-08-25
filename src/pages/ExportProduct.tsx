@@ -168,12 +168,20 @@ export default function ExportProduct() {
     return () => { cancelled = true }
   }, [key, productId])
 
+  // 갤러리(썸네일)엔 절대 detail_images를 섞지 않는다 — 세로로 긴 상세 인포그래픽이 정사각
+  // 썸네일에 눌려 들어가는 문제가 반복 발생함(닥터랩·바이리뮤 둘 다). detail_images는
+  // 아래 "Product Details" 섹션에 원본 비율 그대로 별도로만 노출한다.
   const images = useMemo(() => {
     if (!product) return []
     const list = product.export_image_urls && product.export_image_urls.length > 0
       ? product.export_image_urls
-      : [product.thumbnail_url, ...(product.gallery_images ?? []), ...(product.detail_images ?? [])]
+      : [product.thumbnail_url, ...(product.gallery_images ?? [])]
     return Array.from(new Set(list.filter((u): u is string => !!u)))
+  }, [product])
+
+  const detailImages = useMemo(() => {
+    if (!product) return []
+    return Array.from(new Set((product.detail_images ?? []).filter(Boolean)))
   }, [product])
 
   const name = product?.export_i18n?.name?.[lang]?.trim() || product?.export_i18n?.name?.en?.trim() || product?.name || ''
@@ -322,6 +330,20 @@ export default function ExportProduct() {
           </div>
         </div>
       </div>
+
+      {/* 세로로 긴 상세 인포그래픽 등 — 갤러리와 분리, 자르지 않고 원본 비율 그대로 노출 */}
+      {detailImages.length > 0 && (
+        <div className="max-w-[1100px] mx-auto px-6 pb-20">
+          <p className="text-[11px] font-bold tracking-[0.14em] uppercase text-ink-faint border-t border-rule pt-8 mb-4">
+            Product Details
+          </p>
+          <div className="max-w-[520px] mx-auto space-y-4">
+            {detailImages.map((url, i) => (
+              <img key={url + i} src={url} alt="" className="w-full h-auto block rounded-card border border-rule" loading="lazy" />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
