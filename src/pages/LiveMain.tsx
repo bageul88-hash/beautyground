@@ -8,7 +8,6 @@ import AppFooter from '../components/layout/AppFooter'
 import PromoBar from '../components/home/PromoBar'
 import { comma, formatLiveSchedTime } from '../lib/format'
 import { useShopLives } from '../hooks/useShopLives'
-import { useSaleProducts } from '../hooks/useSaleProducts'
 
 // /live — 라이브방송 메인페이지. 온라인몰 메인(/app/home)과 별개의 진입점이지만 상품 상세는
 // 공유한다. 라이브에서 들어온 구매는 live_id로 태깅되어 정산·통계에서 구분된다(AppOrder.tsx).
@@ -40,10 +39,8 @@ export default function LiveMain() {
   const [replays, setReplays] = useState<Live[]>([])
   const [hostNames, setHostNames] = useState<Record<string, string>>({})
   const [brandNames, setBrandNames] = useState<Record<string, string>>({})
-  const [primaryProducts, setPrimaryProducts] = useState<Record<string, { name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
+  const [primaryProducts, setPrimaryProducts] = useState<Record<string, { id: string; name: string; price: number; sale_price: number | null; thumbnail_url: string | null; partner_id: string | null }>>({})
   const [loading, setLoading] = useState(true)
-  // 할인 특가: 실제 sale_price가 걸린 상품을 할인율 높은 순으로 (홈 화면과 동일한 정의/훅 재사용)
-  const { products: saleProducts, loading: saleLoading } = useSaleProducts(6)
 
   useEffect(() => {
     let active = true
@@ -107,6 +104,19 @@ export default function LiveMain() {
   // 캐러셀엔 실제 영상이 있는 것만(진행중 방송 + 다시보기 녹화본) — 예고는 아래 "LIVE 예고" 목록 전용.
   // (2026-08-12 대표님 지시: 제품 카드 말고 실제 보유 영상자료로 채울 것)
   const carouselItems = [...nowLive, ...replays].slice(0, 10)
+
+  // 라이브 추천 상품: 일반 할인 특가가 아니라 실제 라이브 방송(진행중→예정→다시보기 순)에
+  // 걸린 대표상품을 그대로 노출 — 이 페이지 성격에 맞게 "할인 특가" 대신 채택(2026-08-25 대표님 지시).
+  const recommendedProducts = (() => {
+    const seen = new Set<string>()
+    const list: typeof primaryProducts[string][] = []
+    for (const l of [...nowLive, ...scheduled, ...replays]) {
+      const p = primaryProducts[l.id]
+      if (p && !seen.has(p.id)) { seen.add(p.id); list.push(p) }
+      if (list.length >= 6) break
+    }
+    return list
+  })()
 
   // ── 캐러셀 자동 슬라이드 + 드래그 (목업 LiveCarousel.jsx 동작 그대로) ──
   // 3초마다 한 칸씩 좌측으로, 끝에 닿으면 처음으로. 손가락 스와이프/마우스 드래그로
@@ -360,18 +370,15 @@ export default function LiveMain() {
           </>
         )}
 
-        {!saleLoading && saleProducts.length > 0 && (
+        {!loading && recommendedProducts.length > 0 && (
           <>
             <div className="mt-8 mx-4 border-t border-card-border" aria-hidden="true" />
             <section className="pt-8 px-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-black">할인 특가</h2>
-                <Link to="/live/sale" className="text-xs text-[#666666] focus:outline-none focus-visible:shadow-ring">
-                  전체보기 →
-                </Link>
+                <h2 className="text-base font-bold text-black">라이브 추천 상품</h2>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-                {saleProducts.map((p) => (
+                {recommendedProducts.map((p) => (
                   <Link key={p.id} to={`/app/product/${p.id}`} data-product-id={p.id} className="text-left focus:outline-none focus-visible:shadow-ring">
                     <div className="w-full aspect-square rounded-xl overflow-hidden bg-bg-card border border-card-border">
                       {p.thumbnail_url ? (
