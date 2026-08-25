@@ -35,7 +35,7 @@ export default function HostLogin() {
       <main className="py-20 md:py-28" style={{ backgroundColor: '#f7f4ef' }}>
         <div className="max-w-[420px] mx-auto px-6">
           <div className="text-center mb-8">
-            <span className="text-gold text-[13px] font-medium tracking-widest uppercase mb-3 block">
+            <span className="text-ink text-[13px] font-medium tracking-widest uppercase mb-3 block">
               HOST LOGIN
             </span>
             <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-text">
@@ -58,7 +58,7 @@ export default function HostLogin() {
                   id="email" type="email" required
                   value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="example@email.com"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
+                  className="w-full bg-white border border-rule rounded-md px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition"
                 />
               </div>
               <div>
@@ -69,7 +69,7 @@ export default function HostLogin() {
                   id="password" type="password" required
                   value={password} onChange={(e) => setPassword(e.target.value)}
                   placeholder="비밀번호"
-                  className="w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition"
+                  className="w-full bg-white border border-rule rounded-md px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition"
                 />
               </div>
 
@@ -78,14 +78,14 @@ export default function HostLogin() {
               )}
 
               <Button
-                type="submit" variant="gold" size="md"
+                type="submit" variant="ink" size="md"
                 label={submitting ? '로그인 중…' : '로그인'}
                 disabled={submitting} className="w-full"
               />
 
               <p className="text-center text-[13px] text-text-sub pt-1">
                 아직 계정이 없으신가요?{' '}
-                <Link to="/host/register" className="text-gold hover:underline">회원가입</Link>
+                <Link to="/host/register" className="text-ink hover:underline">회원가입</Link>
               </p>
             </div>
           </form>

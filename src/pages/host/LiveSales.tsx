@@ -82,7 +82,7 @@ export default function HostLiveSales() {
     return (
       <div className="max-w-md mx-auto mt-16 bg-white rounded-[14px] border border-[#e5e0d8] p-10 text-center">
         <p className="text-[16px] font-semibold text-[#111] mb-3">방송을 찾을 수 없습니다</p>
-        <Link to="/host/lives" className="text-[13px] text-[#b8924a] font-medium hover:underline">
+        <Link to="/host/lives" className="text-[13px] text-ink font-medium hover:underline">
           내 방송 목록으로
         </Link>
       </div>
@@ -133,7 +133,7 @@ export default function HostLiveSales() {
                 type="button"
                 onClick={createChannel}
                 disabled={provisioning}
-                className="text-[13px] font-semibold text-white bg-[#b8924a] rounded-full px-4 py-2 disabled:opacity-60"
+                className="text-[13px] font-semibold text-white bg-ink rounded-full px-4 py-2 disabled:opacity-60"
               >
                 {provisioning ? '채널 생성 중…' : '송출 채널 만들기'}
               </button>
@@ -149,7 +149,7 @@ export default function HostLiveSales() {
                   <button
                     type="button"
                     onClick={() => copy('url', streamInfo.rtmpsUrl)}
-                    className="shrink-0 text-[12px] text-[#b8924a] font-medium"
+                    className="shrink-0 text-[12px] text-ink font-medium"
                   >
                     {copied === 'url' ? '복사됨' : '복사'}
                   </button>
@@ -171,7 +171,7 @@ export default function HostLiveSales() {
                   <button
                     type="button"
                     onClick={() => copy('key', streamInfo.streamKey)}
-                    className="shrink-0 text-[12px] text-[#b8924a] font-medium"
+                    className="shrink-0 text-[12px] text-ink font-medium"
                   >
                     {copied === 'key' ? '복사됨' : '복사'}
                   </button>
@@ -189,7 +189,7 @@ export default function HostLiveSales() {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
           <p className="text-[12px] text-[#9a9080] mb-2">총 판매액</p>
-          <p className="font-serif text-[22px] font-bold text-[#b8924a]">{won(totalSales)}</p>
+          <p className="font-serif text-[22px] font-bold text-ink">{won(totalSales)}</p>
         </div>
         <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
           <p className="text-[12px] text-[#9a9080] mb-2">판매 건수</p>

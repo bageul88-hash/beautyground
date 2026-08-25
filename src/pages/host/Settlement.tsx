@@ -84,7 +84,7 @@ export default function HostSettlementPage() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {([
-          { label: '이번 달 정산 예정액', value: thisMonthPending, color: '#b8924a' },
+          { label: '이번 달 정산 예정액', value: thisMonthPending, color: '#1a1e36' },
           { label: '지난 달 정산 완료액', value: lastMonthPaid, color: '#1D9E75' },
           { label: '누적 정산 총액', value: totalPaid },
         ] as { label: string; value: number; color?: string }[]).map(({ label, value, color }) => (

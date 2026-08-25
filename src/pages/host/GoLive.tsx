@@ -196,7 +196,7 @@ export default function HostGoLive() {
             type="button"
             onClick={createChannel}
             disabled={provisioning}
-            className="w-full text-[14px] font-semibold text-white bg-[#b8924a] rounded-full py-3 disabled:opacity-60"
+            className="w-full text-[14px] font-semibold text-white bg-ink rounded-full py-3 disabled:opacity-60"
           >
             {provisioning ? '채널 준비 중…' : '방송 준비 시작'}
           </button>

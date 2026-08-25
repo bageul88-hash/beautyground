@@ -21,7 +21,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
 
 const field =
-  'w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition'
+  'w-full bg-white border border-rule rounded-md px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition'
 
 export default function HostRegister() {
   const [form, setForm] = useState<FormState>(INITIAL)
@@ -130,13 +130,13 @@ export default function HostRegister() {
               <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
                 <Link
                   to="/"
-                  className="inline-block bg-gold text-white rounded-pill text-[14px] px-6 py-3 font-medium hover:bg-gold-light transition-colors"
+                  className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
                 >
                   홈으로
                 </Link>
                 <Link
                   to="/host/login"
-                  className="inline-block bg-cream-3 text-text-sub rounded-pill text-[14px] px-6 py-3 font-medium hover:bg-cream-2 transition-colors"
+                  className="inline-block bg-paper border border-rule text-ink-soft rounded-pill text-[14px] px-6 py-3 font-medium hover:text-ink transition-colors"
                 >
                   로그인
                 </Link>
@@ -145,7 +145,7 @@ export default function HostRegister() {
           ) : (
             <>
               <div className="text-center mb-8">
-                <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-gold">
+                <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-ink">
                   뷰티그라운드
                 </h1>
                 <p className="text-text-sub text-[14px] mt-2">진행자 회원가입</p>
@@ -220,12 +220,12 @@ export default function HostRegister() {
                     )}
                   </div>
 
-                  <label className="flex items-start gap-2.5 cursor-pointer bg-cream rounded-md p-4" style={{ border: '0.5px solid #e5e0d8' }}>
+                  <label className="flex items-start gap-2.5 cursor-pointer bg-quiet rounded-md p-4" style={{ border: '0.5px solid #E3E5E9' }}>
                     <input
                       type="checkbox"
                       checked={agree}
                       onChange={(e) => { setAgree(e.target.checked); setErrors((p) => ({ ...p, agree: undefined })) }}
-                      className="w-4 h-4 accent-gold mt-0.5"
+                      className="w-4 h-4 accent-ink mt-0.5"
                     />
                     <span className="text-[13px] text-text-sub">
                       <span className="text-[#FF4757]">[필수]</span> 개인정보 수집·이용에 동의합니다. (방송·정산 처리 목적)
@@ -238,14 +238,14 @@ export default function HostRegister() {
                   )}
 
                   <Button
-                    type="submit" variant="gold" size="md"
+                    type="submit" variant="ink" size="md"
                     label={submitting ? '신청 중…' : '회원가입'}
                     disabled={submitting} className="w-full"
                   />
 
                   <p className="text-center text-[13px] text-text-sub pt-1">
                     이미 계정이 있으신가요?{' '}
-                    <Link to="/host/login" className="text-gold hover:underline">로그인</Link>
+                    <Link to="/host/login" className="text-ink hover:underline">로그인</Link>
                   </p>
                 </div>
               </form>

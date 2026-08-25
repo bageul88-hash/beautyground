@@ -67,7 +67,7 @@ export default function HostLayout() {
         </button>
         <div className="px-6 pt-8 pb-6 border-b border-white/10">
           <Link to="/" className="block">
-            <p className="text-[#b8924a] font-serif text-[20px] font-bold tracking-wide hover:text-[#d4aa6a] transition-colors">
+            <p className="text-white font-serif text-[20px] font-bold tracking-wide hover:opacity-80 transition-colors">
               뷰티그라운드
             </p>
             <p className="text-[#555] text-[11px] mt-0.5 tracking-widest uppercase">Host Center</p>
@@ -90,7 +90,7 @@ export default function HostLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
                   isActive
-                    ? 'text-[#b8924a] bg-[rgba(184,146,74,0.1)] border-l-[3px] border-[#b8924a] pl-[17px]'
+                    ? 'text-white bg-ink border-l-[3px] border-ink pl-[17px] rounded-r-md'
                     : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
                 }`
               }

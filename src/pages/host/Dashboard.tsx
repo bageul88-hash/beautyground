@@ -125,14 +125,14 @@ export default function HostDashboard() {
         <p className="text-[12px] text-[#9a9080] leading-relaxed">
           예상 수수료는 이번 달 매출을 기준으로 현재 등급을 적용한 참고값입니다. 실제 정산은
           매월 관리자가 생성하며,{' '}
-          <Link to="/host/settlement" className="text-[#b8924a] hover:underline">정산 내역</Link>에서 확인할 수 있습니다.
+          <Link to="/host/settlement" className="text-ink hover:underline">정산 내역</Link>에서 확인할 수 있습니다.
         </p>
       </div>
 
       <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[14px] font-bold text-[#111]">최근 방송</h2>
-          <Link to="/host/lives" className="flex items-center gap-1 text-[12px] text-[#b8924a] hover:underline">
+          <Link to="/host/lives" className="flex items-center gap-1 text-[12px] text-ink hover:underline">
             전체 보기 <IconChevronRight size={13} />
           </Link>
         </div>
@@ -186,7 +186,7 @@ function UsageGuide() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {GUIDE_STEPS.map((s) => (
           <div key={s.title} className="bg-[#f7f4ef] rounded-xl p-4">
-            <p className="text-[13px] font-semibold text-[#b8924a] mb-1">{s.title}</p>
+            <p className="text-[13px] font-semibold text-ink mb-1">{s.title}</p>
             <p className="text-[12px] text-[#666] leading-relaxed">{s.body}</p>
           </div>
         ))}

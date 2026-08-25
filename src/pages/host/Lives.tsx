@@ -107,7 +107,7 @@ function CreateLiveForm({ onCreated }: { onCreated: () => void }) {
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="w-full text-[13px] font-semibold text-[#b8924a] hover:underline text-left"
+          className="w-full text-[13px] font-semibold text-ink hover:underline text-left"
         >
           + 새 라이브 만들기
         </button>
@@ -120,7 +120,7 @@ function CreateLiveForm({ onCreated }: { onCreated: () => void }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="예: 8월 28일 라이브 방송"
-              className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-[#b8924a]"
+              className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink"
             />
           </div>
           <div>
@@ -130,12 +130,12 @@ function CreateLiveForm({ onCreated }: { onCreated: () => void }) {
               value={scheduledAt}
               min={nowLocalInput()}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-[#b8924a]"
+              className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink"
             />
           </div>
           {error && <p className="text-[12px] text-[#FF4757]">{error}</p>}
           <div className="flex gap-2">
-            <Button variant="gold" size="sm" label={creating ? '만드는 중…' : '만들기'} disabled={creating} onClick={submit} />
+            <Button variant="ink" size="sm" label={creating ? '만드는 중…' : '만들기'} disabled={creating} onClick={submit} />
             <button onClick={() => { setOpen(false); setError('') }} className="text-[12px] text-[#999] px-2">취소</button>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function HostLives() {
             key={f.value}
             onClick={() => setFilter(f.value)}
             className={`px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${
-              filter === f.value ? 'bg-[#b8924a] text-white' : 'bg-white border border-[#e5e0d8] text-[#555]'
+              filter === f.value ? 'bg-ink text-white' : 'bg-white border border-[#e5e0d8] text-[#555]'
             }`}
           >
             {f.label}
@@ -206,7 +206,7 @@ export default function HostLives() {
               <Link
                 key={live.id}
                 to={`/host/live/${live.id}`}
-                className="block bg-white rounded-[14px] border border-[#e5e0d8] p-5 hover:border-[#b8924a] transition-colors"
+                className="block bg-white rounded-[14px] border border-[#e5e0d8] p-5 hover:border-ink transition-colors"
               >
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-[14px] font-semibold text-[#111] leading-tight">{live.title}</p>
