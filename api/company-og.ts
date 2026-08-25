@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 const OG_PROFILES: Record<string, { title: string; desc: string; path: string }> = {
   company: { title: 'LIFE IS BEAUTY', desc: '뷰티그라운드 회사소개서', path: '/company' },
   live: { title: '뷰티그라운드 라이브커머스', desc: 'AK플라자·현대백화점·롯데백화점 매장에서 직접 만나는 뷰티 라이브 — 지금 방송 중인 라이브와 다시보기를 확인해보세요', path: '/live' },
+  export: { title: '뷰티그라운드 브랜드 수출 플랫폼', desc: '브랜드가 직접 정보를 올리고 해외 수출을 제안하는 곳 — K-뷰티 브랜드와 바이어를 잇는 정보 공유 플랫폼', path: '/export' },
 }
 
 // ── ?job=gov-support-sync ──────────────────────────────────────────────────
