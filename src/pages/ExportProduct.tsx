@@ -25,18 +25,9 @@ const LANGS: { code: Lang; label: string }[] = [
   { code: 'ko', label: '한국어' },
 ]
 
+// 해외 바이어 전용 페이지라 브라우저 언어 자동감지 없이 항상 영어로 시작(2026-08-26 확정) —
+// 필요하면 우상단 언어 스위처로 직접 바꾼다.
 function detectLang(): Lang {
-  if (typeof navigator === 'undefined') return 'en'
-  const nl = navigator.language?.toLowerCase() ?? ''
-  if (nl.startsWith('ko')) return 'ko'
-  if (nl.startsWith('zh-tw') || nl.startsWith('zh-hk') || nl.startsWith('zh-hant')) return 'zh_tw'
-  if (nl.startsWith('zh')) return 'zh_cn'
-  if (nl.startsWith('ja')) return 'ja'
-  if (nl.startsWith('ms')) return 'ms'
-  if (nl.startsWith('id')) return 'id'
-  if (nl.startsWith('vi')) return 'vi'
-  if (nl.startsWith('th')) return 'th'
-  if (nl.startsWith('ru')) return 'ru'
   return 'en'
 }
 

@@ -12,14 +12,9 @@ export const LANGS: { code: Lang; label: string }[] = [
   { code: 'es', label: 'Español' },
 ]
 
-// 브라우저 언어를 감지해 초기 표시 언어를 정한다(못 찾으면 영어 — 해외 바이어가 주 타깃).
+// 이 페이지들은 해외 바이어 전용이라 브라우저 언어 자동감지 없이 항상 영어로 시작한다
+// (2026-08-26 확정) — 필요하면 언어 스위처로 직접 바꾼다.
 export function detectLang(): Lang {
-  if (typeof navigator === 'undefined') return 'en'
-  const nl = navigator.language?.toLowerCase() ?? ''
-  if (nl.startsWith('ko')) return 'ko'
-  if (nl.startsWith('ja')) return 'ja'
-  if (nl.startsWith('zh')) return 'zh'
-  if (nl.startsWith('es')) return 'es'
   return 'en'
 }
 
