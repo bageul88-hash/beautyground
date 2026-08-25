@@ -29,6 +29,18 @@ export default function HostLogin() {
     navigate('/host/dashboard')
   }
 
+  const handleKakao = async () => {
+    setError(null)
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${window.location.origin}/host/dashboard`,
+        scopes: 'profile_nickname account_email',
+      },
+    })
+    if (oauthError) setError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
+  }
+
   return (
     <>
       <GNB />
@@ -50,6 +62,28 @@ export default function HostLogin() {
             style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
           >
             <div className="space-y-4">
+              {/* 카카오 로그인 — 공식 버튼 규격(#FEE500 배경 + 검정 85% 텍스트, 카카오 고유색 예외) */}
+              <button
+                type="button"
+                onClick={handleKakao}
+                className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 focus:outline-none focus-visible:shadow-ring"
+                style={{ backgroundColor: '#FEE500', color: 'rgba(0,0,0,0.85)' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="rgba(0,0,0,0.85)"
+                    d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-.95 3.52c-.08.31.27.56.54.38l4.19-2.79c.51.05 1.03.08 1.56.08 5.52 0 10-3.54 10-7.85C22 6.54 17.52 3 12 3z"
+                  />
+                </svg>
+                카카오로 로그인
+              </button>
+
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex-1 h-px bg-rule" />
+                <span className="text-[12px] text-ink-faint">또는 이메일로 로그인</span>
+                <div className="flex-1 h-px bg-rule" />
+              </div>
+
               <div>
                 <label htmlFor="email" className="block text-[13px] font-medium text-text mb-1.5">
                   이메일

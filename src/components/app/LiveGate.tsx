@@ -56,12 +56,12 @@ export default function LiveGate({ children }: { children: ReactNode }) {
           value={code}
           onChange={(e) => { setCode(e.target.value); setError(false) }}
           autoFocus
-          className="w-full border border-cream-2 rounded-md px-4 py-3 text-center text-[16px] tracking-[0.2em] focus:outline-none focus:shadow-focus"
+          className="w-full border border-rule rounded-md px-4 py-3 text-center text-[16px] tracking-[0.2em] focus:outline-none focus-visible:shadow-ring"
         />
         {error && <p className="mt-2 text-[12.5px] text-red-500">코드가 올바르지 않습니다</p>}
         <button
           type="submit"
-          className="mt-4 w-full rounded-pill bg-gold text-white text-[14px] font-medium py-3 hover:bg-gold-light transition-colors"
+          className="mt-4 w-full rounded-pill bg-ink text-paper text-[14px] font-medium py-3 hover:opacity-90 transition-colors"
         >
           확인
         </button>
