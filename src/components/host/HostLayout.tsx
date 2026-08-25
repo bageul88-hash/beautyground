@@ -26,6 +26,13 @@ const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> 
   pending:   { bg: 'bg-[#FAEEDA]', text: 'text-[#633806]', label: '심사중' },
 }
 
+// ERP(beautyground-erp) 사이드바와 동일한 남색 그라데이션 알약 버튼(2026-08-26 대표님 지시)
+const NAV_GRADIENT = 'linear-gradient(135deg, #1e4fd8 0%, #2b6cf0 35%, #4a8bf7 70%, #1e4fd8 100%)'
+const NAV_GRADIENT_ACTIVE = 'linear-gradient(135deg, #dfe3f0 0%, #ffffff 40%, #f2f4fb 70%, #d8dceb 100%)'
+const LOGOUT_GRADIENT = 'linear-gradient(135deg, #dc2626 0%, #ef4444 30%, #f87171 65%, #b91c1c 100%)'
+const navShadow = 'box-shadow:0 10px 24px rgba(30,79,216,.45),inset 0 2px 2px rgba(255,255,255,.7),inset 0 -4px 8px rgba(0,0,0,.3)'
+const navShadowActive = 'box-shadow:0 10px 24px rgba(30,40,90,.28),inset 0 2px 2px rgba(255,255,255,.95),inset 0 -4px 8px rgba(0,0,0,.12)'
+
 export default function HostLayout() {
   const navigate = useNavigate()
   const [host, setHost] = useState<Host | null>(null)
@@ -54,57 +61,60 @@ export default function HostLayout() {
       )}
 
       <aside
-        className={`w-[240px] min-h-screen bg-[#0e0c08] flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 ${
+        className={`w-[240px] min-h-screen bg-white flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 shadow-[2px_0_18px_rgba(30,40,90,.08)] ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <button
           onClick={() => setMenuOpen(false)}
-          className="lg:hidden absolute top-4 right-4 text-[#888] hover:text-white"
+          className="lg:hidden absolute top-4 right-4 text-ink-faint hover:text-ink"
           aria-label="메뉴 닫기"
         >
           <IconX size={20} />
         </button>
-        <div className="px-6 pt-8 pb-6 border-b border-white/10">
+        <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
-            <p className="text-white font-serif text-[20px] font-bold tracking-wide hover:opacity-80 transition-colors">
+            <p className="text-ink font-serif text-[20px] font-bold tracking-wide hover:opacity-80 transition-colors">
               뷰티그라운드
             </p>
-            <p className="text-[#555] text-[11px] mt-0.5 tracking-widest uppercase">Host Center</p>
+            <p className="text-ink-faint text-[11px] mt-0.5 tracking-widest uppercase">Host Center</p>
           </Link>
         </div>
 
-        <div className="px-6 py-4 border-b border-white/10">
-          <p className="text-white text-[13px] font-semibold">{host?.name ?? '-'}</p>
+        <div className="px-6 py-4 border-b border-rule">
+          <p className="text-ink text-[13px] font-semibold">{host?.name ?? '-'}</p>
           <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[11px] font-medium ${badge.bg} ${badge.text}`}>
             {badge.label}
           </span>
         </div>
 
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 px-3 flex flex-col gap-2">
           {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
-                  isActive
-                    ? 'text-white bg-ink border-l-[3px] border-ink pl-[17px] rounded-r-md'
-                    : 'text-[#888] hover:text-white border-l-[3px] border-transparent pl-[17px]'
+                `flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[13.5px] font-semibold transition-transform border ${
+                  isActive ? 'text-ink border-white/95 hover:-translate-y-0.5' : 'text-white border-white/65 hover:-translate-y-0.5'
                 }`
               }
+              style={({ isActive }) => ({
+                background: isActive ? NAV_GRADIENT_ACTIVE : NAV_GRADIENT,
+                cssText: isActive ? navShadowActive : navShadow,
+              })}
             >
-              <Icon size={18} />
+              <Icon size={17} />
               {label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-6 py-6 border-t border-white/10">
+        <div className="px-3 pb-6 pt-3 border-t border-rule">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-[#555] hover:text-white text-[13px] transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[13px] font-semibold text-white border border-white/65 hover:-translate-y-0.5 transition-transform"
+            style={{ background: LOGOUT_GRADIENT, boxShadow: '0 10px 24px rgba(220,38,38,.5), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.28)' }}
           >
             <IconLogout size={16} />
             로그아웃

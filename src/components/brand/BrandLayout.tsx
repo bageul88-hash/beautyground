@@ -28,15 +28,20 @@ const FULL_NAV_ITEMS = [
 // 하므로 "수출 소개" 하나만 노출한다.
 const EXPORT_ONLY_NAV_ITEMS = [EXPORT_NAV_ITEM]
 
-// 강조는 원색 1개(signal-blue)만 — 관리자(/admin) AdminLayout.tsx와 동일한 규칙.
 const STATUS_BADGE: Record<string, { className: string; label: string }> = {
   active:    { className: 'bg-signal-blue/10 text-signal-blue', label: '이용중' },
   pending:   { className: 'bg-quiet text-ink-soft', label: '승인 대기' }, // OTP 셀프 가입 브랜드(2026-08-17)
   suspended: { className: 'bg-quiet text-ink-faint', label: '정지됨' },
 }
 
-// 관리자(/admin) AdminLayout.tsx와 같은 톤으로 통일(2026-08-15) — 화이트+블랙 텍스트,
-// 진한 배경색·골드 강조 없이 얇은 선과 잉크 농도로만 상태 구분.
+// ERP(beautyground-erp) 사이드바와 동일한 남색 그라데이션 알약 버튼(2026-08-26 대표님 지시:
+// "셀러페이지도 마찬가지로 같게 해줘") — HostLayout.tsx와 동일한 패턴.
+const NAV_GRADIENT = 'linear-gradient(135deg, #1e4fd8 0%, #2b6cf0 35%, #4a8bf7 70%, #1e4fd8 100%)'
+const NAV_GRADIENT_ACTIVE = 'linear-gradient(135deg, #dfe3f0 0%, #ffffff 40%, #f2f4fb 70%, #d8dceb 100%)'
+const LOGOUT_GRADIENT = 'linear-gradient(135deg, #dc2626 0%, #ef4444 30%, #f87171 65%, #b91c1c 100%)'
+const navShadow = { boxShadow: '0 10px 24px rgba(30,79,216,.45), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.3)' }
+const navShadowActive = { boxShadow: '0 10px 24px rgba(30,40,90,.28), inset 0 2px 2px rgba(255,255,255,.95), inset 0 -4px 8px rgba(0,0,0,.12)' }
+
 export default function BrandLayout() {
   const navigate = useNavigate()
   const [partner, setPartner] = useState<Partner | null>(null)
@@ -72,7 +77,7 @@ export default function BrandLayout() {
   const badge = STATUS_BADGE[partner?.status ?? 'active'] ?? STATUS_BADGE.active
 
   return (
-    <div className="flex min-h-screen bg-paper">
+    <div className="flex min-h-screen bg-[#f7f4ef]">
       {menuOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
@@ -82,7 +87,7 @@ export default function BrandLayout() {
       )}
 
       <aside
-        className={`w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 ${
+        className={`w-[240px] min-h-screen bg-white flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 lg:translate-x-0 shadow-[2px_0_18px_rgba(30,40,90,.08)] ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -109,24 +114,26 @@ export default function BrandLayout() {
           </span>
         </div>
 
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-4 px-3 flex flex-col gap-2 overflow-y-auto">
           {navItems.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
-                  isActive
-                    ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
-                    : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
+                `flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[13.5px] font-semibold transition-transform border relative hover:-translate-y-0.5 ${
+                  isActive ? 'text-ink border-white/95' : 'text-white border-white/65'
                 }`
               }
+              style={({ isActive }) => ({
+                background: isActive ? NAV_GRADIENT_ACTIVE : NAV_GRADIENT,
+                ...(isActive ? navShadowActive : navShadow),
+              })}
             >
-              <Icon size={18} />
+              <Icon size={17} />
               {label}
               {to === '/brand/settlement' && pendingCount > 0 && (
-                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-signal-red text-paper text-[10.5px] font-bold">
+                <span className="absolute right-3 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-signal-red text-paper text-[10.5px] font-bold">
                   {pendingCount}
                 </span>
               )}
@@ -134,10 +141,11 @@ export default function BrandLayout() {
           ))}
         </nav>
 
-        <div className="px-6 py-6 border-t border-rule">
+        <div className="px-3 pb-6 pt-3 border-t border-rule">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-ink-faint hover:text-ink text-[13px] transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[13px] font-semibold text-white border border-white/65 hover:-translate-y-0.5 transition-transform"
+            style={{ background: LOGOUT_GRADIENT, boxShadow: '0 10px 24px rgba(220,38,38,.5), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.28)' }}
           >
             <IconLogout size={16} />
             로그아웃
@@ -146,7 +154,7 @@ export default function BrandLayout() {
       </aside>
 
       <div className="flex-1 ml-0 lg:ml-[240px] flex flex-col min-h-screen">
-        <header className="h-[60px] bg-paper border-b border-rule flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
+        <header className="h-[60px] bg-white border-b border-[#eee] flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMenuOpen(true)}

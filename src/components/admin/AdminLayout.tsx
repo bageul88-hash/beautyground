@@ -1,4 +1,5 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   IconHome,
   IconLogout,
@@ -16,6 +17,7 @@ import {
   IconWorld,
   IconTargetArrow,
   IconClipboardList,
+  IconChevronRight,
 } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
@@ -76,8 +78,28 @@ const NAV_GROUPS = [
   },
 ]
 
+// ERP(beautyground-erp) 사이드바와 동일한 남색/청록 그라데이션 알약 버튼(2026-08-26 대표님 지시:
+// "관리자 페이지의 모든 좌측 박스는 erp 좌측 박스와 똑같이 디자인 변경해")
+const GROUP_GRADIENT = 'linear-gradient(135deg, #1e4fd8 0%, #2b6cf0 35%, #4a8bf7 70%, #1e4fd8 100%)'
+const ITEM_GRADIENT = 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 30%, #5eead4 65%, #14b8a6 100%)'
+const ITEM_GRADIENT_ACTIVE = 'linear-gradient(135deg, #dfe3f0 0%, #ffffff 40%, #f2f4fb 70%, #d8dceb 100%)'
+const LOGOUT_GRADIENT = 'linear-gradient(135deg, #dc2626 0%, #ef4444 30%, #f87171 65%, #b91c1c 100%)'
+const groupShadow = { boxShadow: '0 10px 24px rgba(30,79,216,.45), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.3)' }
+const itemShadow = { boxShadow: '0 8px 18px rgba(20,184,166,.45), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.22)' }
+const itemShadowActive = { boxShadow: '0 10px 24px rgba(30,40,90,.28), inset 0 2px 2px rgba(255,255,255,.95), inset 0 -4px 8px rgba(0,0,0,.12)' }
+
+function groupHasActive(group: (typeof NAV_GROUPS)[number], pathname: string) {
+  return group.items.some((it) => pathname === it.to || pathname.startsWith(it.to + '/'))
+}
+
 export default function AdminLayout() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  // 아코디언: 한 번에 한 그룹만 펼침 — 기본값은 현재 경로가 속한 그룹, 사용자가 누르면 그 선택이 우선(ERP와 동일 규칙)
+  const activeGroupTitle = NAV_GROUPS.find((g) => groupHasActive(g, pathname))?.title ?? null
+  const [openGroup, setOpenGroup] = useState<string | null | undefined>(undefined)
+  const currentOpen = openGroup === undefined ? activeGroupTitle : openGroup
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -85,9 +107,8 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      {/* 사이드바 — 화이트+블랙 텍스트(새 월드). 진한 배경색·골드 강조 없이 얇은 선과 잉크 농도로만 상태 구분. */}
-      <aside className="w-[240px] min-h-screen bg-paper border-r border-rule flex flex-col fixed left-0 top-0 z-30">
+    <div className="flex min-h-screen bg-[#f4f5f9]">
+      <aside className="w-[264px] min-h-screen bg-white flex flex-col fixed left-0 top-0 z-30 shadow-[2px_0_18px_rgba(30,40,90,.08)] overflow-y-auto">
         <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
             <p className="text-ink text-[20px] font-bold tracking-wide">
@@ -97,34 +118,56 @@ export default function AdminLayout() {
           </Link>
         </div>
 
-        <nav className="flex-1 py-4 pb-10 overflow-y-auto">
-          {NAV_GROUPS.map((group, i) => (
-            <div key={group.title} className={i > 0 ? 'mt-3 pt-3 border-t border-rule' : ''}>
-              <p className="px-5 pb-1 text-[10.5px] tracking-widest uppercase text-ink-faint">{group.title}</p>
-              {group.items.map(({ label, to, icon: Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-5 py-3 text-[13px] transition-colors ${
-                      isActive
-                        ? 'text-ink font-bold bg-quiet border-l-[3px] border-ink pl-[17px]'
-                        : 'text-ink-soft hover:text-ink border-l-[3px] border-transparent pl-[17px]'
-                    }`
-                  }
+        <nav className="flex-1 py-4 px-3 flex flex-col gap-[7px]">
+          {NAV_GROUPS.map((group) => {
+            const isOpen = currentOpen === group.title
+            return (
+              <div key={group.title}>
+                <button
+                  type="button"
+                  onClick={() => setOpenGroup(isOpen ? null : group.title)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[12.5px] font-extrabold tracking-wide text-white border border-white/65 hover:-translate-y-0.5 transition-transform relative"
+                  style={{ background: GROUP_GRADIENT, ...groupShadow }}
                 >
-                  <Icon size={18} />
-                  {label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+                  {group.title}
+                  <IconChevronRight
+                    size={13}
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div className="flex flex-col gap-[5px] mt-[5px] mb-1">
+                    {group.items.map(({ label, to, icon: Icon }) => (
+                      <NavLink
+                        key={to}
+                        to={to}
+                        className={({ isActive }) =>
+                          `flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-transform border hover:-translate-y-0.5 ${
+                            isActive ? 'text-ink border-white/95' : 'text-white border-white/65'
+                          }`
+                        }
+                        style={({ isActive }) => ({
+                          background: isActive ? ITEM_GRADIENT_ACTIVE : ITEM_GRADIENT,
+                          ...(isActive ? itemShadowActive : itemShadow),
+                        })}
+                      >
+                        <Icon size={16} />
+                        {label}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </nav>
 
-        <div className="px-6 py-6 border-t border-rule">
+        <div className="px-3 pb-6 pt-3 border-t border-rule">
           <button
             onClick={() => void handleLogout()}
-            className="flex items-center gap-2 text-ink-faint hover:text-ink text-[13px] transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-full text-[13px] font-semibold text-white border border-white/65 hover:-translate-y-0.5 transition-transform"
+            style={{ background: LOGOUT_GRADIENT, boxShadow: '0 10px 24px rgba(220,38,38,.5), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.28)' }}
           >
             <IconLogout size={16} />
             로그아웃
@@ -133,7 +176,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* 메인 콘텐츠 */}
-      <div className="flex-1 ml-[240px] min-h-screen">
+      <div className="flex-1 ml-[264px] min-h-screen">
         <Outlet />
       </div>
     </div>
