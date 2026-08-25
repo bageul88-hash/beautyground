@@ -37,6 +37,7 @@ export default function HostRegister() {
   const [session, setSession] = useState<Session | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
   const [alreadyHost, setAlreadyHost] = useState(false)
+  const [justLoggedIn, setJustLoggedIn] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -104,6 +105,7 @@ export default function HostRegister() {
 
     let userId: string | null
     let email = form.email.trim()
+    let loggedIn = !!session
 
     if (session) {
       userId = session.user.id
@@ -132,6 +134,8 @@ export default function HostRegister() {
         return
       }
       userId = signUpData.user?.id ?? null
+      // 이메일 확인 절차가 꺼져있으면 signUp만으로도 바로 세션이 생긴다 — 이 경우도 "로그인됨"으로 취급.
+      loggedIn = !!signUpData.session
     }
 
     // 파트너와 달리 신청 테이블 없이 hosts 에 바로 pending 으로 insert
@@ -152,6 +156,7 @@ export default function HostRegister() {
     }
 
     setSubmitting(false)
+    setJustLoggedIn(loggedIn)
     setDone(true)
   }
 
@@ -172,22 +177,33 @@ export default function HostRegister() {
                 가입 신청이 접수되었습니다
               </h1>
               <p className="text-[14px] text-text-sub leading-relaxed">
-                승인 후 로그인하실 수 있습니다.<br />
-                결과는 입력하신 이메일로 안내드립니다.
+                승인이 완료되면 진행자센터를 이용하실 수 있습니다.<br />
+                {justLoggedIn ? '진행자센터에서 승인 여부를 바로 확인하실 수 있어요.' : '결과는 입력하신 이메일로 안내드립니다.'}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
-                <Link
-                  to="/"
-                  className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
-                >
-                  홈으로
-                </Link>
-                <Link
-                  to="/host/login"
-                  className="inline-block bg-paper border border-rule text-ink-soft rounded-pill text-[14px] px-6 py-3 font-medium hover:text-ink transition-colors"
-                >
-                  로그인
-                </Link>
+                {justLoggedIn ? (
+                  <Link
+                    to="/host/dashboard"
+                    className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
+                  >
+                    진행자센터로 가기
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/"
+                      className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
+                    >
+                      홈으로
+                    </Link>
+                    <Link
+                      to="/host/login"
+                      className="inline-block bg-paper border border-rule text-ink-soft rounded-pill text-[14px] px-6 py-3 font-medium hover:text-ink transition-colors"
+                    >
+                      로그인
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           ) : alreadyHost ? (
