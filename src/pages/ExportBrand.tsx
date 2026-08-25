@@ -393,18 +393,18 @@ export default function ExportBrand() {
               {products.map((p) => {
                 const img = p.export_image_urls?.[0] ?? p.thumbnail_url ?? ''
                 return (
-                  <figure key={p.id}>
-                    <div className="border border-[#E6E3DC] bg-[#FAF9F6]">
+                  <Link key={p.id} to={`/x/${brand.id}/products/${p.id}`} className="block group">
+                    <div className="border border-[#E6E3DC] bg-[#FAF9F6] group-hover:border-[#16202F] transition-colors">
                       <img src={img} alt={productName(p)} className="w-full aspect-square object-cover mix-blend-multiply" loading="lazy" />
                     </div>
                     <figcaption className="mt-2">
-                      <p className="text-[12px] font-medium text-[#16202F] leading-[1.45] line-clamp-2">{productName(p)}</p>
+                      <p className="text-[12px] font-medium text-[#16202F] leading-[1.45] line-clamp-2 group-hover:underline">{productName(p)}</p>
                       <p className="text-[10.5px] text-[#8A8577] mt-1">
                         {p.price ? `${t.retail} ₩${p.price.toLocaleString()}` : ''}
                       </p>
                       <p className="text-[10.5px] text-[#E53E3E] mt-0.5">{t.priceOnRequest}</p>
                     </figcaption>
-                  </figure>
+                  </Link>
                 )
               })}
             </div>

@@ -13,6 +13,7 @@ const AppHome = lazy(() => import('./pages/AppHome'))
 const CompanyIntro = lazy(() => import('./pages/CompanyIntro'))
 const Export = lazy(() => import('./pages/Export'))
 const ExportBrand = lazy(() => import('./pages/ExportBrand'))
+const ExportProduct = lazy(() => import('./pages/ExportProduct'))
 const PartnerHub = lazy(() => import('./pages/PartnerHub'))
 const PartnerHubList = lazy(() => import('./pages/PartnerHubList'))
 const PartnerHubDetail = lazy(() => import('./pages/PartnerHubDetail'))
@@ -167,6 +168,9 @@ export default function App() {
         {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙).
             구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />
+        {/* 상품 단위 수출 상세 — /x/:key 하위 중첩(별도 독립 라우트가 아님, 2026-08-25 확정).
+            가격·MOQ·스펙 없음, 갤러리·설명은 온라인몰 products 데이터 재사용, Inquire는 /export 문의폼 프리필로 연결 */}
+        <Route path="/x/:key/products/:productId" element={<ExportProduct />} />
         {/* 브랜드 파트너 허브(2026-08-24) — 입점·비입점 브랜드 누구나 로그인 없이 열람하는 정보
             페이지(정부지원사업/백화점 입점/브랜드 운영정보 + /export 링크). 신청·입점 폼이 전혀
             없는 일방향 정보 제공 페이지라, 2026-08-10에 PG 심사에서 "중개플랫폼"으로 오인되어

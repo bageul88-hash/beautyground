@@ -473,7 +473,7 @@ export default function Export() {
                       {brand.products.map((product) => (
                         <Link
                           key={product.id}
-                          to={`/x/${brand.id}`}
+                          to={`/x/${brand.id}/products/${product.id}`}
                           className="rounded-card overflow-hidden border border-rule block hover:border-ink transition-colors group/card"
                         >
                           <div className="aspect-square bg-quiet overflow-hidden">
