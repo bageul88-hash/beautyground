@@ -468,34 +468,12 @@ export default function Export() {
                     </p>
                   )}
 
-                  {brand.products.length > 0 && (
-                    <div className="grid grid-cols-2 gap-3 mt-4">
-                      {brand.products.map((product) => (
-                        <Link
-                          key={product.id}
-                          to={`/x/${brand.id}/products/${product.id}`}
-                          className="rounded-card overflow-hidden border border-rule block hover:border-ink transition-colors group/card"
-                        >
-                          <div className="aspect-square bg-quiet overflow-hidden">
-                            <img
-                              src={product.export_image_urls[0] ?? product.thumbnail_url ?? ''}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          </div>
-                          <div className="px-2.5 py-2">
-                            <p className="text-[12px] font-semibold text-ink leading-snug line-clamp-2 group-hover/card:underline">
-                              {product.name}
-                            </p>
-                            {product.export_description_en && (
-                              <p className="text-[11px] text-ink-faint mt-1 line-clamp-1">{product.export_description_en}</p>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <Link
+                    to={`/x/${brand.id}`}
+                    className="inline-flex items-center gap-1 mt-2 text-[13px] font-semibold text-ink hover:underline"
+                  >
+                    {t.viewAllProducts}
+                  </Link>
                 </div>
               ))}
             </div>
