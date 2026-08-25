@@ -1,12 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
 
-// /company 링크 공유 시 미리보기(OG)를 쇼핑몰 네이밍 대신 회사소개서용으로 바꿔서 내보낸다.
+// /company, /live 등 특정 경로 공유 시 미리보기(OG)를 쇼핑몰 기본 네이밍 대신 그 페이지 전용으로 바꿔서 내보낸다.
 // SPA라 라우트별 메타태그가 불가능하므로, 이 함수가 index.html을 받아 head 메타만 치환해 반환한다.
-// (크롤러·사용자 모두 동일 HTML — 앱 번들이 그대로 로드되므로 화면은 기존 /company 페이지와 동일)
-
-const OG_TITLE = 'LIFE IS BEAUTY'
-const OG_DESC = '뷰티그라운드 회사소개서'
+// (크롤러·사용자 모두 동일 HTML — 앱 번들이 그대로 로드되므로 화면은 원래 페이지와 동일)
+// ⚠️ Vercel Hobby 플랜 서버리스 함수 12개 제한에 걸려있어(2026-08-24 실측) 새 api/*.ts 파일을 늘리지 않고
+// ?page= 쿼리로 이 함수 하나에 프로필을 더 얹는 방식으로 확장한다(gov-support-sync 크론과 동일 관례).
+const OG_PROFILES: Record<string, { title: string; desc: string; path: string }> = {
+  company: { title: 'LIFE IS BEAUTY', desc: '뷰티그라운드 회사소개서', path: '/company' },
+  live: { title: '뷰티그라운드 라이브커머스', desc: 'AK플라자·현대백화점·롯데백화점 매장에서 직접 만나는 뷰티 라이브 — 지금 방송 중인 라이브와 다시보기를 확인해보세요', path: '/live' },
+}
 
 // ── ?job=gov-support-sync ──────────────────────────────────────────────────
 // 정부지원사업(기업마당) 자동수집 크론(Vercel Cron, vercel.json)도 이 파일에 얹혀 있다.
@@ -151,6 +154,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const host = (req.headers['x-forwarded-host'] as string) || req.headers.host || 'beautyground.co.kr'
   const origin = `https://${host}`
+  const pageKey = typeof req.query.page === 'string' ? req.query.page : 'company'
+  const profile = OG_PROFILES[pageKey] ?? OG_PROFILES.company
   let html: string
   try {
     const r = await fetch(`${origin}/index.html`)
@@ -163,12 +168,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   html = html
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${OG_TITLE} | ${OG_DESC}</title>`)
-    .replace(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${OG_DESC}" />`)
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${profile.title} | ${profile.desc}</title>`)
+    .replace(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${profile.desc}" />`)
     .replace(/<meta\s+property="og:site_name"[\s\S]*?\/>/, `<meta property="og:site_name" content="BEAUTYGROUND" />`)
-    .replace(/<meta\s+property="og:title"[\s\S]*?\/>/, `<meta property="og:title" content="${OG_TITLE}" />`)
-    .replace(/<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${OG_DESC}" />`)
-    .replace(/<meta\s+property="og:url"[\s\S]*?\/>/, `<meta property="og:url" content="${origin}/company" />`)
+    .replace(/<meta\s+property="og:title"[\s\S]*?\/>/, `<meta property="og:title" content="${profile.title}" />`)
+    .replace(/<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${profile.desc}" />`)
+    .replace(/<meta\s+property="og:url"[\s\S]*?\/>/, `<meta property="og:url" content="${origin}${profile.path}" />`)
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate')

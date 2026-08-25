@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/company", "destination": "/api/company-og" },
+    { "source": "/live", "destination": "/api/company-og?page=live" },
     { "source": "/((?!api/).*)", "destination": "/" }
   ],
   "crons": [
