@@ -87,10 +87,13 @@ export default function HostDashboard() {
 
   if (host.status === 'pending') {
     return (
-      <div className="max-w-md mx-auto mt-16 bg-white rounded-[14px] border border-[#e5e0d8] p-10 text-center">
-        <p className="text-[16px] font-semibold text-[#111] mb-2">가입 승인 대기 중입니다</p>
-        <p className="text-[14px] text-[#9a9080]">승인이 완료되면 진행자 센터를 이용하실 수 있습니다.</p>
-      </div>
+      <>
+        <div className="max-w-md mx-auto mt-16 bg-white rounded-[14px] border border-[#e5e0d8] p-10 text-center">
+          <p className="text-[16px] font-semibold text-[#111] mb-2">가입 승인 대기 중입니다</p>
+          <p className="text-[14px] text-[#9a9080]">승인이 완료되면 진행자 센터를 이용하실 수 있습니다.</p>
+        </div>
+        <UsageGuide />
+      </>
     )
   }
 
@@ -162,6 +165,32 @@ export default function HostDashboard() {
           </div>
         )}
       </div>
+
+      <UsageGuide />
     </>
+  )
+}
+
+// 승인된 진행자도 처음엔 방송 만드는 법·시작하는 법이 낯설 수 있어 항상 눈에 보이는 곳에 안내를 둔다.
+const GUIDE_STEPS = [
+  { title: '① 라이브 만들기', body: '왼쪽 메뉴 "내 방송"에서 [+ 새 라이브 만들기] → 제목·방송 예정일시만 입력하면 나만의 방송 링크가 바로 발급됩니다.' },
+  { title: '② 방송 시작', body: '방송 시작 6시간 전부터, 받은 링크를 핸드폰 브라우저로 열고 "방송 준비 시작 → 카메라 켜기 → 방송 시작" 순서로 누르면 바로 송출됩니다. 앱 설치·별도 장비 필요 없습니다.' },
+  { title: '③ 방송 진행', body: '이 화면을 벗어나거나 새로고침하면 송출이 끊기니, 방송 중엔 계속 켜둔 채로 진행하고 끝나면 "방송 종료"를 눌러주세요.' },
+  { title: '④ 판매·정산 확인', body: '방송이 끝나면 자동으로 다시보기(VOD)가 남고, 판매 수량·매출은 이 대시보드와 "정산 내역"에서 확인할 수 있습니다.' },
+]
+
+function UsageGuide() {
+  return (
+    <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mt-6">
+      <h2 className="text-[14px] font-bold text-[#111] mb-4">📖 이용 방법</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {GUIDE_STEPS.map((s) => (
+          <div key={s.title} className="bg-[#f7f4ef] rounded-xl p-4">
+            <p className="text-[13px] font-semibold text-[#b8924a] mb-1">{s.title}</p>
+            <p className="text-[12px] text-[#666] leading-relaxed">{s.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
