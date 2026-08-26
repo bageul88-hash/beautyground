@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { ExportBrandPublic } from '../lib/types'
-import CuratorSeal from '../components/export/CuratorSeal'
 
 // 브랜드별 수출 미니페이지(/x/:key) — 해외 바이어·소비자에게 링크/QR 하나로 전달하는 모바일 원페이지.
 // 디자인: "무역 라인시트(line sheet)" — 화이트 지면, 세리프 브랜드명, 헤어라인 괘선, 스펙 테이블.
@@ -280,7 +279,6 @@ export default function ExportBrand() {
   if (brand === null) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-8 text-center">
-        <CuratorSeal size={72} />
         <p className="font-serif text-[19px] text-[#16202F] leading-snug">{COPY[lang].notFoundTitle}</p>
         <p className="text-[13px] text-[#8A8577] leading-relaxed max-w-[300px]">{COPY[lang].notFoundBody}</p>
         <Link to="/export" className="mt-3 text-[12px] tracking-[0.1em] text-[#16202F] border-b border-[#16202F] pb-0.5 hover:text-[#E53E3E] hover:border-[#E53E3E] transition-colors">
@@ -355,7 +353,6 @@ export default function ExportBrand() {
               </p>
             )}
           </div>
-          <div className="absolute top-5 right-5 seal-in"><CuratorSeal /></div>
         </header>
 
         {/* ── PROVEN IN KOREA — 스펙 테이블 (뷰티그라운드 자동 삽입, DB 사실만) ── */}

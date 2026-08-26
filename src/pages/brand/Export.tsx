@@ -11,7 +11,6 @@ import {
   translateText,
 } from '../../lib/partner'
 import type { Partner, Product } from '../../lib/types'
-import CuratorSeal from '../../components/export/CuratorSeal'
 
 // 수출 브랜드 페이지 편집기 (v2, 2026-08-17 재구축 — 리틀리 벤치마킹 후 확정한 틀)
 // 좌측 = 고정 슬롯 아코디언(기본 정보 입력) / 우측 = 바이어에게 보이는 폰 화면 실시간 미리보기.
@@ -759,7 +758,6 @@ export default function BrandExport() {
                   </p>
                 )}
               </div>
-              <div className="absolute top-3 right-3 rotate-[-8deg]"><CuratorSeal size={58} /></div>
             </div>
             {/* PROVEN — 스펙 테이블 */}
             <div className="px-4 pb-1">
