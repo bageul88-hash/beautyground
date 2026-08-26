@@ -78,7 +78,7 @@ export default function ExportBrands() {
   return (
     <>
       <GNB extra={<LanguageSwitcher lang={lang} setLang={setLang} />} />
-      <ExportTopNav lang={lang} active=\"brands\" layout=\"wide\" stickyTop={16} />
+      <ExportTopNav lang={lang} active="brands" layout="wide" stickyTop={16} />
       <main className="bg-paper">
         <section className="max-w-[1080px] mx-auto px-6 py-16 sm:py-20">
           <Link to="/export" className="inline-block text-[13px] text-ink-soft hover:text-ink hover:underline mb-8">

@@ -224,7 +224,7 @@ export default function ExportProduct() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <ExportTopNav lang={lang} active=\"brands\" layout=\"wide\" stickyTop={0} />
+      <ExportTopNav lang={lang} active="brands" layout="wide" stickyTop={0} />
       <div className="max-w-[1100px] mx-auto px-6 pt-6 flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-faint truncate">
           <Link to="/export" className="hover:text-ink transition-colors">Export Catalog</Link>

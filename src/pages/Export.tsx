@@ -360,7 +360,7 @@ export default function Export() {
   return (
     <>
       <GNB extra={<LanguageSwitcher lang={lang} setLang={setLang} />} />
-      <ExportTopNav lang={lang} active=\"home\" layout=\"wide\" stickyTop={16} />
+      <ExportTopNav lang={lang} active="home" layout="wide" stickyTop={16} />
       <main className="bg-paper">
         {/* Hero */}
         <section className="border-b border-rule px-6 py-20 sm:py-28 text-center">
