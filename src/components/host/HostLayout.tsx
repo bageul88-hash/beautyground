@@ -30,8 +30,11 @@ const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> 
 const NAV_GRADIENT = 'linear-gradient(135deg, #1e4fd8 0%, #2b6cf0 35%, #4a8bf7 70%, #1e4fd8 100%)'
 const NAV_GRADIENT_ACTIVE = 'linear-gradient(135deg, #dfe3f0 0%, #ffffff 40%, #f2f4fb 70%, #d8dceb 100%)'
 const LOGOUT_GRADIENT = 'linear-gradient(135deg, #dc2626 0%, #ef4444 30%, #f87171 65%, #b91c1c 100%)'
-const navShadow = 'box-shadow:0 10px 24px rgba(30,79,216,.45),inset 0 2px 2px rgba(255,255,255,.7),inset 0 -4px 8px rgba(0,0,0,.3)'
-const navShadowActive = 'box-shadow:0 10px 24px rgba(30,40,90,.28),inset 0 2px 2px rgba(255,255,255,.95),inset 0 -4px 8px rgba(0,0,0,.12)'
+// ⚠️ React inline style은 `cssText`를 인식 못 함(순수 DOM API 전용) — boxShadow로 직접 지정해야
+// 실제로 적용된다. 예전엔 cssText로 넣어놔서 그라데이션 배경 자체가 안 먹혀 버튼 글씨가
+// 흰 배경에 흰 글씨로 안 보이던 버그였음(2026-08-26 발견·수정).
+const navShadow = '0 10px 24px rgba(30,79,216,.45), inset 0 2px 2px rgba(255,255,255,.7), inset 0 -4px 8px rgba(0,0,0,.3)'
+const navShadowActive = '0 10px 24px rgba(30,40,90,.28), inset 0 2px 2px rgba(255,255,255,.95), inset 0 -4px 8px rgba(0,0,0,.12)'
 
 export default function HostLayout() {
   const navigate = useNavigate()
@@ -101,7 +104,7 @@ export default function HostLayout() {
               }
               style={({ isActive }) => ({
                 background: isActive ? NAV_GRADIENT_ACTIVE : NAV_GRADIENT,
-                cssText: isActive ? navShadowActive : navShadow,
+                boxShadow: isActive ? navShadowActive : navShadow,
               })}
             >
               <Icon size={17} />
