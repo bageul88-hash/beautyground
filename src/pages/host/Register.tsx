@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
-import GNB from '../../components/layout/GNB'
-import Footer from '../../components/layout/Footer'
 import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
 
@@ -155,9 +153,9 @@ export default function HostRegister() {
 
   return (
     <>
-      <GNB />
-      <main className="py-10 md:py-14 min-h-[calc(100vh-160px)] flex items-center" style={{ backgroundColor: '#f7f4ef' }}>
-        <div className="max-w-[400px] mx-auto px-4 sm:px-6 w-full">
+      <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-6" style={{ backgroundColor: '#f7f4ef' }}>
+        <Link to="/" className="font-serif text-[16px] font-bold text-ink mb-5">뷰티그라운드</Link>
+        <div className="max-w-[400px] w-full">
           {checkingSession ? (
             <div className="text-center text-[14px] text-ink-faint py-20">불러오는 중...</div>
           ) : done ? (
@@ -318,7 +316,6 @@ export default function HostRegister() {
           )}
         </div>
       </main>
-      <Footer />
     </>
   )
 }
