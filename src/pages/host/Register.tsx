@@ -36,17 +36,24 @@ export default function HostRegister() {
   const [session, setSession] = useState<Session | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
 
-  // 이미 로그인된 계정(쇼핑몰 일반회원 포함 — 계정은 공유, 셀러는 그 위에 얹는 추가 자격)이
-  // 이미 hosts에도 등록돼 있으면, 다시 로그인하라고 막지 않고 바로 진행자센터로 들여보낸다.
-  // (예전엔 "이미 가입된 계정입니다 → 로그인하러 가기" 벽을 보여줬는데, 이미 로그인된
-  // 상태에서 또 로그인하라는 게 불필요한 장벽이었음 — 2026-08-26 대표님 지적으로 변경)
+  // ⚠️ 이 페이지는 방문할 때마다 항상 카카오/네이버/휴대폰 선택 화면부터 보여준다 —
+  // 브라우저에 쇼핑몰 일반회원으로 로그인된 세션이 이미 남아있어도(예: 대표님이 조금 전
+  // 다른 쇼핑몰 화면에서 카카오로 로그인해둔 상태) 그 세션을 조용히 재사용해 곧장
+  // "이름·연락처만 입력" 화면으로 건너뛰지 않는다 — 섭외 대상이 처음 이 링크를 열었을 때와
+  // 똑같은 화면이 항상 나와야 하고, 대표님이 테스트할 때도 매번 버튼 화면부터 보여야 함
+  // (2026-08-26 확정). "SESSION_FLAG"는 카카오/네이버 버튼을 실제로 눌러서 그 인증을 마치고
+  // 돌아온 경우에만 세팅되므로, 이 값이 있을 때만 기존 세션을 인정하고 다음 단계로 넘어간다.
+  const SESSION_FLAG = 'host_join_authed'
+
   useEffect(() => {
     let active = true
     ;(async () => {
+      const justAuthed = sessionStorage.getItem(SESSION_FLAG) === '1'
+      sessionStorage.removeItem(SESSION_FLAG)
       const { data: { session: s } } = await supabase.auth.getSession()
       if (!active) return
-      setSession(s)
-      if (s) {
+      if (s && justAuthed) {
+        setSession(s)
         const meta = s.user.user_metadata as { name?: string; full_name?: string } | undefined
         const knownName = meta?.name ?? meta?.full_name ?? ''
         if (knownName) setName((prev) => prev || knownName)
@@ -61,6 +68,7 @@ export default function HostRegister() {
 
   const handleKakao = async () => {
     setFormError(null)
+    sessionStorage.setItem(SESSION_FLAG, '1')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
@@ -68,7 +76,7 @@ export default function HostRegister() {
         scopes: 'profile_nickname account_email',
       },
     })
-    if (error) setFormError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    if (error) { sessionStorage.removeItem(SESSION_FLAG); setFormError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.') }
   }
 
   // 네이버 — 일반 회원가입(AppSignup.tsx)과 동일한 커스텀 OAuth 흐름 재사용.
@@ -79,6 +87,7 @@ export default function HostRegister() {
       setFormError('네이버 로그인이 아직 설정되지 않았습니다.')
       return
     }
+    sessionStorage.setItem(SESSION_FLAG, '1')
     const state = crypto.randomUUID()
     sessionStorage.setItem('naver_oauth_state', state)
     sessionStorage.setItem('naver_oauth_from', window.location.pathname)
@@ -115,6 +124,10 @@ export default function HostRegister() {
     const { data: { session: s } } = await supabase.auth.getSession()
     setSession(s)
     setPhone(phoneInput)
+    if (s) {
+      const { data: existing } = await supabase.from('hosts').select('id').eq('user_id', s.user.id).maybeSingle()
+      if (existing) navigate('/host/dashboard', { replace: true })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
