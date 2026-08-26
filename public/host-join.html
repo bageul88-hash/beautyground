@@ -17,10 +17,14 @@
 <!-- live.html과 동일한 이유로 정적 파일 분리 — SPA의 공용 manifest.json을 JS로
      바꾸는 방식은 iOS Safari가 "홈 화면에 추가" 순간에 무시해버림. 이 페이지 자체를
      홈 화면에 추가하면 시작주소·아이콘·이름은 이 파일 고정값이라 항상 정확하다.
-     ⚠️ live.html처럼 iframe으로 감싸지 않고 즉시 리다이렉트만 함 — 카카오/네이버
-     로그인이 실제 페이지에서 전체 화면 이동(location.href)으로 동작하는데, 그걸
-     iframe 안에서 하면 카카오 로그인 페이지 쪽 프레임 차단 정책에 걸려 깨질 수
-     있어서(2026-08-27), iframe 없이 그냥 실제 주소로 넘겨주는 방식을 택함. -->
+     ⚠️⚠️ 2026-08-27: 처음엔 location.replace()로 즉시 이동시켰는데, 그게 문제였다 —
+     "홈 화면에 추가"는 그 순간 실제 보고 있는 페이지(top-level document) 기준으로
+     정보를 읽는데, 리다이렉트가 사용자가 공유버튼 누르기도 전에 이미 실행돼서
+     결국 /host/join(쇼핑몰 공용 manifest)을 기준으로 저장돼버렸음(대표님이 10번
+     지우고 다시 깔아도 계속 쇼핑몰로 열려서 발견). live.html처럼 iframe으로 감싸는
+     방법도 있지만 카카오 로그인 프레임 차단 위험이 있어(위 기록 참고) 대신 자동이동을
+     없애고 버튼을 한 번 눌러야 넘어가게 함 — 이러면 페이지 URL이 리다이렉트 없이
+     이 파일 그대로 유지된 상태에서 "홈 화면에 추가"가 이루어져 항상 정확하다. -->
 <link rel="manifest" href="/manifest-hostjoin.json">
 <link rel="icon" href="/icons/icon-hostjoin-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-hostjoin-apple-touch.png">
@@ -28,7 +32,22 @@
 <meta name="apple-mobile-web-app-title" content="라이브커머스 셀러">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#17181C">
-<script>location.replace('/host/join');</script>
+<style>
+  html, body { margin:0; padding:0; height:100%; background:#17181C; }
+  body { display:flex; align-items:center; justify-content:center; }
+  .wrap { text-align:center; padding:24px; }
+  img { width:96px; height:96px; border-radius:22px; margin-bottom:20px; }
+  h1 { color:#fff; font-size:18px; font-weight:700; margin:0 0 8px; font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif; }
+  p { color:#9a9080; font-size:13px; margin:0 0 28px; font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif; }
+  button { background:#fff; color:#17181C; border:0; border-radius:999px; padding:14px 32px; font-size:15px; font-weight:700; font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif; }
+</style>
 </head>
-<body></body>
+<body>
+  <div class="wrap">
+    <img src="/icons/icon-hostjoin-192.png" alt="">
+    <h1>라이브커머스 셀러페이지</h1>
+    <p>뷰티그라운드 라이브커머스 진행자 가입</p>
+    <button onclick="location.href='/host/join'">시작하기</button>
+  </div>
+</body>
 </html>
