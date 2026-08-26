@@ -13,6 +13,7 @@ const AppHome = lazy(() => import('./pages/AppHome'))
 const CompanyIntro = lazy(() => import('./pages/CompanyIntro'))
 const Export = lazy(() => import('./pages/Export'))
 const ExportBrand = lazy(() => import('./pages/ExportBrand'))
+const ExportBrands = lazy(() => import('./pages/ExportBrands'))
 const ExportProduct = lazy(() => import('./pages/ExportProduct'))
 const PartnerHub = lazy(() => import('./pages/PartnerHub'))
 const PartnerHubList = lazy(() => import('./pages/PartnerHubList'))
@@ -165,6 +166,7 @@ export default function App() {
             /export/products(전체 상품)·/export/products/:id(상세)는 2026-08-16 추가 —
             아몬드뷰티(aamondbeauty.com) 상품상세 구조를 참고해 순서 재구성. */}
         <Route path="/export" element={<Export />} />
+        <Route path="/export/brands" element={<ExportBrands />} />
         {/* 브랜드별 수출 미니페이지 — 브랜드가 가입해 수출 프로필을 채운 경우에만 열림(틀만 제공 원칙).
             구 상세 틀(/export/products·/export/brands, 아몬드뷰티 참고 구조)은 혼동 방지 위해 2026-08-17 삭제(대표님 지시) — git 이력에 보존됨 */}
         <Route path="/x/:key" element={<ExportBrand />} />

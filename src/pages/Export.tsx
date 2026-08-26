@@ -4,8 +4,9 @@ import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { supabase } from '../lib/supabase'
 import { useShopBrands } from '../hooks/useShopBrands'
+import { useExportBrandCards } from '../hooks/useExportBrandCards'
+import ExportBrandCard from '../components/export/ExportBrandCard'
 import { PRODUCT_CATEGORIES } from '../lib/types'
-import type { ExportBrandPublic } from '../lib/types'
 import { COMPANY_INFO } from '../lib/companyInfo'
 import { type Lang, detectLang, CATEGORY_I18N } from '../lib/exportI18n'
 import LanguageSwitcher from '../components/export/LanguageSwitcher'
@@ -23,6 +24,7 @@ interface Copy {
   brandsTitle: string
   brandsBody: string
   viewAllProducts: string
+  viewAllBrands: string
   exportingToLabel: string
   moqLabel: string
   categoriesKicker: string
@@ -62,6 +64,7 @@ const COPY: Record<Lang, Copy> = {
     brandsTitle: '피처드 브랜드',
     brandsBody: '뷰티그라운드가 직접 매입·판매하는 브랜드 중 일부입니다.',
     viewAllProducts: '전체 상품 보기 →',
+    viewAllBrands: '전체 브랜드 보기',
     exportingToLabel: '수출 중인 국가',
     moqLabel: 'MOQ · 샘플 정책',
     categoriesKicker: '카테고리',
@@ -99,6 +102,7 @@ const COPY: Record<Lang, Copy> = {
     brandsTitle: 'Featured Brands',
     brandsBody: "A selection of brands we directly buy from and sell — that's Beautyground's portfolio.",
     viewAllProducts: 'View All Products →',
+    viewAllBrands: 'View All Brands',
     exportingToLabel: 'Currently Exporting To',
     moqLabel: 'MOQ · Sample Policy',
     categoriesKicker: 'Categories',
@@ -137,6 +141,7 @@ const COPY: Record<Lang, Copy> = {
     brandsTitle: 'フィーチャーブランド',
     brandsBody: 'Beautygroundが直接買い付け・販売しているブランドの一部です。',
     viewAllProducts: 'すべての商品を見る →',
+    viewAllBrands: 'すべてのブランドを見る',
     exportingToLabel: '現在の輸出先国',
     moqLabel: 'MOQ・サンプルポリシー',
     categoriesKicker: 'カテゴリー',
@@ -175,6 +180,7 @@ const COPY: Record<Lang, Copy> = {
     brandsTitle: '精选品牌',
     brandsBody: '以下是Beautyground直接采购并销售的部分品牌。',
     viewAllProducts: '查看全部产品 →',
+    viewAllBrands: '查看全部品牌',
     exportingToLabel: '目前出口至',
     moqLabel: 'MOQ·样品政策',
     categoriesKicker: '品类',
@@ -212,6 +218,7 @@ const COPY: Record<Lang, Copy> = {
     brandsTitle: 'Marcas Destacadas',
     brandsBody: 'Una selección de marcas que compramos y vendemos directamente — el portafolio de Beautyground.',
     viewAllProducts: 'Ver Todos los Productos →',
+    viewAllBrands: 'Ver Todas las Marcas',
     exportingToLabel: 'Actualmente Exportando A',
     moqLabel: 'MOQ · Política de Muestras',
     categoriesKicker: 'Categorías',
@@ -245,19 +252,6 @@ interface CatalogItem {
   category: string | null
 }
 
-interface FeaturedProduct {
-  id: string
-  name: string
-  thumbnail_url: string | null
-  export_image_urls: string[]
-  export_description_en: string | null
-  partner_id: string
-}
-
-interface BrandCard extends ExportBrandPublic {
-  products: FeaturedProduct[]
-}
-
 interface FormState {
   company_name: string
   contact_name: string
@@ -281,7 +275,8 @@ export default function Export() {
   const [searchParams] = useSearchParams()
   const productParam = searchParams.get('product')
   const [items, setItems] = useState<CatalogItem[]>([])
-  const [brandCards, setBrandCards] = useState<BrandCard[]>([])
+  // 브랜드 박스 데이터는 /export/brands(전체 목록)와 공유 — 여기선 4개만 노출하고 화살표로 전체 페이지 연결
+  const { brandCards } = useExportBrandCards()
   const [form, setForm] = useState<FormState>(() =>
     productParam ? { ...EMPTY_FORM, message: `Re: ${productParam}\n\n` } : EMPTY_FORM
   )
@@ -311,29 +306,6 @@ export default function Export() {
         .order('created_at', { ascending: false })
         .limit(12)
       if (!cancelled) setItems((data ?? []) as CatalogItem[])
-    })()
-    return () => { cancelled = true }
-  }, [])
-
-  // 브랜드가 /brand/export에서 입력한 정보(로고·영문소개·인증·대표상품)를 공개 페이지에 노출.
-  // export_brand_public 뷰는 anon 조회 가능한 안전한 컬럼만 담고 있음(supabase/partners_export_pitch_en.sql).
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const [{ data: brandRows }, { data: productRows }] = await Promise.all([
-        supabase.from('export_brand_public').select('*'),
-        supabase
-          .from('products')
-          .select('id,name,thumbnail_url,export_image_urls,export_description_en,partner_id')
-          .eq('is_export_featured', true)
-          .eq('status', 'on_sale'),
-      ])
-      if (cancelled) return
-      const products = (productRows ?? []) as FeaturedProduct[]
-      const cards = ((brandRows ?? []) as ExportBrandPublic[])
-        .map((b) => ({ ...b, products: products.filter((p) => p.partner_id === b.id) }))
-        .filter((b) => (b.export_pitch_en?.trim() ?? '').length > 0 || b.products.length > 0)
-      setBrandCards(cards)
     })()
     return () => { cancelled = true }
   }, [])
@@ -421,60 +393,26 @@ export default function Export() {
                 <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
                 <h2 className="text-[24px] sm:text-[28px] font-bold text-ink">{t.brandsTitle}</h2>
               </div>
+              {/* 더보기 — 피처드 4개 외 전체 브랜드 목록(/export/brands)으로 이동. 팔레트 규칙: 블랙 외곽선 원형 화살표 */}
+              <Link
+                to="/export/brands"
+                className="group inline-flex items-center gap-3 text-[13px] font-semibold text-ink shrink-0"
+                aria-label={t.viewAllBrands}
+              >
+                <span className="hidden sm:inline group-hover:underline">{t.viewAllBrands}</span>
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-ink text-[18px] leading-none transition-colors group-hover:bg-ink group-hover:text-paper"
+                >
+                  →
+                </span>
+              </Link>
             </div>
             <p className="text-ink-soft text-[14px] mb-10">{t.brandsBody}</p>
 
             <div className="grid sm:grid-cols-2 gap-6">
-              {brandCards.map((brand) => (
-                <div key={brand.id} className="border border-rule rounded-card p-6">
-                  {/* 브랜드별 수출 미니페이지(/x/:key)로 연결 — 구 상세 틀(/export/brands)은 2026-08-17 삭제 */}
-                  <Link to={`/x/${brand.id}`} className="flex items-center gap-3 mb-4 group w-fit">
-                    {brand.export_logo_url ? (
-                      <img
-                        src={brand.export_logo_url}
-                        alt={brand.brand_name}
-                        className="w-11 h-11 rounded-full object-cover border border-rule"
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-quiet flex items-center justify-center text-[16px] font-bold text-ink-soft">
-                        {brand.brand_name.charAt(0)}
-                      </div>
-                    )}
-                    <p className="text-[16px] font-bold text-ink group-hover:underline">{brand.brand_name}</p>
-                  </Link>
-
-                  {brand.export_certifications.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {brand.export_certifications.map((cert) => (
-                        <span key={cert} className="px-2.5 py-1 rounded-pill text-[11px] border border-rule text-ink-soft">
-                          {cert}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {brand.export_pitch_en && (
-                    <p className="text-[13.5px] text-ink-soft leading-relaxed mb-3">{brand.export_pitch_en}</p>
-                  )}
-
-                  {brand.export_countries && (
-                    <p className="text-[12px] text-ink-faint mb-1">
-                      {t.exportingToLabel}: <span className="text-ink-soft">{brand.export_countries}</span>
-                    </p>
-                  )}
-                  {brand.export_moq_notes && (
-                    <p className="text-[12px] text-ink-faint mb-4">
-                      {t.moqLabel}: <span className="text-ink-soft">{brand.export_moq_notes}</span>
-                    </p>
-                  )}
-
-                  <Link
-                    to={`/x/${brand.id}`}
-                    className="inline-flex items-center gap-1 mt-2 text-[13px] font-semibold text-ink hover:underline"
-                  >
-                    {t.viewAllProducts}
-                  </Link>
-                </div>
+              {brandCards.slice(0, 4).map((brand) => (
+                <ExportBrandCard key={brand.id} brand={brand} labels={t} />
               ))}
             </div>
           </section>
