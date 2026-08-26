@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import GNB from '../components/layout/GNB'
 import Footer from '../components/layout/Footer'
 import { supabase } from '../lib/supabase'
@@ -10,6 +10,7 @@ import { PRODUCT_CATEGORIES } from '../lib/types'
 import { COMPANY_INFO } from '../lib/companyInfo'
 import { type Lang, detectLang, CATEGORY_I18N } from '../lib/exportI18n'
 import LanguageSwitcher from '../components/export/LanguageSwitcher'
+import ExportTopNav from '../components/export/ExportTopNav'
 
 interface Copy {
   kicker: string
@@ -273,6 +274,7 @@ const EMPTY_FORM: FormState = {
 export default function Export() {
   const { brands } = useShopBrands()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const productParam = searchParams.get('product')
   const [items, setItems] = useState<CatalogItem[]>([])
   // 브랜드 박스 데이터는 /export/brands(전체 목록)와 공유 — 여기선 4개만 노출하고 화살표로 전체 페이지 연결
@@ -309,6 +311,13 @@ export default function Export() {
     })()
     return () => { cancelled = true }
   }, [])
+
+  // 상단 고정 내비의 #categories / #export-inquiry-form 링크 — 같은 페이지에선 라우터가 스크롤을 안 해주므로 직접 이동
+  useEffect(() => {
+    if (!location.hash) return
+    const el = document.getElementById(location.hash.slice(1))
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [location.hash])
 
   const toggleCategory = (cat: string) => {
     setCategories((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]))
@@ -351,6 +360,7 @@ export default function Export() {
   return (
     <>
       <GNB extra={<LanguageSwitcher lang={lang} setLang={setLang} />} />
+      <ExportTopNav lang={lang} active=\"home\" layout=\"wide\" stickyTop={16} />
       <main className="bg-paper">
         {/* Hero */}
         <section className="border-b border-rule px-6 py-20 sm:py-28 text-center">
@@ -387,7 +397,7 @@ export default function Export() {
 
         {/* Featured Brands — 브랜드가 /brand/export에서 입력한 정보 */}
         {brandCards.length > 0 && (
-          <section className="max-w-[1080px] mx-auto px-6 py-20">
+          <section id="brands" className="max-w-[1080px] mx-auto px-6 py-20 scroll-mt-28">
             <div className="flex items-end justify-between mb-2 gap-4 flex-wrap">
               <div>
                 <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.brandsKicker}</p>
@@ -419,7 +429,7 @@ export default function Export() {
         )}
 
         {/* Category showcase */}
-        <section className="max-w-[1080px] mx-auto px-6 py-20">
+        <section id="categories" className="max-w-[1080px] mx-auto px-6 py-20 scroll-mt-28">
           <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.categoriesKicker}</p>
           <h2 className="text-[24px] sm:text-[28px] font-bold text-ink mb-10">{t.categoriesTitle}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
@@ -452,7 +462,7 @@ export default function Export() {
         </section>
 
         {/* Inquiry form */}
-        <section id="export-inquiry-form" className="bg-quiet px-6 py-20">
+        <section id="export-inquiry-form" className="bg-quiet px-6 py-20 scroll-mt-28">
           <div className="max-w-[560px] mx-auto">
             <p className="text-[13px] font-bold text-signal-blue tracking-[0.2em] uppercase mb-2">{t.getInTouchKicker}</p>
             <h2 className="text-[24px] sm:text-[28px] font-bold text-ink mb-3">{t.requestCatalogTitle}</h2>

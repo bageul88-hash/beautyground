@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import ExportTopNav from '../components/export/ExportTopNav'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { ExportBrandPublic } from '../lib/types'
@@ -310,6 +311,8 @@ export default function ExportBrand() {
             <span className="text-[#FF8A8A] font-bold">승인 대기 미리보기</span> — 이 페이지는 지금 본인에게만 보입니다. 뷰티그라운드 승인 후 바이어에게 공개됩니다.
           </div>
         )}
+
+        <ExportTopNav lang={lang} active="brands" layout="sheet" stickyTop={0} />
 
         {/* ── 상단: 뒤로가기 + 홈 + 플랫폼 표기 + 언어 ── */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4 gap-3">

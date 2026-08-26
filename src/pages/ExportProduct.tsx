@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { ExportBrandPublic } from '../lib/types'
 import { CATEGORY_I18N } from '../lib/exportI18n'
+import ExportTopNav from '../components/export/ExportTopNav'
 
 // 상품 단위 수출 상세 — /x/:key 하위에 중첩된 페이지(별도 독립 라우트가 아님, 2026-08-25 확정).
 // 대표님 승인 시안(claude.ai/code/artifact/16f3e47e...)의 구조를 그대로 따른다 —
@@ -223,6 +224,7 @@ export default function ExportProduct() {
 
   return (
     <div className="min-h-screen bg-paper">
+      <ExportTopNav lang={lang} active=\"brands\" layout=\"wide\" stickyTop={0} />
       <div className="max-w-[1100px] mx-auto px-6 pt-6 flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-faint truncate">
           <Link to="/export" className="hover:text-ink transition-colors">Export Catalog</Link>
