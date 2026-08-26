@@ -503,7 +503,7 @@ export default function AppProductDetail() {
           브랜드 자사몰 참고 구조). 배송/교환/환불 규정은 전자상거래법상 상품마다 상시
           고지해야 하므로 갤러리 이미지 유무와 무관하게 항상 노출한다. */}
       <div className="border-t border-rule">
-        <div className="flex border-b border-rule overflow-x-auto scrollbar-hide">
+        <div className="flex justify-between border-b border-rule">
           {[
             '상세정보',
             `리뷰 (${(view.reviewSummary?.count ?? 0).toLocaleString('ko-KR')})`,
@@ -513,7 +513,7 @@ export default function AppProductDetail() {
             <button
               key={tab}
               onClick={() => setActiveTab(i)}
-              className={`shrink-0 px-3.5 py-3 text-[12px] font-bold whitespace-nowrap relative focus:outline-none focus-visible:shadow-ring ${activeTab === i ? 'text-ink' : 'text-ink-faint'}`}
+              className={`shrink-0 px-2 py-3 text-[12px] font-bold text-center whitespace-nowrap relative focus:outline-none focus-visible:shadow-ring ${activeTab === i ? 'text-ink' : 'text-ink-faint'}`}
               aria-pressed={activeTab === i}
             >
               {tab}
