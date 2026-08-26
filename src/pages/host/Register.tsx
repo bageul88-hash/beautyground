@@ -6,38 +6,37 @@ import Footer from '../../components/layout/Footer'
 import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
 
-interface FormState {
-  name: string
-  phone: string
-  email: string
-  password: string
-  passwordConfirm: string
+// 010-1234-5678 / 01012345678 → +821012345678 (Supabase phone auth는 E.164 형식 필요)
+function toE164(raw: string): string | null {
+  const digits = raw.replace(/\D/g, '')
+  if (!/^01[0-9]{8,9}$/.test(digits)) return null
+  return `+82${digits.slice(1)}`
 }
 
-const INITIAL: FormState = { name: '', phone: '', email: '', password: '', passwordConfirm: '' }
-
-type FieldErrors = Partial<Record<keyof FormState | 'agree', string>>
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
-
-const field =
-  'w-full bg-white border border-rule rounded-md px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition'
+type Step = 'choose' | 'phone-number' | 'phone-code'
 
 export default function HostRegister() {
-  const [form, setForm] = useState<FormState>(INITIAL)
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [agree, setAgree] = useState(false)
-  const [errors, setErrors] = useState<FieldErrors>({})
+  const [nameError, setNameError] = useState<string | null>(null)
+  const [agreeError, setAgreeError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
 
-  // 카카오로 먼저 로그인하고 돌아온 경우 — 이미 인증된 세션이 있으면 이메일·비밀번호는
-  // 다시 안 받고 이름·연락처만 받아서 hosts 레코드를 만든다.
+  // 휴대폰 인증 단계 — Supabase Auth의 네이티브 phone OTP를 그대로 사용한다(signInWithOtp/verifyOtp).
+  // ⚠️ Supabase 프로젝트에 SMS Provider(Twilio 등)가 아직 연결 안 되어 있어 지금은 발송 시도 시
+  // 에러가 난다 — 대표님이 나중에 문자 서비스를 연결하면 이 화면은 코드 수정 없이 바로 동작한다.
+  const [step, setStep] = useState<Step>('choose')
+  const [phoneInput, setPhoneInput] = useState('')
+  const [code, setCode] = useState('')
+  const [phoneSubmitting, setPhoneSubmitting] = useState(false)
+  const [phoneError, setPhoneError] = useState<string | null>(null)
+
   const [session, setSession] = useState<Session | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
   const [alreadyHost, setAlreadyHost] = useState(false)
-  const [justLoggedIn, setJustLoggedIn] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -47,8 +46,9 @@ export default function HostRegister() {
       setSession(s)
       if (s) {
         const meta = s.user.user_metadata as { name?: string; full_name?: string } | undefined
-        const kakaoName = meta?.name ?? meta?.full_name ?? ''
-        if (kakaoName) setForm((prev) => ({ ...prev, name: prev.name || kakaoName }))
+        const knownName = meta?.name ?? meta?.full_name ?? ''
+        if (knownName) setName((prev) => prev || knownName)
+        if (s.user.phone) setPhone((prev) => prev || s.user.phone!)
         const { data: existing } = await supabase.from('hosts').select('id').eq('user_id', s.user.id).maybeSingle()
         if (active && existing) setAlreadyHost(true)
       }
@@ -56,12 +56,6 @@ export default function HostRegister() {
     })()
     return () => { active = false }
   }, [])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
-    setErrors((prev) => ({ ...prev, [name]: undefined }))
-  }
 
   const handleKakao = async () => {
     setFormError(null)
@@ -76,8 +70,6 @@ export default function HostRegister() {
   }
 
   // 네이버 — 일반 회원가입(AppSignup.tsx)과 동일한 커스텀 OAuth 흐름 재사용.
-  // 콜백(AppNaverCallback.tsx)이 sessionStorage의 naver_oauth_from으로 돌아오므로
-  // 현재 경로(host/register 또는 host/join)를 그대로 저장해두면 알아서 여기로 복귀한다.
   const handleNaver = () => {
     setFormError(null)
     const clientId = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined
@@ -96,76 +88,52 @@ export default function HostRegister() {
     window.location.href = url.toString()
   }
 
-  const validate = (): FieldErrors => {
-    const e: FieldErrors = {}
-    if (!form.name.trim()) e.name = '이름을 입력하세요.'
-    if (!form.phone.trim()) e.phone = '연락처를 입력하세요.'
-    if (!session) {
-      if (!form.email.trim()) e.email = '이메일을 입력하세요.'
-      else if (!EMAIL_RE.test(form.email.trim())) e.email = '올바른 이메일 형식이 아닙니다.'
-      if (!form.password) e.password = '비밀번호를 입력하세요.'
-      else if (!PASSWORD_RE.test(form.password))
-        e.password = '8자 이상, 영문·숫자·특수문자를 모두 포함해야 합니다.'
-      if (!form.passwordConfirm) e.passwordConfirm = '비밀번호를 다시 입력하세요.'
-      else if (form.password !== form.passwordConfirm)
-        e.passwordConfirm = '비밀번호가 일치하지 않습니다.'
+  const handleSendCode = async () => {
+    setPhoneError(null)
+    const e164 = toE164(phoneInput)
+    if (!e164) { setPhoneError('휴대폰 번호를 정확히 입력해 주세요. (예: 01012345678)'); return }
+    setPhoneSubmitting(true)
+    const { error } = await supabase.auth.signInWithOtp({ phone: e164 })
+    setPhoneSubmitting(false)
+    if (error) {
+      setPhoneError('문자 인증 서비스가 아직 준비 중입니다. 카카오 또는 네이버로 가입해 주세요.')
+      return
     }
-    if (!agree) e.agree = '개인정보 수집·이용에 동의해야 합니다.'
-    return e
+    setStep('phone-code')
+  }
+
+  const handleVerifyCode = async () => {
+    setPhoneError(null)
+    const e164 = toE164(phoneInput)
+    if (!e164 || !code.trim()) { setPhoneError('인증번호를 입력해 주세요.'); return }
+    setPhoneSubmitting(true)
+    const { error } = await supabase.auth.verifyOtp({ phone: e164, token: code.trim(), type: 'sms' })
+    setPhoneSubmitting(false)
+    if (error) { setPhoneError('인증번호가 올바르지 않습니다.'); return }
+    const { data: { session: s } } = await supabase.auth.getSession()
+    setSession(s)
+    setPhone(phoneInput)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (submitting) return
+    if (submitting || !session) return
     setFormError(null)
+    setNameError(null)
+    setAgreeError(null)
 
-    const v = validate()
-    if (Object.keys(v).length > 0) { setErrors(v); return }
-    setErrors({})
+    let hasError = false
+    if (!name.trim()) { setNameError('이름을 입력하세요.'); hasError = true }
+    if (!agree) { setAgreeError('개인정보 수집·이용에 동의해야 합니다.'); hasError = true }
+    if (hasError) return
+
     setSubmitting(true)
-
-    let userId: string | null
-    let email = form.email.trim()
-    let loggedIn = !!session
-
-    if (session) {
-      userId = session.user.id
-      email = session.user.email ?? ''
-    } else {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: form.password,
-      })
-
-      if (signUpError) {
-        const msg = signUpError.message?.toLowerCase() ?? ''
-        const already = msg.includes('already') || msg.includes('registered') || msg.includes('exists')
-        setSubmitting(false)
-        setFormError(
-          already
-            ? '이미 등록된 이메일입니다. 로그인을 이용해 주세요.'
-            : `회원가입 중 오류가 발생했습니다. (${signUpError.message})`
-        )
-        return
-      }
-
-      if (signUpData.user && signUpData.user.identities?.length === 0) {
-        setSubmitting(false)
-        setFormError('이미 등록된 이메일입니다. 로그인을 이용해 주세요.')
-        return
-      }
-      userId = signUpData.user?.id ?? null
-      // 이메일 확인 절차가 꺼져있으면 signUp만으로도 바로 세션이 생긴다 — 이 경우도 "로그인됨"으로 취급.
-      loggedIn = !!signUpData.session
-    }
-
-    // 파트너와 달리 신청 테이블 없이 hosts 에 바로 pending 으로 insert
     const { error: insertError } = await supabase.from('hosts').insert([
       {
-        user_id: userId,
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        email,
+        user_id: session.user.id,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: session.user.email ?? '',
         status: 'pending',
       },
     ])
@@ -177,61 +145,35 @@ export default function HostRegister() {
     }
 
     setSubmitting(false)
-    setJustLoggedIn(loggedIn)
     setDone(true)
   }
+
+  const card = 'bg-white rounded-md p-6 border shadow-[0_4px_24px_rgba(0,0,0,0.05)]'
+  const cardBorder = { borderColor: '#e5e0d8', borderWidth: '0.5px' } as const
+  const field =
+    'w-full bg-white border border-rule rounded-md px-4 py-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus-visible:shadow-ring transition'
 
   return (
     <>
       <GNB />
-      <main className="py-16 md:py-24" style={{ backgroundColor: '#f7f4ef' }}>
-        <div className="max-w-[420px] mx-auto px-4 sm:px-6">
+      <main className="py-10 md:py-14 min-h-[calc(100vh-160px)] flex items-center" style={{ backgroundColor: '#f7f4ef' }}>
+        <div className="max-w-[400px] mx-auto px-4 sm:px-6 w-full">
           {checkingSession ? (
             <div className="text-center text-[14px] text-ink-faint py-20">불러오는 중...</div>
           ) : done ? (
-            <div
-              className="bg-white rounded-md p-8 md:p-10 text-center border shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
-              style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
-            >
-              <div className="text-5xl mb-5" aria-hidden="true">✅</div>
-              <h1 className="font-serif text-[22px] md:text-[26px] font-bold text-text mb-3">
-                가입 신청이 접수되었습니다
-              </h1>
-              <p className="text-[14px] text-text-sub leading-relaxed">
-                승인이 완료되면 진행자센터를 이용하실 수 있습니다.<br />
-                {justLoggedIn ? '진행자센터에서 승인 여부를 바로 확인하실 수 있어요.' : '결과는 입력하신 이메일로 안내드립니다.'}
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
-                {justLoggedIn ? (
-                  <Link
-                    to="/host/dashboard"
-                    className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
-                  >
-                    진행자센터로 가기
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      to="/"
-                      className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
-                    >
-                      홈으로
-                    </Link>
-                    <Link
-                      to="/host/login"
-                      className="inline-block bg-paper border border-rule text-ink-soft rounded-pill text-[14px] px-6 py-3 font-medium hover:text-ink transition-colors"
-                    >
-                      로그인
-                    </Link>
-                  </>
-                )}
-              </div>
+            <div className={`${card} text-center`} style={cardBorder}>
+              <div className="text-5xl mb-4" aria-hidden="true">✅</div>
+              <h1 className="font-serif text-[22px] font-bold text-text mb-2">가입 신청이 접수되었습니다</h1>
+              <p className="text-[14px] text-text-sub leading-relaxed">승인이 완료되면 진행자센터를 이용하실 수 있습니다.</p>
+              <Link
+                to="/host/dashboard"
+                className="inline-block mt-6 bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
+              >
+                진행자센터로 가기
+              </Link>
             </div>
           ) : alreadyHost ? (
-            <div
-              className="bg-white rounded-md p-8 md:p-10 text-center border shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
-              style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
-            >
+            <div className={`${card} text-center`} style={cardBorder}>
               <h1 className="font-serif text-[22px] font-bold text-text mb-3">이미 가입된 계정입니다</h1>
               <p className="text-[14px] text-text-sub leading-relaxed mb-6">로그인해서 진행자 센터를 이용해 주세요.</p>
               <Link
@@ -243,161 +185,135 @@ export default function HostRegister() {
             </div>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-ink">
+              <div className="text-center mb-6">
+                <h1 className="font-serif text-[24px] md:text-[28px] font-bold text-ink leading-snug">
                   라이브 방송 셀러 회원가입
                 </h1>
-                <p className="text-text-sub text-[14px] mt-2">뷰티그라운드 라이브커머스에서 방송을 진행하실 분을 모집합니다</p>
+                <p className="text-text-sub text-[13px] mt-1.5">뷰티그라운드 라이브커머스 진행자를 모집합니다</p>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                noValidate
-                className="bg-white rounded-md p-6 md:p-8 border shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
-                style={{ borderColor: '#e5e0d8', borderWidth: '0.5px' }}
-              >
-                <div className="space-y-4">
-                  {!session && (
-                    <>
-                      {/* 카카오 로그인 — 공식 버튼 규격(#FEE500 배경 + 검정 85% 텍스트, 카카오 고유색 예외) */}
-                      <button
-                        type="button"
-                        onClick={handleKakao}
-                        className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 focus:outline-none focus-visible:shadow-ring"
-                        style={{ backgroundColor: '#FEE500', color: 'rgba(0,0,0,0.85)' }}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            fill="rgba(0,0,0,0.85)"
-                            d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-.95 3.52c-.08.31.27.56.54.38l4.19-2.79c.51.05 1.03.08 1.56.08 5.52 0 10-3.54 10-7.85C22 6.54 17.52 3 12 3z"
-                          />
-                        </svg>
-                        카카오로 라이브 셀러 시작하기
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleNaver}
-                        className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 text-paper focus:outline-none focus-visible:shadow-ring"
-                        style={{ backgroundColor: '#03C75A' }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-                          <path fill="#fff" d="M13.6 12.5 8.9 5.5H4.9v13h4.5v-7l4.7 7h4v-13h-4.5v7Z" />
-                        </svg>
-                        네이버로 라이브 셀러 시작하기
-                      </button>
-
-                      <div className="flex items-center gap-3 py-1">
-                        <div className="flex-1 h-px bg-rule" />
-                        <span className="text-[12px] text-ink-faint">또는 이메일로 가입</span>
-                        <div className="flex-1 h-px bg-rule" />
-                      </div>
-                    </>
-                  )}
-
-                  {session && (
+              {session ? (
+                <form onSubmit={handleSubmit} noValidate className={card} style={cardBorder}>
+                  <div className="space-y-3.5">
                     <div className="bg-quiet rounded-md p-3 text-[12.5px] text-ink-soft">
                       로그인됐습니다{session.user.email ? ` (${session.user.email})` : ''}. 이름·연락처만 마저 입력해 주세요.
                     </div>
-                  )}
 
-                  <div>
-                    <label htmlFor="name" className="block text-[13px] font-medium text-text mb-1.5">
-                      이름 <span className="text-[#FF4757]">*</span>
+                    <input
+                      value={name} onChange={(e) => { setName(e.target.value); setNameError(null) }}
+                      placeholder="이름" className={field}
+                    />
+                    {nameError && <p className="text-[12px] text-[#FF4757]">{nameError}</p>}
+
+                    <input
+                      value={phone} onChange={(e) => setPhone(e.target.value)}
+                      placeholder="연락처 (010-0000-0000)" className={field}
+                    />
+
+                    <label className="flex items-start gap-2.5 cursor-pointer bg-quiet rounded-md p-3.5" style={{ border: '0.5px solid #E3E5E9' }}>
+                      <input
+                        type="checkbox" checked={agree}
+                        onChange={(e) => { setAgree(e.target.checked); setAgreeError(null) }}
+                        className="w-4 h-4 accent-ink mt-0.5"
+                      />
+                      <span className="text-[12.5px] text-text-sub">
+                        <span className="text-[#FF4757]">[필수]</span> 개인정보 수집·이용에 동의합니다. (방송·정산 처리 목적)
+                      </span>
                     </label>
-                    <input
-                      id="name" name="name" type="text"
-                      value={form.name} onChange={handleChange}
-                      placeholder="홍길동" className={field}
+                    {agreeError && <p className="text-[12px] text-[#FF4757]">{agreeError}</p>}
+                    {formError && <p className="text-[13px] text-[#FF4757]" role="alert">{formError}</p>}
+
+                    <Button
+                      type="submit" variant="ink" size="md"
+                      label={submitting ? '신청 중…' : '회원가입'}
+                      disabled={submitting} className="w-full"
                     />
-                    {errors.name && <p className="mt-1 text-[12px] text-[#FF4757]">{errors.name}</p>}
                   </div>
+                </form>
+              ) : step === 'choose' ? (
+                <div className={card} style={cardBorder}>
+                  <div className="space-y-3">
+                    <button
+                      type="button" onClick={handleKakao}
+                      className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 focus:outline-none focus-visible:shadow-ring"
+                      style={{ backgroundColor: '#FEE500', color: 'rgba(0,0,0,0.85)' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="rgba(0,0,0,0.85)" d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-.95 3.52c-.08.31.27.56.54.38l4.19-2.79c.51.05 1.03.08 1.56.08 5.52 0 10-3.54 10-7.85C22 6.54 17.52 3 12 3z" />
+                      </svg>
+                      카카오로 시작하기
+                    </button>
 
-                  <div>
-                    <label htmlFor="phone" className="block text-[13px] font-medium text-text mb-1.5">
-                      연락처 <span className="text-[#FF4757]">*</span>
-                    </label>
-                    <input
-                      id="phone" name="phone" type="tel"
-                      value={form.phone} onChange={handleChange}
-                      placeholder="010-0000-0000" className={field}
-                    />
-                    {errors.phone && <p className="mt-1 text-[12px] text-[#FF4757]">{errors.phone}</p>}
+                    <button
+                      type="button" onClick={handleNaver}
+                      className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 text-paper focus:outline-none focus-visible:shadow-ring"
+                      style={{ backgroundColor: '#03C75A' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#fff" d="M13.6 12.5 8.9 5.5H4.9v13h4.5v-7l4.7 7h4v-13h-4.5v7Z" />
+                      </svg>
+                      네이버로 시작하기
+                    </button>
+
+                    <button
+                      type="button" onClick={() => { setFormError(null); setStep('phone-number') }}
+                      className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 border border-rule text-ink focus:outline-none focus-visible:shadow-ring"
+                    >
+                      휴대폰 번호로 시작하기
+                    </button>
+
+                    {formError && <p className="text-center text-[13px] text-[#FF4757] pt-1">{formError}</p>}
                   </div>
-
-                  {!session && (
-                    <>
-                      <div>
-                        <label htmlFor="email" className="block text-[13px] font-medium text-text mb-1.5">
-                          이메일 <span className="text-[#FF4757]">*</span>
-                        </label>
-                        <input
-                          id="email" name="email" type="email"
-                          value={form.email} onChange={handleChange}
-                          placeholder="example@email.com" className={field}
-                        />
-                        {errors.email && <p className="mt-1 text-[12px] text-[#FF4757]">{errors.email}</p>}
-                      </div>
-
-                      <div>
-                        <label htmlFor="password" className="block text-[13px] font-medium text-text mb-1.5">
-                          비밀번호 <span className="text-[#FF4757]">*</span>
-                        </label>
-                        <input
-                          id="password" name="password" type="password"
-                          value={form.password} onChange={handleChange}
-                          placeholder="8자 이상, 영문+숫자+특수문자" className={field}
-                        />
-                        {errors.password && <p className="mt-1 text-[12px] text-[#FF4757]">{errors.password}</p>}
-                      </div>
-
-                      <div>
-                        <label htmlFor="passwordConfirm" className="block text-[13px] font-medium text-text mb-1.5">
-                          비밀번호 확인 <span className="text-[#FF4757]">*</span>
-                        </label>
-                        <input
-                          id="passwordConfirm" name="passwordConfirm" type="password"
-                          value={form.passwordConfirm} onChange={handleChange}
-                          placeholder="비밀번호 재입력" className={field}
-                        />
-                        {errors.passwordConfirm && (
-                          <p className="mt-1 text-[12px] text-[#FF4757]">{errors.passwordConfirm}</p>
-                        )}
-                      </div>
-                    </>
-                  )}
-
-                  <label className="flex items-start gap-2.5 cursor-pointer bg-quiet rounded-md p-4" style={{ border: '0.5px solid #E3E5E9' }}>
-                    <input
-                      type="checkbox"
-                      checked={agree}
-                      onChange={(e) => { setAgree(e.target.checked); setErrors((p) => ({ ...p, agree: undefined })) }}
-                      className="w-4 h-4 accent-ink mt-0.5"
-                    />
-                    <span className="text-[13px] text-text-sub">
-                      <span className="text-[#FF4757]">[필수]</span> 개인정보 수집·이용에 동의합니다. (방송·정산 처리 목적)
-                    </span>
-                  </label>
-                  {errors.agree && <p className="text-[12px] text-[#FF4757]">{errors.agree}</p>}
-
-                  {formError && (
-                    <p className="text-[13px] text-[#FF4757]" role="alert">{formError}</p>
-                  )}
-
-                  <Button
-                    type="submit" variant="ink" size="md"
-                    label={submitting ? '신청 중…' : '회원가입'}
-                    disabled={submitting} className="w-full"
-                  />
-
-                  {!session && (
-                    <p className="text-center text-[13px] text-text-sub pt-1">
-                      이미 계정이 있으신가요?{' '}
-                      <Link to="/host/login" className="text-ink hover:underline">로그인</Link>
-                    </p>
-                  )}
                 </div>
-              </form>
+              ) : (
+                <div className={card} style={cardBorder}>
+                  <div className="space-y-3">
+                    {step === 'phone-number' ? (
+                      <>
+                        <input
+                          value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)}
+                          placeholder="휴대폰 번호 (01012345678)" inputMode="numeric"
+                          className={field} autoFocus
+                        />
+                        <Button
+                          type="button" variant="ink" size="md" className="w-full"
+                          label={phoneSubmitting ? '전송 중…' : '인증번호 받기'}
+                          disabled={phoneSubmitting} onClick={() => void handleSendCode()}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[12.5px] text-ink-soft">{phoneInput}로 전송된 인증번호를 입력해 주세요.</p>
+                        <input
+                          value={code} onChange={(e) => setCode(e.target.value)}
+                          placeholder="인증번호 6자리" inputMode="numeric"
+                          className={field} autoFocus
+                        />
+                        <Button
+                          type="button" variant="ink" size="md" className="w-full"
+                          label={phoneSubmitting ? '확인 중…' : '확인'}
+                          disabled={phoneSubmitting} onClick={() => void handleVerifyCode()}
+                        />
+                      </>
+                    )}
+                    {phoneError && <p className="text-[13px] text-[#FF4757]" role="alert">{phoneError}</p>}
+                    <button
+                      type="button"
+                      onClick={() => { setStep('choose'); setPhoneError(null); setCode('') }}
+                      className="w-full text-center text-[13px] text-ink-faint underline pt-1 focus:outline-none focus-visible:shadow-ring"
+                    >
+                      다른 방법으로 가입
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!session && (
+                <p className="text-center text-[13px] text-text-sub mt-4">
+                  이미 계정이 있으신가요?{' '}
+                  <Link to="/host/login" className="text-ink hover:underline">로그인</Link>
+                </p>
+              )}
             </>
           )}
         </div>
