@@ -75,6 +75,27 @@ export default function HostRegister() {
     if (error) setFormError('카카오 로그인 연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
   }
 
+  // 네이버 — 일반 회원가입(AppSignup.tsx)과 동일한 커스텀 OAuth 흐름 재사용.
+  // 콜백(AppNaverCallback.tsx)이 sessionStorage의 naver_oauth_from으로 돌아오므로
+  // 현재 경로(host/register 또는 host/join)를 그대로 저장해두면 알아서 여기로 복귀한다.
+  const handleNaver = () => {
+    setFormError(null)
+    const clientId = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined
+    if (!clientId) {
+      setFormError('네이버 로그인이 아직 설정되지 않았습니다.')
+      return
+    }
+    const state = crypto.randomUUID()
+    sessionStorage.setItem('naver_oauth_state', state)
+    sessionStorage.setItem('naver_oauth_from', window.location.pathname)
+    const url = new URL('https://nid.naver.com/oauth2.0/authorize')
+    url.searchParams.set('response_type', 'code')
+    url.searchParams.set('client_id', clientId)
+    url.searchParams.set('redirect_uri', `${window.location.origin}/app/auth/naver/callback`)
+    url.searchParams.set('state', state)
+    window.location.href = url.toString()
+  }
+
   const validate = (): FieldErrors => {
     const e: FieldErrors = {}
     if (!form.name.trim()) e.name = '이름을 입력하세요.'
@@ -224,9 +245,9 @@ export default function HostRegister() {
             <>
               <div className="text-center mb-8">
                 <h1 className="font-serif text-[28px] md:text-[32px] font-bold text-ink">
-                  뷰티그라운드
+                  라이브 방송 셀러 회원가입
                 </h1>
-                <p className="text-text-sub text-[14px] mt-2">진행자 회원가입</p>
+                <p className="text-text-sub text-[14px] mt-2">뷰티그라운드 라이브커머스에서 방송을 진행하실 분을 모집합니다</p>
               </div>
 
               <form
@@ -251,7 +272,19 @@ export default function HostRegister() {
                             d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-.95 3.52c-.08.31.27.56.54.38l4.19-2.79c.51.05 1.03.08 1.56.08 5.52 0 10-3.54 10-7.85C22 6.54 17.52 3 12 3z"
                           />
                         </svg>
-                        카카오로 1초 시작하기
+                        카카오로 라이브 셀러 시작하기
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleNaver}
+                        className="w-full flex items-center justify-center gap-2 rounded-control font-bold text-[15px] py-3.5 text-paper focus:outline-none focus-visible:shadow-ring"
+                        style={{ backgroundColor: '#03C75A' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                          <path fill="#fff" d="M13.6 12.5 8.9 5.5H4.9v13h4.5v-7l4.7 7h4v-13h-4.5v7Z" />
+                        </svg>
+                        네이버로 라이브 셀러 시작하기
                       </button>
 
                       <div className="flex items-center gap-3 py-1">
@@ -264,7 +297,7 @@ export default function HostRegister() {
 
                   {session && (
                     <div className="bg-quiet rounded-md p-3 text-[12.5px] text-ink-soft">
-                      카카오로 로그인됐습니다{session.user.email ? ` (${session.user.email})` : ''}. 이름·연락처만 마저 입력해 주세요.
+                      로그인됐습니다{session.user.email ? ` (${session.user.email})` : ''}. 이름·연락처만 마저 입력해 주세요.
                     </div>
                   )}
 

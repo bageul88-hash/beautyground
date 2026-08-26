@@ -10,6 +10,7 @@ export default function AppNaverCallback() {
   const navigate = useNavigate()
   const { mode, toggle } = useViewMode()
   const [error, setError] = useState('')
+  const [returnTo, setReturnTo] = useState('/app/signup')
 
   useEffect(() => {
     const run = async () => {
@@ -18,6 +19,7 @@ export default function AppNaverCallback() {
       const state = params.get('state')
       const savedState = sessionStorage.getItem('naver_oauth_state')
       const from = sessionStorage.getItem('naver_oauth_from') || '/app/mypage'
+      setReturnTo(from)
       sessionStorage.removeItem('naver_oauth_state')
       sessionStorage.removeItem('naver_oauth_from')
 
@@ -67,7 +69,7 @@ export default function AppNaverCallback() {
         <>
           <p className="text-[15px] text-signal-red font-bold mb-4">{error}</p>
           <button
-            onClick={() => navigate('/app/signup')}
+            onClick={() => navigate(returnTo)}
             className="text-ink text-[14px] font-bold underline focus:outline-none focus-visible:shadow-ring"
           >
             회원가입으로 돌아가기
