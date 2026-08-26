@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 // 엑스포트(해외 바이어) 공통 상단 카테고리 내비 — 스크롤해도 상단 고정(sticky).
 // 로드맵 3단 구조(/export 랜딩 → /x/:key 브랜드 → 상품)에서 바이어가 어디서든 바로 갈 핵심 구역 4개:
 // Home(랜딩) · Brands(전체 브랜드) · Categories(취급 카테고리) · Inquiry(문의 폼).
-// 팔레트 규칙: 화이트 면 + 헤어라인 + 블랙 글씨, 중요 액션(Inquiry)만 레드. 이모지·그라데이션 없음.
+// 팔레트 규칙: 화이트 면 + 블랙 글씨, 중요 액션(Inquiry)만 레드. 이모지·그라데이션 없음.
+// 아래 콘텐츠(← 바 등)와 경계가 분명하도록 하단 1px 블랙 라인 + 16px 간격(mb-4) — 2026-08-26 대표님 지시.
 
 export type ExportNavKey = 'home' | 'brands' | 'categories' | 'inquiry'
 
@@ -45,7 +46,7 @@ export default function ExportTopNav({ lang, active, layout = 'wide', stickyTop 
   return (
     <nav
       aria-label="Export navigation"
-      className={`sticky ${stickyTop === 16 ? 'top-16' : 'top-0'} z-40 bg-white border-b border-rule`}
+      className={`sticky ${stickyTop === 16 ? 'top-16' : 'top-0'} z-40 bg-white border-b border-ink mb-4`}
     >
       <div className={`${inner} flex items-center gap-6 overflow-x-auto scrollbar-hide h-11`}>
         {ITEMS.map(({ key, to }) => {
