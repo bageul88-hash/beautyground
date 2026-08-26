@@ -106,9 +106,13 @@ export default function AdminLayout() {
     navigate('/app/home')
   }
 
+  // 전체 화면 폭에 그대로 늘어붙는 대신, 콘텐츠 영역에 최대폭을 두고 가운데 정렬 —
+  // 넓은 모니터에서 좌우 여백이 생기고 그 안에서 사이드바:본문 비율이 고정된다
+  // (2026-08-27 대표님 지시: "좌측 버튼과 우측 비율을 잡고 전체 화면 좌우 여백을 잡아줘").
   return (
-    <div className="flex min-h-screen bg-[#f4f5f9]">
-      <aside className="w-[264px] min-h-screen bg-white flex flex-col fixed left-0 top-0 z-30 shadow-[2px_0_18px_rgba(30,40,90,.08)] overflow-y-auto">
+    <div className="min-h-screen bg-[#f4f5f9]">
+    <div className="flex max-w-[1440px] mx-auto min-h-screen bg-white shadow-[0_0_40px_rgba(30,40,90,.06)]">
+      <aside className="w-[264px] shrink-0 min-h-screen bg-white flex flex-col sticky top-0 h-screen z-30 shadow-[2px_0_18px_rgba(30,40,90,.08)] overflow-y-auto">
         <div className="px-6 pt-8 pb-6 border-b border-rule">
           <Link to="/" className="block">
             <p className="text-ink text-[20px] font-bold tracking-wide">
@@ -176,9 +180,10 @@ export default function AdminLayout() {
       </aside>
 
       {/* 메인 콘텐츠 */}
-      <div className="flex-1 ml-[264px] min-h-screen">
+      <div className="flex-1 min-w-0 min-h-screen">
         <Outlet />
       </div>
+    </div>
     </div>
   )
 }
