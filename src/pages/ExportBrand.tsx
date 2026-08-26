@@ -316,8 +316,8 @@ export default function ExportBrand() {
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              aria-label="이전 페이지로"
+              onClick={() => navigate('/export/brands')}
+              aria-label="전체 브랜드 목록으로"
               className="text-[#8A8577] hover:text-[#16202F] transition-colors text-[15px] shrink-0"
             >
               ←
