@@ -688,11 +688,11 @@ export default function ShopLiveWatch() {
               )}
             </div>
 
-            {/* 전체 판매 상품 시트 */}
+            {/* 전체 판매 상품 시트 — 방송 영상이 계속 보이도록 뒤를 어둡게 덮지 않음(더캐스트 벤치마킹) */}
             {productSheetOpen && (
-              <div className="absolute inset-0 z-40 bg-black/50 flex items-end" onClick={() => setProductSheetOpen(false)}>
+              <div className="absolute inset-0 z-40 flex items-end" onClick={() => setProductSheetOpen(false)}>
                 <div
-                  className="w-full max-h-[75%] bg-white rounded-t-2xl overflow-y-auto"
+                  className="w-full max-h-[55%] bg-white rounded-t-2xl overflow-y-auto shadow-[0_-8px_24px_rgba(0,0,0,.35)]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="sticky top-0 bg-white flex items-center justify-between px-4 py-3 border-b border-cream-2">
@@ -776,14 +776,14 @@ export default function ShopLiveWatch() {
         )}
       </div>
 
-      {/* 구매 모달 */}
+      {/* 구매 모달 — 방송 영상이 계속 보이도록 뒤를 어둡게 덮지 않음(더캐스트 벤치마킹) */}
       {buyProduct && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
           onClick={closeBuy}
         >
           <div
-            className="w-full sm:max-w-[420px] bg-white rounded-t-md sm:rounded-md p-5"
+            className="w-full sm:max-w-[420px] bg-white rounded-t-md sm:rounded-md p-5 shadow-[0_-8px_24px_rgba(0,0,0,.35)]"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={goToOrder}>
