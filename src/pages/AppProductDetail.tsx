@@ -15,14 +15,13 @@ import ProductInfoTable from '../components/product/ProductInfoTable'
 import CategoryTabBar from '../components/product/CategoryTabBar'
 import ReviewSummary from '../components/product/ReviewSummary'
 import ProductQnA from '../components/product/ProductQnA'
+import { useProductQuestions } from '../hooks/useProductQuestions'
 import { IconHeart, IconCart, IconMinus, IconPlus } from '../components/common/Icon'
 import { IconSend2, IconBrandFacebook, IconBrandX, IconLink } from '@tabler/icons-react'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
 import Thumb from '../components/common/Thumb'
 import ScrollToTopButton from '../components/common/ScrollToTopButton'
 import CartCountBadge from '../components/common/CartCountBadge'
-
-const DETAIL_TABS = ['상품정보', '성분', '결제/배송/교환·반품정보']
 
 // 소비자 상세 렌더링용 통합 뷰모델 (DB 상품 / 목데이터 공통)
 interface ProductView {
@@ -100,6 +99,7 @@ export default function AppProductDetail() {
   const [activeTab, setActiveTab] = useState(0)
   const [activeImg, setActiveImg] = useState(0)
   const [wished, setWished] = useState(false)
+  const { questions: qnaQuestions } = useProductQuestions(id)
 
   // 공유 — 라이브 시청화면과 동일 패턴(자체 소형 메뉴: 카카오=링크복사 대체·페이스북·X·링크복사)
   // 모바일에 공유 수단이 없다는 대표님 지적(2026-08-13)으로 추가
@@ -499,28 +499,21 @@ export default function AppProductDetail() {
         <p className="text-[12px] text-ink-faint mt-3">{SHIPPING_NOTICE}</p>
       </div>
 
-      {/* 리뷰 요약 (대표 → 리뷰 → 상세 순서). 클릭 시 별도 리뷰 페이지로 이동 */}
-      <ReviewSummary summary={view.reviewSummary} productId={id} className="border-t border-rule" />
-
-      {/* 상세 이미지 (DB 상품) */}
-      {view.detailImages.length > 0 && (
-        <div className="border-t border-rule">
-          {view.detailImages.map((url, i) => (
-            <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
-          ))}
-        </div>
-      )}
-
-      {/* 상세 탭 — 배송/교환/환불 규정은 전자상거래법상 상품마다 상시 고지해야 하므로
-          갤러리 이미지 유무와 무관하게 항상 노출한다(이전엔 view.images.length===0일 때만
-          떠서 실사진이 있는 실제 상품은 이 정보가 아예 안 보였음 — PG 심사 대응으로 수정). */}
+      {/* 상세정보 / 리뷰 / 결제·배송·교환·반품정보 / 상품문의 — 4탭 통합 (PG 심사 대응,
+          브랜드 자사몰 참고 구조). 배송/교환/환불 규정은 전자상거래법상 상품마다 상시
+          고지해야 하므로 갤러리 이미지 유무와 무관하게 항상 노출한다. */}
       <div className="border-t border-rule">
         <div className="flex border-b border-rule">
-          {DETAIL_TABS.map((tab, i) => (
+          {[
+            '상세정보',
+            `리뷰 (${(view.reviewSummary?.count ?? 0).toLocaleString('ko-KR')})`,
+            '결제/배송/교환·반품정보',
+            `상품문의 (${qnaQuestions.length.toLocaleString('ko-KR')})`,
+          ].map((tab, i) => (
             <button
               key={tab}
               onClick={() => setActiveTab(i)}
-              className={`flex-1 py-3 text-[13px] font-bold relative focus:outline-none focus-visible:shadow-ring ${activeTab === i ? 'text-ink' : 'text-ink-faint'}`}
+              className={`flex-1 py-3 text-[11.5px] font-bold relative focus:outline-none focus-visible:shadow-ring ${activeTab === i ? 'text-ink' : 'text-ink-faint'}`}
               aria-pressed={activeTab === i}
             >
               {tab}
@@ -530,24 +523,38 @@ export default function AppProductDetail() {
             </button>
           ))}
         </div>
-        <div className="px-4 py-5 text-[13px] text-ink-soft leading-relaxed">
-          {activeTab === 0 && <p>{view.description ?? `${view.brand} ${view.name} 상품입니다.`}</p>}
-          {activeTab === 1 && <p>전성분은 제품 포장을 참조해 주세요.</p>}
-          {activeTab === 2 && (
-            <div className="space-y-2">
-              <p>• 결제수단: 신용카드</p>
-              <p>• 배송기간: 주문 후 1~2 영업일 출고</p>
-              <p>• {SHIPPING_NOTICE}</p>
-              <p>• 주문취소: 상품 발송 전 마이페이지 또는 고객센터를 통해 즉시 취소 가능</p>
-              <p>• 교환/반품: 상품 수령 후 7일 이내 가능 (단순 변심 시 왕복 배송비 고객 부담, 개봉·사용한 상품은 제한될 수 있음)</p>
-              <p>• 환불: 반품 상품 확인 후 3영업일 이내 결제수단으로 환급</p>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* 상품 문의(Q&A) */}
-      {id && <ProductQnA productId={id} className="border-t border-rule" />}
+        {activeTab === 0 && (
+          <div>
+            <div className="px-4 py-5 text-[13px] text-ink-soft leading-relaxed">
+              <p>{view.description ?? `${view.brand} ${view.name} 상품입니다.`}</p>
+              <p className="mt-2 text-ink-faint">전성분은 제품 포장을 참조해 주세요.</p>
+            </div>
+            {view.detailImages.length > 0 && (
+              <div>
+                {view.detailImages.map((url, i) => (
+                  <img key={i} src={url} alt={`상세 이미지 ${i + 1}`} loading="lazy" className="w-full h-auto block" />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 1 && <ReviewSummary summary={view.reviewSummary} productId={id} />}
+
+        {activeTab === 2 && (
+          <div className="px-4 py-5 text-[13px] text-ink-soft leading-relaxed space-y-2">
+            <p>• 결제수단: 신용카드</p>
+            <p>• 배송기간: 주문 후 1~2 영업일 출고</p>
+            <p>• {SHIPPING_NOTICE}</p>
+            <p>• 주문취소: 상품 발송 전 마이페이지 또는 고객센터를 통해 즉시 취소 가능</p>
+            <p>• 교환/반품: 상품 수령 후 7일 이내 가능 (단순 변심 시 왕복 배송비 고객 부담, 개봉·사용한 상품은 제한될 수 있음)</p>
+            <p>• 환불: 반품 상품 확인 후 3영업일 이내 결제수단으로 환급</p>
+          </div>
+        )}
+
+        {activeTab === 3 && id && <ProductQnA productId={id} />}
+      </div>
 
       {/* 맨 위로 버튼 (긴 상세페이지 스크롤 시 노출, 하단 구매 바 위에 배치) */}
       <ScrollToTopButton />
