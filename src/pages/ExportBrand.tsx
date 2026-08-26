@@ -40,7 +40,6 @@ interface Copy {
   provenRows: [string, string][] // [라벨, 값] — 라인시트 스펙 테이블
   priceOnRequest: string
   retail: string
-  shopBtn: string
   wholesaleBtn: string
   wholesaleSub: string
   ctaSub: string
@@ -60,7 +59,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'Products', fromBrand: 'From the Brand', certs: 'Certifications', proven: 'Proven in Korea',
     provenRows: mkProven('AK Department Store — on display', 'beautyground.co.kr — selling now', 'Direct buy & resell by Beautyground', ['Retail', 'Online', 'Trade']),
     priceOnRequest: 'Wholesale on request', retail: 'Korea retail',
-    shopBtn: 'Shop retail', wholesaleBtn: 'Wholesale inquiry', wholesaleSub: 'Reply within 24h',
+    wholesaleBtn: 'Wholesale inquiry', wholesaleSub: 'Reply within 24h',
     ctaSub: 'Retail and export are both handled by Beautyground, Seoul.',
     notFoundTitle: 'This brand page is not open yet.',
     notFoundBody: 'It opens when the brand completes its export profile with Beautyground.',
@@ -70,7 +69,7 @@ const COPY: Record<Lang, Copy> = {
     products: '產品', fromBrand: '品牌故事', certs: '認證', proven: '韓國實績',
     provenRows: mkProven('AK百貨 — 門市陳列中', 'beautyground.co.kr — 販售中', 'Beautyground 直接買斷再販售', ['零售', '線上', '交易']),
     priceOnRequest: '批發價格請洽詢', retail: '韓國零售價',
-    shopBtn: '前往選購', wholesaleBtn: '批發洽詢', wholesaleSub: '24小時內回覆',
+    wholesaleBtn: '批發洽詢', wholesaleSub: '24小時內回覆',
     ctaSub: '零售與出口皆由首爾 Beautyground 營運。',
     notFoundTitle: '此品牌頁面尚未開設。',
     notFoundBody: '品牌在 Beautyground 完成出口資料登錄後即會開放。',
@@ -80,7 +79,7 @@ const COPY: Record<Lang, Copy> = {
     products: '产品', fromBrand: '品牌故事', certs: '认证', proven: '韩国实绩',
     provenRows: mkProven('AK百货 — 门店陈列中', 'beautyground.co.kr — 在售', 'Beautyground 直接买断再销售', ['零售', '线上', '交易']),
     priceOnRequest: '批发价格请咨询', retail: '韩国零售价',
-    shopBtn: '前往选购', wholesaleBtn: '批发咨询', wholesaleSub: '24小时内回复',
+    wholesaleBtn: '批发咨询', wholesaleSub: '24小时内回复',
     ctaSub: '零售与出口均由首尔 Beautyground 运营。',
     notFoundTitle: '此品牌页面尚未开设。',
     notFoundBody: '品牌在 Beautyground 完成出口资料登记后即会开放。',
@@ -90,7 +89,7 @@ const COPY: Record<Lang, Copy> = {
     products: '商品', fromBrand: 'ブランドストーリー', certs: '認証', proven: '韓国での実績',
     provenRows: mkProven('AK百貨店 — 店頭陳列中', 'beautyground.co.kr — 販売中', 'Beautyground が直接買付・再販売', ['小売', 'オンライン', '取引']),
     priceOnRequest: '卸価格はお問い合わせください', retail: '韓国小売価格',
-    shopBtn: '購入ページへ', wholesaleBtn: '卸売のお問い合わせ', wholesaleSub: '24時間以内に返信',
+    wholesaleBtn: '卸売のお問い合わせ', wholesaleSub: '24時間以内に返信',
     ctaSub: '小売・輸出ともにソウルのBeautygroundが運営しています。',
     notFoundTitle: 'このブランドページはまだ開設されていません。',
     notFoundBody: 'ブランドがBeautygroundでの輸出プロフィール登録を完了すると開設されます。',
@@ -100,7 +99,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'Produk', fromBrand: 'Daripada Jenama', certs: 'Pensijilan', proven: 'Terbukti di Korea',
     provenRows: mkProven('Gedung AK — dipamerkan', 'beautyground.co.kr — dijual sekarang', 'Belian terus & jualan semula oleh Beautyground', ['Runcit', 'Dalam talian', 'Dagangan']),
     priceOnRequest: 'Harga borong atas permintaan', retail: 'Runcit Korea',
-    shopBtn: 'Beli runcit', wholesaleBtn: 'Pertanyaan borong', wholesaleSub: 'Balas dalam 24 jam',
+    wholesaleBtn: 'Pertanyaan borong', wholesaleSub: 'Balas dalam 24 jam',
     ctaSub: 'Runcit dan eksport dikendalikan oleh Beautyground, Seoul.',
     notFoundTitle: 'Halaman jenama ini belum dibuka.',
     notFoundBody: 'Ia dibuka apabila jenama melengkapkan profil eksport dengan Beautyground.',
@@ -110,7 +109,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'Produk', fromBrand: 'Dari Brand', certs: 'Sertifikasi', proven: 'Terbukti di Korea',
     provenRows: mkProven('AK Dept. Store — dipajang', 'beautyground.co.kr — dijual sekarang', 'Dibeli langsung & dijual kembali oleh Beautyground', ['Ritel', 'Online', 'Perdagangan']),
     priceOnRequest: 'Harga grosir sesuai permintaan', retail: 'Ritel Korea',
-    shopBtn: 'Beli ritel', wholesaleBtn: 'Pertanyaan grosir', wholesaleSub: 'Dibalas dalam 24 jam',
+    wholesaleBtn: 'Pertanyaan grosir', wholesaleSub: 'Dibalas dalam 24 jam',
     ctaSub: 'Ritel dan ekspor ditangani oleh Beautyground, Seoul.',
     notFoundTitle: 'Halaman merek ini belum dibuka.',
     notFoundBody: 'Halaman dibuka setelah merek melengkapi profil ekspor di Beautyground.',
@@ -120,7 +119,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'Sản phẩm', fromBrand: 'Từ thương hiệu', certs: 'Chứng nhận', proven: 'Kiểm chứng tại Hàn Quốc',
     provenRows: mkProven('TTTM AK — đang trưng bày', 'beautyground.co.kr — đang bán', 'Beautyground mua đứt & bán lại trực tiếp', ['Bán lẻ', 'Trực tuyến', 'Giao dịch']),
     priceOnRequest: 'Giá sỉ theo yêu cầu', retail: 'Giá lẻ Hàn Quốc',
-    shopBtn: 'Mua lẻ', wholesaleBtn: 'Hỏi giá sỉ', wholesaleSub: 'Phản hồi trong 24h',
+    wholesaleBtn: 'Hỏi giá sỉ', wholesaleSub: 'Phản hồi trong 24h',
     ctaSub: 'Bán lẻ và xuất khẩu đều do Beautyground, Seoul đảm nhận.',
     notFoundTitle: 'Trang thương hiệu này chưa được mở.',
     notFoundBody: 'Trang sẽ mở khi thương hiệu hoàn tất hồ sơ xuất khẩu với Beautyground.',
@@ -130,7 +129,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'สินค้า', fromBrand: 'จากแบรนด์', certs: 'การรับรอง', proven: 'พิสูจน์แล้วในเกาหลี',
     provenRows: mkProven('ห้าง AK — วางจำหน่ายอยู่', 'beautyground.co.kr — กำลังขาย', 'Beautyground ซื้อขาดและขายต่อโดยตรง', ['ค้าปลีก', 'ออนไลน์', 'การค้า']),
     priceOnRequest: 'ราคาส่งสอบถามได้', retail: 'ราคาปลีกเกาหลี',
-    shopBtn: 'ซื้อปลีก', wholesaleBtn: 'สอบถามราคาส่ง', wholesaleSub: 'ตอบกลับภายใน 24 ชม.',
+    wholesaleBtn: 'สอบถามราคาส่ง', wholesaleSub: 'ตอบกลับภายใน 24 ชม.',
     ctaSub: 'ค้าปลีกและส่งออกดำเนินการโดย Beautyground โซล',
     notFoundTitle: 'หน้าแบรนด์นี้ยังไม่เปิด',
     notFoundBody: 'จะเปิดเมื่อแบรนด์ลงทะเบียนข้อมูลส่งออกกับ Beautyground เสร็จสิ้น',
@@ -140,7 +139,7 @@ const COPY: Record<Lang, Copy> = {
     products: 'Продукция', fromBrand: 'От бренда', certs: 'Сертификаты', proven: 'Проверено в Корее',
     provenRows: mkProven('Универмаг AK — представлено', 'beautyground.co.kr — в продаже', 'Прямая закупка и перепродажа Beautyground', ['Розница', 'Онлайн', 'Торговля']),
     priceOnRequest: 'Оптовая цена по запросу', retail: 'Розница в Корее',
-    shopBtn: 'Купить в розницу', wholesaleBtn: 'Оптовый запрос', wholesaleSub: 'Ответ в течение 24 ч',
+    wholesaleBtn: 'Оптовый запрос', wholesaleSub: 'Ответ в течение 24 ч',
     ctaSub: 'Розница и экспорт — Beautyground, Сеул.',
     notFoundTitle: 'Страница бренда ещё не открыта.',
     notFoundBody: 'Она откроется, когда бренд завершит экспортный профиль в Beautyground.',
@@ -150,7 +149,7 @@ const COPY: Record<Lang, Copy> = {
     products: '제품', fromBrand: '브랜드 스토리', certs: '인증', proven: 'Proven in Korea',
     provenRows: mkProven('AK백화점 — 매장 진열 중', 'beautyground.co.kr — 판매 중', '뷰티그라운드 직매입 후 재판매', ['오프라인', '온라인', '거래방식']),
     priceOnRequest: '도매가 문의', retail: '한국 소비자가',
-    shopBtn: '구매하기', wholesaleBtn: '도매 문의', wholesaleSub: '24시간 내 회신',
+    wholesaleBtn: '도매 문의', wholesaleSub: '24시간 내 회신',
     ctaSub: '소매·수출 모두 서울 뷰티그라운드가 운영합니다.',
     notFoundTitle: '아직 개설되지 않은 브랜드 페이지입니다.',
     notFoundBody: '브랜드가 뷰티그라운드 수출 프로필 등록을 완료하면 열립니다.',
@@ -437,14 +436,8 @@ export default function ExportBrand() {
         <div className="sticky bottom-0 px-5 pt-6 pb-[calc(env(safe-area-inset-bottom)+16px)] bg-gradient-to-t from-white via-white/60 to-transparent">
           <div className="flex gap-2.5">
             <Link
-              to={`/app/brand/${brand.id}`}
-              className="flex-1 text-center rounded-full py-3.5 text-[12.5px] tracking-[0.06em] text-[#16202F] bg-white/55 border border-white/90 backdrop-blur-[20px] backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_6px_20px_rgba(70,90,190,0.14)] hover:bg-white/75 active:opacity-85 transition-colors"
-            >
-              {t.shopBtn}
-            </Link>
-            <Link
-              to="/export"
-              className="flex-[1.4] text-center rounded-full py-3.5 text-[12.5px] tracking-[0.06em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[20px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_22px_rgba(229,62,62,0.28)] hover:bg-[#E53E3E] active:opacity-90 transition-colors"
+              to="/export#export-inquiry-form"
+              className="flex-1 text-center rounded-full py-3.5 text-[12.5px] tracking-[0.06em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[20px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_22px_rgba(229,62,62,0.28)] hover:bg-[#E53E3E] active:opacity-90 transition-colors"
             >
               {t.wholesaleBtn} <span className="text-white/80 ml-1 text-[10px]">{t.wholesaleSub}</span>
             </Link>

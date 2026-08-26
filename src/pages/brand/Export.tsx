@@ -830,10 +830,7 @@ export default function BrandExport() {
             {/* 글래스 캡슐 CTA */}
             <div className="sticky bottom-0 px-3.5 pt-4 pb-3 bg-gradient-to-t from-white via-white/60 to-transparent">
               <div className="flex gap-2">
-                <div className="flex-1 text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-[#16202F] bg-white/55 border border-white/90 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_14px_rgba(70,90,190,0.14)]">
-                  Shop retail
-                </div>
-                <div className="flex-[1.4] text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_16px_rgba(229,62,62,0.28)]">
+                <div className="flex-1 text-center rounded-full py-2 text-[9px] tracking-[0.05em] text-white bg-[#E53E3E]/85 border border-white/25 backdrop-blur-[16px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_6px_16px_rgba(229,62,62,0.28)]">
                   Wholesale inquiry <span className="text-white/80 text-[7.5px] ml-0.5">24h</span>
                 </div>
               </div>
