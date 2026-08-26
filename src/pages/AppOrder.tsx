@@ -383,6 +383,9 @@ export default function AppOrder() {
       status: 'pending',
       user_id: user?.id ?? null,
       delivery_memo: memo,
+      recipient_name: name.trim(),
+      recipient_phone: phone.trim(),
+      ship_address: fullAddress,
       option_label: i.option_label ?? null,
     }))
     // 배송비도 한 행으로 반영(상품 없는 배송비 행) — 합계 검증(payment-complete)과 일치시키기 위함
@@ -401,6 +404,9 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+      recipient_name: name.trim(),
+      recipient_phone: phone.trim(),
+      ship_address: fullAddress,
         option_label: null,
       })
     }
@@ -419,6 +425,9 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+      recipient_name: name.trim(),
+      recipient_phone: phone.trim(),
+      ship_address: fullAddress,
         option_label: null,
       })
     }
@@ -437,6 +446,9 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+      recipient_name: name.trim(),
+      recipient_phone: phone.trim(),
+      ship_address: fullAddress,
         option_label: null,
       })
     }
@@ -455,6 +467,9 @@ export default function AppOrder() {
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
+      recipient_name: name.trim(),
+      recipient_phone: phone.trim(),
+      ship_address: fullAddress,
         option_label: null,
       })
     }

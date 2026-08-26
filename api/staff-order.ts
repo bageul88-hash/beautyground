@@ -80,6 +80,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     status: 'pending' as const,
     user_id: null,
     delivery_memo: fullMemo,
+    recipient_name: name.trim(),
+    recipient_phone: phone.trim(),
+    ship_address: `${address} ${addressDetail || ''}`.trim(),
   }))
 
   const { error: orderErr } = await mall.from('orders').insert(orderRows)

@@ -17,8 +17,7 @@ import {
   IconWorld,
   IconTargetArrow,
   IconClipboardList,
-  IconChevronRight,
-} from '@tabler/icons-react'
+  IconChevronRight, IconTruck } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
 // 온라인몰과 라이브커머스를 당분간 분리 운영하기로 한 방침(2026-07-31)을 관리자 메뉴에도 그대로
@@ -34,6 +33,7 @@ const NAV_GROUPS = [
       { label: '홈 테마 설정', to: '/admin/theme', icon: IconPalette },
       { label: '마케팅 센터', to: '/admin/marketing', icon: IconSpeakerphone },
       { label: '전체 주문 관리', to: '/admin/orders', icon: IconShoppingBag },
+      { label: '배송 / 물류', to: '/admin/shipping', icon: IconTruck },
       { label: '전체 상품 관리', to: '/admin/products', icon: IconBox },
     ],
   },

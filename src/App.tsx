@@ -56,6 +56,7 @@ const AdminPartnerSettlements = lazy(() => import('./pages/admin/PartnerSettleme
 const AdminDeptAccounts = lazy(() => import('./pages/admin/DeptAccounts'))
 const AdminMembers = lazy(() => import('./pages/admin/Members'))
 const AdminOrders = lazy(() => import('./pages/admin/Orders'))
+const AdminShipping = lazy(() => import('./pages/admin/Shipping'))
 const AdminProducts = lazy(() => import('./pages/admin/Products'))
 const AdminLives = lazy(() => import('./pages/admin/Lives'))
 const AdminCoupons = lazy(() => import('./pages/admin/Coupons'))
@@ -204,6 +205,7 @@ export default function App() {
             <Route path="/admin/dept-accounts" element={<AdminDeptAccounts />} />
             <Route path="/admin/members" element={<AdminMembers />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/shipping" element={<AdminShipping />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/lives" element={<AdminLives />} />
             <Route path="/admin/coupons" element={<AdminCoupons />} />

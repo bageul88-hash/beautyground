@@ -212,7 +212,7 @@ export default function AppOrders() {
 
                   {g.trackingNumber && (
                     <p className="mt-2 text-[12.5px] text-ink-soft">
-                      {g.trackingCarrier ? `${g.trackingCarrier} ` : ''}운송장 <b className="select-all">{g.trackingNumber}</b>
+                      {g.trackingCarrier ? `${g.trackingCarrier} ` : ''}운송장 <b className="select-all">{g.trackingNumber}</b>{' '}<a href={`https://trace.cjlogistics.com/next/tracking.html?wblNo=${encodeURIComponent(g.trackingNumber.replace(/-/g, ''))}`} target="_blank" rel="noreferrer" className="ml-2 underline text-ink">배송 조회</a>
                     </p>
                   )}
 

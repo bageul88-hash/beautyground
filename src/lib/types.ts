@@ -197,6 +197,15 @@ export interface Order {
   delivery_memo?: string | null
   tracking_number?: string | null
   tracking_carrier?: string | null
+  // 배송지·배송 상태 (supabase/shipping.sql, 2026-08-27)
+  recipient_name?: string | null
+  recipient_phone?: string | null
+  ship_address?: string | null
+  ship_zip?: string | null
+  ship_from?: string | null
+  shipping_status?: string | null
+  shipped_at?: string | null
+  delivered_at?: string | null
   created_at: string
 }
 
