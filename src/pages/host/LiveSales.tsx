@@ -1,12 +1,202 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { IconArrowLeft, IconEye } from '@tabler/icons-react'
+import { IconArrowLeft, IconEye, IconSearch, IconX, IconStar } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyHost } from '../../lib/host'
-import type { HostSaleRow, Live } from '../../lib/types'
+import type { HostSaleRow, Live, Product } from '../../lib/types'
 import { formatDateTime, won } from '../../lib/format'
 import { useLiveStreamChannel } from '../../hooks/useLiveStreamChannel'
 import { useStreamStatus } from '../../hooks/useStreamStatus'
+
+type LiteProduct = Pick<Product, 'id' | 'name' | 'thumbnail_url' | 'price' | 'sale_price'>
+
+// 라이브에 붙일 판매 상품 선택 — host_update_live_products RPC(supabase/host_update_live_products.sql)로
+// 본인 라이브에만 반영. 시청자 화면(ShopLiveWatch.tsx)은 product_ids/highlight_product_id를 이미
+// 읽어서 상품 시트·구매 버튼을 그리고 있었는데, 정작 진행자가 상품을 고를 화면이 없어서 항상 비어있었다.
+function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) => void }) {
+  const [selected, setSelected] = useState<LiteProduct[]>([])
+  const [highlightId, setHighlightId] = useState<string | null>(live.highlight_product_id ?? null)
+  const [loadingInitial, setLoadingInitial] = useState(true)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<LiteProduct[]>([])
+  const [searching, setSearching] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    const loadInitial = async () => {
+      const ids = live.product_ids ?? []
+      if (ids.length === 0) { setLoadingInitial(false); return }
+      const { data } = await supabase
+        .from('products')
+        .select('id,name,thumbnail_url,price,sale_price')
+        .in('id', ids)
+      if (!active) return
+      const byId = new Map((data as LiteProduct[] ?? []).map((p) => [p.id, p]))
+      setSelected(ids.map((id) => byId.get(id)).filter(Boolean) as LiteProduct[])
+      setLoadingInitial(false)
+    }
+    void loadInitial()
+    return () => { active = false }
+  }, [live.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const q = query.trim()
+    if (!q) { setResults([]); return }
+    let active = true
+    setSearching(true)
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('id,name,thumbnail_url,price,sale_price')
+        .eq('status', 'on_sale')
+        .ilike('name', `%${q}%`)
+        .limit(8)
+      if (!active) return
+      setResults((data as LiteProduct[]) ?? [])
+      setSearching(false)
+    }, 300)
+    return () => { active = false; clearTimeout(t) }
+  }, [query])
+
+  const addProduct = (p: LiteProduct) => {
+    setSelected((prev) => {
+      if (prev.some((x) => x.id === p.id)) return prev
+      const next = [...prev, p]
+      if (!highlightId) setHighlightId(p.id)
+      return next
+    })
+    setQuery('')
+    setResults([])
+    setSaved(false)
+  }
+
+  const removeProduct = (id: string) => {
+    setSelected((prev) => prev.filter((p) => p.id !== id))
+    setHighlightId((prev) => (prev === id ? null : prev))
+    setSaved(false)
+  }
+
+  const save = async () => {
+    setSaving(true)
+    setError('')
+    setSaved(false)
+    const { data, error: rpcErr } = await supabase.rpc('host_update_live_products', {
+      p_live_id: live.id,
+      p_product_ids: selected.map((p) => p.id),
+      p_highlight_product_id: highlightId,
+    })
+    setSaving(false)
+    if (rpcErr || !data) {
+      setError(rpcErr?.message ?? '저장에 실패했습니다.')
+      return
+    }
+    onSaved(data as Live)
+    setSaved(true)
+  }
+
+  return (
+    <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
+      <h3 className="text-[13px] font-bold text-[#111] mb-3">판매 상품</h3>
+      <p className="text-[12px] text-[#9a9080] mb-4">
+        방송 중 소개할 상품을 검색해서 담고, 그중 하나를 대표 상품으로 지정하세요. 시청자 화면 하단에 바로 노출됩니다.
+      </p>
+
+      <div className="relative mb-4">
+        <IconSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#c8c0b0]" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="상품명으로 검색"
+          className="w-full border border-[#e5e0d8] rounded-md pl-9 pr-3 py-2.5 text-[13px] focus:outline-none focus:border-ink"
+        />
+        {query.trim() && (
+          <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#e5e0d8] rounded-md shadow-lg max-h-64 overflow-y-auto">
+            {searching ? (
+              <p className="px-3 py-3 text-[12px] text-[#9a9080]">검색 중…</p>
+            ) : results.length === 0 ? (
+              <p className="px-3 py-3 text-[12px] text-[#9a9080]">검색 결과가 없습니다.</p>
+            ) : (
+              results.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => addProduct(p)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#faf8f4] text-left"
+                >
+                  {p.thumbnail_url ? (
+                    <img src={p.thumbnail_url} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded bg-[#f3f1ec] shrink-0" />
+                  )}
+                  <span className="text-[13px] text-[#111] line-clamp-1 flex-1">{p.name}</span>
+                  <span className="text-[12px] text-[#555] shrink-0">{won(p.sale_price ?? p.price)}</span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {loadingInitial ? (
+        <p className="text-[12px] text-[#9a9080]">불러오는 중...</p>
+      ) : selected.length === 0 ? (
+        <p className="text-[12px] text-[#9a9080] py-4 text-center border border-dashed border-[#e5e0d8] rounded-md">
+          담긴 상품이 없습니다. 위에서 검색해서 추가하세요.
+        </p>
+      ) : (
+        <div className="space-y-2 mb-4">
+          {selected.map((p) => (
+            <div key={p.id} className="flex items-center gap-3 border border-[#e5e0d8] rounded-md px-3 py-2.5">
+              {p.thumbnail_url ? (
+                <img src={p.thumbnail_url} alt="" className="w-11 h-11 rounded object-cover shrink-0" />
+              ) : (
+                <div className="w-11 h-11 rounded bg-[#f3f1ec] shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-[#111] line-clamp-1">{p.name}</p>
+                <p className="text-[12px] text-[#555]">{won(p.sale_price ?? p.price)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHighlightId(p.id)}
+                title="대표 상품으로 지정"
+                className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full ${
+                  highlightId === p.id ? 'bg-[#FFF3D6] text-[#8A5A00]' : 'bg-[#F3F1EC] text-[#9a9080]'
+                }`}
+              >
+                <IconStar size={12} fill={highlightId === p.id ? '#8A5A00' : 'none'} />
+                대표
+              </button>
+              <button
+                type="button"
+                onClick={() => removeProduct(p.id)}
+                className="shrink-0 text-[#c8c0b0] hover:text-[#FF4757]"
+              >
+                <IconX size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="text-[12px] text-[#FF4757] mb-3">{error}</p>}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving || loadingInitial}
+          className="text-[13px] font-semibold text-white bg-ink rounded-full px-5 py-2.5 disabled:opacity-60"
+        >
+          {saving ? '저장 중…' : '저장'}
+        </button>
+        {saved && <span className="text-[12px] text-[#1E7B3C]">저장됐습니다</span>}
+      </div>
+    </div>
+  )
+}
 
 const STATUS: Record<Live['status'], { label: string; bg: string; text: string }> = {
   scheduled: { label: '예정', bg: 'bg-[#FAEEDA]', text: 'text-[#633806]' },
@@ -106,6 +296,8 @@ export default function HostLiveSales() {
           {badge.label}
         </span>
       </div>
+
+      {live.status !== 'ended' && <LiveProductPicker live={live} onSaved={setLive} />}
 
       {live.status !== 'ended' && (
         <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
