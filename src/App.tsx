@@ -221,6 +221,10 @@ export default function App() {
         <Route path="/host/register" element={<LiveGate><HostRegister /></LiveGate>} />
         <Route path="/host/login" element={<LiveGate><HostLogin /></LiveGate>} />
 
+        {/* 진행자 섭외용 전용 링크 — 접근 코드 없이 바로 회원가입 화면으로.
+            대표님이 섭외 대상에게 직접 이 링크를 보내는 용도(2026-08-26). */}
+        <Route path="/host/join" element={<HostRegister />} />
+
         {/* 링크 하나로 방송 송출(2026-08-20) — 계정 없이 lives.host_token 링크만으로 접근.
             토큰 자체가 인증 수단이라 LiveGate로 한 번 더 감싸지 않음(불필요한 마찰). */}
         <Route path="/host/go/:token" element={<HostGoLive />} />

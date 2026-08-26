@@ -68,7 +68,7 @@ export default function HostRegister() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: `${window.location.origin}/host/register`,
+        redirectTo: `${window.location.origin}${window.location.pathname}`,
         scopes: 'profile_nickname account_email',
       },
     })
