@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>라이브커머스 셀러페이지</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- 카톡 등 링크 공유 미리보기용 — /host/join 쪽은 서버리스 rewrite(api/company-og)로 처리하지만,
+     이 정적 파일은 그 rewrite를 안 타므로 여기서도 직접 명시해서 어느 링크로 공유해도 동일하게 뜨게 함. -->
+<meta property="og:title" content="라이브커머스 셀러페이지">
+<meta property="og:description" content="뷰티그라운드 라이브커머스에서 방송을 진행하실 셀러(진행자)를 모집합니다 — 카카오·네이버로 1분 가입">
+<meta property="og:site_name" content="BEAUTYGROUND">
+
+<!-- live.html과 동일한 이유로 정적 파일 분리 — SPA의 공용 manifest.json을 JS로
+     바꾸는 방식은 iOS Safari가 "홈 화면에 추가" 순간에 무시해버림. 이 페이지 자체를
+     홈 화면에 추가하면 시작주소·아이콘·이름은 이 파일 고정값이라 항상 정확하다.
+     ⚠️ live.html처럼 iframe으로 감싸지 않고 즉시 리다이렉트만 함 — 카카오/네이버
+     로그인이 실제 페이지에서 전체 화면 이동(location.href)으로 동작하는데, 그걸
+     iframe 안에서 하면 카카오 로그인 페이지 쪽 프레임 차단 정책에 걸려 깨질 수
+     있어서(2026-08-27), iframe 없이 그냥 실제 주소로 넘겨주는 방식을 택함. -->
+<link rel="manifest" href="/manifest-hostjoin.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="라이브커머스 셀러">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#17181C">
+<script>location.replace('/host/join');</script>
+</head>
+<body></body>
+</html>

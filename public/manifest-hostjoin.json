@@ -1,0 +1,15 @@
+{
+  "name": "라이브커머스 셀러페이지",
+  "short_name": "라이브커머스 셀러",
+  "description": "뷰티그라운드 라이브커머스 셀러(진행자) 가입",
+  "start_url": "/host-join.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#17181C",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
