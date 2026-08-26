@@ -143,6 +143,18 @@ export default function HostRegister() {
     if (hasError) return
 
     setSubmitting(true)
+
+    // 안전장치: 방금 전 단계에서 이미 가입 여부를 확인했지만(그 사이 레이스·캐시 문제로
+    // 놓쳤을 가능성 대비), 실제로 insert하기 직전에 한 번 더 확인 — 이미 hosts 행이
+    // 있으면 중복 생성하지 않고 그대로 대시보드로 보낸다(2026-08-26 대표님이 이미 가입한
+    // 계정으로 다시 가입 화면이 뜨는 걸 지적해서 추가).
+    const { data: existing } = await supabase.from('hosts').select('id').eq('user_id', session.user.id).maybeSingle()
+    if (existing) {
+      setSubmitting(false)
+      navigate('/host/dashboard', { replace: true })
+      return
+    }
+
     const { error: insertError } = await supabase.from('hosts').insert([
       {
         user_id: session.user.id,
