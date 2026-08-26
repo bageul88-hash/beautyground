@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
 import Button from '../../components/common/Button'
 import { supabase } from '../../lib/supabase'
@@ -14,6 +14,7 @@ function toE164(raw: string): string | null {
 type Step = 'choose' | 'phone-number' | 'phone-code'
 
 export default function HostRegister() {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [agree, setAgree] = useState(false)
@@ -34,8 +35,11 @@ export default function HostRegister() {
 
   const [session, setSession] = useState<Session | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
-  const [alreadyHost, setAlreadyHost] = useState(false)
 
+  // 이미 로그인된 계정(쇼핑몰 일반회원 포함 — 계정은 공유, 셀러는 그 위에 얹는 추가 자격)이
+  // 이미 hosts에도 등록돼 있으면, 다시 로그인하라고 막지 않고 바로 진행자센터로 들여보낸다.
+  // (예전엔 "이미 가입된 계정입니다 → 로그인하러 가기" 벽을 보여줬는데, 이미 로그인된
+  // 상태에서 또 로그인하라는 게 불필요한 장벽이었음 — 2026-08-26 대표님 지적으로 변경)
   useEffect(() => {
     let active = true
     ;(async () => {
@@ -48,12 +52,12 @@ export default function HostRegister() {
         if (knownName) setName((prev) => prev || knownName)
         if (s.user.phone) setPhone((prev) => prev || s.user.phone!)
         const { data: existing } = await supabase.from('hosts').select('id').eq('user_id', s.user.id).maybeSingle()
-        if (active && existing) setAlreadyHost(true)
+        if (active && existing) { navigate('/host/dashboard', { replace: true }); return }
       }
       if (active) setCheckingSession(false)
     })()
     return () => { active = false }
-  }, [])
+  }, [navigate])
 
   const handleKakao = async () => {
     setFormError(null)
@@ -168,17 +172,6 @@ export default function HostRegister() {
                 className="inline-block mt-6 bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
               >
                 진행자센터로 가기
-              </Link>
-            </div>
-          ) : alreadyHost ? (
-            <div className={`${card} text-center`} style={cardBorder}>
-              <h1 className="font-serif text-[22px] font-bold text-text mb-3">이미 가입된 계정입니다</h1>
-              <p className="text-[14px] text-text-sub leading-relaxed mb-6">로그인해서 진행자 센터를 이용해 주세요.</p>
-              <Link
-                to="/host/login"
-                className="inline-block bg-ink text-paper rounded-pill text-[14px] px-6 py-3 font-medium hover:opacity-90 transition-colors"
-              >
-                로그인하러 가기
               </Link>
             </div>
           ) : (
