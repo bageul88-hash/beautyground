@@ -32,20 +32,26 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 // 발송 실패는 절대 방송 시작 응답을 막지 않는다(전체 try/catch).
 async function sendLiveStartNotifications(
   supabase: SupabaseClient,
-  live: { id: string; title: string; partner_id: string | null }
+  live: { id: string; title: string; partner_id: string | null; host_id?: string | null }
 ) {
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !live.partner_id) return
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return
+  if (!live.partner_id && !live.host_id) return
   try {
-    const { data: partner } = await supabase
-      .from('partners')
-      .select('brand_name')
-      .eq('id', live.partner_id)
-      .single()
-    const { data: follows } = await supabase
-      .from('partner_follows')
-      .select('user_id')
-      .eq('partner_id', live.partner_id)
-    const userIds = (follows ?? []).map((f: { user_id: string }) => f.user_id)
+    // 브랜드가 진행하는 라이브는 partner_follows, 매장(호스트)이 직접 여는 라이브는 host_follows —
+    // 서로 다른 팔로우 대상이라 알림 문구도 브랜드명/매장명으로 갈린다.
+    let notifyName = '뷰티그라운드'
+    let userIds: string[] = []
+    if (live.partner_id) {
+      const { data: partner } = await supabase.from('partners').select('brand_name').eq('id', live.partner_id).single()
+      notifyName = partner?.brand_name ?? notifyName
+      const { data: follows } = await supabase.from('partner_follows').select('user_id').eq('partner_id', live.partner_id)
+      userIds = (follows ?? []).map((f: { user_id: string }) => f.user_id)
+    } else if (live.host_id) {
+      const { data: host } = await supabase.from('hosts').select('name').eq('id', live.host_id).single()
+      notifyName = host?.name ?? notifyName
+      const { data: follows } = await supabase.from('host_follows').select('user_id').eq('host_id', live.host_id)
+      userIds = (follows ?? []).map((f: { user_id: string }) => f.user_id)
+    }
     if (userIds.length === 0) return
 
     const { data: subs } = await supabase
@@ -55,7 +61,7 @@ async function sendLiveStartNotifications(
     if (!subs || subs.length === 0) return
 
     const payload = JSON.stringify({
-      title: `${partner?.brand_name ?? '뷰티그라운드'} 라이브 시작`,
+      title: `${notifyName} 라이브 시작`,
       body: live.title,
       data: { url: `/app/live/${live.id}` },
     })
@@ -279,6 +285,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         id: liveId,
         title: String(liveRow.title ?? ''),
         partner_id: (liveRow.partner_id as string | null) ?? null,
+        host_id: (liveRow.host_id as string | null) ?? null,
       })
       res.status(200).json({ ok: true })
       return

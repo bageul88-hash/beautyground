@@ -131,21 +131,25 @@ export default function ShopLiveWatch() {
     await copyShareLink()
   }
 
-  // 브랜드 팔로우 — 다음 라이브 알림 대상이 되는 관계. 비로그인이면 로그인으로 보냄
+  // 브랜드가 진행하는 라이브는 partner_follows, 매장(호스트)이 직접 여는 라이브는 host_follows —
+  // 다음 라이브 알림 대상이 되는 관계. 비로그인이면 로그인으로 보냄
   const toggleFollow = async () => {
-    if (!live?.partner_id) return
+    if (!live?.partner_id && !live?.host_id) return
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       navigate('/app/login', { state: { from: `/app/live/${live.id}` } })
       return
     }
+    const table = live.partner_id ? 'partner_follows' : 'host_follows'
+    const column = live.partner_id ? 'partner_id' : 'host_id'
+    const targetId = live.partner_id ?? live.host_id!
     if (isFollowing) {
       setIsFollowing(false)
-      await supabase.from('partner_follows').delete().eq('user_id', session.user.id).eq('partner_id', live.partner_id)
+      await supabase.from(table).delete().eq('user_id', session.user.id).eq(column, targetId)
     } else {
       setIsFollowing(true)
-      await supabase.from('partner_follows').insert([{ user_id: session.user.id, partner_id: live.partner_id }])
-      // 팔로우한 브랜드가 다음에 라이브를 켜면 실제 알림이 오도록 푸시 구독 유도. 거부/미지원이면 조용히 무시.
+      await supabase.from(table).insert([{ user_id: session.user.id, [column]: targetId }])
+      // 팔로우한 대상이 다음에 라이브를 켜면 실제 알림이 오도록 푸시 구독 유도. 거부/미지원이면 조용히 무시.
       void subscribeToPush()
     }
   }
@@ -199,19 +203,25 @@ export default function ShopLiveWatch() {
           .eq('id', liveRow.partner_id)
           .single()
         if (active) setPartnerName(partnerData?.brand_name ?? null)
+      } else {
+        setPartnerName(null)
+      }
 
+      // 팔로우 여부 — 브랜드가 진행하면 partner_follows, 매장(호스트) 직접 진행이면 host_follows
+      if (liveRow?.partner_id || liveRow?.host_id) {
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
+          const table = liveRow.partner_id ? 'partner_follows' : 'host_follows'
+          const column = liveRow.partner_id ? 'partner_id' : 'host_id'
+          const targetId = liveRow.partner_id ?? liveRow.host_id
           const { data: followRow } = await supabase
-            .from('partner_follows')
+            .from(table)
             .select('id')
             .eq('user_id', session.user.id)
-            .eq('partner_id', liveRow.partner_id)
+            .eq(column, targetId as string)
             .maybeSingle()
           if (active) setIsFollowing(!!followRow)
         }
-      } else {
-        setPartnerName(null)
       }
 
       if (liveRow && liveRow.product_ids && liveRow.product_ids.length > 0) {
@@ -533,7 +543,7 @@ export default function ShopLiveWatch() {
                   </>
                 )}
               </div>
-              {live?.partner_id && (
+              {(live?.partner_id || live?.host_id) && (
                 <button type="button" onClick={() => void toggleFollow()} aria-label={isFollowing ? '팔로우 취소' : '팔로우'} className="flex flex-col items-center transition-transform hover:scale-[1.08] active:scale-90">
                   <span className={`w-[46px] h-[46px] rounded-full backdrop-blur-md flex items-center justify-center ${isFollowing ? 'bg-signal-yellow' : 'bg-white/15'}`}>
                     {isFollowing ? (

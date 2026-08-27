@@ -22,6 +22,7 @@ const AppCategory = lazy(() => import('./pages/AppCategory'))
 const AppSearch = lazy(() => import('./pages/AppSearch'))
 const AppCategoryDetail = lazy(() => import('./pages/AppCategoryDetail'))
 const AppBrandDetail = lazy(() => import('./pages/AppBrandDetail'))
+const AppHostFollow = lazy(() => import('./pages/AppHostFollow'))
 const AppProductDetail = lazy(() => import('./pages/AppProductDetail'))
 const AppProductReviews = lazy(() => import('./pages/AppProductReviews'))
 const AppMyPage = lazy(() => import('./pages/AppMyPage'))
@@ -294,6 +295,7 @@ export default function App() {
         <Route path="/app/search" element={<AppSearch />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
         <Route path="/app/brand/:id" element={<AppBrandDetail />} />
+        <Route path="/app/host/:id/follow" element={<AppHostFollow />} />
         <Route path="/app/product/:id" element={<AppProductDetail />} />
         <Route path="/app/product/:id/reviews" element={<AppProductReviews />} />
         <Route path="/app/mypage" element={<AppMyPage />} />
