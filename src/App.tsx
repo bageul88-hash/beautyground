@@ -289,7 +289,7 @@ export default function App() {
             <Route path="/dept/lives" element={<DeptLives />} />
           </Route>
         </Route>
-        <Route path="/app/live/:id" element={<LiveGate><ShopLiveWatch /></LiveGate>} />
+        <Route path="/app/live/:id" element={<ShopLiveWatch />} />
         <Route path="/app/category" element={<AppCategory />} />
         <Route path="/app/search" element={<AppSearch />} />
         <Route path="/app/category/:id" element={<AppCategoryDetail />} />
