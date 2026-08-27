@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { IconArrowLeft, IconEye, IconX, IconStar } from '@tabler/icons-react'
+import { IconArrowLeft, IconEye, IconX, IconStar, IconFileSpreadsheet } from '@tabler/icons-react'
+import * as XLSX from 'xlsx'
 import { supabase } from '../../lib/supabase'
 import { getMyHost } from '../../lib/host'
 import type { HostSaleRow, Live, Product } from '../../lib/types'
@@ -25,6 +26,9 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importSummary, setImportSummary] = useState<{ updated: number; unmatched: { brand: string; name: string }[] } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let active = true
@@ -99,6 +103,91 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
     setSaved(false)
   }
 
+  // 브랜드가 보내주는 "라이브 특가" 제품 리스트 엑셀(여러 시트, 시트당 브랜드명·제품명·라이브특가KRW 열)을
+  // 한 번에 반영 — 브랜드/제품명으로 매칭해서 담고, 라이브특가는 그 제품의 실제 판매가(sale_price)에
+  // 반영한다(라이브 화면뿐 아니라 온라인몰에도 같은 특가로 보임 — 지금 진행 중인 실제 할인이라 의도된 동작).
+  const importExcel = async (file: File) => {
+    setImporting(true)
+    setImportSummary(null)
+    setError('')
+    try {
+      const norm = (s: string) => s.replace(/\s+/g, '').trim()
+      const wb = XLSX.read(await file.arrayBuffer())
+      const rows: { brand: string; name: string; livePrice: number | null }[] = []
+      for (const sheetName of wb.SheetNames) {
+        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[sheetName], { defval: '' })
+        for (const r of json) {
+          const brand = String(r['브랜드명'] ?? '').trim()
+          const name = String(r['제품명'] ?? '').replace(/\s+/g, ' ').trim()
+          if (!brand || !name) continue
+          let livePrice: number | null = null
+          for (const key of Object.keys(r)) {
+            const k = key.replace(/\s+/g, '')
+            if (k.includes('라이브') && k.includes('특가')) {
+              const v = Number(r[key])
+              if (Number.isFinite(v) && v > 0) livePrice = v
+            }
+          }
+          rows.push({ brand, name, livePrice })
+        }
+      }
+      if (rows.length === 0) {
+        setError('엑셀에서 브랜드명·제품명 열을 찾지 못했습니다.')
+        return
+      }
+
+      const { data: allBrands } = await supabase.from('partner_brands').select('id,brand_name')
+      const brandByNorm = new Map(((allBrands ?? []) as { id: string; brand_name: string }[]).map((b) => [norm(b.brand_name), b.id]))
+
+      const rowsByBrandId = new Map<string, typeof rows>()
+      const unmatched: { brand: string; name: string }[] = []
+      for (const row of rows) {
+        const bid = brandByNorm.get(norm(row.brand))
+        if (!bid) { unmatched.push(row); continue }
+        if (!rowsByBrandId.has(bid)) rowsByBrandId.set(bid, [])
+        rowsByBrandId.get(bid)!.push(row)
+      }
+
+      const newlySelected: LiteProduct[] = []
+      let updated = 0
+      for (const [bid, brandRows] of rowsByBrandId) {
+        const { data: prods } = await supabase
+          .from('products')
+          .select('id,name,thumbnail_url,price,sale_price')
+          .eq('partner_id', bid)
+        const list = (prods ?? []) as LiteProduct[]
+        const byNorm = new Map(list.map((p) => [norm(p.name), p]))
+        for (const row of brandRows) {
+          const found =
+            byNorm.get(norm(row.name)) ??
+            list.find((x) => norm(x.name).includes(norm(row.name)) || norm(row.name).includes(norm(x.name)))
+          if (!found) { unmatched.push(row); continue }
+          let product = found
+          if (row.livePrice != null && row.livePrice !== product.sale_price) {
+            const { error: upErr } = await supabase.from('products').update({ sale_price: row.livePrice }).eq('id', product.id)
+            if (!upErr) {
+              product = { ...product, sale_price: row.livePrice }
+              updated += 1
+            }
+          }
+          newlySelected.push(product)
+        }
+      }
+
+      setSelected((prev) => {
+        const map = new Map(prev.map((p) => [p.id, p]))
+        for (const p of newlySelected) map.set(p.id, p)
+        return [...map.values()]
+      })
+      setImportSummary({ updated, unmatched })
+      setSaved(false)
+    } catch {
+      setError('엑셀 파일을 읽는 중 오류가 발생했습니다. 형식을 확인해 주세요.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   const save = async () => {
     setSaving(true)
     setError('')
@@ -159,6 +248,47 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="mb-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) void importExcel(f)
+            e.target.value = ''
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+          className="flex items-center gap-1.5 text-[12px] font-medium text-[#555] border border-dashed border-[#c8c0b0] rounded-md px-3 py-2 hover:border-ink hover:text-ink disabled:opacity-60"
+        >
+          <IconFileSpreadsheet size={14} />
+          {importing ? '엑셀 처리 중…' : '엑셀로 브랜드·제품·라이브특가 일괄 담기'}
+        </button>
+        <p className="text-[11px] text-[#9a9080] mt-1.5">
+          열: 브랜드명 · 제품명 · 라이브특가KRW (여러 시트 한 번에 처리). 라이브특가는 그 제품의 실제 판매가에 바로 반영됩니다.
+        </p>
+        {importSummary && (
+          <div className="mt-2 text-[12px]">
+            <p className="text-[#1E7B3C]">가격 반영 {importSummary.updated}건 완료.</p>
+            {importSummary.unmatched.length > 0 && (
+              <details className="mt-1">
+                <summary className="text-[#FF4757] cursor-pointer">매칭 실패 {importSummary.unmatched.length}건 (직접 확인 필요)</summary>
+                <ul className="mt-1 pl-4 list-disc text-[#9a9080]">
+                  {importSummary.unmatched.map((u, i) => (
+                    <li key={i}>{u.brand} · {u.name}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
       </div>
 
       {loadingInitial ? (
