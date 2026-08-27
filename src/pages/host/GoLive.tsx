@@ -36,17 +36,12 @@ export default function HostGoLive() {
   const [broadcasting, setBroadcasting] = useState(false)
   const [broadcastErr, setBroadcastErr] = useState('')
   const [camReady, setCamReady] = useState(false)
-  const [flipped, setFlipped] = useState(false)
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
+  const [switchingCam, setSwitchingCam] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
-  // 폰을 거꾸로(180도) 거치했을 때 시청자에게 보내는 화면만 바로잡는 용도 — 로컬 미리보기는
-  // CSS로만 뒤집고(실제 데이터는 그대로), 송출용은 캔버스에 180도 회전해서 그린 뒤 그 캔버스를
-  // 새 트랙으로 만들어 RTCRtpSender.replaceTrack으로 갈아끼운다(재협상 없이 끊김 없이 전환).
-  const flipCanvasRef = useRef<HTMLCanvasElement | null>(null)
-  const flipStreamRef = useRef<MediaStream | null>(null)
-  const flipRafRef = useRef<number | null>(null)
 
   const streamState = useStreamStatus(live?.stream_uid, live?.status !== 'ended', 5000)
 
@@ -92,74 +87,44 @@ export default function HostGoLive() {
     setStreamInfo(j as StreamInfo)
   }
 
-  const openCamera = async () => {
+  const openCamera = async (mode: 'environment' | 'user' = facingMode) => {
     setBroadcastErr('')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: true,
       })
+      streamRef.current?.getTracks().forEach((t) => t.stop())
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         await videoRef.current.play().catch(() => {})
       }
       setCamReady(true)
+      return stream
     } catch {
       setBroadcastErr('카메라·마이크 권한을 허용해야 방송을 시작할 수 있습니다.')
+      return null
     }
   }
 
-  const startFlipLoop = () => {
-    const video = videoRef.current
-    if (!video) return
-    const canvas = document.createElement('canvas')
-    canvas.width = video.videoWidth || 1280
-    canvas.height = video.videoHeight || 720
-    const ctx = canvas.getContext('2d')
-    flipCanvasRef.current = canvas
-    const draw = () => {
-      if (ctx && video) {
-        ctx.save()
-        ctx.translate(canvas.width, canvas.height)
-        ctx.rotate(Math.PI)
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-        ctx.restore()
-      }
-      flipRafRef.current = requestAnimationFrame(draw)
+  // 셀카(전면)/일반(후면) 카메라 전환. 방송 중이면 새 카메라의 영상·음성 트랙으로
+  // RTCRtpSender.replaceTrack — 재협상 없이 시청자 쪽 끊김 없이 바로 바뀐다.
+  const switchCamera = async () => {
+    if (switchingCam) return
+    setSwitchingCam(true)
+    const nextMode = facingMode === 'environment' ? 'user' : 'environment'
+    const newStream = await openCamera(nextMode)
+    if (newStream && pcRef.current) {
+      const newVideoTrack = newStream.getVideoTracks()[0]
+      const newAudioTrack = newStream.getAudioTracks()[0]
+      const videoSender = pcRef.current.getSenders().find((s) => s.track?.kind === 'video')
+      const audioSender = pcRef.current.getSenders().find((s) => s.track?.kind === 'audio')
+      if (newVideoTrack && videoSender) await videoSender.replaceTrack(newVideoTrack)
+      if (newAudioTrack && audioSender) await audioSender.replaceTrack(newAudioTrack)
     }
-    draw()
-    flipStreamRef.current = canvas.captureStream(30)
-  }
-
-  const stopFlipLoop = () => {
-    if (flipRafRef.current) cancelAnimationFrame(flipRafRef.current)
-    flipRafRef.current = null
-    flipStreamRef.current = null
-    flipCanvasRef.current = null
-  }
-
-  // 거치 방향을 뒤집었을 때 누르는 버튼 — 로컬 미리보기(CSS)와 실제 송출 트랙(캔버스) 둘 다 전환.
-  // 이미 방송 중이면 RTCRtpSender.replaceTrack으로 즉시 교체(재협상 없음, 시청자 쪽 끊김 없음).
-  const toggleFlip = async () => {
-    const next = !flipped
-    setFlipped(next)
-    if (next) {
-      startFlipLoop()
-      await new Promise((r) => setTimeout(r, 100))
-      const newTrack = flipStreamRef.current?.getVideoTracks()[0]
-      if (newTrack && pcRef.current) {
-        const sender = pcRef.current.getSenders().find((s) => s.track?.kind === 'video')
-        await sender?.replaceTrack(newTrack)
-      }
-    } else {
-      const originalTrack = streamRef.current?.getVideoTracks()[0]
-      if (originalTrack && pcRef.current) {
-        const sender = pcRef.current.getSenders().find((s) => s.track?.kind === 'video')
-        await sender?.replaceTrack(originalTrack)
-      }
-      stopFlipLoop()
-    }
+    if (newStream) setFacingMode(nextMode)
+    setSwitchingCam(false)
   }
 
   const startBroadcast = async () => {
@@ -168,11 +133,7 @@ export default function HostGoLive() {
     try {
       const pc = new RTCPeerConnection()
       pcRef.current = pc
-      const outgoingVideoTrack = flipped
-        ? flipStreamRef.current?.getVideoTracks()[0] ?? streamRef.current.getVideoTracks()[0]
-        : streamRef.current.getVideoTracks()[0]
-      if (outgoingVideoTrack) pc.addTrack(outgoingVideoTrack, streamRef.current)
-      streamRef.current.getAudioTracks().forEach((t) => pc.addTrack(t, streamRef.current!))
+      streamRef.current.getTracks().forEach((t) => pc.addTrack(t, streamRef.current!))
 
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
@@ -213,7 +174,6 @@ export default function HostGoLive() {
     return () => {
       pcRef.current?.close()
       streamRef.current?.getTracks().forEach((t) => t.stop())
-      stopFlipLoop()
     }
   }, [])
 
@@ -271,7 +231,7 @@ export default function HostGoLive() {
                 ref={videoRef}
                 muted
                 playsInline
-                className={`w-full h-full object-cover ${flipped ? 'rotate-180' : ''}`}
+                className={`w-full h-full object-cover ${facingMode === 'user' ? '-scale-x-100' : ''}`}
               />
               {!camReady && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -281,25 +241,19 @@ export default function HostGoLive() {
               {camReady && (
                 <button
                   type="button"
-                  onClick={toggleFlip}
-                  className={`absolute top-2 right-2 text-[11px] font-semibold px-3 py-1.5 rounded-full ${
-                    flipped ? 'bg-ink text-white' : 'bg-black/50 text-white'
-                  }`}
+                  onClick={switchCamera}
+                  disabled={switchingCam}
+                  className="absolute top-2 right-2 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-black/50 text-white disabled:opacity-60"
                 >
-                  {flipped ? '화면 뒤집기 ON' : '화면 뒤집기'}
+                  {switchingCam ? '전환 중…' : facingMode === 'user' ? '후면 카메라' : '셀카(전면) 카메라'}
                 </button>
               )}
             </div>
-            {camReady && (
-              <p className="text-[11px] text-[#9a9080] text-center mb-3">
-                폰을 거꾸로 거치했다면 위 "화면 뒤집기"를 눌러 시청자 화면을 바로잡으세요.
-              </p>
-            )}
 
             {!camReady ? (
               <button
                 type="button"
-                onClick={openCamera}
+                onClick={() => openCamera()}
                 className="w-full text-[14px] font-semibold text-white bg-[#111] rounded-full py-3"
               >
                 카메라 켜기
