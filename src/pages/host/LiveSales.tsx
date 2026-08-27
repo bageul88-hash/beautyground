@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { IconArrowLeft, IconEye, IconSearch, IconX, IconStar } from '@tabler/icons-react'
+import { IconArrowLeft, IconEye, IconX, IconStar } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import { getMyHost } from '../../lib/host'
 import type { HostSaleRow, Live, Product } from '../../lib/types'
@@ -9,6 +9,7 @@ import { useLiveStreamChannel } from '../../hooks/useLiveStreamChannel'
 import { useStreamStatus } from '../../hooks/useStreamStatus'
 
 type LiteProduct = Pick<Product, 'id' | 'name' | 'thumbnail_url' | 'price' | 'sale_price'>
+type LiteBrand = { id: string; name: string } // id = partner_id
 
 // 라이브에 붙일 판매 상품 선택 — host_update_live_products RPC(supabase/host_update_live_products.sql)로
 // 본인 라이브에만 반영. 시청자 화면(ShopLiveWatch.tsx)은 product_ids/highlight_product_id를 이미
@@ -17,9 +18,10 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
   const [selected, setSelected] = useState<LiteProduct[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(live.highlight_product_id ?? null)
   const [loadingInitial, setLoadingInitial] = useState(true)
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<LiteProduct[]>([])
-  const [searching, setSearching] = useState(false)
+  const [brands, setBrands] = useState<LiteBrand[]>([])
+  const [brandId, setBrandId] = useState('')
+  const [brandProducts, setBrandProducts] = useState<LiteProduct[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
@@ -42,24 +44,44 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
     return () => { active = false }
   }, [live.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 브랜드 선택 → 제품 선택 2단 구조 (판매 등록 화면과 동일한 패턴). 판매중 상품이 있는 브랜드만 노출.
   useEffect(() => {
-    const q = query.trim()
-    if (!q) { setResults([]); return }
     let active = true
-    setSearching(true)
-    const t = setTimeout(async () => {
+    const loadBrands = async () => {
+      const { data: rows } = await supabase.from('products').select('partner_id').eq('status', 'on_sale')
+      if (!active) return
+      const ids = [...new Set((rows ?? []).map((r) => r.partner_id as string | null).filter((v): v is string => !!v))]
+      if (ids.length === 0) { setBrands([]); return }
+      const { data: brandRows } = await supabase.from('partner_brands').select('id,brand_name').in('id', ids)
+      if (!active) return
+      setBrands(
+        ((brandRows ?? []) as { id: string; brand_name: string }[])
+          .map((b) => ({ id: b.id, name: b.brand_name }))
+          .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+      )
+    }
+    void loadBrands()
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (!brandId) { setBrandProducts([]); return }
+    let active = true
+    setLoadingProducts(true)
+    const loadProducts = async () => {
       const { data } = await supabase
         .from('products')
         .select('id,name,thumbnail_url,price,sale_price')
+        .eq('partner_id', brandId)
         .eq('status', 'on_sale')
-        .ilike('name', `%${q}%`)
-        .limit(8)
+        .order('name')
       if (!active) return
-      setResults((data as LiteProduct[]) ?? [])
-      setSearching(false)
-    }, 300)
-    return () => { active = false; clearTimeout(t) }
-  }, [query])
+      setBrandProducts((data as LiteProduct[]) ?? [])
+      setLoadingProducts(false)
+    }
+    void loadProducts()
+    return () => { active = false }
+  }, [brandId])
 
   const addProduct = (p: LiteProduct) => {
     setSelected((prev) => {
@@ -68,8 +90,6 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
       if (!highlightId) setHighlightId(p.id)
       return next
     })
-    setQuery('')
-    setResults([])
     setSaved(false)
   }
 
@@ -101,43 +121,44 @@ function LiveProductPicker({ live, onSaved }: { live: Live; onSaved: (l: Live) =
     <div className="bg-white rounded-[14px] border border-[#e5e0d8] p-6 mb-6">
       <h3 className="text-[13px] font-bold text-[#111] mb-3">판매 상품</h3>
       <p className="text-[12px] text-[#9a9080] mb-4">
-        방송 중 소개할 상품을 검색해서 담고, 그중 하나를 대표 상품으로 지정하세요. 시청자 화면 하단에 바로 노출됩니다.
+        방송 중 소개할 상품을 브랜드→제품 순으로 골라 담고, 그중 하나를 대표 상품으로 지정하세요. 시청자 화면 하단에 바로 노출됩니다.
       </p>
 
-      <div className="relative mb-4">
-        <IconSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#c8c0b0]" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="상품명으로 검색"
-          className="w-full border border-[#e5e0d8] rounded-md pl-9 pr-3 py-2.5 text-[13px] focus:outline-none focus:border-ink"
-        />
-        {query.trim() && (
-          <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#e5e0d8] rounded-md shadow-lg max-h-64 overflow-y-auto">
-            {searching ? (
-              <p className="px-3 py-3 text-[12px] text-[#9a9080]">검색 중…</p>
-            ) : results.length === 0 ? (
-              <p className="px-3 py-3 text-[12px] text-[#9a9080]">검색 결과가 없습니다.</p>
-            ) : (
-              results.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => addProduct(p)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#faf8f4] text-left"
-                >
-                  {p.thumbnail_url ? (
-                    <img src={p.thumbnail_url} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded bg-[#f3f1ec] shrink-0" />
-                  )}
-                  <span className="text-[13px] text-[#111] line-clamp-1 flex-1">{p.name}</span>
-                  <span className="text-[12px] text-[#555] shrink-0">{won(p.sale_price ?? p.price)}</span>
-                </button>
-              ))
-            )}
-          </div>
-        )}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <select
+          value={brandId}
+          onChange={(e) => setBrandId(e.target.value)}
+          className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink"
+        >
+          <option value="">브랜드 선택</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </select>
+        <select
+          value=""
+          disabled={!brandId || loadingProducts}
+          onChange={(e) => {
+            const p = brandProducts.find((x) => x.id === e.target.value)
+            if (p) addProduct(p)
+          }}
+          className="w-full border border-[#e5e0d8] rounded-md px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink disabled:bg-[#faf8f4] disabled:text-[#c8c0b0]"
+        >
+          <option value="">
+            {!brandId
+              ? '브랜드 먼저 선택'
+              : loadingProducts
+              ? '불러오는 중…'
+              : brandProducts.length === 0
+              ? '판매중 상품 없음'
+              : '제품 선택'}
+          </option>
+          {brandProducts.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — {won(p.sale_price ?? p.price)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loadingInitial ? (
