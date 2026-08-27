@@ -8,6 +8,9 @@ import webpush from 'web-push'
 //   POST {hostToken, markLive:true} : 상태를 live로 전환만 함(채널 생성 없이) — 진행자가
 //     브라우저에서 실제 WebRTC 송출을 시작한 직후 호출. Vercel Hobby 플랜 서버리스 함수
 //     12개 제한 때문에 별도 api/live-go-live.ts로 안 두고 여기 합침(2026-08-20).
+//   POST {pushAction:'sendCoupon', userIds, title, body, image, url} : 관리자 쿠폰 생성기 발송
+//     (admin/CouponGenerator.tsx) — admin_issue_coupon RPC로 이미 뽑은 대상에게 웹 푸시 발송.
+//     같은 12개 함수 한도 이유로 여기 합침(2026-08-27).
 // 스트림 키는 DB에 저장하지 않고 매번 Cloudflare에서 조회한다
 // (lives 테이블은 소비자도 읽는 공개 테이블이라 키를 넣으면 방송 탈취 위험).
 const SUPABASE_URL =
@@ -153,6 +156,79 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint).eq('user_id', user.id)
     }
     res.status(200).json({ ok: true })
+    return
+  }
+
+  // 관리자 쿠폰 생성기 — 대상 회원에게 웹 푸시 일괄 발송. 같은 12개 함수 한도 이유로 이 파일에 합침(2026-08-27).
+  // 발급 대상 user_id 목록은 admin_issue_coupon RPC(브라우저에서 먼저 호출)로 이미 계산돼 넘어온다.
+  if (pushAction === 'sendCoupon') {
+    const token = String(req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      res.status(401).json({ ok: false, reason: '로그인이 필요합니다.' })
+      return
+    }
+    const { data: userData } = await supabase.auth.getUser(token)
+    const user = userData?.user
+    if (!user?.email) {
+      res.status(401).json({ ok: false, reason: '세션이 만료되었습니다. 다시 로그인해 주세요.' })
+      return
+    }
+    const { data: adminRow } = await supabase
+      .from('app_admins')
+      .select('email')
+      .eq('email', user.email.toLowerCase())
+      .maybeSingle()
+    if (!adminRow) {
+      res.status(403).json({ ok: false, reason: '관리자만 쿠폰을 발송할 수 있습니다.' })
+      return
+    }
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+      res.status(501).json({ ok: false, reason: '웹 푸시(VAPID) 환경변수가 설정되지 않았습니다.' })
+      return
+    }
+    const {
+      userIds, title: pushTitle, body: pushBody, image: pushImage, url: pushUrl,
+    } = (body as { userIds?: string[]; title?: string; body?: string; image?: string; url?: string } | null) ?? {}
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      res.status(400).json({ ok: false, reason: '발송 대상이 없습니다.' })
+      return
+    }
+    if (!pushTitle || !pushBody) {
+      res.status(400).json({ ok: false, reason: 'title/body 가 필요합니다.' })
+      return
+    }
+
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('id, endpoint, p256dh, auth')
+      .in('user_id', userIds)
+    const payload = JSON.stringify({
+      title: pushTitle,
+      body: pushBody,
+      image: pushImage || undefined,
+      data: { url: pushUrl || '/app/benefits' },
+    })
+
+    let sent = 0
+    await Promise.all(
+      (subs ?? []).map(async (sub: { id: string; endpoint: string; p256dh: string; auth: string }) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
+          sent += 1
+        } catch (err: unknown) {
+          const statusCode = (err as { statusCode?: number } | null)?.statusCode
+          if (statusCode === 404 || statusCode === 410) {
+            await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+          } else {
+            console.error('[live-input] coupon push send failed', sub.id, statusCode)
+          }
+        }
+      })
+    )
+    res.status(200).json({ ok: true, targeted: userIds.length, subscribed: (subs ?? []).length, sent })
     return
   }
 

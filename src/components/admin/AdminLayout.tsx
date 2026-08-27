@@ -17,7 +17,7 @@ import {
   IconWorld,
   IconTargetArrow,
   IconClipboardList,
-  IconChevronRight, IconTruck } from '@tabler/icons-react'
+  IconChevronRight, IconTruck, IconGift } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 
 // 온라인몰과 라이브커머스를 당분간 분리 운영하기로 한 방침(2026-07-31)을 관리자 메뉴에도 그대로
@@ -74,6 +74,7 @@ const NAV_GROUPS = [
     title: '회원',
     items: [
       { label: '회원 관리', to: '/admin/members', icon: IconAddressBook },
+      { label: '쿠폰 생성기', to: '/admin/coupon-generator', icon: IconGift },
     ],
   },
 ]
