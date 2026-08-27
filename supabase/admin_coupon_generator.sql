@@ -70,8 +70,17 @@ begin
   if not public.is_admin() then
     raise exception '관리자만 쿠폰을 발급할 수 있습니다.';
   end if;
-  if p_target not in ('all', 'mall', 'live') then
+  if p_target not in ('all', 'mall', 'live', 'self') then
     raise exception '발급 대상이 올바르지 않습니다.';
+  end if;
+
+  -- 'self' = 실제 회원 건드리지 않는 테스트 발송(관리자 본인에게만)
+  if p_target = 'self' then
+    return query
+      insert into user_coupons (user_id, template_id, expires_at)
+      values (auth.uid(), p_template_id, now() + make_interval(days => greatest(coalesce(p_expires_days, 30), 1)))
+      returning user_coupons.user_id;
+    return;
   end if;
 
   return query

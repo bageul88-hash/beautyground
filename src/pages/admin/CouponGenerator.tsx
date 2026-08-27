@@ -11,7 +11,7 @@ import Button from '../../components/common/Button'
 
 type CampaignType = 'secret' | 'event' | 'general'
 type DiscountType = 'amount' | 'percent' | 'free_shipping'
-type Target = 'all' | 'mall' | 'live'
+type Target = 'all' | 'mall' | 'live' | 'self'
 
 const CAMPAIGN_TYPES: { key: CampaignType; label: string; badge: string }[] = [
   { key: 'secret', label: '시크릿 쿠폰', badge: 'SECRET' },
@@ -20,6 +20,7 @@ const CAMPAIGN_TYPES: { key: CampaignType; label: string; badge: string }[] = [
 ]
 
 const TARGETS: { key: Target; label: string }[] = [
+  { key: 'self', label: '테스트(나에게만)' },
   { key: 'all', label: '전체 회원' },
   { key: 'mall', label: '쇼핑몰 구매 회원' },
   { key: 'live', label: '라이브 구매 회원' },
@@ -39,7 +40,7 @@ export default function AdminCouponGenerator() {
   const [maxDiscount, setMaxDiscount] = useState('')
   const [minOrderAmount, setMinOrderAmount] = useState('0')
   const [expiresDays, setExpiresDays] = useState('30')
-  const [target, setTarget] = useState<Target>('all')
+  const [target, setTarget] = useState<Target>('self')
 
   const [sending, setSending] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -258,7 +259,11 @@ export default function AdminCouponGenerator() {
                   </button>
                 ))}
               </div>
-              <p className="text-[12px] text-ink-faint mt-2">쇼핑몰/라이브 구분은 회원 관리 화면과 동일한 기준(구매 이력)입니다.</p>
+              <p className="text-[12px] text-ink-faint mt-2">
+                {target === 'self'
+                  ? '실제 회원에게는 나가지 않고 관리자 본인 계정에만 쿠폰이 발급·푸시됩니다 — 테스트용.'
+                  : '쇼핑몰/라이브 구분은 회원 관리 화면과 동일한 기준(구매 이력)입니다.'}
+              </p>
             </div>
 
             {message && (
