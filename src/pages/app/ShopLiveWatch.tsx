@@ -605,7 +605,7 @@ export default function ShopLiveWatch() {
                   <div className="mr-14 flex items-stretch bg-white rounded-2xl overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.3)] pointer-events-auto">
                     <button
                       type="button"
-                      onClick={() => openBuy(primaryProduct)}
+                      onClick={() => (products.length > 1 ? setProductSheetOpen(true) : openBuy(primaryProduct))}
                       className="flex items-center gap-2.5 flex-1 min-w-0 p-2 text-left"
                     >
                       {primaryProduct.thumbnail_url ? (
