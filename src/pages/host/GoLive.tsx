@@ -36,10 +36,17 @@ export default function HostGoLive() {
   const [broadcasting, setBroadcasting] = useState(false)
   const [broadcastErr, setBroadcastErr] = useState('')
   const [camReady, setCamReady] = useState(false)
+  const [flipped, setFlipped] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
+  // 폰을 거꾸로(180도) 거치했을 때 시청자에게 보내는 화면만 바로잡는 용도 — 로컬 미리보기는
+  // CSS로만 뒤집고(실제 데이터는 그대로), 송출용은 캔버스에 180도 회전해서 그린 뒤 그 캔버스를
+  // 새 트랙으로 만들어 RTCRtpSender.replaceTrack으로 갈아끼운다(재협상 없이 끊김 없이 전환).
+  const flipCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const flipStreamRef = useRef<MediaStream | null>(null)
+  const flipRafRef = useRef<number | null>(null)
 
   const streamState = useStreamStatus(live?.stream_uid, live?.status !== 'ended', 5000)
 
@@ -103,13 +110,69 @@ export default function HostGoLive() {
     }
   }
 
+  const startFlipLoop = () => {
+    const video = videoRef.current
+    if (!video) return
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    const ctx = canvas.getContext('2d')
+    flipCanvasRef.current = canvas
+    const draw = () => {
+      if (ctx && video) {
+        ctx.save()
+        ctx.translate(canvas.width, canvas.height)
+        ctx.rotate(Math.PI)
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        ctx.restore()
+      }
+      flipRafRef.current = requestAnimationFrame(draw)
+    }
+    draw()
+    flipStreamRef.current = canvas.captureStream(30)
+  }
+
+  const stopFlipLoop = () => {
+    if (flipRafRef.current) cancelAnimationFrame(flipRafRef.current)
+    flipRafRef.current = null
+    flipStreamRef.current = null
+    flipCanvasRef.current = null
+  }
+
+  // 거치 방향을 뒤집었을 때 누르는 버튼 — 로컬 미리보기(CSS)와 실제 송출 트랙(캔버스) 둘 다 전환.
+  // 이미 방송 중이면 RTCRtpSender.replaceTrack으로 즉시 교체(재협상 없음, 시청자 쪽 끊김 없음).
+  const toggleFlip = async () => {
+    const next = !flipped
+    setFlipped(next)
+    if (next) {
+      startFlipLoop()
+      await new Promise((r) => setTimeout(r, 100))
+      const newTrack = flipStreamRef.current?.getVideoTracks()[0]
+      if (newTrack && pcRef.current) {
+        const sender = pcRef.current.getSenders().find((s) => s.track?.kind === 'video')
+        await sender?.replaceTrack(newTrack)
+      }
+    } else {
+      const originalTrack = streamRef.current?.getVideoTracks()[0]
+      if (originalTrack && pcRef.current) {
+        const sender = pcRef.current.getSenders().find((s) => s.track?.kind === 'video')
+        await sender?.replaceTrack(originalTrack)
+      }
+      stopFlipLoop()
+    }
+  }
+
   const startBroadcast = async () => {
     if (!token || !streamInfo?.webRtcUrl || !streamRef.current) return
     setBroadcastErr('')
     try {
       const pc = new RTCPeerConnection()
       pcRef.current = pc
-      streamRef.current.getTracks().forEach((t) => pc.addTrack(t, streamRef.current!))
+      const outgoingVideoTrack = flipped
+        ? flipStreamRef.current?.getVideoTracks()[0] ?? streamRef.current.getVideoTracks()[0]
+        : streamRef.current.getVideoTracks()[0]
+      if (outgoingVideoTrack) pc.addTrack(outgoingVideoTrack, streamRef.current)
+      streamRef.current.getAudioTracks().forEach((t) => pc.addTrack(t, streamRef.current!))
 
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
@@ -150,6 +213,7 @@ export default function HostGoLive() {
     return () => {
       pcRef.current?.close()
       streamRef.current?.getTracks().forEach((t) => t.stop())
+      stopFlipLoop()
     }
   }, [])
 
@@ -207,14 +271,30 @@ export default function HostGoLive() {
                 ref={videoRef}
                 muted
                 playsInline
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${flipped ? 'rotate-180' : ''}`}
               />
               {!camReady && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-[13px] text-white/70">카메라 미리보기</p>
                 </div>
               )}
+              {camReady && (
+                <button
+                  type="button"
+                  onClick={toggleFlip}
+                  className={`absolute top-2 right-2 text-[11px] font-semibold px-3 py-1.5 rounded-full ${
+                    flipped ? 'bg-ink text-white' : 'bg-black/50 text-white'
+                  }`}
+                >
+                  {flipped ? '화면 뒤집기 ON' : '화면 뒤집기'}
+                </button>
+              )}
             </div>
+            {camReady && (
+              <p className="text-[11px] text-[#9a9080] text-center mb-3">
+                폰을 거꾸로 거치했다면 위 "화면 뒤집기"를 눌러 시청자 화면을 바로잡으세요.
+              </p>
+            )}
 
             {!camReady ? (
               <button
