@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import * as PortOne from '@portone/browser-sdk/v2'
 import BackHeader from '../components/layout/BackHeader'
@@ -10,7 +10,7 @@ import { COMPANY_INFO } from '../lib/companyInfo'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 import { getAddresses, addAddress, type Address } from '../lib/addresses'
 import { clearCartItems } from '../lib/cart'
-import { searchAddress } from '../lib/daumPostcode'
+import { embedAddressSearch } from '../lib/daumPostcode'
 import type { LiveCoupon } from '../lib/types'
 import { couponDiscountAmount, couponEligible, couponLabel, couponSoldOut } from '../lib/coupons'
 import {
@@ -84,12 +84,31 @@ export default function AppOrder() {
     setAddressDetail('')
     setSelectedAddressId(a.id)
   }
-  const handleSearchAddress = async () => {
-    const result = await searchAddress().catch(() => null)
-    if (!result) return
-    setAddress(result.address)
-    setSelectedAddressId(null)
-  }
+  // 팝업(window.open) 대신 화면에 바로 끼워넣는 방식 — 모바일 사파리에서 스크립트 로딩을
+  // 기다린 뒤(await) 팝업을 열면 사용자 제스처 밖으로 밀려나 조용히 차단되는 문제가 있었음
+  // (2026-08-27 실제 방송 중 발견: "주소 검색" 눌러도 아무 반응 없음).
+  const [addrSearchOpen, setAddrSearchOpen] = useState(false)
+  const addrContainerRef = useRef<HTMLDivElement>(null)
+  const handleSearchAddress = () => setAddrSearchOpen(true)
+  useEffect(() => {
+    if (!addrSearchOpen || !addrContainerRef.current) return
+    void embedAddressSearch(addrContainerRef.current, (result) => {
+      setAddress(result.address)
+      setSelectedAddressId(null)
+      setAddrSearchOpen(false)
+    })
+  }, [addrSearchOpen])
+  const addressSearchOverlay = addrSearchOpen && (
+    <div className="fixed inset-0 z-[70] bg-black/40 flex items-end justify-center" onClick={() => setAddrSearchOpen(false)}>
+      <div className="w-full sm:max-w-[480px] bg-paper rounded-t-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-rule">
+          <p className="text-[14px] font-bold text-ink">주소 검색</p>
+          <button type="button" onClick={() => setAddrSearchOpen(false)} className="text-ink-faint text-[18px] leading-none" aria-label="닫기">✕</button>
+        </div>
+        <div ref={addrContainerRef} className="h-[70vh]" />
+      </div>
+    </div>
+  )
   // 모바일 간편결제는 결제 후 이 페이지로 새로 리다이렉트됨 — 복귀 첫 화면부터 '결제 확인 중'으로 시작해야
   // 확인이 끝나기 전에 "주문할 상품이 없습니다"(빈 주문서)가 먼저 보이는 혼란이 없다
   const [status, setStatus] = useState<Status>(() =>
@@ -635,6 +654,7 @@ export default function AppOrder() {
         status={status}
         onPay={handlePay}
       />
+      {addressSearchOverlay}
       </>
     )
   }
@@ -879,6 +899,7 @@ export default function AppOrder() {
           </button>
         </div>
       </div>
+      {addressSearchOverlay}
     </OrderFrame>
   )
 }

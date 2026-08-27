@@ -4,7 +4,11 @@
 declare global {
   interface Window {
     daum?: {
-      Postcode: new (options: { oncomplete: (data: DaumPostcodeData) => void }) => { open: () => void }
+      Postcode: new (options: {
+        oncomplete: (data: DaumPostcodeData) => void
+        width?: string | number
+        height?: string | number
+      }) => { open: () => void; embed: (el: HTMLElement) => void }
     }
   }
 }
@@ -37,6 +41,9 @@ function loadDaumPostcodeScript(): Promise<void> {
 }
 
 // 팝업으로 주소 검색 후 "[13584] 서울 강남구 테헤란로 123" 형태로 반환
+// ⚠️ 모바일 사파리에서 스크립트 로딩(await)을 거치고 나면 window.open이 사용자 제스처 밖으로
+// 밀려나 팝업이 조용히 차단된다(눌러도 아무 반응 없음, 2026-08-27 실제 방송 중 발견) —
+// 새로 만드는 화면은 팝업 없이 페이지에 바로 끼워넣는 embedAddressSearch를 쓸 것.
 export async function searchAddress(): Promise<AddressSearchResult> {
   await loadDaumPostcodeScript()
   return new Promise((resolve) => {
@@ -46,5 +53,19 @@ export async function searchAddress(): Promise<AddressSearchResult> {
         resolve({ zonecode: data.zonecode, address: `[${data.zonecode}] ${roadOrJibun}` })
       },
     }).open()
+  })
+}
+
+// 팝업 대신 지정한 컨테이너 안에 검색 UI를 직접 그려 넣음(iframe) — 팝업 차단 문제 자체가 없다.
+export function embedAddressSearch(container: HTMLElement, onComplete: (result: AddressSearchResult) => void): Promise<void> {
+  return loadDaumPostcodeScript().then(() => {
+    new window.daum!.Postcode({
+      oncomplete: (data) => {
+        const roadOrJibun = data.roadAddress || data.jibunAddress
+        onComplete({ zonecode: data.zonecode, address: `[${data.zonecode}] ${roadOrJibun}` })
+      },
+      width: '100%',
+      height: '100%',
+    }).embed(container)
   })
 }
