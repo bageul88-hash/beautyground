@@ -779,11 +779,11 @@ export default function ShopLiveWatch() {
       {/* 구매 모달 — 방송 영상이 계속 보이도록 뒤를 어둡게 덮지 않음(더캐스트 벤치마킹) */}
       {buyProduct && (
         <div
-          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[60] flex items-end justify-center"
           onClick={closeBuy}
         >
           <div
-            className="w-full sm:max-w-[420px] bg-white rounded-t-md sm:rounded-md p-5 shadow-[0_-8px_24px_rgba(0,0,0,.35)]"
+            className="w-full sm:max-w-[420px] bg-white rounded-t-md p-5 shadow-[0_-8px_24px_rgba(0,0,0,.35)]"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={goToOrder}>
