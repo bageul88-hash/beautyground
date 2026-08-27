@@ -54,12 +54,17 @@ $$;
 revoke all on function public.admin_create_coupon_template(text, text, numeric, numeric, numeric, text, text) from public;
 grant execute on function public.admin_create_coupon_template(text, text, numeric, numeric, numeric, text, text) to authenticated;
 
--- 2) 대상 회원에게 일괄 발급 (관리자 전용) — p_target: 'all' | 'mall' | 'live'
+-- 2) 대상 회원에게 일괄 발급 (관리자 전용) — p_target: 'all' | 'mall' | 'live' | 'self' | 'selected'
 --    mall/live 구분 기준은 members_channel_breakdown.sql 과 동일(orders.live_id 유무).
+--    p_target='selected' 일 때만 p_user_ids(회원 관리 화면에서 고른 회원 id 목록)를 사용.
+--    인자 개수가 바뀌므로(uuid[] 추가) create or replace 대신 drop 후 재생성해야 함(Postgres 제약,
+--    안 그러면 3-인자 옛 함수가 오버로드로 남아 PostgREST RPC 호출이 어느 쪽인지 모호해짐).
+drop function if exists public.admin_issue_coupon(text, text, int);
 create or replace function public.admin_issue_coupon(
   p_template_id text,
   p_target text,
-  p_expires_days int
+  p_expires_days int,
+  p_user_ids uuid[] default null
 )
 returns table (user_id uuid)
 language plpgsql
@@ -70,7 +75,7 @@ begin
   if not public.is_admin() then
     raise exception '관리자만 쿠폰을 발급할 수 있습니다.';
   end if;
-  if p_target not in ('all', 'mall', 'live', 'self') then
+  if p_target not in ('all', 'mall', 'live', 'self', 'selected') then
     raise exception '발급 대상이 올바르지 않습니다.';
   end if;
 
@@ -79,6 +84,19 @@ begin
     return query
       insert into user_coupons (user_id, template_id, expires_at)
       values (auth.uid(), p_template_id, now() + make_interval(days => greatest(coalesce(p_expires_days, 30), 1)))
+      returning user_coupons.user_id;
+    return;
+  end if;
+
+  -- 'selected' = 회원 관리 화면에서 체크박스로 고른 회원에게만
+  if p_target = 'selected' then
+    if p_user_ids is null or array_length(p_user_ids, 1) is null then
+      raise exception '선택된 회원이 없습니다.';
+    end if;
+    return query
+      insert into user_coupons (user_id, template_id, expires_at)
+      select uid, p_template_id, now() + make_interval(days => greatest(coalesce(p_expires_days, 30), 1))
+      from unnest(p_user_ids) as uid
       returning user_coupons.user_id;
     return;
   end if;
@@ -103,8 +121,8 @@ begin
     returning user_coupons.user_id;
 end;
 $$;
-revoke all on function public.admin_issue_coupon(text, text, int) from public;
-grant execute on function public.admin_issue_coupon(text, text, int) to authenticated;
+revoke all on function public.admin_issue_coupon(text, text, int, uuid[]) from public;
+grant execute on function public.admin_issue_coupon(text, text, int, uuid[]) to authenticated;
 
 -- 3) 쿠폰 배너 이미지 업로드 — product-images 버킷(이미 공개 버킷, export/ 접두사와 같은 관례)의
 --    coupons/ 접두사에 관리자만 업로드 가능. 웹푸시 payload 용량 제한(약 4KB) 때문에

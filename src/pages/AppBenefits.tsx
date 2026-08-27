@@ -11,6 +11,7 @@ import {
   type ValidCoupon,
 } from '../lib/rewards'
 import { BENEFIT_MIN_ORDER_AMOUNT, KAKAO_CHANNEL_URL } from '../constants'
+import { isPushSupported, subscribeToPush } from '../lib/pushNotifications'
 
 // 회원 혜택 모음 — 메인 상단 프로모션 띠(PromoBar)와 마이페이지 메뉴에서 여기로 연결된다.
 // ① 회원가입 축하 적립금(자동 지급, supabase/signup_bonus.sql) ② 카카오 친구추가 혜택(자율신고 방식,
@@ -23,6 +24,27 @@ export default function AppBenefits() {
   const [kakaoClaimed, setKakaoClaimed] = useState(false)
   const [claiming, setClaiming] = useState(false)
   const [toast, setToast] = useState('')
+  // 쿠폰/이벤트 알림용 웹 푸시 — 지금까지는 브랜드 팔로우 시에만 구독을 유도했는데(ShopLiveWatch.tsx),
+  // 팔로우한 적 없는 회원은 관리자 쿠폰 생성기로 쿠폰을 보내도 알림이 안 감 — 여기서도 별도로 유도.
+  const [pushEnabled, setPushEnabled] = useState(
+    typeof Notification !== 'undefined' && Notification.permission === 'granted'
+  )
+  const [pushBusy, setPushBusy] = useState(false)
+
+  const handleEnablePush = async () => {
+    setPushBusy(true)
+    try {
+      await subscribeToPush()
+      if (Notification.permission === 'granted') {
+        setPushEnabled(true)
+        showToast('쿠폰·이벤트 알림을 켰어요')
+      } else {
+        showToast('알림 권한이 거부되었어요. 브라우저 설정에서 허용해 주세요.')
+      }
+    } finally {
+      setPushBusy(false)
+    }
+  }
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -155,7 +177,18 @@ export default function AppBenefits() {
           </div>
 
           <div className="border border-rule px-4 py-4">
-            <h2 className="text-[14px] font-bold text-ink mb-3">쿠폰함 ({coupons.length})</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[14px] font-bold text-ink">쿠폰함 ({coupons.length})</h2>
+              {isPushSupported() && !pushEnabled && (
+                <button
+                  onClick={() => void handleEnablePush()}
+                  disabled={pushBusy}
+                  className="text-[12px] font-semibold text-signal-blue disabled:opacity-50"
+                >
+                  {pushBusy ? '설정 중...' : '🔔 쿠폰 알림 받기'}
+                </button>
+              )}
+            </div>
             {coupons.length === 0 ? (
               <p className="text-[13px] text-ink-faint py-2">보유 중인 쿠폰이 없어요.</p>
             ) : (

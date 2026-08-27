@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import { supabase } from '../../lib/supabase'
 import Button from '../../components/common/Button'
@@ -11,7 +11,15 @@ import Button from '../../components/common/Button'
 
 type CampaignType = 'secret' | 'event' | 'general'
 type DiscountType = 'amount' | 'percent' | 'free_shipping'
-type Target = 'all' | 'mall' | 'live' | 'self'
+type Target = 'all' | 'mall' | 'live' | 'self' | 'selected'
+
+interface MemberRow {
+  id: string
+  email: string
+  name: string
+  mall_order_count: number
+  live_order_count: number
+}
 
 const CAMPAIGN_TYPES: { key: CampaignType; label: string; badge: string }[] = [
   { key: 'secret', label: '시크릿 쿠폰', badge: 'SECRET' },
@@ -24,6 +32,7 @@ const TARGETS: { key: Target; label: string }[] = [
   { key: 'all', label: '전체 회원' },
   { key: 'mall', label: '쇼핑몰 구매 회원' },
   { key: 'live', label: '라이브 구매 회원' },
+  { key: 'selected', label: '회원 선택' },
 ]
 
 const inputCls =
@@ -41,6 +50,35 @@ export default function AdminCouponGenerator() {
   const [minOrderAmount, setMinOrderAmount] = useState('0')
   const [expiresDays, setExpiresDays] = useState('30')
   const [target, setTarget] = useState<Target>('self')
+
+  const [members, setMembers] = useState<MemberRow[]>([])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [memberQuery, setMemberQuery] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (target !== 'selected' || members.length > 0 || membersLoading) return
+    setMembersLoading(true)
+    supabase.rpc('admin_list_members').then(({ data, error }) => {
+      if (!error) setMembers((data ?? []) as MemberRow[])
+      setMembersLoading(false)
+    })
+  }, [target, members.length, membersLoading])
+
+  const filteredMembers = useMemo(() => {
+    const q = memberQuery.trim().toLowerCase()
+    if (!q) return members
+    return members.filter((m) => m.email?.toLowerCase().includes(q) || m.name?.toLowerCase().includes(q))
+  }, [members, memberQuery])
+
+  const toggleMember = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const [sending, setSending] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -85,7 +123,12 @@ export default function AdminCouponGenerator() {
       setMessage('할인값을 입력해 주세요.')
       return
     }
-    if (!window.confirm(`${TARGETS.find((t) => t.key === target)?.label}에게 "${label.trim()}" 쿠폰을 발급하고 푸시를 발송할까요?`)) return
+    if (target === 'selected' && selectedIds.size === 0) {
+      setMessage('발급할 회원을 한 명 이상 선택해 주세요.')
+      return
+    }
+    const targetLabel = target === 'selected' ? `선택한 회원 ${selectedIds.size}명` : TARGETS.find((t) => t.key === target)?.label
+    if (!window.confirm(`${targetLabel}에게 "${label.trim()}" 쿠폰을 발급하고 푸시를 발송할까요?`)) return
 
     setSending(true)
     try {
@@ -118,6 +161,7 @@ export default function AdminCouponGenerator() {
         p_template_id: templateId as string,
         p_target: target,
         p_expires_days: Number(expiresDays || 30),
+        p_user_ids: target === 'selected' ? Array.from(selectedIds) : null,
       })
       if (iErr) throw iErr
       const userIds = ((issued ?? []) as { user_id: string }[]).map((r) => r.user_id)
@@ -262,8 +306,38 @@ export default function AdminCouponGenerator() {
               <p className="text-[12px] text-ink-faint mt-2">
                 {target === 'self'
                   ? '실제 회원에게는 나가지 않고 관리자 본인 계정에만 쿠폰이 발급·푸시됩니다 — 테스트용.'
+                  : target === 'selected'
+                  ? '아래 목록에서 발급할 회원을 직접 체크하세요.'
                   : '쇼핑몰/라이브 구분은 회원 관리 화면과 동일한 기준(구매 이력)입니다.'}
               </p>
+
+              {target === 'selected' && (
+                <div className="mt-3 border border-rule">
+                  <div className="p-2.5 border-b border-rule flex items-center gap-2">
+                    <input
+                      value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)}
+                      placeholder="이메일·이름으로 검색" className={inputCls}
+                    />
+                    <span className="text-[12px] text-ink-faint whitespace-nowrap">{selectedIds.size}명 선택</span>
+                  </div>
+                  <div className="max-h-[220px] overflow-y-auto">
+                    {membersLoading ? (
+                      <div className="py-8 text-center text-[13px] text-ink-faint">불러오는 중…</div>
+                    ) : filteredMembers.length === 0 ? (
+                      <div className="py-8 text-center text-[13px] text-ink-faint">회원이 없습니다.</div>
+                    ) : (
+                      filteredMembers.map((m) => (
+                        <label key={m.id} className="flex items-center gap-2.5 px-3 py-2 border-b border-rule last:border-0 hover:bg-quiet cursor-pointer">
+                          <input type="checkbox" checked={selectedIds.has(m.id)} onChange={() => toggleMember(m.id)} />
+                          <span className="text-[13px] text-ink flex-1 truncate">{m.email || '(이메일 없음)'} {m.name ? `· ${m.name}` : ''}</span>
+                          {m.mall_order_count > 0 && <span className="text-[11px] text-signal-blue">쇼핑몰</span>}
+                          {m.live_order_count > 0 && <span className="text-[11px] text-signal-red">라이브</span>}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {message && (
