@@ -138,4 +138,25 @@ create policy "admin can upload coupon banners"
     and public.is_admin()
   );
 
+-- 4) 쿠폰함/체크아웃에 배너 이미지도 같이 보여주기 위해 get_my_valid_coupons()에 banner_image 추가.
+--    반환 컬럼이 늘어나므로 drop 후 재생성(Postgres 제약, signup_bonus.sql 원본 버전을 대체).
+drop function if exists public.get_my_valid_coupons();
+create or replace function public.get_my_valid_coupons()
+returns table (
+  id uuid, template_id text, label text, discount_type text,
+  discount_value numeric, max_discount numeric, min_order_amount numeric, expires_at timestamptz,
+  banner_image text
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select uc.id, uc.template_id, ct.label, ct.discount_type, ct.discount_value, ct.max_discount, ct.min_order_amount, uc.expires_at, ct.banner_image
+  from user_coupons uc
+  join coupon_templates ct on ct.id = uc.template_id
+  where uc.user_id = auth.uid() and uc.used_at is null and uc.expires_at >= now()
+  order by uc.expires_at asc;
+$$;
+grant execute on function public.get_my_valid_coupons() to authenticated;
+
 notify pgrst, 'reload schema';

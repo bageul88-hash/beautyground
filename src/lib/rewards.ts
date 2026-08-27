@@ -12,6 +12,7 @@ export interface ValidCoupon {
   maxDiscount: number | null
   minOrderAmount: number
   expiresAt: string
+  bannerImage: string | null
 }
 
 export async function getMyPointsBalance(): Promise<number> {
@@ -83,5 +84,6 @@ export async function getMyValidCoupons(): Promise<ValidCoupon[]> {
     maxDiscount: c.max_discount == null ? null : Number(c.max_discount),
     minOrderAmount: Number(c.min_order_amount),
     expiresAt: c.expires_at as string,
+    bannerImage: (c.banner_image as string | null) ?? null,
   }))
 }

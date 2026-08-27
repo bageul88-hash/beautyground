@@ -194,13 +194,18 @@ export default function AppBenefits() {
             ) : (
               <div className="space-y-2.5">
                 {coupons.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between border-b border-rule pb-2.5 last:border-0 last:pb-0">
-                    <div>
-                      <p className="text-[13px] font-bold text-ink">{c.label}</p>
-                      <p className="text-[11px] text-ink-faint mt-0.5">
-                        {c.minOrderAmount > 0 ? `${c.minOrderAmount.toLocaleString('ko-KR')}원 이상 · ` : ''}
-                        {new Date(c.expiresAt).toLocaleDateString('ko-KR')}까지
-                      </p>
+                  <div key={c.id} className="border-b border-rule pb-2.5 last:border-0 last:pb-0">
+                    {c.bannerImage && (
+                      <img src={c.bannerImage} alt={c.label} className="w-full rounded-control mb-2 border border-rule" />
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[13px] font-bold text-ink">{c.label}</p>
+                        <p className="text-[11px] text-ink-faint mt-0.5">
+                          {c.minOrderAmount > 0 ? `${c.minOrderAmount.toLocaleString('ko-KR')}원 이상 · ` : ''}
+                          {new Date(c.expiresAt).toLocaleDateString('ko-KR')}까지
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
