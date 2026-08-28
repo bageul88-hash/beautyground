@@ -69,6 +69,8 @@ export default function ShopLiveWatch() {
   const [, setPartnerName] = useState<string | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [youtubePlaying, setYoutubePlaying] = useState(false)
+  // 라이브 자동재생은 음소거로만 허용되므로(브라우저 정책), 시청자가 직접 켜기 전까지 false
+  const [soundOn, setSoundOn] = useState(false)
 
   // 구매 폼 상태 — 수량만 고르고 정식 주문/결제 페이지(/app/order)로 넘긴다
   const [buyProduct, setBuyProduct] = useState<Product | null>(null)
@@ -315,7 +317,9 @@ export default function ShopLiveWatch() {
     : products
   const primaryProduct = orderedProducts[0] ?? null
 
-  const streamSrc = streamIframeSrc(live?.stream_uid)
+  // 링크로 들어오자마자 방송이 나오도록 자동재생. 브라우저가 소리 있는 자동재생을 막으므로
+  // 음소거로 시작하고, 시청자가 "소리 켜기"를 누르면 muted=false 로 다시 불러온다(유튜브·틱톡 방식).
+  const streamSrc = streamIframeSrc(live?.stream_uid, { autoplay: true, muted: !soundOn })
   // 실제 송출 연결 여부 — status='live'인데 송출이 끊겨 있으면 대기 화면을 보여주고,
   // 폴링으로 연결이 감지되면 자동으로 플레이어로 전환된다. 조회 실패(unknown)면 차단하지 않는다.
   const streamState = useStreamStatus(live?.stream_uid, live?.status === 'live')
@@ -339,6 +343,7 @@ export default function ShopLiveWatch() {
           onAir={onAir}
           waitingForStream={waitingForStream}
           streamSrc={streamSrc}
+          onSoundOn={soundOn ? undefined : () => setSoundOn(true)}
           youtubeEmbedSrc={youtubeEmbedSrc(live.stream_url)}
           liveCoupon={liveCoupon}
           orderedProducts={orderedProducts}
@@ -393,14 +398,25 @@ export default function ShopLiveWatch() {
                   <p className="relative text-white/80 text-[12px]">잠시 후 자동으로 시작됩니다</p>
                 </div>
               ) : streamSrc ? (
-                <iframe
-                  src={streamSrc}
-                  className="absolute inset-0 w-full h-full"
-                  style={{ border: 'none' }}
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                  allowFullScreen
-                  title="라이브 영상"
-                />
+                <>
+                  <iframe
+                    src={streamSrc}
+                    className="absolute inset-0 w-full h-full"
+                    style={{ border: 'none' }}
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                    allowFullScreen
+                    title="라이브 영상"
+                  />
+                  {!soundOn && (
+                    <button
+                      type="button"
+                      onClick={() => setSoundOn(true)}
+                      className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 rounded-full bg-black/70 text-white text-[12.5px] font-semibold px-3.5 py-2 backdrop-blur-sm"
+                    >
+                      🔇 탭해서 소리 켜기
+                    </button>
+                  )}
+                </>
               ) : youtubeEmbedSrc(live.stream_url) ? (
                 youtubePlaying ? (
                   <iframe

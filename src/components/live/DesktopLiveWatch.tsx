@@ -18,6 +18,8 @@ interface Props {
   onAir: boolean
   waitingForStream: boolean
   streamSrc: string | null
+  // 자동재생은 음소거로만 허용되므로, 소리를 켜지 않은 동안만 값이 들어온다(켜면 undefined)
+  onSoundOn?: () => void
   youtubeEmbedSrc: string | null
   liveCoupon: LiveCoupon | null
   orderedProducts: Product[]
@@ -51,6 +53,7 @@ export default function DesktopLiveWatch({
   onAir,
   waitingForStream,
   streamSrc,
+  onSoundOn,
   youtubeEmbedSrc,
   liveCoupon,
   orderedProducts,
@@ -112,14 +115,25 @@ export default function DesktopLiveWatch({
                 <p className="relative text-paper/80 text-[13px]">잠시 후 자동으로 시작됩니다</p>
               </div>
             ) : streamSrc ? (
-              <iframe
-                src={streamSrc}
-                className="absolute inset-0 w-full h-full"
-                style={{ border: 'none' }}
-                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                allowFullScreen
-                title="라이브 영상"
-              />
+              <>
+                <iframe
+                  src={streamSrc}
+                  className="absolute inset-0 w-full h-full"
+                  style={{ border: 'none' }}
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                  allowFullScreen
+                  title="라이브 영상"
+                />
+                {onSoundOn && (
+                  <button
+                    type="button"
+                    onClick={onSoundOn}
+                    className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 rounded-full bg-black/70 text-paper text-[13px] font-semibold px-4 py-2 backdrop-blur-sm"
+                  >
+                    🔇 클릭해서 소리 켜기
+                  </button>
+                )}
+              </>
             ) : youtubeEmbedSrc ? (
               <iframe
                 src={youtubeEmbedSrc}
