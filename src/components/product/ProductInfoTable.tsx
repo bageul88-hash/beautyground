@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD, MADE_IN } from '../../constants'
 
 interface ProductInfoTableProps {
   consumerPrice: number // 소비자가(정가)
   salePrice: number // 판매가
   brand?: string
+  partnerId?: string | null // 있으면 브랜드명을 /app/brand/:id 링크로 렌더
   madeIn?: string
   showPrice?: boolean // 소비자가·판매가 행 표시 여부(가격이 위에 따로 있으면 false)
   rewardRate?: number // 내 등급 적립률(%) — 지정하면 "적립" 행 노출(2026-08-23 실적립 활성화)
@@ -17,11 +19,19 @@ export default function ProductInfoTable({
   consumerPrice,
   salePrice,
   brand,
+  partnerId,
   madeIn = MADE_IN,
   showPrice = true,
   rewardRate,
   className = '',
 }: ProductInfoTableProps) {
+  const brandValue = partnerId ? (
+    <Link to={`/app/brand/${partnerId}`} className="font-semibold text-ink underline underline-offset-2">
+      {brand}
+    </Link>
+  ) : (
+    brand
+  )
   const hasDiscount = salePrice < consumerPrice
   const priceRows: Array<[string, ReactNode]> = showPrice
     ? [
@@ -45,7 +55,7 @@ export default function ProductInfoTable({
           </span>,
         ] as [string, ReactNode]]
       : []),
-    ...(brand ? [['브랜드', brand] as [string, ReactNode]] : []),
+    ...(brand ? [['브랜드', brandValue] as [string, ReactNode]] : []),
     ['제조국', madeIn],
     [
       '배송비',

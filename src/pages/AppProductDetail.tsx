@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import BottomNav from '../components/layout/BottomNav'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
@@ -27,6 +27,7 @@ import CartCountBadge from '../components/common/CartCountBadge'
 interface ProductView {
   name: string
   brand: string
+  partnerId: string | null
   category: string | null
   reviewSummary: ReviewSummaryData | null
   price: number // 판매가
@@ -55,6 +56,7 @@ function fromDbProduct(p: Product, brand: string): ProductView {
   return {
     name: p.name,
     brand,
+    partnerId: p.partner_id ?? null,
     category: p.category ?? null,
     reviewSummary: p.review_summary ?? null,
     price: sell,
@@ -73,6 +75,7 @@ function fromMock(m: (typeof ALL_PRODUCTS)[number]): ProductView {
   return {
     name: m.name,
     brand: m.brand,
+    partnerId: null,
     category: null,
     reviewSummary: null,
     price: m.price,
@@ -413,7 +416,15 @@ export default function AppProductDetail() {
       )}
 
       <div className="px-4 pt-5 pb-4">
-        {view.brand && <p className="text-[13px] text-ink-soft">{view.brand}</p>}
+        {view.brand && (
+          view.partnerId ? (
+            <Link to={`/app/brand/${view.partnerId}`} className="text-[13px] text-ink-soft underline underline-offset-2">
+              {view.brand}
+            </Link>
+          ) : (
+            <p className="text-[13px] text-ink-soft">{view.brand}</p>
+          )
+        )}
         <h1 className="text-[18px] font-bold text-ink mt-1 leading-tight">{view.name}</h1>
 
         {/* 가격 */}
@@ -444,6 +455,7 @@ export default function AppProductDetail() {
           consumerPrice={view.originalPrice ?? view.price}
           salePrice={view.price}
           brand={view.brand || undefined}
+          partnerId={view.partnerId}
           showPrice={false}
           rewardRate={rewardRate}
           className="mt-4"

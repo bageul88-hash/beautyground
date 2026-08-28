@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import ImagePlaceholder from '../common/ImagePlaceholder'
 import Thumb from '../common/Thumb'
 import ReviewSummary from './ReviewSummary'
@@ -15,6 +15,7 @@ import type { ProductOption, ReviewSummaryData, ScrapedReview } from '../../lib/
 interface View {
   name: string
   brand: string
+  partnerId: string | null
   category: string | null
   reviewSummary: ReviewSummaryData | null
   price: number
@@ -185,7 +186,15 @@ export default function DesktopProductDetail({
 
         {/* 구매 패널 — 스크롤해도 고정 */}
         <div className="sticky top-24 bg-paper border border-rule p-6">
-          {view.brand && <p className="text-[13px] text-ink-soft">{view.brand}</p>}
+          {view.brand && (
+            view.partnerId ? (
+              <Link to={`/app/brand/${view.partnerId}`} className="text-[13px] text-ink-soft underline underline-offset-2">
+                {view.brand}
+              </Link>
+            ) : (
+              <p className="text-[13px] text-ink-soft">{view.brand}</p>
+            )
+          )}
           <h1 className="mt-1 text-[20px] font-bold text-ink leading-snug">{view.name}</h1>
 
           <div className="flex items-end gap-2 mt-4">
@@ -208,6 +217,7 @@ export default function DesktopProductDetail({
             consumerPrice={view.originalPrice ?? view.price}
             salePrice={view.price}
             brand={view.brand || undefined}
+            partnerId={view.partnerId}
             showPrice={false}
             rewardRate={rewardRate}
             className="mt-4"
