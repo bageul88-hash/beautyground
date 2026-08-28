@@ -230,7 +230,23 @@ export default function AdminMembers() {
     setStaffLoading(false)
   }
 
+  // 회원 목록 탭에서도 "이미 직원인지" 표시해야 하므로 처음부터 불러오고, staff 탭 진입 시 새로고침한다.
+  useEffect(() => { void loadStaff() }, [])
   useEffect(() => { if (tab === 'staff') void loadStaff() }, [tab])
+
+  const staffEmailSet = useMemo(() => new Set(staffList.map((s) => s.email)), [staffList])
+  const [promotingId, setPromotingId] = useState<string | null>(null)
+
+  // 회원 목록에서 바로 "직원 승급" — 가입 안 된 이메일을 admin이 미리 추측해 입력하는 대신,
+  // 실제 가입된 계정만 골라서 승급하도록(2026-08-28 대표님 확정: "가입하면 그 아이디를 직원용으로 승급").
+  const promoteToStaff = async (m: MemberRow) => {
+    if (!m.email) return
+    setPromotingId(m.id)
+    const { error: err } = await supabase.rpc('admin_set_staff', { p_email: m.email, p_note: m.name || null })
+    setPromotingId(null)
+    if (err) { setError(`직원 승급 실패: ${err.message}`); return }
+    void loadStaff()
+  }
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -333,6 +349,7 @@ export default function AdminMembers() {
                       <th className="px-4 py-3 font-medium whitespace-nowrap">쇼핑몰 구매액</th>
                       <th className="px-4 py-3 font-medium whitespace-nowrap">라이브 구매액</th>
                       <th className="px-4 py-3 font-medium whitespace-nowrap">누적구매금액</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">직원</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -352,6 +369,21 @@ export default function AdminMembers() {
                         <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{won(m.mall_spent)}</td>
                         <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{won(m.live_spent)}</td>
                         <td className="px-4 py-3 text-ink font-semibold whitespace-nowrap">{won(m.total_spent)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {!m.email ? (
+                            <span className="text-ink-faint">-</span>
+                          ) : staffEmailSet.has(m.email) ? (
+                            <span className="text-[12px] font-semibold text-signal-blue">✓ 직원</span>
+                          ) : (
+                            <button
+                              onClick={() => void promoteToStaff(m)}
+                              disabled={promotingId === m.id}
+                              className="text-[12px] font-semibold text-ink-soft border border-rule rounded-control px-2.5 py-1 hover:border-ink-faint disabled:opacity-50"
+                            >
+                              {promotingId === m.id ? '승급 중...' : '직원 승급'}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
