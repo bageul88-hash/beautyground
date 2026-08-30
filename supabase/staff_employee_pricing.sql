@@ -1,9 +1,12 @@
--- 직원 전용 구매 링크(/staff) — 상품별 직원가(employee_price).
+-- 직원 전용 구매 링크(/staff) — 상품별 직원가(employee_price). 최초 1회 스냅샷 이력(2026-08 이전).
+-- 2026-08-30부터는 이 파일을 다시 실행하지 않고, ERP(beautyground-erp/server/config/settlementMethods.js
+-- employeePriceFor)와 동일한 로직을 재사용하는 1회성 스크립트로 직접 재계산·반영함(코드는 커밋 안 함, 결과만 DB 반영).
 -- 계산식: 원가 = 정상가(sale_price) x (1-브랜드정산수수료율) [수수료방식] 또는 고정공급가 [닥터랩/더마리]
---        직원가 = 원가 / 0.9  (뷰티그라운드 마진 10%만 남기고 제공, AK수수료 없는 온라인이라 가능)
--- 원가 데이터 출처: ERP Supabase(ndhxicsfgaeqduxtqmmj) erp_settle_brand.fee / erp_settle_supply.supply
+--        직원가 = 원가 / (1 - BG마진율)  — 매장 운영비(erp_operating_cost)를 받는 브랜드는 마진 10%,
+--        운영비 없이 진행하는 브랜드는 마진 15%로 차등 적용(운영비 수입이 없는 만큼 이 채널에서 더 확보).
+-- 원가 데이터 출처: ERP Supabase(ndhxicsfgaeqduxtqmmj) erp_settle_brand.fee / erp_settle_supply.supply / erp_operating_cost.
 -- 매입방식 브랜드(리나시타·N2U·바이오드론·큐티시아·쇼핑백·올리오·틴트)는 원가 데이터가 없어 제외.
--- Supabase 대시보드(beautyground-main, bjqtuklkskrqzbuxdwxm) > SQL Editor 에 붙여넣어 실행하세요.
+-- 아래는 최초 스냅샷 당시의 값이라 지금 DB 실제값과 다를 수 있음(참고용, 재실행 금지).
 
 ALTER TABLE products ADD COLUMN IF NOT EXISTS employee_price integer;
 
