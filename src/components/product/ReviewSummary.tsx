@@ -34,7 +34,12 @@ export default function ReviewSummary({
   // 똑같이 보여주고 개수만 "0개"로 표시한다(전엔 여기서 return null 해서 섹션이 통째로 사라졌음).
   const count = summary?.count ?? 0
   const avg = summary?.avg ?? null
-  const reviews = (summary?.photos ?? []).map(toPhoto)
+  const allReviews = (summary?.photos ?? []).map(toPhoto)
+  // 사진 리뷰(url 있음)를 앞에, 텍스트 리뷰(url 없음)를 뒤에 — 사진 우선 노출
+  const photoReviews = allReviews.filter((r) => r.url)
+  const textReviews = allReviews.filter((r) => !r.url)
+  const reviews = [...photoReviews, ...textReviews]
+  const hasPhoto = photoReviews.length > 0
   const rating = avg ?? 0
   const active = openIdx != null ? reviews[openIdx] : null
 
@@ -52,7 +57,7 @@ export default function ReviewSummary({
     <section className={`px-4 py-8 ${className}`}>
       <div className="max-w-[1000px] mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink">PHOTO REVIEW</h2>
+          <h2 className="text-[13px] font-bold tracking-[0.08em] text-ink">{hasPhoto ? 'PHOTO REVIEW' : 'REVIEW'}</h2>
           {productId && (
             <button type="button" onClick={() => goReviews()} className="text-[12px] font-bold text-ink-soft focus:outline-none focus-visible:shadow-ring">
               리뷰 전체보기 ›
@@ -72,17 +77,17 @@ export default function ReviewSummary({
             <Stars value={rating} className="text-[13px] mt-1.5" />
             <p className="text-[12px] text-ink-soft mt-1.5 tabular-nums">{count.toLocaleString('ko-KR')}개</p>
           </button>
-          {reviews.length > 0 && (
+          {photoReviews.length > 0 && (
             <div className="flex-1 min-w-0 flex gap-2 overflow-x-auto scrollbar-hide">
-              {reviews.map((r, i) => (
+              {photoReviews.map((r, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => onItem(i, r.url)}
+                  onClick={() => onItem(i, r.url ?? undefined)}
                   className="shrink-0 w-[104px] h-[104px] overflow-hidden bg-quiet focus:outline-none focus-visible:shadow-ring"
                   aria-label={`리뷰 사진 ${i + 1} 보기`}
                 >
-                  <img src={r.url} alt={`리뷰 사진 ${i + 1}`} loading="lazy" className="w-full h-full object-cover"
+                  <img src={r.url ?? ''} alt={`리뷰 사진 ${i + 1}`} loading="lazy" className="w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).closest('button')!.style.display = 'none' }} />
                 </button>
               ))}
@@ -90,18 +95,18 @@ export default function ReviewSummary({
           )}
         </div>
 
-        {/* 리뷰 카드 그리드 (사진 + 본문 + 별점 + 날짜/작성자) */}
-        {reviews.length > 0 && (
+        {/* 사진 리뷰 카드 그리드 (사진 + 본문 + 별점 + 날짜/작성자) */}
+        {photoReviews.length > 0 && (
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {reviews.map((r, i) => (
+            {photoReviews.map((r, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => onItem(i, r.url)}
+                onClick={() => onItem(i, r.url ?? undefined)}
                 className="text-left bg-paper border border-rule overflow-hidden focus:outline-none focus-visible:shadow-ring"
               >
                 <div className="aspect-square bg-quiet">
-                  <img src={r.url} alt="" loading="lazy" className="w-full h-full object-cover"
+                  <img src={r.url ?? ''} alt="" loading="lazy" className="w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden' }} />
                 </div>
                 <div className="p-2.5">
@@ -115,19 +120,51 @@ export default function ReviewSummary({
             ))}
           </div>
         )}
+
+        {/* 텍스트 리뷰 목록 (사진 없는 리뷰 — 별점 + 본문 + 작성자) */}
+        {textReviews.length > 0 && (
+          <ul className="mt-6 divide-y divide-rule border-t border-rule">
+            {textReviews.map((r, i) => (
+              <li key={i}>
+                <button
+                  type="button"
+                  onClick={() => onItem(photoReviews.length + i)}
+                  className="w-full text-left py-3.5 focus:outline-none focus-visible:shadow-ring"
+                >
+                  <div className="flex items-center gap-2">
+                    <Stars value={r.rating ?? 5} className="text-[12px]" />
+                    {(r.author || r.date) && (
+                      <span className="text-[11px] text-ink-faint">{[r.author, r.date].filter(Boolean).join(' · ')}</span>
+                    )}
+                  </div>
+                  <p className="mt-1.5 text-[13px] text-ink leading-relaxed line-clamp-3">{r.text}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* 리뷰 상세 모달 (파트너 페이지 전용 — productId 없을 때) */}
       {active && (
         <div className="fixed inset-0 z-[60] bg-ink/70 flex items-center justify-center p-4" onClick={() => setOpenIdx(null)}>
           <div className="bg-paper overflow-hidden max-w-[420px] w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="relative bg-quiet">
-              <img src={active.url} alt="리뷰 사진" className="w-full max-h-[60vh] object-contain" />
-              <button type="button" onClick={() => setOpenIdx(null)}
-                className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-paper text-ink border border-rule focus:outline-none focus-visible:shadow-ring" aria-label="닫기">
-                <IconClose className="w-4 h-4" />
-              </button>
-            </div>
+            {active.url ? (
+              <div className="relative bg-quiet">
+                <img src={active.url} alt="리뷰 사진" className="w-full max-h-[60vh] object-contain" />
+                <button type="button" onClick={() => setOpenIdx(null)}
+                  className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-paper text-ink border border-rule focus:outline-none focus-visible:shadow-ring" aria-label="닫기">
+                  <IconClose className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-end p-2 border-b border-rule">
+                <button type="button" onClick={() => setOpenIdx(null)}
+                  className="w-8 h-8 flex items-center justify-center text-ink focus:outline-none focus-visible:shadow-ring" aria-label="닫기">
+                  <IconClose className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <div className="p-4">
               {active.rating != null && <Stars value={active.rating} className="text-[15px] mb-1 block" />}
               <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">{active.text || '작성된 후기 내용이 없습니다.'}</p>

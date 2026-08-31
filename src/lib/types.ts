@@ -44,9 +44,9 @@ export interface ProductOption {
   in_stock: boolean
 }
 
-// 리뷰 사진 1건 (썸네일 클릭 시 모달에 본문 표시)
+// 리뷰 1건 (url 있으면 사진 리뷰, 없으면 텍스트 전용 리뷰)
 export interface ReviewPhoto {
-  url: string
+  url?: string | null // 사진 없는 텍스트 리뷰는 url 없음
   text?: string
   rating?: number | null
   author?: string | null
