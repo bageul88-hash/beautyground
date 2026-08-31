@@ -250,9 +250,6 @@ export default function DesktopOrder({
               <a href="/terms" target="_blank" rel="noreferrer" className="underline">이용약관</a> 및{' '}
               <a href="/privacy" target="_blank" rel="noreferrer" className="underline">개인정보처리방침</a>에 동의한 것으로 간주됩니다.
             </p>
-            {paymentReady && (
-              <p className="text-[11px] text-ink-faint mt-3">테스트 모드 결제입니다. 실제 청구되지 않습니다.</p>
-            )}
             <p className="text-[11px] text-ink-faint mt-4 pt-3 border-t border-rule leading-relaxed">
               {COMPANY_INFO.name} | 대표: {COMPANY_INFO.ceo} | 사업자등록번호: {COMPANY_INFO.bizNumber} | 통신판매업신고: {COMPANY_INFO.mailOrderNumber}
               <br />
