@@ -12,6 +12,7 @@ import { getMyPointsBalance, getMyValidCoupons } from '../lib/rewards'
 import { IconUser } from '../components/common/Icon'
 import { useIsAdmin } from '../lib/useIsAdmin'
 import { useIsStaff } from '../lib/staff'
+import { useActiveMissions } from '../hooks/useActiveMissions'
 
 // 실제 로그인 사용자 프로필 (포인트/쿠폰은 supabase/signup_bonus.sql 적용 후 실제 지급값)
 interface RealUser {
@@ -24,7 +25,7 @@ interface RealUser {
 }
 
 // 이모지 대신 텍스트만 — 아이콘은 상태를 나타낼 때만 쓰고, 목록 항목 장식용으로는 쓰지 않는다.
-function buildMenuItems(user: RealUser) {
+function buildMenuItems(user: RealUser, showMissions: boolean) {
   return [
     { label: '주문 내역', path: '/app/orders' },
     { label: '배송지 관리', path: '/app/addresses' },
@@ -32,6 +33,8 @@ function buildMenuItems(user: RealUser) {
     { label: '혜택', path: '/app/benefits' },
     { label: '쿠폰함', count: user.coupons, path: '/app/benefits' },
     { label: '포인트', value: `${user.points.toLocaleString()}P`, path: '/app/benefits' },
+    // 참여형 기능은 관리자가 활동 미션을 켰을 때만 노출한다(=붙이는 스위치).
+    ...(showMissions ? [{ label: '살아가는 이야기', path: '/app/diary' }] : []),
     { label: '최근 본 상품' },
     { label: '리뷰 관리' },
   ]
@@ -52,6 +55,7 @@ export default function AppMyPage() {
   const { mode, isDesktop, toggle } = useViewMode()
   const { isAdmin } = useIsAdmin()
   const { isStaff } = useIsStaff()
+  const { missions: activeMissions } = useActiveMissions()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
   const [membership, setMembership] = useState<MembershipInfo | null>(null)
   const [tiers, setTiers] = useState<MembershipTier[]>([])
@@ -252,11 +256,28 @@ export default function AppMyPage() {
             {user.points.toLocaleString()}P
           </span>
         </div>
+
+        {/* 활동 미션 — 구매 없이도 포인트를 모을 수 있는 진입구. 유입 장치라 목록에 묻히지 않게 따로 뺀다.
+            켜진 미션이 없으면 렌더하지 않는다(관리자 스위치). */}
+        {activeMissions.length > 0 && (
+        <button
+          onClick={() => navigate('/app/missions')}
+          className="mt-3 w-full border border-rule px-4 py-3.5 flex items-center justify-between text-left focus:outline-none focus-visible:shadow-ring"
+        >
+          <span>
+            <span className="text-[14px] font-bold text-ink">활동 미션</span>
+            <span className="block text-[12px] text-ink-soft mt-0.5">
+              걷고, 이야기 남기고 포인트 받아가세요
+            </span>
+          </span>
+          <span className="text-ink-faint" aria-hidden="true">›</span>
+        </button>
+        )}
       </div>
 
       {/* 메뉴 */}
       <div className="mt-2 bg-paper">
-        {buildMenuItems(user).map(({ label, path, count, value }) => (
+        {buildMenuItems(user, activeMissions.length > 0).map(({ label, path, count, value }) => (
           <button
             key={label}
             onClick={() => path && navigate(path)}

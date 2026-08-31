@@ -2,6 +2,7 @@ import AppHeader from '../layout/AppHeader'
 import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
 import TrustStrip from './TrustStrip'
+import MissionBanner from './MissionBanner'
 import ProductRail from './ProductRail'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
@@ -45,6 +46,7 @@ export default function HomeBody({
       <AppHeader />
       <HeroCarousel banners={banners} loading={bannerLoading} />
       <TrustStrip />
+      <MissionBanner />
 
       {/* 추천 상품·신상품·할인은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
           좌우 버튼 탐색이 항상 일치한다. */}

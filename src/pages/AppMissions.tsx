@@ -13,6 +13,11 @@ import {
 // 미션 목록은 관리자(/admin/missions)가 만든 것을 그대로 가져온다(코드에 미션이 하드코딩되지 않음).
 // 걸음수는 네이티브 앱(헬스킷/헬스커넥트) 전환 후에 자동 연동되며, 그전까지 걷기 미션은 목록에만 노출된다.
 
+// 버튼만 눌러 받는 게 아니라 실제 활동을 해야 적립되는 미션은 해당 화면으로 보낸다.
+const ACTION_ROUTE: Record<string, { to: string; label: string }> = {
+  diary_post: { to: '/app/diary', label: '쓰러 가기' },
+}
+
 const METRIC_UNIT: Record<string, string> = {
   steps: '보',
   live_minutes: '분',
@@ -117,6 +122,9 @@ export default function AppMissions() {
               : m.target_value
             // 걸음수는 네이티브 앱 연동 전이라 사용자가 직접 받을 수 없다(자동 집계 대상).
             const autoOnly = m.metric === 'steps'
+            // 실제 활동을 해야 적립되는 미션은 버튼으로 주지 않고 해당 화면으로 보낸다.
+            // (일기는 글을 올리는 순간 create_diary RPC 안에서 적립된다)
+            const goTo = ACTION_ROUTE[m.metric]
 
             return (
               <li key={m.id} className="rounded-card border border-rule bg-paper p-4">
@@ -160,6 +168,11 @@ export default function AppMissions() {
                       <span className="px-3 py-2 rounded-control bg-ink/5 text-ink-faint text-[11px] text-center leading-tight">
                         앱에서<br />자동 적립
                       </span>
+                    ) : goTo ? (
+                      <button onClick={() => navigate(goTo.to)}
+                        className="px-4 py-2 rounded-control bg-signal-blue text-paper text-[12px] font-semibold">
+                        {goTo.label}
+                      </button>
                     ) : (
                       <button onClick={() => void handleClaim(m)} disabled={busyKey === m.key}
                         className="px-4 py-2 rounded-control bg-signal-blue text-paper text-[12px] font-semibold disabled:opacity-50">

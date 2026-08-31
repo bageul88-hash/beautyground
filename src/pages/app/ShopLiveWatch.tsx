@@ -7,6 +7,7 @@ import { streamIframeSrc } from '../../lib/cloudflare'
 import { useLiveChat } from '../../hooks/useLiveChat'
 import { useStreamStatus } from '../../hooks/useStreamStatus'
 import { useLiveHearts } from '../../hooks/useLiveHearts'
+import { useLiveWatchReward } from '../../hooks/useLiveWatchReward'
 import { subscribeToPush } from '../../lib/pushNotifications'
 import { IconHeartFilled, IconSend2, IconUserCircle, IconBrandFacebook, IconBrandX, IconLink, IconBellPlus, IconBellFilled } from '@tabler/icons-react'
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
@@ -327,6 +328,9 @@ export default function ShopLiveWatch() {
   const onAir = live?.status === 'live' && Boolean(live.stream_uid) && streamState !== 'disconnected'
   const topBadge = onAir ? 'LIVE' : live && live.status === 'live' ? '준비중' : live ? statusLabel[live.status] : ''
 
+  // 시청 시간 적립 — 실제 송출 중일 때만 센다(준비중·종료 화면은 제외).
+  const watchReward = useLiveWatchReward(onAir)
+
   const inputClass =
     'w-full bg-white border border-cream-2 rounded-md px-4 py-3 text-[14px] text-text placeholder:text-text-hint focus:outline-none focus:shadow-focus transition'
 
@@ -497,6 +501,13 @@ export default function ShopLiveWatch() {
                 {topBadge}
               </span>
             </div>
+
+            {/* 시청 적립 안내 — 포인트를 받은 순간에만 잠깐 띄운다(방송 화면을 계속 가리지 않게) */}
+            {watchReward.awarded > 0 && (
+              <div className="absolute top-[68px] left-1/2 -translate-x-1/2 z-30 rounded-pill bg-black/70 text-white text-[12px] font-semibold px-3.5 py-1.5 whitespace-nowrap">
+                📺 {watchReward.minutes}분 시청 · {watchReward.awarded}P 적립
+              </div>
+            )}
 
             {/* 떠오르는 좋아요 하트 */}
             {onAir && (
