@@ -510,17 +510,28 @@ export default function AppOrder() {
       return
     }
 
-    const res = await PortOne.requestPayment({
-      storeId,
-      channelKey,
-      paymentId,
-      orderName,
-      totalAmount: finalTotal,
-      currency: 'CURRENCY_KRW',
-      payMethod: 'CARD',
-      customer: { fullName: name.trim(), phoneNumber: phone.trim(), email: user?.email ?? undefined },
-      redirectUrl: `${window.location.origin}/app/order`,
-    })
+    let res: Awaited<ReturnType<typeof PortOne.requestPayment>> | undefined
+    try {
+      res = await PortOne.requestPayment({
+        storeId,
+        channelKey,
+        paymentId,
+        orderName,
+        totalAmount: finalTotal,
+        currency: 'CURRENCY_KRW',
+        payMethod: 'CARD',
+        customer: { fullName: name.trim(), phoneNumber: phone.trim(), email: user?.email ?? undefined },
+        redirectUrl: `${window.location.origin}/app/order`,
+      })
+    } catch (err) {
+      await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
+      if (redeemedCoupon && liveId) await supabase.rpc('release_live_coupon', { p_live_id: liveId })
+      if (redeemedPoints > 0) await releasePoints(paymentId)
+      if (redeemedCouponId) await releaseSignupCoupon(paymentId)
+      setStatus('error')
+      setMessage(err instanceof Error ? err.message : '결제창 호출에 실패했습니다. 다시 시도해 주세요.')
+      return
+    }
 
     if (res?.code != null) {
       await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
