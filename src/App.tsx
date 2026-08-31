@@ -38,6 +38,7 @@ const AppAccount = lazy(() => import('./pages/AppAccount'))
 const AppAddresses = lazy(() => import('./pages/AppAddresses'))
 const AppWishlist = lazy(() => import('./pages/AppWishlist'))
 const AppBenefits = lazy(() => import('./pages/AppBenefits'))
+const AppMissions = lazy(() => import('./pages/AppMissions'))
 const AppSkinTest = lazy(() => import('./pages/AppSkinTest'))
 
 // 법적 고지
@@ -316,6 +317,7 @@ export default function App() {
         <Route path="/app/addresses" element={<AppAddresses />} />
         <Route path="/app/wishlist" element={<AppWishlist />} />
         <Route path="/app/benefits" element={<AppBenefits />} />
+        <Route path="/app/missions" element={<AppMissions />} />
         <Route path="/app/skin-test" element={<AppSkinTest />} />
 
         {/* fallback */}
