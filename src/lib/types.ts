@@ -319,3 +319,46 @@ export interface ExportBuyer {
   notes: string | null
   created_at: string
 }
+
+// 활동 미션(참여 리워드, /admin/missions, supabase/missions.sql) — 걷기·일기·라이브시청 등.
+// 코드 수정 없이 관리자 화면에서 미션을 만들고 켜고 끌 수 있게 설계됨("살아 움직이는 앱" 원칙).
+// 포인트 지급은 기존 point_transactions 원장을 그대로 사용한다.
+export interface MissionMilestone {
+  value: number   // 구간 목표값 (예: 5000보)
+  points: number  // 해당 구간 도달 시 지급 포인트
+}
+
+export interface Mission {
+  id: string
+  key: string
+  title: string
+  description: string | null
+  icon: string | null
+  type: 'daily' | 'streak' | 'cumulative' | 'once'
+  metric: string            // steps | attendance | diary_post | review_post | live_minutes | custom
+  target_value: number
+  reward_points: number
+  milestones: MissionMilestone[]
+  reward_note: string | null
+  max_per_day: number
+  cooldown_sec: number
+  starts_at: string | null
+  ends_at: string | null
+  point_expire_days: number
+  active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface MissionProgress {
+  id: number
+  mission_id: string
+  user_id: string
+  progress_date: string
+  current_value: number
+  claim_count: number
+  awarded_points: number
+  last_claim_at: string | null
+  completed_at: string | null
+}
