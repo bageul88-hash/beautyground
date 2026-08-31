@@ -358,7 +358,7 @@ export default function AppOrder() {
         }
       }
     }
-    const paymentId = `order_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
+    const paymentId = `order${Date.now()}${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
 
     // 적립금·가입 쿠폰(라이브 쿠폰과 별개) 결제 직전 확정 — 실패하면 결제 진행 안 하고 안내 후 재시도 유도
     let redeemedPoints = 0
