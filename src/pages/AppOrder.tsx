@@ -249,6 +249,20 @@ export default function AppOrder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 결제창 호출 실패·사용자 취소 시 주문을 실패로 정리한다.
+  // 브라우저에서 orders 를 직접 update 하면 RLS 에 막혀 조용히 무시되므로 서버를 거친다(2026-09-01).
+  const markOrderFailed = async (paymentId: string) => {
+    try {
+      await fetch('/api/payment-complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId, markFailed: true }),
+      })
+    } catch {
+      /* 실패해도 결제 흐름 자체엔 영향 없음 */
+    }
+  }
+
   const verify = async (paymentId: string) => {
     setStatus('verifying')
     setMessage('')
@@ -534,7 +548,7 @@ export default function AppOrder() {
         redirectUrl: `${window.location.origin}/app/order`,
       })
     } catch (err) {
-      await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
+      await markOrderFailed(paymentId)
       if (redeemedCoupon && liveId) await supabase.rpc('release_live_coupon', { p_live_id: liveId })
       if (redeemedPoints > 0) await releasePoints(paymentId)
       if (redeemedCouponId) await releaseSignupCoupon(paymentId)
@@ -544,7 +558,7 @@ export default function AppOrder() {
     }
 
     if (res?.code != null) {
-      await supabase.from('orders').update({ status: 'failed' }).eq('payment_id', paymentId)
+      await markOrderFailed(paymentId)
       // 결제창이 그 자리에서 닫힌 동기 실패 경로에 한해 쿠폰 반환(모바일 리다이렉트 흐름은 상태 유실로 반환 안 됨 — 알려진 한계)
       if (redeemedCoupon && liveId) await supabase.rpc('release_live_coupon', { p_live_id: liveId })
       if (redeemedPoints > 0) await releasePoints(paymentId)

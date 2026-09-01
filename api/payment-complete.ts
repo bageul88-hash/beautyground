@@ -40,6 +40,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 웹훅은 사용자가 결제창 닫고 이탈해도 서버가 직접 통보받아 주문확정·재고차감이 누락되지 않게 하는 안전망.
   // 위변조 걱정 없음 — 어느 경로든 아래에서 포트원 API로 실제 결제 상태·금액을 재조회해 검증함.
   const webhookType = (body as { type?: string } | null)?.type
+  // 결제창을 못 띄웠거나 사용자가 닫은 경우 브라우저가 이 플래그로 알려온다(2026-09-01).
+  // 예전엔 브라우저가 orders 를 직접 update 했는데, RLS 상 아무 역할도 UPDATE 권한이 없어
+  // 회원·비회원 모두 조용히 실패하고 pending 행이 계속 쌓였다. 서버(service role)에서 처리한다.
+  const markFailed = (body as { markFailed?: boolean } | null)?.markFailed === true
   const paymentId =
     (body as { paymentId?: string } | null)?.paymentId ??
     (body as { data?: { paymentId?: string } } | null)?.data?.paymentId
@@ -67,6 +71,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(webhookType ? 200 : 404).json({ ok: false, reason: '주문을 찾을 수 없습니다.' })
     return
   }
+  // 결제 실패/취소 기록 — pending 인 주문만, 그리고 포트원에 실제 결제가 없을 때만 failed 로 내린다.
+  // (실제로 승인된 결제를 실패로 덮어쓰면 주문이 사라지므로 반드시 PG 상태를 먼저 확인한다)
+  if (markFailed) {
+    if (!orderRows.every((r) => r.status === 'pending')) {
+      res.status(200).json({ ok: true, skipped: 'not_pending' })
+      return
+    }
+    try {
+      const pr = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}`, {
+        headers: { Authorization: `PortOne ${PORTONE_SECRET}` },
+      })
+      if (pr.ok) {
+        const pay = (await pr.json()) as { status?: string }
+        if (pay?.status === 'PAID') {
+          // 실제로는 결제가 된 건 — 실패로 내리면 안 된다
+          res.status(200).json({ ok: false, reason: '결제가 완료된 주문입니다.' })
+          return
+        }
+      }
+    } catch {
+      // 포트원 조회 실패는 무시하고 진행 — pending 이었던 것은 확인했다
+    }
+    const { error: failErr } = await supabase
+      .from('orders')
+      .update({ status: 'failed' })
+      .eq('payment_id', paymentId)
+      .eq('status', 'pending')
+    if (failErr) {
+      res.status(200).json({ ok: false, reason: '주문 상태 변경에 실패했습니다.' })
+      return
+    }
+    res.status(200).json({ ok: true, marked: 'failed' })
+    return
+  }
+
   if (orderRows[0].status === 'paid') {
     // 이미 처리된 결제(중복 콜백) — 성공으로 응답만
     res.status(200).json({ ok: true })
