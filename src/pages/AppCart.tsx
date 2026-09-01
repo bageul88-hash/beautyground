@@ -7,7 +7,6 @@ import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCart from '../components/cart/DesktopCart'
 import ProductRail from '../components/home/ProductRail'
 import { useViewMode } from '../lib/viewMode'
-import { supabase } from '../lib/supabase'
 import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../lib/cart'
 import { useCartRecommendations } from '../hooks/useCartRecommendations'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
@@ -89,12 +88,9 @@ export default function AppCart() {
   const { products: recommended, loading: recLoading } = useCartRecommendations(cartCategories, cartProductIds)
 
   const goOrder = async () => {
-    // 주문(결제) 시점에만 로그인 요구 — 비로그인이면 로그인으로 보냄(게스트 장바구니는 localStorage에 유지됨).
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      navigate('/app/login', { state: { from: '/app/cart' } })
-      return
-    }
+    // 비회원 구매 허용(2026-09-01) — 상품 상세 "바로구매"는 이미 비회원을 주문서로 보내는데
+    // 장바구니 경로만 로그인을 강제하고 있어 "비회원 구매 불가"로 보였다(KG이니시스 심사 지적).
+    // 주문서(AppOrder)가 비회원 입력(이름·연락처·이메일·배송지)을 모두 받으므로 그대로 넘긴다.
     navigate('/app/order', {
       state: {
         items: selectedLines.map((l) => ({
