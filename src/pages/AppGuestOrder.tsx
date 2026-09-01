@@ -16,14 +16,17 @@ interface GuestOrderRow {
   delivery_memo: string | null
 }
 
+// orders.status 의 실제 값(lib/types.ts)과 1:1로 맞춘다.
+// 예전엔 쓰지도 않는 preparing/delivered 가 들어있고 cancel_requested·done 이 빠져 있어서,
+// 취소 요청한 주문을 조회하면 화면에 'cancel_requested' 라는 영문이 그대로 보였다(2026-09-01 수정).
 const STATUS_LABEL: Record<string, string> = {
   pending: '결제 대기',
-  paid: '결제 완료',
-  preparing: '상품 준비 중',
-  shipped: '배송 중',
-  delivered: '배송 완료',
-  cancelled: '취소됨',
   failed: '결제 실패',
+  paid: '결제 완료',
+  cancel_requested: '취소 요청됨',
+  shipped: '배송 중',
+  done: '배송 완료',
+  cancelled: '취소 완료',
 }
 
 const field =
@@ -37,6 +40,8 @@ export default function AppGuestOrder() {
   const [rows, setRows] = useState<GuestOrderRow[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelMsg, setCancelMsg] = useState('')
 
   const lookup = async () => {
     const no = orderNo.trim()
@@ -47,6 +52,7 @@ export default function AppGuestOrder() {
     }
     setLoading(true)
     setMessage('')
+    setCancelMsg('')
     setRows(null)
     const { data, error } = await supabase.rpc('guest_order_lookup', { p_payment_id: no, p_phone: ph })
     setLoading(false)
@@ -62,6 +68,36 @@ export default function AppGuestOrder() {
     setRows(list)
   }
 
+  // 비회원 주문 취소 — 배송 전이면 서버(/api/order-cancel)가 주문번호+연락처를 대조한 뒤 즉시 환불한다.
+  // 회원으로 주문한 건은 서버가 403 을 주므로 로그인 후 취소하도록 안내한다.
+  const cancelOrder = async () => {
+    if (!window.confirm('이 주문을 취소할까요?\n결제하신 금액이 환불됩니다.')) return
+    setCancelling(true)
+    setCancelMsg('')
+    try {
+      const r = await fetch('/api/order-cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId: orderNo.trim(), phone: phone.trim() }),
+      })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok || !data.ok) {
+        setCancelMsg(
+          r.status === 403
+            ? '회원으로 주문하신 건입니다. 로그인 후 주문 내역에서 취소해 주세요.'
+            : data.reason || '취소에 실패했습니다. 고객센터(02-897-8287)로 연락해 주세요.'
+        )
+        return
+      }
+      setRows((prev) => (prev ? prev.map((x) => ({ ...x, status: 'cancelled' })) : prev))
+      setCancelMsg('취소가 완료되었습니다. 카드 취소 반영은 카드사에 따라 3~5영업일이 걸릴 수 있습니다.')
+    } catch {
+      setCancelMsg('취소 요청에 실패했습니다. 네트워크를 확인해 주세요.')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   // 주문 완료 화면에서 주문번호를 들고 넘어온 경우 안내만 — 연락처는 직접 입력해야 조회됨
   useEffect(() => {
     if (params.get('no')) setMessage('주문 시 입력한 연락처를 입력하면 주문 내역이 표시됩니다.')
@@ -73,7 +109,7 @@ export default function AppGuestOrder() {
     <AppFrame>
       <BackHeader title="비회원 주문 조회" />
       <div className="px-5 py-6 space-y-3">
-        <input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="주문번호 (order_...)" className={field} />
+        <input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="주문번호 (order 로 시작)" className={field} />
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="주문 시 입력한 연락처 (010-0000-0000)" className={field} />
         <button
           onClick={() => void lookup()}
@@ -102,6 +138,21 @@ export default function AppGuestOrder() {
               <span className="text-[13px] font-bold text-ink">합계</span>
               <span className="text-[14px] font-bold tabular-nums text-ink">{total.toLocaleString('ko-KR')}원</span>
             </div>
+            {['paid', 'cancel_requested'].includes(rows[0].status) && (
+              <div className="px-4 py-3 border-t border-rule">
+                <button
+                  onClick={() => void cancelOrder()}
+                  disabled={cancelling}
+                  className="w-full text-[13px] text-ink-soft rounded-control border border-rule py-2.5 bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
+                >
+                  {cancelling ? '취소 처리 중…' : '주문 취소'}
+                </button>
+                <p className="mt-2 text-[11.5px] text-ink-faint leading-relaxed">
+                  배송 전까지 직접 취소하실 수 있습니다. 배송이 시작된 뒤에는 고객센터(02-897-8287)로 연락해 주세요.
+                </p>
+              </div>
+            )}
+            {cancelMsg && <p className="px-4 pb-3 text-[12.5px] text-signal-red leading-relaxed">{cancelMsg}</p>}
           </div>
         )}
 

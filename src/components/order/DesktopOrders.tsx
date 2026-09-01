@@ -52,6 +52,16 @@ export default function DesktopOrders({ loggedIn, groups, msg, cancelling, onReq
             <button onClick={() => navigate('/app/login')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring">
               로그인하기
             </button>
+            {/* 비회원 구매자는 여기서 막히면 자기 주문을 찾아갈 길이 없었다(2026-09-01 추가) */}
+            <button
+              onClick={() => navigate('/app/guest-order')}
+              className="mt-3 rounded-control border border-rule text-ink font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring"
+            >
+              비회원 주문 조회
+            </button>
+            <p className="mt-3 text-[12px] text-ink-faint leading-relaxed">
+              로그인 없이 주문하셨다면 주문번호와 연락처로 조회하실 수 있어요.
+            </p>
           </div>
         ) : (
           <>
@@ -120,17 +130,19 @@ export default function DesktopOrders({ loggedIn, groups, msg, cancelling, onReq
                           </p>
                         )}
 
-                        {g.status === 'paid' && (
-                          <button
-                            onClick={() => onRequestCancel(g)}
-                            disabled={cancelling === g.paymentId}
-                            className="mt-3 rounded-control border border-rule py-2.5 px-6 text-[13px] text-ink-soft bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
-                          >
-                            {cancelling === g.paymentId ? '요청 중...' : '주문 취소 요청'}
-                          </button>
-                        )}
-                        {g.status === 'cancel_requested' && (
-                          <p className="mt-2 text-[12px] text-signal-red">확인 후 취소가 확정됩니다.</p>
+                        {['paid', 'cancel_requested'].includes(g.status) && (
+                          <>
+                            <button
+                              onClick={() => onRequestCancel(g)}
+                              disabled={cancelling === g.paymentId}
+                              className="mt-3 rounded-control border border-rule py-2.5 px-6 text-[13px] text-ink-soft bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
+                            >
+                              {cancelling === g.paymentId ? '취소 처리 중…' : '주문 취소'}
+                            </button>
+                            <p className="mt-2 text-[11.5px] text-ink-faint leading-relaxed">
+                              배송 전까지 바로 취소하실 수 있습니다. 카드 취소 반영은 카드사에 따라 3~5영업일이 걸릴 수 있습니다.
+                            </p>
+                          </>
                         )}
                       </div>
                     </div>
