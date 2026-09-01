@@ -1,14 +1,15 @@
 import { Link, useLocation } from 'react-router-dom'
-import { IconHome, IconGrid, IconLive, IconCart, IconUser } from '../common/Icon'
-import CartCountBadge from '../common/CartCountBadge'
+import { IconHome, IconGrid, IconLive, IconTalk, IconUser } from '../common/Icon'
 
-// 2026-08-12: /live 재구축(실데이터) 완료로 '라이브' 탭 복원. '홈'=/app/home(온라인몰 메인),
-// '라이브'=/live(라이브방송 메인) — 서로 다른 독립 경로라 중복활성 버그 없음.
+// 2026-09-02 개편 — 하단 5칸 중 3칸이 제품(카테고리·장바구니)이라 쇼핑몰로만 보였다.
+// 커뮤니티를 앞세우는 라이프스타일 플랫폼 방향에 맞춰 제품은 '쇼핑' 한 칸으로 묶고,
+// 그 자리에 '이야기'(살아가는 이야기)를 넣었다. 장바구니는 상단 헤더에 아이콘·개수 뱃지가
+// 이미 있어 중복이므로 하단에서 뺐다.
 const NAV_ITEMS = [
   { path: '/app/home', Icon: IconHome, label: '홈' },
-  { path: '/app/category', Icon: IconGrid, label: '카테고리' },
+  { path: '/app/diary', Icon: IconTalk, label: '이야기' },
   { path: '/live', Icon: IconLive, label: '라이브' },
-  { path: '/app/cart', Icon: IconCart, label: '장바구니' },
+  { path: '/app/category', Icon: IconGrid, label: '쇼핑' },
   { path: '/app/mypage', Icon: IconUser, label: '마이' },
 ]
 
@@ -36,7 +37,6 @@ export default function BottomNav() {
               >
                 <span className="relative inline-flex">
                   <Icon className="w-[21px] h-[21px]" strokeWidth={isActive ? 2 : 1.6} />
-                  {path === '/app/cart' && <CartCountBadge />}
                 </span>
                 <span className={`text-[11px] leading-none ${isActive ? 'font-bold' : ''}`}>{label}</span>
               </Link>

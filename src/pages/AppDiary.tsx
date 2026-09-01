@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import BottomNav from '../components/layout/BottomNav'
 import { supabase } from '../lib/supabase'
 import {
   getDiaryFeed, getMonthlyBestDiaries, createDiary, toggleDiaryLike, deleteDiary,
@@ -11,6 +12,14 @@ import {
 // 살아가는 이야기 — 유저가 사진과 함께 일상을 남기는 곳.
 // 글을 올리면 create_diary RPC 안에서 diary_post 미션이 자동 적립된다(화면에서 따로 적립 호출 안 함).
 // 좋아요가 많은 글은 '이달의 우수 사연'으로 뽑아 선물을 준다.
+//
+// 2026-09-02 화면 정돈 — 히로인스 게시판이 "텍스트가 빽빽하고 계속 재촉해서 답답하다"는
+// 대표님 지적에 따라, 수상작(트웬티) 방식으로 다시 짰다.
+//   · 작은 회색 라벨 + 굵은 제목으로 위계를 만든다
+//   · 우수 사연은 텍스트 3줄 나열 대신 가로 카드로 (사진이 있으면 사진이 주인공)
+//   · 피드 카드는 사진을 크게, 본문은 3줄까지만 — 훑을 수 있게
+//   · 재촉하는 장치(타이머·소멸 압박)는 넣지 않는다
+// 로직(불러오기·작성·좋아요·삭제)은 이전과 동일하다.
 
 const MAX_IMAGES = 4
 
@@ -32,6 +41,19 @@ function maskName(name: string | null) {
   if (n.length <= 2) return n[0] + '*'
   // 이메일 앞부분이 닉네임이 되면 길어질 수 있어 가운데 별표는 최대 3개로 줄인다.
   return n[0] + '*'.repeat(Math.min(n.length - 2, 3)) + n[n.length - 1]
+}
+
+// 섹션 머리 — 작은 회색 라벨 위, 굵은 제목 아래. 훑기만 해도 구조가 잡히게.
+function SectionHead({ label, title, right }: { label: string; title: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex items-end justify-between gap-3 mb-3">
+      <div className="min-w-0">
+        <p className="text-[11.5px] text-ink-faint leading-none mb-1.5">{label}</p>
+        <h2 className="text-[17px] font-bold text-ink leading-tight">{title}</h2>
+      </div>
+      {right}
+    </div>
+  )
 }
 
 export default function AppDiary() {
@@ -132,37 +154,24 @@ export default function AppDiary() {
     setFeed((prev) => prev.filter((x) => x.id !== d.id))
   }
 
+  const openComposer = () => {
+    if (!loggedIn) { navigate('/app/login'); return }
+    setComposing(true)
+  }
+
   return (
     <AppFrame>
       <BackHeader title="살아가는 이야기" />
 
-      {/* 이달의 우수 사연 */}
-      {best.length > 0 && (
-        <section className="mx-5 mt-4 rounded-card border border-rule bg-quiet p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[13px] font-bold text-ink">🏆 이달의 우수 사연</p>
-            <span className="text-[11px] text-ink-faint">좋아요가 많은 글에 선물을 드려요</span>
-          </div>
-          <ul className="space-y-1.5">
-            {best.map((b, i) => (
-              <li key={b.id} className="flex items-center gap-2 text-[12px]">
-                <span className="w-4 shrink-0 text-ink-faint font-semibold">{i + 1}</span>
-                <span className="flex-1 truncate text-ink">{b.content}</span>
-                <span className="shrink-0 text-ink-faint">♥ {b.like_count}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* 쓰기 */}
-      <section className="px-5 mt-4">
+      {/* 쓰기 — 화면에 들어오면 가장 먼저 보이는 행동 */}
+      <section className="px-5 pt-5">
         {!composing ? (
           <button
-            onClick={() => { if (!loggedIn) { navigate('/app/login'); return } setComposing(true) }}
-            className="w-full rounded-card border border-dashed border-rule px-4 py-3.5 text-left text-[13px] text-ink-soft"
+            onClick={openComposer}
+            className="w-full rounded-card bg-ink text-paper px-5 py-4 text-left focus:outline-none focus-visible:shadow-ring"
           >
-            ✏️ 오늘 어떤 하루였나요? 이야기를 남기면 포인트를 드려요
+            <span className="block text-[15px] font-bold leading-tight">오늘 어떤 하루였나요?</span>
+            <span className="block text-[12.5px] opacity-75 mt-1">사소한 하루도 누군가에겐 위로가 됩니다</span>
           </button>
         ) : (
           <div className="rounded-card border border-rule bg-paper p-4">
@@ -193,7 +202,7 @@ export default function AppDiary() {
               <div className="flex items-center gap-3">
                 <button onClick={() => fileRef.current?.click()} disabled={files.length >= MAX_IMAGES}
                   className="text-[13px] text-ink-soft disabled:opacity-40">
-                  📷 사진 {files.length}/{MAX_IMAGES}
+                  사진 {files.length}/{MAX_IMAGES}
                 </button>
                 <span className="text-[11px] text-ink-faint">{content.length}/1000</span>
               </div>
@@ -211,65 +220,114 @@ export default function AppDiary() {
         )}
       </section>
 
-      {/* 정렬 */}
-      <div className="flex items-center gap-2 px-5 mt-5 mb-2">
-        {([['recent', '최신'], ['popular', '인기']] as const).map(([key, label]) => (
-          <button key={key} onClick={() => setSort(key)}
-            className={`px-3 py-1.5 rounded-full text-[12px] font-semibold ${
-              sort === key ? 'bg-ink text-paper' : 'bg-ink/5 text-ink-soft'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* 이달의 우수 사연 — 텍스트 나열 대신 가로 카드 */}
+      {best.length > 0 && (
+        <section className="px-5 pt-8">
+          <SectionHead label="이번 달, 많은 분이 마음을 눌러준" title="이달의 이야기" />
+          <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-1 px-1 snap-x">
+            {best.map((b, i) => (
+              <div
+                key={b.id}
+                className="shrink-0 w-[190px] snap-start rounded-card border border-rule bg-paper p-4"
+              >
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ink text-paper text-[11px] font-bold mb-2.5">
+                  {i + 1}
+                </span>
+                <p className="text-[13px] text-ink leading-snug line-clamp-3 min-h-[3.6em]">{b.content}</p>
+                <p className="text-[11.5px] text-ink-faint mt-2.5">♥ {b.like_count}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 피드 */}
-      {loading ? (
-        <p className="px-5 py-10 text-[13px] text-ink-soft">불러오는 중…</p>
-      ) : feed.length === 0 ? (
-        <div className="px-5 py-12 text-center">
-          <p className="text-[13px] text-ink-soft">아직 올라온 이야기가 없어요.<br />첫 번째 이야기를 남겨보세요.</p>
-        </div>
-      ) : (
-        <ul className="px-5 pb-24 space-y-3">
-          {feed.map((d) => (
-            <li key={d.id} className="rounded-card border border-rule bg-paper p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[12px] font-semibold text-ink">{maskName(d.nickname)}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-ink-faint">{timeAgo(d.created_at)}</span>
-                  {d.is_mine && (
-                    <button onClick={() => void onDelete(d)} className="text-[11px] text-ink-faint underline">삭제</button>
+      <section className="px-5 pt-8 pb-28">
+        <SectionHead
+          label="오늘도 각자의 하루를 살아갑니다"
+          title="사람들의 이야기"
+          right={
+            <div className="flex items-center gap-1 shrink-0">
+              {([['recent', '최신'], ['popular', '인기']] as const).map(([key, label]) => (
+                <button key={key} onClick={() => setSort(key)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition ${
+                    sort === key ? 'bg-ink text-paper' : 'text-ink-faint'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          }
+        />
+
+        {loading ? (
+          <p className="py-12 text-center text-[13px] text-ink-faint">불러오는 중…</p>
+        ) : feed.length === 0 ? (
+          <button
+            onClick={openComposer}
+            className="w-full rounded-card border border-dashed border-rule bg-quiet/40 px-5 py-12 text-center focus:outline-none focus-visible:shadow-ring"
+          >
+            <p className="text-[14px] font-semibold text-ink">아직 아무도 오늘을 남기지 않았어요</p>
+            <p className="text-[12.5px] text-ink-faint mt-1.5">첫 이야기의 주인공이 되어주세요</p>
+          </button>
+        ) : (
+          <ul className="space-y-4">
+            {feed.map((d) => {
+              const imgs = d.images ?? []
+              return (
+                <li key={d.id} className="rounded-card border border-rule bg-paper overflow-hidden">
+                  {/* 사진이 있으면 사진이 주인공 — 카드 맨 위에 크게 */}
+                  {imgs.length > 0 && (
+                    <div className={`grid gap-0.5 ${imgs.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      {imgs.slice(0, 4).map((src, i) => (
+                        <div
+                          key={`${src}-${i}`}
+                          className={`bg-quiet overflow-hidden ${
+                            imgs.length === 1 ? 'aspect-[4/3]' : 'aspect-square'
+                          } ${imgs.length === 3 && i === 0 ? 'col-span-2 aspect-[2/1]' : ''}`}
+                        >
+                          <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </div>
-              </div>
 
-              <p className="text-[14px] text-ink whitespace-pre-wrap leading-relaxed">{d.content}</p>
+                  <div className="p-4">
+                    <p className="text-[14px] text-ink whitespace-pre-wrap leading-relaxed line-clamp-4">
+                      {d.content}
+                    </p>
 
-              {d.images.length > 0 && (
-                <div className={`grid gap-1.5 mt-3 ${d.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                  {d.images.map((src) => (
-                    <img key={src} src={src} alt="" loading="lazy"
-                      className={`w-full rounded-lg object-cover ${d.images.length === 1 ? 'max-h-80' : 'h-36'}`} />
-                  ))}
-                </div>
-              )}
-
-              <button onClick={() => void onLike(d)}
-                className={`mt-3 inline-flex items-center gap-1.5 text-[13px] ${
-                  d.liked_by_me ? 'text-signal-blue font-semibold' : 'text-ink-soft'}`}>
-                <span>{d.liked_by_me ? '♥' : '♡'}</span>
-                <span>{d.like_count}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                    <div className="flex items-center justify-between mt-3.5 pt-3 border-t border-rule">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-[12px] font-semibold text-ink truncate">{maskName(d.nickname)}</span>
+                        <span className="text-[11.5px] text-ink-faint shrink-0">{timeAgo(d.created_at)}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {d.is_mine && (
+                          <button onClick={() => void onDelete(d)} className="text-[11.5px] text-ink-faint">삭제</button>
+                        )}
+                        <button onClick={() => void onLike(d)}
+                          className={`inline-flex items-center gap-1.5 text-[13px] ${
+                            d.liked_by_me ? 'text-signal-blue font-semibold' : 'text-ink-soft'}`}>
+                          <span>{d.liked_by_me ? '♥' : '♡'}</span>
+                          <span className="tabular-nums">{d.like_count}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
 
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-ink text-paper text-[13px] shadow-lg">
           {toast}
         </div>
       )}
+
+      <BottomNav />
     </AppFrame>
   )
 }

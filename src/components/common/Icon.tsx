@@ -166,3 +166,13 @@ export function IconGrid(p: IconProps) {
     </Svg>
   )
 }
+
+// 커뮤니티(살아가는 이야기) 탭 아이콘 — 대화가 오간다는 뜻으로 말풍선 두 개(2026-09-02)
+export function IconTalk(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3.5 6.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8l-3.5 3v-3a1 1 0 0 1-1-1z" />
+      <path d="M17 9.5h1.5a2 2 0 0 1 2 2v4a1 1 0 0 1-1 1v2.5L17 16.5h-4" />
+    </Svg>
+  )
+}

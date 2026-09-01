@@ -5,20 +5,42 @@ import AppFooter from '../components/layout/AppFooter'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
 import DesktopCategory from '../components/category/DesktopCategory'
 import BrandRail from '../components/home/BrandRail'
+import HeroCarousel from '../components/home/HeroCarousel'
+import TrustStrip from '../components/home/TrustStrip'
+import ProductRail from '../components/home/ProductRail'
 import { useViewMode } from '../lib/viewMode'
 import { useShopBrands } from '../hooks/useShopBrands'
+import { useHeroBanners } from '../hooks/useHeroBanners'
+import { useSaleProducts } from '../hooks/useSaleProducts'
+import { useHomeProductSections } from '../hooks/useHomeProductSections'
 import { CATEGORIES } from '../constants'
 
+// 2026-09-02 — 홈을 커뮤니티로 넘기면서, 기존 홈에 있던 상품 영역(배너·할인특가·추천·신상품)을
+// 지우지 않고 이 '쇼핑' 탭으로 그대로 옮겨왔다(대표님 지시). 상품을 찾는 사람은 여기로 온다.
 export default function AppCategory() {
   const navigate = useNavigate()
   const { mode, isDesktop, toggle } = useViewMode()
   const { brands, loading: brandsLoading } = useShopBrands()
+  const { banners, loading: bannerLoading } = useHeroBanners()
+  const { products: saleProducts, loading: saleLoading } = useSaleProducts()
+  const { products, recommended, seasonLabel, loading: prodLoading } = useHomeProductSections()
+  const goProduct = (id: string) => navigate(`/app/product/${id}`)
 
   if (isDesktop) {
     return (
       <>
         <ViewModeToggle mode={mode} onToggle={toggle} />
-        <DesktopCategory />
+        <DesktopCategory
+          banners={banners}
+          categories={CATEGORIES.map((c) => c.label)}
+          recommended={recommended}
+          seasonLabel={seasonLabel}
+          products={products}
+          prodLoading={prodLoading}
+          saleProducts={saleProducts}
+          saleLoading={saleLoading}
+          onProductClick={goProduct}
+        />
       </>
     )
   }
@@ -28,7 +50,11 @@ export default function AppCategory() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <AppHeader />
 
-      <div className="px-4 pt-5 pb-3">
+      {/* 홈에서 옮겨온 프로모션 배너 */}
+      <HeroCarousel banners={banners} loading={bannerLoading} />
+      <TrustStrip />
+
+      <div className="px-4 pt-6 pb-3">
         <h1 className="text-[18px] font-bold text-ink">카테고리</h1>
         <p className="text-[13px] text-ink-soft mt-1">원하는 카테고리를 선택하세요</p>
       </div>
@@ -59,8 +85,23 @@ export default function AppCategory() {
       </div>
 
       {/* 브랜드 텍스트 레일 — /live·홈과 동일 컴포넌트 (2026-08-12 대표님 지시로 카테고리에도 노출) */}
-      <div className="pb-8">
+      <div className="pt-2">
         <BrandRail brands={brands} loading={brandsLoading} />
+      </div>
+
+      {/* 홈에서 옮겨온 상품 레일 3종 */}
+      {saleProducts.length > 0 && (
+        <ProductRail id="shop-sale" title="할인 특가" products={saleProducts} loading={saleLoading} onProductClick={goProduct} />
+      )}
+      <ProductRail
+        id="shop-recommended"
+        title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
+        products={recommended}
+        loading={prodLoading}
+        onProductClick={goProduct}
+      />
+      <div className="pb-8">
+        <ProductRail id="shop-products" title="신상품" products={products} loading={prodLoading} onProductClick={goProduct} />
       </div>
 
       <AppFooter />

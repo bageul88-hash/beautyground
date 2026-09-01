@@ -1,9 +1,8 @@
+import { useNavigate } from 'react-router-dom'
 import AppHeader from '../layout/AppHeader'
-import HeroCarousel from './HeroCarousel'
 import MarqueeBar from './MarqueeBar'
-import TrustStrip from './TrustStrip'
 import MissionBanner from './MissionBanner'
-import ProductRail from './ProductRail'
+import DiaryHomeFeed from './DiaryHomeFeed'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
 import type { ShopBrand } from '../../hooks/useShopBrands'
@@ -18,61 +17,42 @@ interface HomeBodyProps {
   prodLoading: boolean
   saleProducts: ShopProduct[]
   saleLoading: boolean
-  // 브랜드 레일은 카테고리 페이지로 이전(2026-08-12 대표님 지시) — 호출부 호환을 위해 props만 유지
   brands: ShopBrand[]
   brandsLoading: boolean
   onProductClick: (id: string) => void
 }
 
-// 홈 화면 본문(마퀴~상품그리드) — 실제 /app/home과 관리자 미리보기가 공유하는 프레젠테이션 컴포넌트.
-// 데이터는 항상 부모(AppHome 또는 관리자 화면)가 내려준다(직접 fetch 하지 않음).
-// 2026-08-12: 목업(live-commerce-new) 홈 배치 이식 — 카테고리 칩 섹션 제거, 할인 특가를
-// 최상단으로, 그 아래 브랜드 레일 신규 추가(대표님 지시).
-export default function HomeBody({
-  marqueeItems,
-  banners,
-  bannerLoading,
-  recommended,
-  seasonLabel,
-  products,
-  prodLoading,
-  saleProducts,
-  saleLoading,
-  onProductClick,
-}: HomeBodyProps) {
+// 홈 화면 본문.
+//
+// 2026-09-02 전환 — 대표님 지시 "홈을 누르면 제품 페이지가 있으면 안 된다. 주인공은 커뮤니티다."
+// 배너·할인특가·추천·신상품 등 상품 영역은 지우지 않고 전부 '쇼핑' 탭(/app/category)으로 옮겼다.
+// 홈에는 오늘 할 일(미션)과 사람들의 이야기만 남긴다.
+//
+// props 는 호출부(AppHome·관리자 미리보기) 호환을 위해 그대로 받되 상품 관련 값은 쓰지 않는다.
+export default function HomeBody({ marqueeItems }: HomeBodyProps) {
+  const navigate = useNavigate()
+
   return (
     <>
       <MarqueeBar items={marqueeItems} />
       <AppHeader />
-      <HeroCarousel banners={banners} loading={bannerLoading} />
-      <TrustStrip />
+
+      {/* 오늘 할 수 있는 일 — 관리자가 미션을 켜야 나타난다 */}
       <MissionBanner />
 
-      {/* 추천 상품·신상품·할인은 같은 가로 스크롤 레일 컴포넌트를 써서 썸네일 비율과
-          좌우 버튼 탐색이 항상 일치한다. */}
-      {saleProducts.length > 0 && (
-        <ProductRail
-          id="home-sale"
-          title="할인 특가"
-          products={saleProducts}
-          loading={saleLoading}
-          onProductClick={onProductClick}
-        />
-      )}
-      <ProductRail
-        id="home-recommended"
-        title={seasonLabel ? `추천 상품 · ${seasonLabel} 시즌` : '추천 상품'}
-        products={recommended}
-        loading={prodLoading}
-        onProductClick={onProductClick}
-      />
-      <ProductRail
-        id="home-products"
-        title="신상품"
-        products={products}
-        loading={prodLoading}
-        onProductClick={onProductClick}
-      />
+      {/* 오늘의 이야기 쓰기 */}
+      <section className="px-5 pt-5">
+        <button
+          onClick={() => navigate('/app/diary')}
+          className="w-full rounded-card bg-ink text-paper px-5 py-4 text-left focus:outline-none focus-visible:shadow-ring"
+        >
+          <span className="block text-[15px] font-bold leading-tight">오늘 어떤 하루였나요?</span>
+          <span className="block text-[12.5px] opacity-75 mt-1">사소한 하루도 누군가에겐 위로가 됩니다</span>
+        </button>
+      </section>
+
+      {/* 사람들의 이야기 — 홈의 주인공 */}
+      <DiaryHomeFeed />
     </>
   )
 }
