@@ -92,17 +92,32 @@ export default function AppOrders() {
 
   useEffect(() => { load() }, [])
 
+  // 배송 전 주문은 구매자가 직접 취소하면 그 자리에서 환불된다(2026-09-01).
+  // 예전엔 cancel_requested 로만 바뀌고 관리자가 확정해야 환불돼서, 구매자는 돈이 언제 돌아오는지 알 수 없었다.
   const requestCancel = async (g: OrderGroup) => {
-    if (!window.confirm('이 주문의 취소를 요청할까요?\n확인 후 취소가 확정됩니다.')) return
+    if (!window.confirm('이 주문을 취소할까요?\n결제하신 금액이 환불됩니다.')) return
     setCancelling(g.paymentId)
     setMsg('')
-    const { data, error } = await supabase.rpc('request_order_cancel', { p_payment_id: g.paymentId })
-    setCancelling(null)
-    if (error || !data) {
-      setMsg('취소 요청에 실패했습니다. 고객센터(02-897-8287)로 연락해 주세요.')
-      return
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { setMsg('로그인이 만료되었습니다. 다시 로그인해 주세요.'); return }
+      const r = await fetch('/api/order-cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ paymentId: g.paymentId }),
+      })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok || !data.ok) {
+        setMsg(data.reason || '취소에 실패했습니다. 고객센터(02-897-8287)로 연락해 주세요.')
+        return
+      }
+      setGroups((prev) => prev.map((x) => (x.paymentId === g.paymentId ? { ...x, status: 'cancelled' } : x)))
+      setMsg('취소가 완료되었습니다. 카드 취소 반영은 카드사에 따라 3~5영업일이 걸릴 수 있습니다.')
+    } catch {
+      setMsg('취소 요청에 실패했습니다. 네트워크를 확인해 주세요.')
+    } finally {
+      setCancelling(null)
     }
-    setGroups((prev) => prev.map((x) => (x.paymentId === g.paymentId ? { ...x, status: 'cancel_requested' } : x)))
   }
 
   if (loading) {
@@ -139,6 +154,16 @@ export default function AppOrders() {
           <button onClick={() => navigate('/app/login')} className="rounded-control bg-ink text-paper font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring">
             로그인하기
           </button>
+          {/* 비회원 구매자는 여기서 막히면 자기 주문을 찾아갈 길이 없었다(2026-09-01 추가) */}
+          <button
+            onClick={() => navigate('/app/guest-order')}
+            className="mt-3 rounded-control border border-rule text-ink font-bold text-[14px] px-8 py-3.5 focus:outline-none focus-visible:shadow-ring"
+          >
+            비회원 주문 조회
+          </button>
+          <p className="mt-3 text-[12px] text-ink-faint leading-relaxed">
+            로그인 없이 주문하셨다면 주문번호와 연락처로 조회하실 수 있어요.
+          </p>
         </div>
       </div>
       </div>
@@ -216,17 +241,19 @@ export default function AppOrders() {
                     </p>
                   )}
 
-                  {g.status === 'paid' && (
-                    <button
-                      onClick={() => requestCancel(g)}
-                      disabled={cancelling === g.paymentId}
-                      className="mt-3 w-full text-[13px] text-ink-soft rounded-control border border-rule py-2.5 bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
-                    >
-                      {cancelling === g.paymentId ? '요청 중...' : '주문 취소 요청'}
-                    </button>
-                  )}
-                  {g.status === 'cancel_requested' && (
-                    <p className="mt-2 text-[12px] text-signal-red">확인 후 취소가 확정됩니다.</p>
+                  {['paid', 'cancel_requested'].includes(g.status) && (
+                    <>
+                      <button
+                        onClick={() => requestCancel(g)}
+                        disabled={cancelling === g.paymentId}
+                        className="mt-3 w-full text-[13px] text-ink-soft rounded-control border border-rule py-2.5 bg-paper disabled:opacity-50 focus:outline-none focus-visible:shadow-ring"
+                      >
+                        {cancelling === g.paymentId ? '취소 처리 중…' : '주문 취소'}
+                      </button>
+                      <p className="mt-2 text-[11.5px] text-ink-faint leading-relaxed">
+                        배송 전까지 바로 취소하실 수 있습니다. 카드 취소 반영은 카드사에 따라 3~5영업일이 걸릴 수 있습니다.
+                      </p>
+                    </>
                   )}
                 </div>
               </div>

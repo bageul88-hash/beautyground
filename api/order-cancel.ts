@@ -1,8 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
 
-// 주문 취소 확정(환불) — 파트너(해당 주문 판매자) 또는 관리자만 호출 가능.
-// 포트원 실취소 → 주문 상태 cancelled → 재고 복구까지 한 번에 처리한다.
+// 주문 취소 확정(환불) — 포트원 실취소 → 주문 상태 cancelled → 재고 복구까지 한 번에 처리.
+// 호출 주체 3가지:
+//  1) 관리자 / 2) 해당 주문 상품의 판매 파트너 — 상태 제한 없이 취소 확정 가능
+//  3) 구매자 본인 — 배송 전(paid/cancel_requested)만 즉시 환불(2026-09-01).
+//     회원은 Bearer 토큰의 user_id 일치로, 비회원은 주문번호 + 주문 시 입력한 연락처 일치로 확인한다.
+//     배송이 시작된 뒤(shipped/done)에는 구매자가 직접 취소할 수 없고 취소 '요청'만 남긴다.
 const SUPABASE_URL =
   process.env.SUPABASE_URL || 'https://bjqtuklkskrqzbuxdwxm.supabase.co'
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -24,49 +28,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try { body = JSON.parse(body) } catch { body = {} }
   }
   const paymentId = (body as { paymentId?: string } | null)?.paymentId
+  const phone = (body as { phone?: string } | null)?.phone
   if (!paymentId) {
     res.status(400).json({ ok: false, reason: 'paymentId 가 필요합니다.' })
     return
   }
 
-  const token = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) {
-    res.status(401).json({ ok: false, reason: '로그인이 필요합니다.' })
-    return
-  }
-
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
-  const { data: userData, error: userErr } = await supabase.auth.getUser(token)
-  const user = userData?.user
-  if (userErr || !user) {
-    res.status(401).json({ ok: false, reason: '인증에 실패했습니다.' })
-    return
-  }
 
   const { data: orderRows, error: selErr } = await supabase
     .from('orders')
-    .select('id, product_id, partner_id, quantity, status')
+    .select('id, product_id, partner_id, quantity, status, user_id, buyer_phone')
     .eq('payment_id', paymentId)
   if (selErr || !orderRows || orderRows.length === 0) {
     res.status(404).json({ ok: false, reason: '주문을 찾을 수 없습니다.' })
     return
   }
 
-  // 권한: 관리자이거나, 이 주문 상품의 판매 파트너 본인
-  const isAdmin = ADMIN_EMAILS.includes(user.email ?? '')
-  if (!isAdmin) {
-    const { data: partner } = await supabase
-      .from('partners')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
-    const pid = partner?.id
-    const owns = !!pid && orderRows.some((r) => r.partner_id === pid)
-    const foreign = orderRows.some((r) => r.partner_id && r.partner_id !== pid)
-    if (!owns || foreign) {
-      res.status(403).json({ ok: false, reason: '이 주문을 취소할 권한이 없습니다.' })
+  const digits = (v: string | null | undefined) => (v ?? '').replace(/\D/g, '')
+  const token = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
+  // 'seller' = 관리자·파트너(상태 제한 없음), 'buyer' = 구매자 본인(배송 전만)
+  let role: 'seller' | 'buyer'
+
+  if (token) {
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token)
+    const user = userData?.user
+    if (userErr || !user) {
+      res.status(401).json({ ok: false, reason: '인증에 실패했습니다.' })
       return
     }
+    if (ADMIN_EMAILS.includes(user.email ?? '')) {
+      role = 'seller'
+    } else {
+      const { data: partner } = await supabase
+        .from('partners')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      const pid = partner?.id
+      const owns = !!pid && orderRows.some((r) => r.partner_id === pid)
+      const foreign = orderRows.some((r) => r.partner_id && r.partner_id !== pid)
+      if (owns && !foreign) {
+        role = 'seller'
+      } else if (orderRows.every((r) => r.user_id === user.id)) {
+        role = 'buyer' // 구매자 본인(회원)
+      } else {
+        res.status(403).json({ ok: false, reason: '이 주문을 취소할 권한이 없습니다.' })
+        return
+      }
+    }
+  } else {
+    // 비회원 구매자 — 주문번호 + 주문 시 입력한 연락처가 모두 일치해야 한다
+    const ph = digits(phone)
+    const isGuestOrder = orderRows.every((r) => !r.user_id)
+    const phoneMatch = ph.length >= 10 && orderRows.some((r) => digits(r.buyer_phone) === ph)
+    if (!isGuestOrder || !phoneMatch) {
+      res.status(403).json({ ok: false, reason: '주문번호 또는 연락처가 일치하지 않습니다.' })
+      return
+    }
+    role = 'buyer'
+  }
+
+  // 구매자 본인은 배송 전에만 즉시 취소(환불)할 수 있다 — 배송 후에는 고객센터 접수
+  if (role === 'buyer' && !orderRows.every((r) => ['paid', 'cancel_requested'].includes(r.status))) {
+    res.status(200).json({
+      ok: false,
+      reason: '배송이 시작된 주문은 바로 취소할 수 없습니다. 고객센터(02-897-8287)로 문의해 주세요.',
+    })
+    return
   }
 
   if (orderRows.every((r) => r.status === 'cancelled')) {
@@ -81,7 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const r = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}/cancel`, {
         method: 'POST',
         headers: { Authorization: `PortOne ${PORTONE_SECRET}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: '판매자 취소 승인' }),
+        body: JSON.stringify({ reason: role === 'buyer' ? '구매자 취소 요청' : '판매자 취소 승인' }),
       })
       if (!r.ok) {
         const text = await r.text()
