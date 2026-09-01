@@ -89,12 +89,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     role = 'buyer'
   }
 
-  // 구매자 본인은 배송 전에만 즉시 취소(환불)할 수 있다 — 배송 후에는 고객센터 접수
+  // 구매자 본인은 배송 전에만 즉시 취소(환불)할 수 있다.
+  // 막을 때는 왜 막혔는지 상태에 맞게 알려준다 — 전부 "배송이 시작됐다"로 뭉뚱그리면
+  // 이미 취소된 주문을 다시 눌러본 구매자가 엉뚱한 안내를 보고 고객센터로 전화하게 된다.
   if (role === 'buyer' && !orderRows.every((r) => ['paid', 'cancel_requested'].includes(r.status))) {
-    res.status(200).json({
-      ok: false,
-      reason: '배송이 시작된 주문은 바로 취소할 수 없습니다. 고객센터(02-897-8287)로 문의해 주세요.',
-    })
+    const st = orderRows[0]?.status
+    const reason =
+      st === 'cancelled'
+        ? '이미 취소된 주문입니다.'
+        : st === 'pending' || st === 'failed'
+          ? '결제가 완료되지 않은 주문이라 취소할 내역이 없습니다.'
+          : st === 'done'
+            ? '배송이 완료된 주문입니다. 반품·환불은 고객센터(02-897-8287)로 문의해 주세요.'
+            : '배송이 시작된 주문은 바로 취소할 수 없습니다. 고객센터(02-897-8287)로 문의해 주세요.'
+    res.status(200).json({ ok: false, reason })
     return
   }
 
