@@ -31,6 +31,8 @@ interface Props {
   onName: (v: string) => void
   phone: string
   onPhone: (v: string) => void
+  email: string
+  onEmail: (v: string) => void
   address: string
   onSearchAddress: () => void
   addressDetail: string
@@ -74,6 +76,8 @@ export default function DesktopOrder({
   onName,
   phone,
   onPhone,
+  email,
+  onEmail,
   address,
   onSearchAddress,
   addressDetail,
@@ -180,6 +184,18 @@ export default function DesktopOrder({
               <input value={name} onChange={(e) => onName(e.target.value)} placeholder="받는 분 성함" className={field} />
               <input value={phone} onChange={(e) => onPhone(e.target.value)} placeholder="연락처 (010-0000-0000)" className={field} />
             </div>
+            {/* 이니시스 V2 일반결제는 구매자 이메일이 필수 — 비회원은 직접 입력받는다(2026-09-01) */}
+            {isGuest && (
+              <input
+                value={email}
+                onChange={(e) => onEmail(e.target.value)}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="이메일 (결제 영수증·주문 안내 발송)"
+                className={field}
+              />
+            )}
             <div className="flex gap-2">
               <input
                 value={address}

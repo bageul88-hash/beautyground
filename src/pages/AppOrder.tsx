@@ -65,6 +65,9 @@ export default function AppOrder() {
   const [isGuest, setIsGuest] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  // 비회원 주문 이메일(2026-09-01): KG이니시스 V2 일반결제는 구매자 이메일이 필수 —
+  // 없으면 prepare 단계에서 400으로 막혀 결제창 자체가 안 뜬다. 회원은 가입 이메일을 그대로 쓴다.
+  const [email, setEmail] = useState('')
   const [address, setAddress] = useState('')
   const [addressDetail, setAddressDetail] = useState('')
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([])
@@ -186,6 +189,7 @@ export default function AppOrder() {
         return
       }
       const meta = session.user.user_metadata as { name?: string; phone?: string } | undefined
+      setEmail(session.user.email ?? '')
       const [addrs, reval, balance, coupons] = await Promise.all([
         getAddresses(), revalidateItems(initialItems), getMyPointsBalance(), getMyValidCoupons(),
       ])
@@ -310,6 +314,11 @@ export default function AppOrder() {
       setMessage('연락처를 휴대폰 번호 형식(010-0000-0000)으로 입력해 주세요.')
       return
     }
+    // 이니시스 V2 일반결제 필수값 — 비면 결제창 호출 자체가 실패한다
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setMessage('결제 영수증을 받으실 이메일을 정확히 입력해 주세요.')
+      return
+    }
     if (!storeId || !channelKey) {
       setMessage('아직 결제 수단을 준비하고 있어요. 정식 오픈 후 결제하실 수 있습니다. 조금만 기다려 주세요!')
       return
@@ -332,6 +341,7 @@ export default function AppOrder() {
 
     setStatus('paying')
     const { data: { user } } = await supabase.auth.getUser()
+    const buyerEmail = email.trim() || user?.email || null
 
     // 상품별 partner_id 조회 (파트너 주문관리 연결용)
     const productIds = items.map((i) => i.product_id)
@@ -398,7 +408,7 @@ export default function AppOrder() {
       amount: i.price * i.quantity,
       buyer_name: name.trim(),
       buyer_phone: phone.trim(),
-      buyer_email: user?.email ?? null,
+      buyer_email: buyerEmail,
       status: 'pending',
       user_id: user?.id ?? null,
       delivery_memo: memo,
@@ -419,7 +429,7 @@ export default function AppOrder() {
         amount: deliveryFee,
         buyer_name: name.trim(),
         buyer_phone: phone.trim(),
-        buyer_email: user?.email ?? null,
+        buyer_email: buyerEmail,
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
@@ -440,7 +450,7 @@ export default function AppOrder() {
         amount: -couponDiscount,
         buyer_name: name.trim(),
         buyer_phone: phone.trim(),
-        buyer_email: user?.email ?? null,
+        buyer_email: buyerEmail,
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
@@ -461,7 +471,7 @@ export default function AppOrder() {
         amount: -redeemedPoints,
         buyer_name: name.trim(),
         buyer_phone: phone.trim(),
-        buyer_email: user?.email ?? null,
+        buyer_email: buyerEmail,
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
@@ -482,7 +492,7 @@ export default function AppOrder() {
         amount: -signupCouponPreview,
         buyer_name: name.trim(),
         buyer_phone: phone.trim(),
-        buyer_email: user?.email ?? null,
+        buyer_email: buyerEmail,
         status: 'pending',
         user_id: user?.id ?? null,
         delivery_memo: memo,
@@ -520,7 +530,7 @@ export default function AppOrder() {
         totalAmount: finalTotal,
         currency: 'CURRENCY_KRW',
         payMethod: 'CARD',
-        customer: { fullName: name.trim(), phoneNumber: phone.trim(), email: user?.email ?? undefined },
+        customer: { fullName: name.trim(), phoneNumber: phone.trim(), email: buyerEmail ?? undefined },
         redirectUrl: `${window.location.origin}/app/order`,
       })
     } catch (err) {
@@ -638,6 +648,8 @@ export default function AppOrder() {
         onName={editField(setName)}
         phone={phone}
         onPhone={editField(setPhone)}
+        email={email}
+        onEmail={setEmail}
         address={address}
         onSearchAddress={handleSearchAddress}
         addressDetail={addressDetail}
@@ -742,6 +754,17 @@ export default function AppOrder() {
 
         <input value={name} onChange={(e) => editField(setName)(e.target.value)} placeholder="받는 분 성함" className={field} />
         <input value={phone} onChange={(e) => editField(setPhone)(e.target.value)} placeholder="연락처 (010-0000-0000)" className={field} />
+        {isGuest && (
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="이메일 (결제 영수증·주문 안내 발송)"
+            className={field}
+          />
+        )}
         <div className="flex gap-2">
           <input
             value={address}
