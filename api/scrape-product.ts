@@ -2,6 +2,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import * as cheerio from 'cheerio'
 import { GoogleGenAI } from '@google/genai'
 import { imageSize } from 'image-size'
+import { createClient } from '@supabase/supabase-js'
+
+// 브랜드 셀러센터에서 URL 로 긁은 상품을 그대로 등록하는 저장 모드(2026-09-02).
+// Vercel 함수 12개 한도가 꽉 차 새 엔드포인트를 만들지 않고 이 API 에 mode:'save' 로 얹었다.
+// ⚠️ partner_id 는 요청값을 믿지 않고 서버가 토큰으로 조회해 강제한다 — 남의 브랜드로 등록 불가.
+const SUPABASE_URL_SAVE = process.env.SUPABASE_URL || 'https://bjqtuklkskrqzbuxdwxm.supabase.co'
+const SERVICE_ROLE_SAVE = process.env.SUPABASE_SERVICE_ROLE_KEY
+const ALLOWED_CATEGORIES = ['스킨케어', '메이크업', '향수', '헤어·바디', '이너뷰티', '뷰티 디바이스', '기타']
 
 // 상품 카테고리 (폼 드롭다운과 일치)
 const CATEGORIES = ['스킨케어', '메이크업', '향수', '헤어·바디', '이너뷰티', '뷰티 디바이스', '기타']
@@ -165,6 +173,75 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
   const url = (body as { url?: string } | null)?.url?.trim()
+
+  // ── 저장 모드: 브랜드 셀러센터가 미리보기에서 확인한 상품을 그대로 등록한다 ──
+  if ((body as { mode?: string } | null)?.mode === 'save') {
+    if (!SERVICE_ROLE_SAVE) {
+      res.status(500).json({ ok: false, error: '서버 설정 오류(SUPABASE_SERVICE_ROLE_KEY 누락).' })
+      return
+    }
+    const token = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      res.status(401).json({ ok: false, error: '로그인이 필요합니다.' })
+      return
+    }
+    const sb = createClient(SUPABASE_URL_SAVE, SERVICE_ROLE_SAVE)
+    const { data: userData } = await sb.auth.getUser(token)
+    const user = userData?.user
+    if (!user) {
+      res.status(401).json({ ok: false, error: '인증에 실패했습니다. 다시 로그인해 주세요.' })
+      return
+    }
+    // partner_id 는 절대 요청값을 쓰지 않는다 — 토큰 주인의 브랜드로 강제
+    const { data: partner } = await sb
+      .from('partners')
+      .select('id, brand_name, status')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (!partner) {
+      res.status(403).json({ ok: false, error: '브랜드 계정이 아닙니다. 담당자에게 문의해 주세요.' })
+      return
+    }
+
+    const p = (body as { product?: Record<string, unknown> } | null)?.product ?? {}
+    const name = String(p.name ?? '').trim()
+    const price = Number(p.price ?? 0)
+    const category = String(p.category ?? '')
+    if (!name) { res.status(400).json({ ok: false, error: '상품명을 입력해 주세요.' }); return }
+    if (!Number.isFinite(price) || price <= 0) { res.status(400).json({ ok: false, error: '판매가를 올바르게 입력해 주세요.' }); return }
+    if (!ALLOWED_CATEGORIES.includes(category)) { res.status(400).json({ ok: false, error: '카테고리를 선택해 주세요.' }); return }
+
+    const salePriceRaw = Number(p.sale_price ?? 0)
+    const salePrice = Number.isFinite(salePriceRaw) && salePriceRaw > 0 && salePriceRaw < price ? salePriceRaw : null
+    const stockRaw = Number(p.stock ?? 0)
+    const stock = Number.isFinite(stockRaw) && stockRaw >= 0 ? Math.floor(stockRaw) : 0
+    const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string').slice(0, 30) : [])
+
+    const row = {
+      name,
+      price: Math.round(price),
+      sale_price: salePrice,
+      category,
+      description: typeof p.description === 'string' ? p.description.slice(0, 4000) : null,
+      thumbnail_url: typeof p.thumbnail_url === 'string' ? p.thumbnail_url : null,
+      gallery_images: arr(p.images),
+      detail_images: arr(p.detail_images),
+      source_url: typeof p.source_url === 'string' ? p.source_url : null,
+      partner_id: partner.id,
+      brand: partner.brand_name ?? null,
+      stock,
+      // 등록 직후 바로 노출하지 않는다 — 관리자가 /admin/products 에서 확인 후 '판매중'으로 바꾼다
+      // (products.status 는 on_sale/sold_out/hidden 만 허용하므로 hidden 을 검수 대기로 쓴다)
+      status: 'hidden',
+    }
+    const { data: inserted, error: insErr } = await sb.from('products').insert(row).select('id').single()
+    if (insErr) {
+      res.status(200).json({ ok: false, error: `등록에 실패했습니다: ${insErr.message}` })
+      return
+    }
+    res.status(200).json({ ok: true, id: inserted?.id })
+    return
+  }
 
   if (!url || !/^https?:\/\//i.test(url)) {
     res.status(400).json({ ok: false, error: '올바른 상품 페이지 URL 을 입력해 주세요.' })
