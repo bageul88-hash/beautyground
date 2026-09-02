@@ -12,7 +12,6 @@ import { IconHeartFilled, IconSend2, IconUserCircle, IconBrandFacebook, IconBran
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
 import DesktopLiveWatch from '../../components/live/DesktopLiveWatch'
 import ReplayPlayer from '../../components/live/ReplayPlayer'
-import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
 
 const statusLabel: Record<Live['status'], string> = {
@@ -55,7 +54,7 @@ const nicknameColor = (nickname: string): string => {
 export default function ShopLiveWatch() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { mode, isDesktop, toggle } = useViewMode()
+  const { isDesktop } = useViewMode()
 
   const [live, setLive] = useState<Live | null>(null)
   const [hostName, setHostName] = useState<string | null>(null)
@@ -374,7 +373,6 @@ export default function ShopLiveWatch() {
   if (isDesktop && live) {
     return (
       <>
-        <ViewModeToggle mode={mode} onToggle={toggle} />
         <DesktopLiveWatch
           live={live}
           hostName={hostName}
@@ -413,7 +411,6 @@ export default function ShopLiveWatch() {
 
   return (
     <div className="fixed inset-0 z-0 bg-black flex justify-center">
-      <ViewModeToggle mode={mode} onToggle={toggle} />
       <div className="relative w-full h-full max-w-[480px] overflow-hidden">
         {loading ? (
           <div className="h-full flex items-center justify-center text-white/70 text-[14px]">불러오는 중…</div>
@@ -444,7 +441,8 @@ export default function ShopLiveWatch() {
                 <>
                   <ReplayPlayer src={streamSrc} title="다시보기 영상" />
                   {replayUrls.length > 1 && (
-                    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                    <div className="absolute left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5" style={{ bottom: 76 }}>
+                      {/* 재생바(52px, bottom-0) 위 12px 간격 — 채팅 입력줄과 안 겹치도록 별도 오프셋 */}
                       {replayUrls.map((_, i) => (
                         <button
                           key={i}
@@ -649,7 +647,14 @@ export default function ShopLiveWatch() {
                 클릭을 가로채 우측 아이콘 레일을 덮어버리는 문제가 있었음. 실제 상호작용 요소에만 auto로 되살림. */}
             <div
               className="absolute inset-x-0 bottom-0 z-30 px-3 flex flex-col gap-2 pointer-events-none"
-              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
+              style={{
+                // 다시보기는 화면 최하단에 커스텀 재생바(ReplayPlayer, 52px)가 떠 있어서
+                // 채팅 입력줄이 그 위에 그대로 겹쳐 보이는 문제가 있었다(2026-09-03) — 재생바 +
+                // 파트 선택 pill(76px)까지 확실히 피하도록 이 스택 전체를 위로 띄운다.
+                paddingBottom: activeReplayUrl
+                  ? 'calc(env(safe-area-inset-bottom) + 108px)'
+                  : 'calc(env(safe-area-inset-bottom) + 10px)',
+              }}
             >
               {liveCoupon && !couponSoldOut(liveCoupon) && (
                 <div className="mr-14 bg-black/45 backdrop-blur-sm border border-gold/40 rounded-lg px-3 py-2">
