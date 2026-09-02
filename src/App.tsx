@@ -60,6 +60,8 @@ const AdminOrders = lazy(() => import('./pages/admin/Orders'))
 const AdminShipping = lazy(() => import('./pages/admin/Shipping'))
 const AdminProducts = lazy(() => import('./pages/admin/Products'))
 const AdminLives = lazy(() => import('./pages/admin/Lives'))
+// 방송 지원(운영) 화면 — 진행자가 상품을 못 거는 링크 방식일 때 운영팀이 대신 상품을 걸고 채팅 응대한다.
+const AdminLiveSupport = lazy(() => import('./pages/admin/LiveSupport'))
 const AdminCoupons = lazy(() => import('./pages/admin/Coupons'))
 const AdminCouponGenerator = lazy(() => import('./pages/admin/CouponGenerator'))
 const AdminExportInquiries = lazy(() => import('./pages/admin/ExportInquiries'))
@@ -210,6 +212,7 @@ export default function App() {
             <Route path="/admin/shipping" element={<AdminShipping />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/lives" element={<AdminLives />} />
+            <Route path="/admin/lives/:id/support" element={<AdminLiveSupport />} />
             <Route path="/admin/coupons" element={<AdminCoupons />} />
             <Route path="/admin/coupon-generator" element={<AdminCouponGenerator />} />
             <Route path="/admin/export-inquiries" element={<AdminExportInquiries />} />

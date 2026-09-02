@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+// 관리자 여부는 로그인 세션 동안 바뀌지 않으므로 한 번만 조회해 재사용한다(메시지마다 왕복 방지).
+let adminCache: boolean | null = null
+
 export interface ChatMessage {
   id: number
   live_id: string
@@ -95,8 +98,15 @@ export function useLiveChat(liveId: string | undefined): UseLiveChat {
       return false
     }
 
-    // (2) 닉네임 = 이메일 @ 앞부분
-    const nickname = (user.email ?? '').split('@')[0] || '익명'
+    // (2) 닉네임 = 이메일 @ 앞부분.
+    //     단 운영팀(관리자)이 보내면 'beautyground.official' 같은 계정 아이디가 그대로 노출되므로
+    //     '매니저'로 표시한다 — 시청자·진행자가 운영팀 메시지임을 바로 알아보게 하는 목적.
+    let nickname = (user.email ?? '').split('@')[0] || '익명'
+    if (adminCache === null) {
+      const { data: adminFlag } = await supabase.rpc('is_admin')
+      adminCache = adminFlag === true
+    }
+    if (adminCache) nickname = '매니저'
 
     // (3) insert — user_id 에 반드시 user.id (RLS with check 통과 핵심)
     const { error } = await supabase.from('chat_messages').insert({

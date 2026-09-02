@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { Live } from '../../lib/types'
 import { formatDateTime } from '../../lib/format'
@@ -144,6 +145,13 @@ export default function AdminLives() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
+                          {/* 방송 지원 — 진행자 대신 상품을 걸고 채팅으로 응대하는 운영 화면 */}
+                          <Link
+                            to={`/admin/lives/${l.id}/support`}
+                            className="text-[12px] font-bold text-paper bg-ink px-2.5 py-1.5 rounded-control whitespace-nowrap"
+                          >
+                            방송 지원
+                          </Link>
                           {l.status !== 'ended' && (
                             <Button variant="danger" size="sm" label="강제 종료" disabled={busyId === l.id} onClick={() => void forceEnd(l)} />
                           )}

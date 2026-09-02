@@ -56,6 +56,33 @@ export default function HostGoLive() {
   const streamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const markedRef = useRef(false)
+  const [ending, setEnding] = useState(false)
+  const [endMsg, setEndMsg] = useState<string | null>(null)
+
+  // 방송 종료 — 상태를 ended 로 내리고 서버가 Cloudflare 녹화본을 찾아 다시보기로 연결한다.
+  const endBroadcast = async () => {
+    if (!token || ending) return
+    setEnding(true)
+    setEndMsg(null)
+    try {
+      const r = await fetch('/api/live-input', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hostToken: token, markEnded: true }),
+      })
+      const j = (await r.json().catch(() => ({}))) as { ok?: boolean; playbackUrl?: string | null; reason?: string }
+      if (!r.ok || !j.ok) {
+        setBroadcastErr(j.reason ?? '종료 처리에 실패했습니다.')
+        return
+      }
+      setLive((prev) => (prev ? { ...prev, status: 'ended' } : prev))
+      setEndMsg(j.playbackUrl ? '방송을 종료하고 다시보기를 저장했습니다.' : '방송을 종료했습니다. (녹화본은 잠시 후 연결됩니다)')
+    } catch {
+      setBroadcastErr('종료 처리 중 오류가 발생했습니다.')
+    } finally {
+      setEnding(false)
+    }
+  }
 
   const streamState = useStreamStatus(live?.stream_uid, live?.status !== 'ended', 5000)
 
@@ -252,6 +279,20 @@ export default function HostGoLive() {
           >
             {streamState === 'connected' ? '● 방송 중' : '방송 대기'}
           </span>
+
+          {/* RTMPS(앱 송출)는 우리 화면에 "종료" 시점이 없어서, 끝나도 계속 방송중으로 남고
+              녹화본도 연결되지 않았다. 진행자가 이 버튼을 누르면 종료 처리 + 녹화본 자동 연결을 한다. */}
+          {live.status === 'live' && !broadcasting && (
+            <button
+              type="button"
+              onClick={endBroadcast}
+              disabled={ending}
+              className="w-full mt-3 text-[13px] font-semibold text-[#111] bg-[#F3F1EC] rounded-full py-2.5 disabled:opacity-60"
+            >
+              {ending ? '종료 처리 중…' : '방송 종료하고 다시보기 저장'}
+            </button>
+          )}
+          {endMsg && <p className="text-[12px] text-[#1E7B3C] mt-2">{endMsg}</p>}
         </div>
 
         {!streamInfo ? (

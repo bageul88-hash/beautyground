@@ -319,7 +319,16 @@ export default function ShopLiveWatch() {
 
   // 링크로 들어오자마자 방송이 나오도록 자동재생. 브라우저가 소리 있는 자동재생을 막으므로
   // 음소거로 시작하고, 시청자가 "소리 켜기"를 누르면 muted=false 로 다시 불러온다(유튜브·틱톡 방식).
-  const streamSrc = streamIframeSrc(live?.stream_uid, { autoplay: true, muted: !soundOn })
+  // 종료된 방송은 라이브 입력(stream_uid)이 아니라 녹화본을 틀어야 한다.
+  // 라이브 입력을 그대로 틀면 송출이 끝났으므로 "Stream has not started yet." 만 뜬다.
+  // playback_url 에는 방송 종료 시 api/live-input(markEnded)이 넣어준 Cloudflare 녹화본 iframe 주소가 들어있다.
+  const replaySrc =
+    live?.status === 'ended' && live.playback_url && /cloudflarestream\.com/.test(live.playback_url)
+      ? `${live.playback_url}${live.playback_url.includes('?') ? '&' : '?'}autoplay=true${
+          soundOn ? '' : '&muted=true'
+        }`
+      : null
+  const streamSrc = replaySrc ?? streamIframeSrc(live?.stream_uid, { autoplay: true, muted: !soundOn })
   // 실제 송출 연결 여부 — status='live'인데 송출이 끊겨 있으면 대기 화면을 보여주고,
   // 폴링으로 연결이 감지되면 자동으로 플레이어로 전환된다. 조회 실패(unknown)면 차단하지 않는다.
   const streamState = useStreamStatus(live?.stream_uid, live?.status === 'live')

@@ -19,6 +19,9 @@ const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
 const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID
 const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN
 const CF_API = 'https://api.cloudflare.com/client/v4'
+// 공개 재생 도메인(비밀 아님) — src/lib/cloudflare.ts 의 CF_STREAM_SUBDOMAIN 과 같은 값.
+// 방송 종료 시 녹화본(VOD) 재생 주소를 만들어 lives.playback_url 에 저장하는 데 쓴다.
+const CF_STREAM_SUBDOMAIN = process.env.CF_STREAM_SUBDOMAIN || 'customer-musyiv3qecrzgpdk'
 
 // 팔로우한 브랜드 라이브 시작 알림(웹 푸시). 같은 12개 함수 한도 이유로 이 파일에 합침.
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY
@@ -252,6 +255,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? String(req.query.hostToken ?? '')
       : String((body as { hostToken?: string } | null)?.hostToken ?? '')
   const markLive = req.method === 'POST' && (body as { markLive?: boolean } | null)?.markLive === true
+  // 방송 종료 — 상태를 ended 로 내리고, 그 방송의 Cloudflare 녹화본을 찾아 다시보기로 연결한다.
+  const markEnded = req.method === 'POST' && (body as { markEnded?: boolean } | null)?.markEnded === true
   let liveId =
     req.method === 'GET'
       ? String(req.query.liveId ?? '')
@@ -288,6 +293,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         host_id: (liveRow.host_id as string | null) ?? null,
       })
       res.status(200).json({ ok: true })
+      return
+    }
+
+    // 방송 종료 — 상태를 ended 로 내리고, 이 방송의 녹화본(VOD)을 찾아 다시보기 주소로 연결한다.
+    // Cloudflare는 라이브 입력에서 녹화된 영상에 liveInput 필드를 달아주므로 그걸로 골라낸다.
+    // 녹화본 조회가 실패해도 종료 처리 자체는 반드시 되게 한다(방송이 계속 켜져 보이는 게 더 나쁨).
+    if (markEnded) {
+      const patch: { status: string; playback_url?: string } = { status: 'ended' }
+      const streamUid = (liveRow.stream_uid as string | null) ?? null
+      if (streamUid && CF_ACCOUNT_ID && CF_API_TOKEN) {
+        try {
+          const vr = await fetch(`${CF_API}/accounts/${CF_ACCOUNT_ID}/stream?limit=50`, {
+            headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
+          })
+          const vj = (await vr.json()) as {
+            result?: Array<{ uid: string; liveInput?: string; created?: string; status?: { state?: string } }>
+          }
+          const mine = (vj.result ?? [])
+            .filter((v) => v.liveInput === streamUid && v.status?.state !== 'error')
+            .sort((a, b) => String(b.created ?? '').localeCompare(String(a.created ?? '')))
+          if (mine[0]) {
+            patch.playback_url = `https://${CF_STREAM_SUBDOMAIN}.cloudflarestream.com/${mine[0].uid}/iframe`
+          }
+        } catch (e) {
+          console.error('[live-input] recording lookup failed', e)
+        }
+      }
+      const { error: endErr } = await supabase.from('lives').update(patch).eq('id', liveId)
+      if (endErr) {
+        res.status(500).json({ ok: false, reason: '종료 처리에 실패했습니다.' })
+        return
+      }
+      res.status(200).json({ ok: true, playbackUrl: patch.playback_url ?? null })
       return
     }
   } else {
