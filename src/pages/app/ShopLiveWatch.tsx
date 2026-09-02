@@ -260,7 +260,10 @@ export default function ShopLiveWatch() {
     return () => { active = false }
   }, [id])
 
-  // 판매자 조작(지금판매·공지핀·방송상태)을 실시간 수신 — lives 행 UPDATE 구독
+  // 판매자 조작(지금판매·공지핀·방송상태)을 실시간 수신 — lives 행 UPDATE 구독.
+  // product_ids 자체가 바뀌면(방송 중 새 상품 추가) 상품 데이터를 다시 불러온다 — 안 그러면
+  // highlight_product_id만 실시간으로 바뀌고 정작 그 상품 정보(이름·가격·이미지)가 없어서
+  // 화면엔 계속 이전 상품이 보이는 버그가 있었다(2026-09-02 실제 방송 중 발견).
   useEffect(() => {
     if (!id) return
     const ch = supabase
@@ -269,7 +272,17 @@ export default function ShopLiveWatch() {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'lives', filter: `id=eq.${id}` },
         (payload) => {
-          setLive((prev) => (prev ? { ...prev, ...(payload.new as Partial<Live>) } : prev))
+          const next = payload.new as Partial<Live>
+          setLive((prev) => (prev ? { ...prev, ...next } : prev))
+          if (next.product_ids && next.product_ids.length > 0) {
+            void supabase
+              .from('products')
+              .select('*')
+              .in('id', next.product_ids)
+              .then(({ data }) => setProducts((data ?? []) as Product[]))
+          } else if (next.product_ids) {
+            setProducts([])
+          }
         }
       )
       .subscribe()
