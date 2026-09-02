@@ -71,6 +71,8 @@ export default function ShopLiveWatch() {
   const [youtubePlaying, setYoutubePlaying] = useState(false)
   // 라이브 자동재생은 음소거로만 허용되므로(브라우저 정책), 시청자가 직접 켜기 전까지 false
   const [soundOn, setSoundOn] = useState(false)
+  // 송출이 중간에 끊겼다 재연결되면 녹화본이 여러 개로 쪼개진다 — 그때 어느 구간을 보고 있는지
+  const [replayPart, setReplayPart] = useState(0)
 
   // 구매 폼 상태 — 수량만 고르고 정식 주문/결제 페이지(/app/order)로 넘긴다
   const [buyProduct, setBuyProduct] = useState<Product | null>(null)
@@ -334,13 +336,27 @@ export default function ShopLiveWatch() {
   // 음소거로 시작하고, 시청자가 "소리 켜기"를 누르면 muted=false 로 다시 불러온다(유튜브·틱톡 방식).
   // 종료된 방송은 라이브 입력(stream_uid)이 아니라 녹화본을 틀어야 한다.
   // 라이브 입력을 그대로 틀면 송출이 끝났으므로 "Stream has not started yet." 만 뜬다.
-  // playback_url 에는 방송 종료 시 api/live-input(markEnded)이 넣어준 Cloudflare 녹화본 iframe 주소가 들어있다.
-  const replaySrc =
-    live?.status === 'ended' && live.playback_url && /cloudflarestream\.com/.test(live.playback_url)
-      ? `${live.playback_url}${live.playback_url.includes('?') ? '&' : '?'}autoplay=true${
-          soundOn ? '' : '&muted=true'
-        }`
-      : null
+  // playback_url 에는 방송 종료 시 api/live-input(markEnded)이 넣어준 Cloudflare 녹화본 iframe 주소가
+  // 들어있다. 송출이 중간에 끊겼다 재연결된 방송은 녹화본이 여러 개라 JSON 배열 문자열로 저장되어
+  // 있다(2026-09-02) — 컬럼 스키마를 새로 안 만들고 재사용하는 방식. 단일 URL 문자열과 둘 다 처리.
+  const replayUrls = (() => {
+    if (live?.status !== 'ended' || !live.playback_url) return []
+    if (live.playback_url.startsWith('[')) {
+      try {
+        const arr = JSON.parse(live.playback_url) as unknown
+        return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === 'string') : []
+      } catch {
+        return []
+      }
+    }
+    return /cloudflarestream\.com/.test(live.playback_url) ? [live.playback_url] : []
+  })()
+  const activeReplayUrl = replayUrls[Math.min(replayPart, replayUrls.length - 1)] ?? null
+  const replaySrc = activeReplayUrl
+    ? `${activeReplayUrl}${activeReplayUrl.includes('?') ? '&' : '?'}autoplay=true${
+        soundOn ? '' : '&muted=true'
+      }`
+    : null
   const streamSrc = replaySrc ?? streamIframeSrc(live?.stream_uid, { autoplay: true, muted: !soundOn })
   // 실제 송출 연결 여부 — status='live'인데 송출이 끊겨 있으면 대기 화면을 보여주고,
   // 폴링으로 연결이 감지되면 자동으로 플레이어로 전환된다. 조회 실패(unknown)면 차단하지 않는다.
@@ -437,6 +453,22 @@ export default function ShopLiveWatch() {
                     >
                       🔇 탭해서 소리 켜기
                     </button>
+                  )}
+                  {replayUrls.length > 1 && (
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                      {replayUrls.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setReplayPart(i)}
+                          className={`rounded-full text-[11.5px] font-semibold px-3 py-1.5 backdrop-blur-sm ${
+                            i === replayPart ? 'bg-white text-black' : 'bg-black/60 text-white'
+                          }`}
+                        >
+                          {i + 1}부
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </>
               ) : youtubeEmbedSrc(live.stream_url) ? (

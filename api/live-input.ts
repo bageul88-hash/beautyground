@@ -121,10 +121,11 @@ async function markLiveEnded(supabase: SupabaseClient, liveId: string, streamUid
         headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
       })
       const vj = (await vr.json()) as {
-        result?: Array<{ uid: string; liveInput?: string; created?: string; status?: { state?: string } }>
+        result?: Array<{ uid: string; liveInput?: string; created?: string; duration?: number; status?: { state?: string } }>
       }
       const mine = (vj.result ?? [])
-        .filter((v) => v.liveInput === streamUid && v.status?.state !== 'error')
+        // duration<15초는 연결 순간의 잡음(재연결 시도 등)이라 다시보기에 노출할 내용이 아니다.
+        .filter((v) => v.liveInput === streamUid && v.status?.state !== 'error' && (v.duration ?? 0) >= 15)
         .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')))
         .map((v) => `https://${CF_STREAM_SUBDOMAIN}.cloudflarestream.com/${v.uid}/iframe`)
       if (mine.length === 1) {
