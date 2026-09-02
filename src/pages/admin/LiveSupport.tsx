@@ -240,7 +240,9 @@ export default function LiveSupport() {
                           {highlightId === p.id && (
                             <span className="text-signal-red font-bold mr-1">● 대표</span>
                           )}
-                          <span className="text-ink-soft">{p.brand} </span>
+                          {p.brand && !p.name.startsWith(p.brand) && (
+                            <span className="text-ink-soft">{p.brand} </span>
+                          )}
                           {p.name}
                         </p>
                         <p className="text-[12px] font-bold text-ink">{won(p.sale_price ?? p.price)}</p>
@@ -312,7 +314,9 @@ export default function LiveSupport() {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] text-ink truncate">
-                          <span className="text-ink-soft">{p.brand} </span>
+                          {p.brand && !p.name.startsWith(p.brand) && (
+                            <span className="text-ink-soft">{p.brand} </span>
+                          )}
                           {p.name}
                         </p>
                         <p className="text-[11.5px] text-ink-soft">
