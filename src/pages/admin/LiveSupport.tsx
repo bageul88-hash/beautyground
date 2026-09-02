@@ -31,6 +31,9 @@ export default function LiveSupport() {
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)
+  // 방송 카드에 쓰는 대표 이미지 — /admin/lives 카드 목록에 그대로 나온다.
+  const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [hostName, setHostName] = useState<string | null>(null)
 
   const [soundOn, setSoundOn] = useState(false)
 
@@ -52,6 +55,13 @@ export default function LiveSupport() {
     setLive(row)
     setSelectedIds(row.product_ids ?? [])
     setHighlightId(row.highlight_product_id ?? null)
+    setThumbnailUrl(row.thumbnail_url ?? '')
+    if (row.host_id) {
+      const { data: h } = await supabase.from('hosts').select('name').eq('id', row.host_id).maybeSingle()
+      setHostName((h as { name: string | null } | null)?.name ?? null)
+    } else {
+      setHostName(null)
+    }
     setLoading(false)
   }, [id])
 
@@ -125,7 +135,11 @@ export default function LiveSupport() {
     setErr(null)
     const { error } = await supabase
       .from('lives')
-      .update({ product_ids: selectedIds, highlight_product_id: highlightId })
+      .update({
+        product_ids: selectedIds,
+        highlight_product_id: highlightId,
+        thumbnail_url: thumbnailUrl.trim() || null,
+      })
       .eq('id', id)
     setSaving(false)
     if (error) {
@@ -206,11 +220,33 @@ export default function LiveSupport() {
             )}
           </div>
           <p className="mt-2 text-[12px] text-ink-soft text-center">
-            시청자 화면{' '}
+            진행자 <b className="text-ink">{hostName ?? '미지정'}</b> · 시청자 화면{' '}
             <Link to={`/app/live/${live.id}`} target="_blank" className="underline">
               열기
             </Link>
           </p>
+
+          {/* 방송 카드 이미지 — /admin/lives 방송자 카드 목록에 그대로 쓰인다. */}
+          <div className="mt-4 bg-paper border border-rule p-3">
+            <p className="text-[12.5px] font-bold text-ink mb-1.5">방송 카드 이미지</p>
+            <p className="text-[11.5px] text-ink-soft mb-2">
+              방송자 목록 카드에 보이는 이미지입니다. 이미지 주소를 붙여넣고 저장하세요.
+            </p>
+            <div className="flex items-center gap-2">
+              {thumbnailUrl ? (
+                <img src={thumbnailUrl} alt="" className="w-12 h-16 object-cover border border-rule shrink-0" />
+              ) : (
+                <div className="w-12 h-16 bg-quiet border border-rule shrink-0" />
+              )}
+              <input
+                value={thumbnailUrl}
+                onChange={(e) => setThumbnailUrl(e.target.value)}
+                placeholder="https://…"
+                className="flex-1 min-w-0 border border-rule px-2.5 py-2 text-[12.5px] focus:outline-none"
+              />
+            </div>
+            <p className="text-[11.5px] text-ink-soft mt-1.5">아래 &quot;저장&quot; 버튼을 누르면 함께 저장됩니다.</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 min-w-0">

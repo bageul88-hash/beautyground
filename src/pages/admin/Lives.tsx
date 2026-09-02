@@ -6,7 +6,11 @@ import { formatDateTime } from '../../lib/format'
 import Button from '../../components/common/Button'
 
 type Filter = Live['status'] | 'all'
-type LiveRow = Live & { partners: { brand_name: string } | null }
+type LiveRow = Live & {
+  partners: { brand_name: string } | null
+  // 진행자 애칭 — 카드에 누가 진행하는 방송인지 바로 보이게 한다(2026-09-02)
+  hosts: { name: string | null } | null
+}
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: '전체' },
@@ -33,7 +37,7 @@ export default function AdminLives() {
     setLoading(true)
     const { data, error: err } = await supabase
       .from('lives')
-      .select('*, partners(brand_name)')
+      .select('*, partners(brand_name), hosts(name)')
       .order('created_at', { ascending: false })
     if (err) { setError(`목록 조회 실패: ${err.message}`); setLoading(false); return }
     setLives((data ?? []) as LiveRow[])
@@ -99,6 +103,54 @@ export default function AdminLives() {
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-md px-4 py-3 mb-5">{error}</div>
+        )}
+
+        {/* 방송자 카드 — 진행자가 여러 명일 때 누가 방송 중인지 한눈에 보고, 눌러서 바로 지원 화면으로
+            들어가기 위한 목록(2026-09-02). 이미지는 방송 썸네일(지원 화면에서 등록), 이름은 진행자 애칭. */}
+        {!loading && visible.length > 0 && (
+          <div className="mb-8">
+            <p className="text-[13px] font-bold text-ink mb-3">
+              방송자 목록 <span className="text-ink-soft font-normal">— 카드를 누르면 그 방송을 지원합니다</span>
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {visible.map((l) => {
+                const badge = STATUS_BADGE[l.status]
+                return (
+                  <Link
+                    key={`card-${l.id}`}
+                    to={`/admin/lives/${l.id}/support`}
+                    className="bg-paper border border-rule overflow-hidden hover:border-ink transition-colors"
+                  >
+                    <div className="relative w-full aspect-[9/16] bg-quiet">
+                      {l.thumbnail_url ? (
+                        <img src={l.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-[11.5px] text-ink-faint text-center px-2">
+                          이미지 없음
+                          <br />
+                          (지원 화면에서 등록)
+                        </div>
+                      )}
+                      <span
+                        className={`absolute top-2 left-2 inline-flex items-center rounded-pill px-2 py-0.5 text-[11px] font-bold ${badge.className}`}
+                      >
+                        {l.status === 'live' && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-signal-red mr-1 onair-dot" />
+                        )}
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div className="p-2.5">
+                      <p className="text-[12.5px] font-bold text-ink truncate">
+                        {l.hosts?.name ?? l.partners?.brand_name ?? '진행자 미지정'}
+                      </p>
+                      <p className="text-[11.5px] text-ink-soft truncate mt-0.5">{l.title}</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )}
 
         {loading ? (
