@@ -4,6 +4,7 @@ import type { Live, LiveCoupon, Product } from '../../lib/types'
 import type { ChatMessage } from '../../hooks/useLiveChat'
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
 import { IconHeart } from '../common/Icon'
+import ReplayPlayer from './ReplayPlayer'
 
 const CHAT_EMOJIS = [
   '😍', '❤️', '👍', '🔥', '😂', '😮', '👏', '🎉',
@@ -209,7 +210,29 @@ export default function DesktopLiveWatch({
                 <p className="relative text-paper text-[16px] font-bold mb-1">방송 준비 중입니다</p>
                 <p className="relative text-paper/80 text-[13px]">잠시 후 자동으로 시작됩니다</p>
               </div>
+            ) : streamSrc && replayParts && replayParts.length > 0 ? (
+              // 다시보기 — 되감기/빨리감기가 필요하므로 커스텀 재생바가 있는 플레이어 사용
+              <>
+                <ReplayPlayer src={streamSrc} title="다시보기 영상" />
+                {replayParts.length > 1 && (
+                  <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                    {replayParts.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => onReplayPartChange?.(i)}
+                        className={`rounded-full text-[12.5px] font-semibold px-3.5 py-1.5 backdrop-blur-sm ${
+                          i === replayPart ? 'bg-paper text-ink' : 'bg-black/60 text-paper'
+                        }`}
+                      >
+                        {i + 1}부
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             ) : streamSrc ? (
+              // 실시간 방송 — 되감기 개념이 없으므로 Cloudflare 기본 iframe 그대로
               <>
                 <iframe
                   src={streamSrc}
@@ -227,22 +250,6 @@ export default function DesktopLiveWatch({
                   >
                     🔇 클릭해서 소리 켜기
                   </button>
-                )}
-                {replayParts && replayParts.length > 1 && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
-                    {replayParts.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => onReplayPartChange?.(i)}
-                        className={`rounded-full text-[12.5px] font-semibold px-3.5 py-1.5 backdrop-blur-sm ${
-                          i === replayPart ? 'bg-paper text-ink' : 'bg-black/60 text-paper'
-                        }`}
-                      >
-                        {i + 1}부
-                      </button>
-                    ))}
-                  </div>
                 )}
               </>
             ) : youtubeEmbedSrc ? (

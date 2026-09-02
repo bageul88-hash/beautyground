@@ -11,6 +11,7 @@ import { subscribeToPush } from '../../lib/pushNotifications'
 import { IconHeartFilled, IconSend2, IconUserCircle, IconBrandFacebook, IconBrandX, IconLink, IconBellPlus, IconBellFilled } from '@tabler/icons-react'
 import { couponLabel, couponRemaining, couponSoldOut } from '../../lib/coupons'
 import DesktopLiveWatch from '../../components/live/DesktopLiveWatch'
+import ReplayPlayer from '../../components/live/ReplayPlayer'
 import ViewModeToggle from '../../components/layout/ViewModeToggle'
 import { useViewMode } from '../../lib/viewMode'
 
@@ -438,7 +439,29 @@ export default function ShopLiveWatch() {
                   <p className="relative text-white text-[15px] font-bold mb-1">방송 준비 중입니다</p>
                   <p className="relative text-white/80 text-[12px]">잠시 후 자동으로 시작됩니다</p>
                 </div>
+              ) : streamSrc && activeReplayUrl ? (
+                // 다시보기 — 되감기/빨리감기가 필요하므로 커스텀 재생바가 있는 플레이어 사용
+                <>
+                  <ReplayPlayer src={streamSrc} title="다시보기 영상" />
+                  {replayUrls.length > 1 && (
+                    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                      {replayUrls.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setReplayPart(i)}
+                          className={`rounded-full text-[11.5px] font-semibold px-3 py-1.5 backdrop-blur-sm ${
+                            i === replayPart ? 'bg-white text-black' : 'bg-black/60 text-white'
+                          }`}
+                        >
+                          {i + 1}부
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               ) : streamSrc ? (
+                // 실시간 방송 — 되감기 개념이 없으므로 Cloudflare 기본 iframe 그대로
                 <>
                   <iframe
                     src={streamSrc}
@@ -456,22 +479,6 @@ export default function ShopLiveWatch() {
                     >
                       🔇 탭해서 소리 켜기
                     </button>
-                  )}
-                  {replayUrls.length > 1 && (
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
-                      {replayUrls.map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setReplayPart(i)}
-                          className={`rounded-full text-[11.5px] font-semibold px-3 py-1.5 backdrop-blur-sm ${
-                            i === replayPart ? 'bg-white text-black' : 'bg-black/60 text-white'
-                          }`}
-                        >
-                          {i + 1}부
-                        </button>
-                      ))}
-                    </div>
                   )}
                 </>
               ) : youtubeEmbedSrc(live.stream_url) ? (
