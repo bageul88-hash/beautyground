@@ -20,6 +20,10 @@ interface Props {
   streamSrc: string | null
   // 자동재생은 음소거로만 허용되므로, 소리를 켜지 않은 동안만 값이 들어온다(켜면 undefined)
   onSoundOn?: () => void
+  // 송출이 끊겼다 재연결된 방송은 다시보기가 여러 조각으로 나뉜다 — 2개 이상일 때만 선택 UI 노출
+  replayParts?: string[]
+  replayPart?: number
+  onReplayPartChange?: (i: number) => void
   youtubeEmbedSrc: string | null
   liveCoupon: LiveCoupon | null
   orderedProducts: Product[]
@@ -54,6 +58,9 @@ export default function DesktopLiveWatch({
   waitingForStream,
   streamSrc,
   onSoundOn,
+  replayParts,
+  replayPart = 0,
+  onReplayPartChange,
   youtubeEmbedSrc,
   liveCoupon,
   orderedProducts,
@@ -220,6 +227,22 @@ export default function DesktopLiveWatch({
                   >
                     🔇 클릭해서 소리 켜기
                   </button>
+                )}
+                {replayParts && replayParts.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                    {replayParts.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => onReplayPartChange?.(i)}
+                        className={`rounded-full text-[12.5px] font-semibold px-3.5 py-1.5 backdrop-blur-sm ${
+                          i === replayPart ? 'bg-paper text-ink' : 'bg-black/60 text-paper'
+                        }`}
+                      >
+                        {i + 1}부
+                      </button>
+                    ))}
+                  </div>
                 )}
               </>
             ) : youtubeEmbedSrc ? (

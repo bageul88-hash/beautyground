@@ -382,6 +382,9 @@ export default function ShopLiveWatch() {
           waitingForStream={waitingForStream}
           streamSrc={streamSrc}
           onSoundOn={soundOn ? undefined : () => setSoundOn(true)}
+          replayParts={replayUrls}
+          replayPart={replayPart}
+          onReplayPartChange={setReplayPart}
           youtubeEmbedSrc={youtubeEmbedSrc(live.stream_url)}
           liveCoupon={liveCoupon}
           orderedProducts={orderedProducts}
