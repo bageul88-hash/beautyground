@@ -102,12 +102,22 @@ export default function DesktopMyPage({
               </div>
             ))}
           </div>
-          <button
-            onClick={() => navigate('/app/account')}
-            className="text-[12px] text-ink-soft rounded-control border border-rule px-4 py-2 shrink-0 focus:outline-none focus-visible:shadow-ring"
-          >
-            프로필 수정
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => navigate('/app/account')}
+              className="text-[12px] text-ink-soft rounded-control border border-rule px-4 py-2 focus:outline-none focus-visible:shadow-ring"
+            >
+              프로필 수정
+            </button>
+            {loggedIn && (
+              <button
+                onClick={onLogout}
+                className="text-[12px] text-ink-faint rounded-control border border-rule px-4 py-2 focus:outline-none focus-visible:shadow-ring"
+              >
+                로그아웃
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 회원 등급 */}
@@ -223,20 +233,16 @@ export default function DesktopMyPage({
           </div>
         )}
 
-        <div className="py-6">
-          {loggedIn === false ? (
+        {loggedIn === false && (
+          <div className="py-6">
             <button
               onClick={() => navigate('/app/login', { state: { from: '/app/mypage' } })}
               className="text-[13px] text-ink-faint underline focus:outline-none focus-visible:shadow-ring"
             >
               로그인
             </button>
-          ) : (
-            <button onClick={onLogout} className="text-[13px] text-ink-faint underline focus:outline-none focus-visible:shadow-ring">
-              로그아웃
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
