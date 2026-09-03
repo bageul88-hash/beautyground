@@ -8,10 +8,12 @@ interface Props {
   loggedIn: boolean
   lines: WishlistLine[]
   onRemove: (line: WishlistLine) => void
+  isVvip: boolean
+  linePrice: (p: WishlistLine['product']) => number
 }
 
 // PC 버전 — 찜 목록을 4열 그리드로. 빈 상태/비로그인 상태는 중앙 안내만 넓혀서 재사용.
-export default function DesktopWishlist({ loggedIn, lines, onRemove }: Props) {
+export default function DesktopWishlist({ loggedIn, lines, onRemove, isVvip, linePrice }: Props) {
   const navigate = useNavigate()
 
   return (
@@ -45,10 +47,16 @@ export default function DesktopWishlist({ loggedIn, lines, onRemove }: Props) {
             </button>
           </div>
         ) : (
+          <>
+          {isVvip && (
+            <div className="bg-signal-yellow/20 border border-rule px-5 py-2.5 mb-5">
+              <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인가로 표시했어요</p>
+            </div>
+          )}
           <div className="grid grid-cols-4 gap-5">
             {lines.map((line) => {
               const p = line.product
-              const sell = p.sale_price ?? p.price
+              const sell = linePrice(p)
               return (
                 <div key={line.id} className="relative">
                   <button
@@ -73,6 +81,7 @@ export default function DesktopWishlist({ loggedIn, lines, onRemove }: Props) {
               )
             })}
           </div>
+          </>
         )}
       </div>
     </div>

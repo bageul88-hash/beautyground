@@ -11,6 +11,8 @@ import { getCart, updateCartQuantity, removeFromCart, type CartLine } from '../l
 import { useCartRecommendations } from '../hooks/useCartRecommendations'
 import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from '../constants'
 import { IconCart, IconClose, IconMinus, IconPlus } from '../components/common/Icon'
+import { supabase } from '../lib/supabase'
+import { vvipPrice } from '../lib/vvip'
 
 export default function AppCart() {
   const navigate = useNavigate()
@@ -18,13 +20,21 @@ export default function AppCart() {
   const [loading, setLoading] = useState(true)
   const [lines, setLines] = useState<CartLine[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  // VVIP 할인 미리보기(찜/장바구니엔 실제 결제금액은 아니고 안내용 — 최종 금액은 AppOrder.tsx가 재산출)
+  const [isVvip, setIsVvip] = useState(false)
+  const [deptStoreByPartner, setDeptStoreByPartner] = useState<Map<string, boolean>>(new Map())
 
   useEffect(() => {
     let active = true
     ;(async () => {
       // 로그인 여부와 무관하게 장바구니를 불러온다(게스트는 브라우저 저장분).
-      const cart = await getCart()
+      const [cart, { data: vvipData, error: vvipErr }] = await Promise.all([
+        getCart(),
+        supabase.rpc('is_vvip'),
+      ])
       if (!active) return
+      const vvip = !vvipErr && vvipData === true
+      setIsVvip(vvip)
       // 담아둔 사이 재고가 줄어 수량이 초과된 라인은 재고에 맞춰 자동 조정
       const adjusted = cart.map((l) => {
         const stock = typeof l.product.stock === 'number' ? l.product.stock : 99
@@ -37,6 +47,15 @@ export default function AppCart() {
       setLines(adjusted)
       // 품절/판매중지 상품은 기본 선택에서 제외
       setSelected(new Set(adjusted.filter((l) => l.product.status === 'on_sale' && (typeof l.product.stock !== 'number' || l.product.stock > 0)).map((l) => l.id)))
+      if (vvip) {
+        const partnerIds = [...new Set(adjusted.map((l) => l.product.partner_id).filter((v): v is string => !!v))]
+        if (partnerIds.length > 0) {
+          const { data: partners } = await supabase.from('partners').select('id, is_dept_store_brand').in('id', partnerIds)
+          if (active) {
+            setDeptStoreByPartner(new Map(((partners ?? []) as { id: string; is_dept_store_brand: boolean }[]).map((p) => [p.id, p.is_dept_store_brand])))
+          }
+        }
+      }
       setLoading(false)
     })()
     return () => { active = false }
@@ -77,8 +96,16 @@ export default function AppCart() {
     else setSelected(new Set(selectableLines.map((l) => l.id)))
   }
 
+  // VVIP면 브랜드별(백화점 입점 20%/온라인 전용 30%) 할인가 미리보기 — 최종 결제금액은 AppOrder.tsx에서 재산출
+  const linePrice = (l: CartLine) => {
+    const base = l.product.sale_price ?? l.product.price
+    if (!isVvip) return base
+    const isDeptStore = l.product.partner_id ? (deptStoreByPartner.get(l.product.partner_id) ?? true) : true
+    return vvipPrice(base, isDeptStore)
+  }
+
   const selectedLines = lines.filter((l) => selected.has(l.id))
-  const subtotal = selectedLines.reduce((s, l) => s + (l.product.sale_price ?? l.product.price) * l.quantity, 0)
+  const subtotal = selectedLines.reduce((s, l) => s + linePrice(l) * l.quantity, 0)
   const deliveryFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const total = subtotal + deliveryFee
 
@@ -138,6 +165,8 @@ export default function AppCart() {
           onUpdateQty={updateQty}
           onRemove={removeItem}
           subtotal={subtotal}
+          isVvip={isVvip}
+          linePrice={linePrice}
           deliveryFee={deliveryFee}
           total={total}
           onOrder={goOrder}
@@ -169,6 +198,11 @@ export default function AppCart() {
         </div>
       ) : (
         <>
+          {isVvip && (
+            <div className="bg-signal-yellow/20 border-b border-rule px-5 py-2.5">
+              <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인가로 표시했어요</p>
+            </div>
+          )}
           <div className="bg-paper px-5 py-3 flex items-center gap-3 border-b border-rule">
             <input
               type="checkbox"
@@ -185,7 +219,7 @@ export default function AppCart() {
 
           <div className="px-4 pt-3 flex flex-col gap-3">
             {lines.map((line) => {
-              const price = line.product.sale_price ?? line.product.price
+              const price = linePrice(line)
               const unavailable = isUnavailable(line)
               const stock = lineStock(line)
               return (

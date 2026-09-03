@@ -17,6 +17,7 @@ import {
   getMyPointsBalance, getMyValidCoupons, couponDiscountFor, redeemPoints, releasePoints,
   redeemSignupCoupon, releaseSignupCoupon, type ValidCoupon,
 } from '../lib/rewards'
+import { vvipPrice } from '../lib/vvip'
 
 interface OrderItem {
   product_id: string
@@ -126,6 +127,9 @@ export default function AppOrder() {
   const [usePoints, setUsePoints] = useState(false)
   const [myCoupons, setMyCoupons] = useState<ValidCoupon[]>([])
   const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null)
+  // VVIP 할인(백화점 입점 20% / 온라인 전용 30%, 적립 없음) — revalidateItems()가 매번 다시 판별해
+  // items[].price에 이미 반영해둔다(서버 api/payment-complete.ts가 동일 로직으로 재검증).
+  const [isVvip, setIsVvip] = useState(false)
 
   const storeId = import.meta.env.VITE_PORTONE_STORE_ID as string | undefined
   const channelKey = import.meta.env.VITE_PORTONE_CHANNEL_KEY as string | undefined
@@ -139,14 +143,27 @@ export default function AppOrder() {
   ): Promise<{ items: OrderItem[]; notices: string[]; blocked: string[] }> => {
     if (current.length === 0) return { items: current, notices: [], blocked: [] }
     const ids = current.map((i) => i.product_id)
-    const { data } = await supabase
-      .from('products')
-      .select('id, name, price, sale_price, stock, status')
-      .in('id', ids)
-    const byId = new Map(
-      ((data ?? []) as { id: string; name: string; price: number; sale_price: number | null; stock: number; status: string }[])
-        .map((p) => [p.id, p])
-    )
+    const [{ data }, { data: vvipData, error: vvipErr }] = await Promise.all([
+      supabase.from('products').select('id, name, price, sale_price, stock, status, partner_id').in('id', ids),
+      supabase.rpc('is_vvip'),
+    ])
+    const vvip = !vvipErr && vvipData === true
+    setIsVvip(vvip)
+    const products = (data ?? []) as { id: string; name: string; price: number; sale_price: number | null; stock: number; status: string; partner_id: string | null }[]
+    const byId = new Map(products.map((p) => [p.id, p]))
+
+    // VVIP면 브랜드별 백화점 입점 여부로 할인율(20%/30%) 결정 — partner_id 없거나 조회 실패 시 백화점(20%)로 안전하게 처리
+    const deptStoreMap = new Map<string, boolean>()
+    if (vvip) {
+      const partnerIds = [...new Set(products.map((p) => p.partner_id).filter((v): v is string => !!v))]
+      if (partnerIds.length > 0) {
+        const { data: partners } = await supabase.from('partners').select('id, is_dept_store_brand').in('id', partnerIds)
+        for (const p of (partners ?? []) as { id: string; is_dept_store_brand: boolean }[]) {
+          deptStoreMap.set(p.id, p.is_dept_store_brand)
+        }
+      }
+    }
+
     const notices: string[] = []
     const blocked: string[] = []
     const next: OrderItem[] = []
@@ -161,10 +178,12 @@ export default function AppOrder() {
         qty = p.stock
         notices.push(`"${p.name}" 재고가 부족해 수량을 ${p.stock}개로 조정했어요.`)
       }
-      const nowPrice = p.sale_price ?? p.price
-      if (nowPrice !== it.price) {
-        notices.push(`"${p.name}" 가격이 ${it.price.toLocaleString('ko-KR')}원 → ${nowPrice.toLocaleString('ko-KR')}원으로 변경되었어요.`)
+      const basePrice = p.sale_price ?? p.price
+      if (basePrice !== it.price) {
+        notices.push(`"${p.name}" 가격이 ${it.price.toLocaleString('ko-KR')}원 → ${basePrice.toLocaleString('ko-KR')}원으로 변경되었어요.`)
       }
+      const isDeptStore = p.partner_id ? (deptStoreMap.get(p.partner_id) ?? true) : true
+      const nowPrice = vvip ? vvipPrice(basePrice, isDeptStore) : basePrice
       next.push({ ...it, price: nowPrice, quantity: qty })
     }
     return { items: next, notices, blocked }
@@ -653,6 +672,7 @@ export default function AppOrder() {
         paymentReady={paymentReady}
         liveCoupon={liveCoupon}
         subtotal={subtotal}
+        isVvip={isVvip}
         blockedNames={blockedNames}
         itemNotices={itemNotices}
         savedAddresses={savedAddresses}
@@ -713,6 +733,12 @@ export default function AppOrder() {
           <p className="text-[12.5px] text-ink-soft">
             <span className="font-bold text-ink">{(liveCoupon.min_purchase - subtotal).toLocaleString('ko-KR')}원</span> 더 담으면 라이브 쿠폰 {couponLabel(liveCoupon)} 적용!
           </p>
+        </div>
+      )}
+
+      {isVvip && (
+        <div className="bg-signal-yellow/20 border-b border-rule px-5 py-2.5">
+          <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인이 적용된 가격이에요</p>
         </div>
       )}
 

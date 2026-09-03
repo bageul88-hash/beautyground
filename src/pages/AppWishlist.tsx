@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import { getWishlist, removeWish, type WishlistLine } from '../lib/wishlist'
 import ImagePlaceholder from '../components/common/ImagePlaceholder'
 import { IconHeart } from '../components/common/Icon'
+import { vvipPrice } from '../lib/vvip'
 
 export default function AppWishlist() {
   const navigate = useNavigate()
@@ -16,6 +17,9 @@ export default function AppWishlist() {
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState(true)
   const [lines, setLines] = useState<WishlistLine[]>([])
+  // VVIP 할인 미리보기(찜은 안내용 — 최종 금액은 결제 단계 AppOrder.tsx가 재산출)
+  const [isVvip, setIsVvip] = useState(false)
+  const [deptStoreByPartner, setDeptStoreByPartner] = useState<Map<string, boolean>>(new Map())
 
   useEffect(() => {
     let active = true
@@ -23,13 +27,34 @@ export default function AppWishlist() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!active) return
       if (!session) { setLoggedIn(false); setLoading(false); return }
-      const list = await getWishlist()
+      const [list, { data: vvipData, error: vvipErr }] = await Promise.all([
+        getWishlist(),
+        supabase.rpc('is_vvip'),
+      ])
       if (!active) return
+      const vvip = !vvipErr && vvipData === true
+      setIsVvip(vvip)
       setLines(list)
+      if (vvip) {
+        const partnerIds = [...new Set(list.map((l) => l.product.partner_id).filter((v): v is string => !!v))]
+        if (partnerIds.length > 0) {
+          const { data: partners } = await supabase.from('partners').select('id, is_dept_store_brand').in('id', partnerIds)
+          if (active) {
+            setDeptStoreByPartner(new Map(((partners ?? []) as { id: string; is_dept_store_brand: boolean }[]).map((p) => [p.id, p.is_dept_store_brand])))
+          }
+        }
+      }
       setLoading(false)
     })()
     return () => { active = false }
   }, [])
+
+  const linePrice = (p: WishlistLine['product']) => {
+    const base = p.sale_price ?? p.price
+    if (!isVvip) return base
+    const isDeptStore = p.partner_id ? (deptStoreByPartner.get(p.partner_id) ?? true) : true
+    return vvipPrice(base, isDeptStore)
+  }
 
   const handleRemove = async (line: WishlistLine) => {
     setLines((prev) => prev.filter((l) => l.id !== line.id))
@@ -53,7 +78,7 @@ export default function AppWishlist() {
     return (
       <>
         <ViewModeToggle mode={mode} onToggle={toggle} />
-        <DesktopWishlist loggedIn={loggedIn} lines={lines} onRemove={handleRemove} />
+        <DesktopWishlist loggedIn={loggedIn} lines={lines} onRemove={handleRemove} isVvip={isVvip} linePrice={linePrice} />
       </>
     )
   }
@@ -82,6 +107,12 @@ export default function AppWishlist() {
       <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader title="찜 목록" />
 
+      {isVvip && lines.length > 0 && (
+        <div className="bg-signal-yellow/20 border-b border-rule px-5 py-2.5">
+          <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인가로 표시했어요</p>
+        </div>
+      )}
+
       {lines.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
           <IconHeart className="w-10 h-10 mb-4 text-ink-faint" />
@@ -98,7 +129,7 @@ export default function AppWishlist() {
         <div className="grid grid-cols-2 gap-3 px-4 pt-4">
           {lines.map((line) => {
             const p = line.product
-            const sell = p.sale_price ?? p.price
+            const sell = linePrice(p)
             return (
               <div key={line.id} className="relative">
                 <button

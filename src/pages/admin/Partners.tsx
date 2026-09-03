@@ -43,6 +43,17 @@ export default function AdminPartners() {
     setRateEdits((prev) => { const next = { ...prev }; delete next[partner.id]; return next })
   }
 
+  // 백화점 입점 여부 — VVIP 할인율 산정 기준(20% 백화점 / 30% 온라인 전용, supabase/vvip_members.sql)
+  const toggleDeptStore = async (partner: Partner) => {
+    setBusyId(partner.id)
+    setError('')
+    const next = !partner.is_dept_store_brand
+    const { error: err } = await supabase.from('partners').update({ is_dept_store_brand: next }).eq('id', partner.id)
+    setBusyId(null)
+    if (err) { setError(`백화점 입점 여부 저장 실패: ${err.message}`); return }
+    setPartners((prev) => prev.map((p) => (p.id === partner.id ? { ...p, is_dept_store_brand: next } : p)))
+  }
+
   const changeStatus = async (partner: Partner, status: Partner['status']) => {
     setBusyId(partner.id)
     setError('')
@@ -119,6 +130,7 @@ export default function AdminPartners() {
                   <th className="px-4 py-3 font-medium whitespace-nowrap">브랜드</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">상태</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수수료율</th>
+                  <th className="px-4 py-3 font-medium whitespace-nowrap">백화점 입점</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">계정 연결</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수출 전용 계정</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap">수출 소개</th>
@@ -156,6 +168,19 @@ export default function AdminPartners() {
                         <span className="text-ink-faint">%</span>
                         <Button variant="inkOutline" size="sm" label="저장" disabled={busyId === p.id} onClick={() => void saveRate(p)} />
                       </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => void toggleDeptStore(p)}
+                        disabled={busyId === p.id}
+                        className={`inline-flex items-center rounded-pill px-2.5 py-1 text-[12px] font-medium disabled:opacity-50 ${
+                          p.is_dept_store_brand ? 'bg-signal-blue/10 text-signal-blue' : 'bg-quiet text-ink-faint'
+                        }`}
+                        title="VVIP 할인율 기준: 백화점 입점 20% / 온라인 전용 30%"
+                      >
+                        {p.is_dept_store_brand ? '백화점 입점' : '온라인 전용'}
+                      </button>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {p.user_id ? (
