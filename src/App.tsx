@@ -37,6 +37,8 @@ const AppNaverCallback = lazy(() => import('./pages/AppNaverCallback'))
 const AppAccount = lazy(() => import('./pages/AppAccount'))
 const AppAddresses = lazy(() => import('./pages/AppAddresses'))
 const AppWishlist = lazy(() => import('./pages/AppWishlist'))
+const AppRecentlyViewed = lazy(() => import('./pages/AppRecentlyViewed'))
+const AppMyReviews = lazy(() => import('./pages/AppMyReviews'))
 const AppBenefits = lazy(() => import('./pages/AppBenefits'))
 const AppSkinTest = lazy(() => import('./pages/AppSkinTest'))
 
@@ -316,6 +318,8 @@ export default function App() {
         <Route path="/app/account" element={<AppAccount />} />
         <Route path="/app/addresses" element={<AppAddresses />} />
         <Route path="/app/wishlist" element={<AppWishlist />} />
+        <Route path="/app/recently-viewed" element={<AppRecentlyViewed />} />
+        <Route path="/app/my-reviews" element={<AppMyReviews />} />
         <Route path="/app/benefits" element={<AppBenefits />} />
         <Route path="/app/skin-test" element={<AppSkinTest />} />
 
