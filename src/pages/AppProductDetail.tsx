@@ -8,6 +8,7 @@ import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import { addToCart } from '../lib/cart'
 import { isWished, addWish, removeWish } from '../lib/wishlist'
+import { recordView } from '../lib/recentlyViewed'
 import { getMyMembership } from '../lib/membership'
 import type { Product, ProductOption, ScrapedReview, ReviewSummaryData } from '../lib/types'
 import { ALL_PRODUCTS, SHIPPING_NOTICE } from '../constants'
@@ -156,6 +157,7 @@ export default function AppProductDetail() {
           }
           if (active) { setView(fromDbProduct(p, brand)); setLoading(false) }
           isWished(id).then((w) => { if (active) setWished(w) })
+          void recordView(id)
           supabase
             .from('product_options')
             .select('*')
