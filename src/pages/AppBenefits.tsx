@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
+import ViewModeToggle from '../components/layout/ViewModeToggle'
+import DesktopBenefits from '../components/benefits/DesktopBenefits'
+import { useViewMode } from '../lib/viewMode'
 import { supabase } from '../lib/supabase'
 import {
   getMyPointsBalance,
@@ -16,8 +19,10 @@ import { isPushSupported, subscribeToPush } from '../lib/pushNotifications'
 // 회원 혜택 모음 — 메인 상단 프로모션 띠(PromoBar)와 마이페이지 메뉴에서 여기로 연결된다.
 // ① 회원가입 축하 적립금(자동 지급, supabase/signup_bonus.sql) ② 카카오 친구추가 혜택(자율신고 방식,
 // supabase/kakao_friend_bonus.sql — 카카오 비즈니스 채널 친구확인 API 인증 전까지 임시) ③ 보유 적립금·쿠폰함.
+// PC 전용 화면이 없어 데스크톱에서도 좁은 모바일 카드 그대로 보이던 것을 분리(2026-09-03).
 export default function AppBenefits() {
   const navigate = useNavigate()
+  const { mode, isDesktop, toggle } = useViewMode()
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
   const [points, setPoints] = useState(0)
   const [coupons, setCoupons] = useState<ValidCoupon[]>([])
@@ -30,6 +35,11 @@ export default function AppBenefits() {
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   )
   const [pushBusy, setPushBusy] = useState(false)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    window.setTimeout(() => setToast(''), 2200)
+  }
 
   const handleEnablePush = async () => {
     setPushBusy(true)
@@ -64,11 +74,6 @@ export default function AppBenefits() {
     load()
   }, [])
 
-  const showToast = (msg: string) => {
-    setToast(msg)
-    window.setTimeout(() => setToast(''), 2200)
-  }
-
   const handleClaimKakao = async () => {
     setClaiming(true)
     try {
@@ -89,8 +94,36 @@ export default function AppBenefits() {
 
   const minOrderText = `${BENEFIT_MIN_ORDER_AMOUNT.toLocaleString('ko-KR')}원 이상 구매 시 사용 가능`
 
+  const sharedProps = {
+    loggedIn,
+    points,
+    coupons,
+    kakaoClaimed,
+    claiming,
+    pushEnabled,
+    pushBusy,
+    minOrderText,
+    onClaimKakao: handleClaimKakao,
+    onEnablePush: () => void handleEnablePush(),
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <ViewModeToggle mode={mode} onToggle={toggle} />
+        <DesktopBenefits {...sharedProps} />
+        {toast && (
+          <div className="fixed left-1/2 -translate-x-1/2 bottom-10 z-50 rounded-control bg-ink text-paper text-[13px] px-4 py-2.5" role="status">
+            {toast}
+          </div>
+        )}
+      </>
+    )
+  }
+
   return (
     <AppFrame>
+      <ViewModeToggle mode={mode} onToggle={toggle} />
       <BackHeader title="혜택" />
 
       {loggedIn === false ? (

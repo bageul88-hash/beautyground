@@ -111,7 +111,7 @@ export default function AppCart() {
       <div className="min-h-screen bg-quiet md:py-6">
         <ViewModeToggle mode={mode} onToggle={toggle} />
         {isDesktop ? (
-          <div className="max-w-[1440px] mx-auto px-6 py-24 flex items-center justify-center">
+          <div className="max-w-[1280px] mx-auto px-6 py-24 flex items-center justify-center">
             <p className="text-ink-faint text-[14px]">불러오는 중...</p>
           </div>
         ) : (

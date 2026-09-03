@@ -51,7 +51,7 @@ export default function DesktopHeader() {
 
   return (
     <header className="bg-paper border-b border-rule sticky top-0 z-50">
-      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative" ref={menuBoxRef}>
             <button
@@ -120,7 +120,7 @@ export default function DesktopHeader() {
       </div>
 
       <div className="border-t border-rule">
-        <div className="max-w-[1200px] mx-auto px-6 h-11 flex items-center justify-between">
+        <div className="max-w-[1280px] mx-auto px-6 h-11 flex items-center justify-between">
           <nav className="flex items-center gap-6" aria-label="카테고리">
             <Link to="/app/category/all" className="text-[13px] font-bold text-ink-soft hover:text-ink transition-colors">
               전체

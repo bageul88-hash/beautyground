@@ -62,7 +62,7 @@ export default function DesktopMyPage({
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      <div className="max-w-[900px] mx-auto px-6 py-10">
+      <div className="max-w-[1280px] mx-auto px-6 py-10">
         {/* 프로필 배너 */}
         <div className="border border-rule px-8 py-6 flex items-center gap-6">
           <div className="w-16 h-16 rounded-full bg-quiet flex items-center justify-center flex-shrink-0 text-ink-soft" aria-hidden="true">

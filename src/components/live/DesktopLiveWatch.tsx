@@ -77,6 +77,38 @@ export default function DesktopLiveWatch({
 }: Props) {
   const chatInputRef = useRef<HTMLInputElement>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
+
+  // 공유 — 모바일 시청화면에만 있고 PC에는 없었다(2026-09-02 추가).
+  // 시청자가 방송 링크를 지인에게 퍼뜨릴 수 있어야 유입이 늘어난다. 모바일과 같은 4종을 제공.
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
+  const shareUrl = () => window.location.href
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl())
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 1600)
+    } catch {
+      /* 클립보드 차단 환경 — 조용히 무시 */
+    }
+    setShareOpen(false)
+  }
+  const shareToFacebook = () => {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`,
+      '_blank',
+      'noopener,width=600,height=500'
+    )
+    setShareOpen(false)
+  }
+  const shareToX = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl())}&text=${encodeURIComponent(live.title)}`,
+      '_blank',
+      'noopener,width=600,height=500'
+    )
+    setShareOpen(false)
+  }
   const insertEmoji = (emoji: string) => {
     setChatInput(chatInput + emoji)
     chatInputRef.current?.focus()
@@ -85,22 +117,78 @@ export default function DesktopLiveWatch({
   return (
     <div className="bg-quiet min-h-screen">
       <div className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={onBack} className="text-[13px] font-bold text-ink-soft hover:text-ink">← 뒤로</button>
           <div className="flex-1 min-w-0 mx-6 text-center">
             <p className="text-[14px] font-bold text-ink truncate">{live.title}</p>
           </div>
-          <span className="shrink-0 flex items-center gap-1.5 rounded-control bg-ink text-paper text-[11px] font-bold px-2.5 py-1 tracking-[0.04em]">
-            {onAir && <span className="w-1.5 h-1.5 rounded-full bg-signal-red onair-dot" />}
-            {topBadge}
-          </span>
+          <div className="shrink-0 flex items-center gap-2">
+            {/* 공유 — 카카오톡은 링크 복사로 대체(모바일과 동일 방식) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShareOpen((v) => !v)}
+                className="text-[12.5px] font-bold text-ink-soft hover:text-ink border border-rule rounded-control px-3 py-1.5"
+              >
+                공유
+              </button>
+              {shareCopied && (
+                <span className="absolute right-0 top-full mt-1 whitespace-nowrap rounded-control bg-ink text-paper text-[11px] px-2 py-1">
+                  링크를 복사했습니다
+                </span>
+              )}
+              {shareOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShareOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 z-50 bg-paper border border-rule rounded-control p-2 flex items-center gap-2 shadow-lg">
+                    <button
+                      type="button"
+                      onClick={() => void copyShareLink()}
+                      className="text-[12px] font-bold text-ink px-2.5 py-1.5 rounded-control"
+                      style={{ backgroundColor: '#FEE500' }}
+                    >
+                      카카오톡
+                    </button>
+                    <button
+                      type="button"
+                      onClick={shareToFacebook}
+                      className="text-[12px] font-bold text-white bg-[#1877F2] px-2.5 py-1.5 rounded-control"
+                    >
+                      페이스북
+                    </button>
+                    <button
+                      type="button"
+                      onClick={shareToX}
+                      className="text-[12px] font-bold text-white bg-black px-2.5 py-1.5 rounded-control"
+                    >
+                      X
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void copyShareLink()}
+                      className="text-[12px] font-bold text-ink bg-quiet px-2.5 py-1.5 rounded-control"
+                    >
+                      링크 복사
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            <span className="flex items-center gap-1.5 rounded-control bg-ink text-paper text-[11px] font-bold px-2.5 py-1 tracking-[0.04em]">
+              {onAir && <span className="w-1.5 h-1.5 rounded-full bg-signal-red onair-dot" />}
+              {topBadge}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8 grid grid-cols-[1.4fr_1fr] gap-8 items-start">
+      <div className="max-w-[1280px] mx-auto px-6 py-8 grid grid-cols-[1.4fr_1fr] gap-8 items-start">
         {/* 영상 */}
         <div className="min-w-0">
-          <div className="relative w-full aspect-video bg-[#14120e] border border-rule overflow-hidden">
+          {/* 라이브는 진행자가 휴대폰으로 세로 촬영한다(실측 720x1280 = 9:16).
+              가로 16:9 틀에 넣으면 양옆에 검은 여백만 크게 생기므로 세로 비율로 맞추고,
+              PC에서 너무 길어지지 않게 높이를 제한한 뒤 가운데 정렬한다. */}
+          <div className="relative mx-auto aspect-[9/16] h-[calc(100vh-220px)] max-h-[720px] bg-[#14120e] border border-rule overflow-hidden">
             {waitingForStream ? (
               <div
                 className="absolute inset-0 flex flex-col items-center justify-center"

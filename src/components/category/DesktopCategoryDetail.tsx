@@ -69,7 +69,7 @@ export default function DesktopCategoryDetail({
       <PromoBar />
       <DesktopHeader />
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-6 py-8">
         <h1 className="text-[22px] font-bold text-ink">{title}</h1>
 
         <div className="mt-5 flex items-center justify-between border-b border-rule pb-4">

@@ -73,7 +73,7 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
     <div className="bg-paper min-h-screen">
       <PromoBar />
       <header className="bg-paper border-b border-rule sticky top-0 z-50">
-        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/app/home" className="text-[19px] font-bold text-ink tracking-[-0.01em]">
             뷰티그라운드
           </Link>
@@ -84,7 +84,7 @@ export default function DesktopLiveList({ loading, hero, otherLiveNow, scheduled
         </div>
       </header>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
+      <div className="max-w-[1280px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink">라이브</h1>
 
         {loading ? (
