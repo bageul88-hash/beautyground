@@ -10,7 +10,6 @@ import { supabase } from '../lib/supabase'
 import { getMyMembership, getTiers, type MembershipInfo, type MembershipTier } from '../lib/membership'
 import { getMyPointsBalance, getMyValidCoupons } from '../lib/rewards'
 import { IconUser } from '../components/common/Icon'
-import { useIsAdmin } from '../lib/useIsAdmin'
 import { useIsStaff } from '../lib/staff'
 import { useActiveMissions } from '../hooks/useActiveMissions'
 
@@ -52,7 +51,6 @@ const EMPTY_USER: RealUser = { name: '게스트', email: '로그인이 필요해
 export default function AppMyPage() {
   const navigate = useNavigate()
   const { mode, isDesktop, toggle } = useViewMode()
-  const { isAdmin } = useIsAdmin()
   const { isStaff } = useIsStaff()
   const { missions: activeMissions } = useActiveMissions()
   const [user, setUser] = useState<RealUser>(EMPTY_USER)
@@ -125,7 +123,6 @@ export default function AppMyPage() {
           onToggleTierGuide={() => setShowTierGuide((v) => !v)}
           loggedIn={loggedIn}
           onLogout={handleLogout}
-          isAdmin={isAdmin}
           isStaff={isStaff}
         />
         {toast && (
@@ -324,19 +321,6 @@ export default function AppMyPage() {
         </div>
       )}
 
-      {/* 관리자 전용 바로가기 — 일반 고객에게는 노출 안 됨 */}
-      {isAdmin && (
-        <div className="mt-2 bg-paper">
-          <p className="px-5 py-3 text-[12px] font-bold text-ink-faint tracking-wide">관리자</p>
-          <button
-            onClick={() => navigate('/app/home')}
-            className="w-full flex items-center justify-between px-5 py-4 border-b border-rule last:border-0 focus:outline-none focus-visible:shadow-ring"
-          >
-            <span className="text-[14px] text-ink">라이브 관리</span>
-            <span className="text-ink-faint" aria-hidden="true">›</span>
-          </button>
-        </div>
-      )}
 
       <div className="px-5 py-6">
         {loggedIn === false ? (
