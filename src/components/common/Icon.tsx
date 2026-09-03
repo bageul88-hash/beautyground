@@ -167,6 +167,15 @@ export function IconGrid(p: IconProps) {
   )
 }
 
+// 가로 세 줄(햄버거) — PC 헤더 전체 카테고리 드롭다운 진입점(2026-09-03)
+export function IconMenu(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M4 6.5h16M4 12h16M4 17.5h16" />
+    </Svg>
+  )
+}
+
 // 커뮤니티(살아가는 이야기) 탭 아이콘 — 대화가 오간다는 뜻으로 말풍선 두 개(2026-09-02)
 export function IconTalk(p: IconProps) {
   return (
