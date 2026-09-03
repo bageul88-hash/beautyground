@@ -15,8 +15,6 @@ export default function DesktopFooter() {
       <div className="max-w-[1200px] mx-auto px-6 pt-10 pb-12">
         <nav className="flex items-center gap-4 text-[13px] font-semibold text-ink-soft pb-6 border-b border-rule" aria-label="하단 메뉴">
           <Link to="/app/login" className="hover:text-ink transition-colors">로그인</Link>
-          {sep}
-          <a href={`tel:${COMPANY_INFO.csPhone}`} className="hover:text-ink transition-colors">소비자상담실</a>
         </nav>
 
         <div className="mt-6 grid grid-cols-2 gap-10">
