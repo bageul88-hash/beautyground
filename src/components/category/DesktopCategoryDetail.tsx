@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ShopProductCard, { ShopProductCardSkeleton } from '../product/ShopProductCard'
 import DesktopHeader from '../layout/DesktopHeader'
 import DesktopFooter from '../layout/DesktopFooter'
+import PromoBar from '../home/PromoBar'
 import type { ShopProduct, ShopSort } from '../../hooks/useShopProducts'
 import type { ShopBrand } from '../../hooks/useShopBrands'
 
@@ -65,6 +66,7 @@ export default function DesktopCategoryDetail({
 
   return (
     <div className="bg-paper min-h-screen">
+      <PromoBar />
       <DesktopHeader />
 
       <div className="max-w-[1200px] mx-auto px-6 py-8">

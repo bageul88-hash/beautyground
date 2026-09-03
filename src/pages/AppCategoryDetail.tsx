@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import BackHeader from '../components/layout/BackHeader'
 import AppFrame from '../components/layout/AppFrame'
 import ViewModeToggle from '../components/layout/ViewModeToggle'
+import PromoBar from '../components/home/PromoBar'
 import DesktopCategoryDetail from '../components/category/DesktopCategoryDetail'
 import { useViewMode } from '../lib/viewMode'
 import ShopProductCard, { ShopProductCardSkeleton } from '../components/product/ShopProductCard'
@@ -103,6 +104,7 @@ export default function AppCategoryDetail() {
   return (
     <AppFrame>
       <ViewModeToggle mode={mode} onToggle={toggle} />
+      <PromoBar />
       <BackHeader
         title={selected ?? '전체 상품'}
         rightElement={

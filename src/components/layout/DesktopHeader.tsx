@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { IconHeart, IconCart } from '../common/Icon'
+import { IconHeart, IconCart, IconMenu } from '../common/Icon'
 import CartCountBadge from '../common/CartCountBadge'
 import { CATEGORIES } from '../../constants'
 import { supabase } from '../../lib/supabase'
@@ -20,6 +20,8 @@ const QUICK_LINKS = [
 
 export default function DesktopHeader() {
   const [name, setName] = useState<string | null>(null)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuBoxRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -35,12 +37,65 @@ export default function DesktopHeader() {
     }
   }, [])
 
+  // 메뉴 바깥을 클릭하면 자동으로 접힌다.
+  useEffect(() => {
+    if (!showMenu) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (menuBoxRef.current && !menuBoxRef.current.contains(e.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showMenu])
+
   return (
     <header className="bg-paper border-b border-rule sticky top-0 z-50">
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/app/home" aria-label="뷰티그라운드 홈">
-          <img src="/images/logo-gold.png" alt="뷰티그라운드" className="h-9 w-auto object-contain" />
-        </Link>
+        <div className="flex items-center gap-4">
+          <div className="relative" ref={menuBoxRef}>
+            <button
+              type="button"
+              aria-label="전체 카테고리"
+              aria-haspopup="true"
+              aria-expanded={showMenu}
+              onClick={() => setShowMenu((v) => !v)}
+              className="text-ink hover:text-ink-soft transition-colors focus:outline-none focus-visible:shadow-ring"
+            >
+              <IconMenu className="w-[22px] h-[22px]" />
+            </button>
+            {showMenu && (
+              <div
+                className="absolute left-0 top-full mt-2 w-[180px] bg-paper border border-rule shadow-sm z-20"
+                role="menu"
+                aria-label="전체 카테고리"
+              >
+                <Link
+                  to="/app/category/all"
+                  onClick={() => setShowMenu(false)}
+                  className="block px-4 py-2.5 text-[13px] font-bold text-ink hover:bg-quiet transition-colors"
+                  role="menuitem"
+                >
+                  전체
+                </Link>
+                {CATEGORIES.map((c) => (
+                  <Link
+                    key={c.id}
+                    to={`/app/category/${c.id}`}
+                    onClick={() => setShowMenu(false)}
+                    className="block px-4 py-2.5 text-[13px] font-semibold text-ink-soft hover:bg-quiet hover:text-ink transition-colors"
+                    role="menuitem"
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <Link to="/app/home" aria-label="뷰티그라운드 홈">
+            <img src="/images/logo-gold.png" alt="뷰티그라운드" className="h-9 w-auto object-contain" />
+          </Link>
+        </div>
         <div className="flex items-center gap-5">
           {name ? (
             <Link to="/app/mypage" className="text-[13px] font-bold text-ink hover:text-ink-soft transition-colors">
