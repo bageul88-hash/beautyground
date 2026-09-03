@@ -583,6 +583,13 @@ export default function AppProductDetail() {
               <p className="text-[15px] font-bold tabular-nums text-ink leading-none">{total.toLocaleString('ko-KR')}원</p>
             </div>
             <button
+              onClick={toggleWish}
+              aria-label={wished ? '찜 해제' : '찜하기'}
+              className="shrink-0 rounded-pill border border-rule text-ink px-3.5 py-3 focus:outline-none focus-visible:shadow-ring"
+            >
+              <IconHeart filled={wished} className={`w-5 h-5 ${wished ? 'text-accent' : ''}`} />
+            </button>
+            <button
               onClick={onAddToCart}
               disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="shrink-0 rounded-pill border border-rule text-ink font-bold text-[13px] px-4 py-3 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
