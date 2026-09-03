@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { ShopProduct } from './useShopProducts'
+import { capPerBrand } from '../lib/curateProducts'
 
 interface Row {
   id: string
@@ -15,6 +16,10 @@ interface Row {
 }
 
 const PER_CATEGORY = 4
+// 최근 등록이 한 브랜드에 몰리면 그 카테고리 4칸이 전부 한 브랜드로 채워지는 문제 방지(2026-09-04) —
+// 최신순으로 넉넉히 가져온 뒤 브랜드당 최대 개수로 걸러서 PER_CATEGORY만큼 채운다.
+const FETCH_POOL = 20
+const MAX_PER_BRAND = 2
 
 // 홈 "카테고리별 추천" 섹션 — 카테고리 탭마다 최신순 4개씩 미리 가져와둔다(탭 전환 시 재요청 없이 즉시 전환).
 export function useCategoryRecommendations(categories: string[]) {
@@ -38,7 +43,7 @@ export function useCategoryRecommendations(categories: string[]) {
             .eq('status', 'on_sale')
             .eq('category', cat)
             .order('created_at', { ascending: false })
-            .limit(PER_CATEGORY)
+            .limit(FETCH_POOL)
         )
       )
       if (!active) return
@@ -55,7 +60,7 @@ export function useCategoryRecommendations(categories: string[]) {
       const map: Record<string, ShopProduct[]> = {}
       categories.forEach((cat, i) => {
         const rows = (results[i].data ?? []) as Row[]
-        map[cat] = rows.map((r) => ({
+        const mapped = rows.map((r) => ({
           id: r.id,
           name: r.name,
           price: r.price,
@@ -67,6 +72,7 @@ export function useCategoryRecommendations(categories: string[]) {
           reviewAvg: r.review_summary?.avg ?? null,
           seasonTags: r.season_tags ?? [],
         }))
+        map[cat] = capPerBrand(mapped, (p) => p.brand_name ?? p.id, MAX_PER_BRAND).slice(0, PER_CATEGORY)
       })
       setByCategory(map)
       setLoading(false)

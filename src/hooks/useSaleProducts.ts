@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { ShopProduct } from './useShopProducts'
+import { capPerBrand } from '../lib/curateProducts'
+
+// 브랜드당 이 레일에 최대 몇 개까지 — 한 브랜드가 할인율 상위를 싹 채워 도배하는 문제 방지(2026-09-04).
+const MAX_PER_BRAND = 2
 
 interface Row {
   id: string
@@ -42,7 +46,7 @@ export function useSaleProducts(limit = 10) {
       }
       if (!active) return
 
-      const withRate = rows
+      const sorted = rows
         .filter((r) => r.sale_price != null && r.sale_price < r.price)
         .map((r) => ({
           rate: 1 - r.sale_price! / r.price,
@@ -60,8 +64,9 @@ export function useSaleProducts(limit = 10) {
           } as ShopProduct,
         }))
         .sort((a, b) => b.rate - a.rate)
-        .slice(0, limit)
         .map((x) => x.product)
+
+      const withRate = capPerBrand(sorted, (p) => p.brand_name ?? p.id, MAX_PER_BRAND).slice(0, limit)
 
       setProducts(withRate)
       setLoading(false)
