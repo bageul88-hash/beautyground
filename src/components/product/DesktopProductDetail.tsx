@@ -272,6 +272,13 @@ export default function DesktopProductDetail({
 
           <div className="mt-5 flex items-center gap-2.5">
             <button
+              onClick={toggleWish}
+              aria-label={wished ? '찜 해제' : '찜하기'}
+              className="shrink-0 w-[52px] h-[52px] rounded-control border border-rule flex items-center justify-center text-ink focus:outline-none focus-visible:shadow-ring"
+            >
+              <IconHeart filled={wished} className={`w-5 h-5 ${wished ? 'text-accent' : ''}`} />
+            </button>
+            <button
               onClick={onAddToCart}
               disabled={view.soldOut || (options.length > 0 && !selectedOption)}
               className="flex-1 rounded-control border border-rule text-ink font-bold text-[14px] py-3.5 disabled:opacity-40 focus:outline-none focus-visible:shadow-ring"
