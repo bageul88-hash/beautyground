@@ -32,13 +32,12 @@ function buildMenuItems(user: RealUser) {
     { label: '혜택', path: '/app/benefits' },
     { label: '쿠폰함', count: user.coupons, path: '/app/benefits' },
     { label: '포인트', value: `${user.points.toLocaleString()}P`, path: '/app/benefits' },
-    { label: '최근 본 상품' },
-    { label: '리뷰 관리' },
+    { label: '최근 본 상품', path: '/app/recently-viewed' },
+    { label: '리뷰 관리', path: '/app/my-reviews' },
   ]
 }
 
 const SETTING_ITEMS = [
-  { label: '알림 설정' },
   { label: '계정/보안', path: '/app/account' },
   { label: '이용약관', path: '/terms' },
   { label: '개인정보처리방침', path: '/privacy' },
