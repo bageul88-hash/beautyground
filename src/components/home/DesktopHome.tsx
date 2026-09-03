@@ -8,6 +8,7 @@ import ImagePlaceholder from '../common/ImagePlaceholder'
 import Thumb from '../common/Thumb'
 import type { HeroBanner } from '../../hooks/useHeroBanners'
 import type { ShopProduct } from '../../hooks/useShopProducts'
+import { timeSlotByHour } from '../../lib/season'
 
 const won = (n: number) => n.toLocaleString('ko-KR')
 
@@ -192,7 +193,7 @@ export default function DesktopHome({
       {/* 지금 확인할 상품 (계절/명절 태그 우선 추천) */}
       <section className="max-w-[1280px] mx-auto px-6 py-16">
         <p className="text-[12px] font-bold tracking-[0.08em] text-ink-faint mb-4">
-          {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} 시즌` : '지금 확인할 상품'}
+          {seasonLabel ? `지금 확인할 상품 · ${seasonLabel} ${timeSlotByHour(new Date().getHours())} 시즌` : '지금 확인할 상품'}
         </p>
         {prodLoading ? (
           <div className="grid grid-cols-4 gap-6">

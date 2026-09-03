@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useShopProducts, type ShopProduct } from './useShopProducts'
 import { useHomeSettings } from './useHomeSettings'
+import { timeSlotByHour, SEASON_TIMESLOT_CATEGORIES, type Season } from '../lib/season'
 
 // "지금 확인할 상품"에 계절 태그가 붙은 상품이 이만큼 이상 있어야 계절 추천으로 노출한다.
 // 너무 적으면(1~2개) "추천"이라 부르기 민망해서 그냥 평소 큐레이션으로 대체한다.
@@ -104,13 +105,23 @@ export function useHomeProductSections() {
       return { recommended: curate(pool, 10), seasonLabel: null as string | null }
     }
 
-    const curatedSeasonal = curate(seasonal, 10)
+    // 지금 시간대(아침/점심/저녁)에 어울리는 카테고리를 우선 노출 — 부족하면 계절 전체로,
+    // 그래도 부족하면 전체 상품으로 자연스럽게 채운다(섹션이 비지 않게, 2026-09-04).
+    const timeSlot = timeSlotByHour(new Date().getHours())
+    const timeCategories = SEASON_TIMESLOT_CATEGORIES[activeSeason as Season][timeSlot]
+    const seasonalNow = seasonal.filter((p) => p.category && timeCategories.includes(p.category))
+    const seasonalPool = seasonalNow.length >= MIN_SEASONAL_FOR_LABEL ? seasonalNow : seasonal
+
+    const curatedSeasonal = curate(seasonalPool, 10)
     if (curatedSeasonal.length >= 10) {
       return { recommended: curatedSeasonal, seasonLabel: activeSeason as string | null }
     }
-    const seasonalIds = new Set(curatedSeasonal.map((p) => p.id))
-    const fill = curate(pool.filter((p) => !seasonalIds.has(p.id)), 10 - curatedSeasonal.length)
-    return { recommended: [...curatedSeasonal, ...fill], seasonLabel: activeSeason as string | null }
+    const shownIds = new Set(curatedSeasonal.map((p) => p.id))
+    // 시간대로 좁힌 풀이 모자라면 나머지 계절 상품으로, 그래도 모자라면 전체 상품으로 채운다.
+    const seasonFill = seasonalPool === seasonal ? [] : curate(seasonal.filter((p) => !shownIds.has(p.id)), 10 - curatedSeasonal.length)
+    seasonFill.forEach((p) => shownIds.add(p.id))
+    const generalFill = curate(pool.filter((p) => !shownIds.has(p.id)), 10 - curatedSeasonal.length - seasonFill.length)
+    return { recommended: [...curatedSeasonal, ...seasonFill, ...generalFill], seasonLabel: activeSeason as string | null }
   }, [latestProducts, products, activeSeason])
 
   return { products, recommended, seasonLabel, loading }
