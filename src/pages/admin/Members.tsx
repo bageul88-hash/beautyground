@@ -91,8 +91,14 @@ interface StaffRow {
   created_at: string
 }
 
+interface VvipRow {
+  email: string
+  note: string | null
+  created_at: string
+}
+
 export default function AdminMembers() {
-  const [tab, setTab] = useState<'members' | 'tiers' | 'staff'>('members')
+  const [tab, setTab] = useState<'members' | 'tiers' | 'staff' | 'vvip'>('members')
 
   // ── 회원 목록 ──
   const [members, setMembers] = useState<MemberRow[]>([])
@@ -269,6 +275,64 @@ export default function AdminMembers() {
     void loadStaff()
   }
 
+  // ── VVIP 지정 (app_vvip) — 직원 지정과 완전히 동일한 패턴. 구매금액 기준 VIP(등급 설정)와 별개로,
+  // 특정 고객을 수동으로 VVIP 지정하면 브랜드별 할인(백화점 입점 20%/온라인 전용 30%, 적립 없음)이 결제에 적용된다.
+  const [vvipList, setVvipList] = useState<VvipRow[]>([])
+  const [vvipLoading, setVvipLoading] = useState(true)
+  const [vvipError, setVvipError] = useState('')
+  const [vvipEmail, setVvipEmail] = useState('')
+  const [vvipNote, setVvipNote] = useState('')
+  const [vvipSubmitting, setVvipSubmitting] = useState(false)
+
+  const loadVvip = async () => {
+    setVvipLoading(true)
+    setVvipError('')
+    const { data, error: err } = await supabase.rpc('admin_list_vvip')
+    if (err) {
+      setVvipError(`VVIP 목록 조회 실패: ${err.message} (supabase/vvip_members.sql 적용 여부 확인)`)
+      setVvipLoading(false)
+      return
+    }
+    setVvipList((data ?? []) as VvipRow[])
+    setVvipLoading(false)
+  }
+
+  useEffect(() => { void loadVvip() }, [])
+  useEffect(() => { if (tab === 'vvip') void loadVvip() }, [tab])
+
+  const vvipEmailSet = useMemo(() => new Set(vvipList.map((v) => v.email)), [vvipList])
+  const [promotingVvipId, setPromotingVvipId] = useState<string | null>(null)
+
+  const promoteToVvip = async (m: MemberRow) => {
+    if (!m.email) return
+    setPromotingVvipId(m.id)
+    const { error: err } = await supabase.rpc('admin_set_vvip', { p_email: m.email, p_note: m.name || null })
+    setPromotingVvipId(null)
+    if (err) { setError(`VVIP 지정 실패: ${err.message}`); return }
+    void loadVvip()
+  }
+
+  const handleAddVvip = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!vvipEmail.trim()) return
+    setVvipSubmitting(true)
+    setVvipError('')
+    const { error: err } = await supabase.rpc('admin_set_vvip', { p_email: vvipEmail.trim(), p_note: vvipNote.trim() || null })
+    setVvipSubmitting(false)
+    if (err) {
+      setVvipError(`지정 실패: ${err.message}`)
+      return
+    }
+    setVvipEmail('')
+    setVvipNote('')
+    void loadVvip()
+  }
+
+  const handleRemoveVvip = async (email: string) => {
+    await supabase.rpc('admin_remove_vvip', { p_email: email })
+    void loadVvip()
+  }
+
   return (
     <>
       <header className="h-[60px] bg-paper border-b border-rule flex items-center px-8 sticky top-0 z-20">
@@ -282,7 +346,7 @@ export default function AdminMembers() {
         </p>
 
         <div className="flex gap-1 mb-6 border-b border-rule">
-          {(['members', 'tiers', 'staff'] as const).map((t) => (
+          {(['members', 'tiers', 'staff', 'vvip'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -290,7 +354,7 @@ export default function AdminMembers() {
                 tab === t ? 'border-ink text-ink' : 'border-transparent text-ink-faint hover:text-ink-soft'
               }`}
             >
-              {t === 'members' ? '회원 목록' : t === 'tiers' ? '등급 설정' : '직원 지정'}
+              {t === 'members' ? '회원 목록' : t === 'tiers' ? '등급 설정' : t === 'staff' ? '직원 지정' : 'VVIP 지정'}
             </button>
           ))}
         </div>
@@ -350,6 +414,7 @@ export default function AdminMembers() {
                       <th className="px-4 py-3 font-medium whitespace-nowrap">라이브 구매액</th>
                       <th className="px-4 py-3 font-medium whitespace-nowrap">누적구매금액</th>
                       <th className="px-4 py-3 font-medium whitespace-nowrap">직원</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">VVIP</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -381,6 +446,21 @@ export default function AdminMembers() {
                               className="text-[12px] font-semibold text-ink-soft border border-rule rounded-control px-2.5 py-1 hover:border-ink-faint disabled:opacity-50"
                             >
                               {promotingId === m.id ? '승급 중...' : '직원 승급'}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {!m.email ? (
+                            <span className="text-ink-faint">-</span>
+                          ) : vvipEmailSet.has(m.email) ? (
+                            <span className="text-[12px] font-semibold text-signal-blue">✓ VVIP</span>
+                          ) : (
+                            <button
+                              onClick={() => void promoteToVvip(m)}
+                              disabled={promotingVvipId === m.id}
+                              className="text-[12px] font-semibold text-ink-soft border border-rule rounded-control px-2.5 py-1 hover:border-ink-faint disabled:opacity-50"
+                            >
+                              {promotingVvipId === m.id ? '지정 중...' : 'VVIP 지정'}
                             </button>
                           )}
                         </td>
@@ -501,7 +581,7 @@ export default function AdminMembers() {
               </div>
             )}
           </>
-        ) : (
+        ) : tab === 'staff' ? (
           <>
             <p className="text-[13px] text-ink-soft mb-6">
               여기에 지정된 이메일로 로그인하면 일반 로그인만으로 <a href="/app/staff-buy" target="_blank" rel="noreferrer" className="underline">직원 전용 구매 페이지</a>가 즉시 열립니다.
@@ -553,6 +633,68 @@ export default function AdminMembers() {
                         <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(s.created_at)}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <button onClick={() => void handleRemoveStaff(s.email)} className="text-ink-faint hover:text-signal-red" aria-label="해제">
+                            <IconTrash size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-[13px] text-ink-soft mb-6">
+              여기에 지정된 고객은 결제 시 브랜드별 할인(백화점 입점 브랜드 20% / 온라인 전용 브랜드 30%)이
+              자동 적용됩니다. 구매금액 기준 VIP(등급 설정 탭)와는 별개이며, 적립은 없습니다.
+            </p>
+
+            <form onSubmit={handleAddVvip} className="bg-paper border border-rule p-6 mb-6 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">이메일</label>
+                <input
+                  value={vvipEmail} onChange={(e) => setVvipEmail(e.target.value)}
+                  placeholder="vvip@example.com" className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-soft mb-1.5">메모(선택)</label>
+                <input
+                  value={vvipNote} onChange={(e) => setVvipNote(e.target.value)}
+                  placeholder="예: OO 사모님" className={inputCls}
+                />
+              </div>
+              <Button type="submit" variant="accent" size="sm" label={vvipSubmitting ? '지정 중...' : 'VVIP 지정'} disabled={vvipSubmitting} />
+            </form>
+
+            {vvipError && (
+              <div className="bg-paper border border-signal-red text-signal-red text-[13px] px-4 py-3 mb-5">{vvipError}</div>
+            )}
+
+            {vvipLoading ? (
+              <div className="py-20 text-center text-[14px] text-ink-faint">불러오는 중…</div>
+            ) : vvipList.length === 0 ? (
+              <div className="py-20 text-center text-[14px] text-ink-faint">지정된 VVIP가 없습니다.</div>
+            ) : (
+              <div className="bg-paper border border-rule overflow-x-auto">
+                <table className="w-full text-[13px] text-left">
+                  <thead>
+                    <tr className="border-b border-rule text-ink-soft">
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">이메일</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">메모</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">지정일</th>
+                      <th className="px-4 py-3 font-medium whitespace-nowrap">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vvipList.map((v) => (
+                      <tr key={v.email} className="border-b border-rule last:border-b-0">
+                        <td className="px-4 py-3 text-ink font-medium whitespace-nowrap">{v.email}</td>
+                        <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{v.note || '-'}</td>
+                        <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{formatDateTime(v.created_at)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <button onClick={() => void handleRemoveVvip(v.email)} className="text-ink-faint hover:text-signal-red" aria-label="해제">
                             <IconTrash size={16} />
                           </button>
                         </td>

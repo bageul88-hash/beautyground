@@ -98,6 +98,7 @@ export interface Partner {
   brand_name: string
   status: 'active' | 'pending' | 'suspended'
   commission_rate: number
+  is_dept_store_brand: boolean // 백화점 입점 여부 — VVIP 할인율 산정 기준(supabase/vvip_members.sql)
   export_pitch: string | null // 브랜드가 직접 쓰는 수출 제안용 소개글 (supabase/partners_export_pitch.sql)
   export_pitch_en: string | null // export_pitch의 영문 번역 (supabase/partners_export_pitch_en.sql) — 공개 /export 페이지에 노출
   // 수출 상세정보 (supabase/partners_export_details.sql)

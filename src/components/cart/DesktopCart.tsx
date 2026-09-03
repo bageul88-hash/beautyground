@@ -18,6 +18,8 @@ interface Props {
   onUpdateQty: (line: CartLine, delta: number) => void
   onRemove: (line: CartLine) => void
   subtotal: number
+  isVvip: boolean
+  linePrice: (line: CartLine) => number
   deliveryFee: number
   total: number
   onOrder: () => void
@@ -38,6 +40,8 @@ export default function DesktopCart({
   onUpdateQty,
   onRemove,
   subtotal,
+  isVvip,
+  linePrice,
   deliveryFee,
   total,
   onOrder,
@@ -68,6 +72,11 @@ export default function DesktopCart({
         ) : (
           <div className="grid grid-cols-[1.6fr_1fr] gap-10 items-start">
             <div>
+              {isVvip && (
+                <div className="bg-signal-yellow/20 border-t border-x border-rule px-5 py-2.5">
+                  <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인가로 표시했어요</p>
+                </div>
+              )}
               <div className="bg-paper px-5 py-3 flex items-center gap-3 border-y border-rule">
                 <input
                   type="checkbox"
@@ -84,7 +93,7 @@ export default function DesktopCart({
 
               <div className="pt-3 flex flex-col gap-3">
                 {lines.map((line) => {
-                  const price = line.product.sale_price ?? line.product.price
+                  const price = linePrice(line)
                   const unavailable = isUnavailable(line)
                   const stock = lineStock(line)
                   return (

@@ -62,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1) 이 결제(payment_id)에 속한 주문행 전부 조회 (장바구니 다건 주문은 상품별로 여러 행)
   const { data: orderRows, error: selErr } = await supabase
     .from('orders')
-    .select('id, product_id, quantity, amount, status, order_name, buyer_name, buyer_email, live_id, user_id, products(name, price, sale_price)')
+    .select('id, product_id, partner_id, quantity, amount, status, order_name, buyer_name, buyer_email, live_id, user_id, products(name, price, sale_price)')
     .eq('payment_id', paymentId)
 
   if (selErr || !orderRows || orderRows.length === 0) {
@@ -116,17 +116,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // (예전엔 orderRows 의 amount 를 그대로 합산해, 손님이 30만원 상품을 100원으로 주문·결제할 수 있었음)
   type JoinedRow = {
     product_id: string | null
+    partner_id: string | null
     quantity: number
     live_id?: string | null
+    user_id?: string | null
+    buyer_email?: string | null
     products?: { price?: number; sale_price?: number | null } | null
   }
   const rows = orderRows as unknown as JoinedRow[]
 
-  // 1) 상품 소계 = Σ (실제 판매가 × 수량). product_id 없는 행(배송비/쿠폰 행)은 서버가 별도 재계산하므로 무시.
+  // VVIP 할인(백화점 입점 20% / 온라인 전용 30%, 적립 없음) — src/lib/vvip.ts와 동일 공식을 유지할 것
+  // (클라이언트 AppOrder.tsx가 요청한 결제금액과 여기서 재산출한 금액이 같아야 결제가 통과됨).
+  // app_vvip은 이메일 화이트리스트라 service role로 직접 조회(is_vvip() RPC는 JWT 세션 필요라 여기선 못 씀).
+  const buyerEmailForVvip = (rows.find((r) => r.buyer_email)?.buyer_email as string | undefined)?.toLowerCase().trim()
+  let buyerIsVvip = false
+  if (buyerEmailForVvip) {
+    const { data: vvipRow } = await supabase
+      .from('app_vvip')
+      .select('email')
+      .eq('email', buyerEmailForVvip)
+      .maybeSingle()
+    buyerIsVvip = !!vvipRow
+  }
+  const deptStoreMap = new Map<string, boolean>()
+  if (buyerIsVvip) {
+    const partnerIds = [...new Set(rows.map((r) => r.partner_id).filter((v): v is string => !!v))]
+    if (partnerIds.length > 0) {
+      const { data: partnerRows } = await supabase
+        .from('partners')
+        .select('id, is_dept_store_brand')
+        .in('id', partnerIds)
+      for (const p of (partnerRows ?? []) as { id: string; is_dept_store_brand: boolean }[]) {
+        deptStoreMap.set(p.id, p.is_dept_store_brand)
+      }
+    }
+  }
+  const vvipUnitPrice = (unit: number, partnerId: string | null): number => {
+    if (!buyerIsVvip) return unit
+    const isDeptStore = partnerId ? (deptStoreMap.get(partnerId) ?? true) : true
+    const rate = isDeptStore ? 0.2 : 0.3
+    return Math.round(unit * (1 - rate))
+  }
+
+  // 1) 상품 소계 = Σ (실제 판매가 × 수량, VVIP면 브랜드별 할인 반영). product_id 없는 행(배송비/쿠폰 행)은 서버가 별도 재계산하므로 무시.
   let authoritativeSubtotal = 0
   for (const r of rows) {
     if (!r.product_id || !r.products) continue
-    const unit = r.products.sale_price ?? r.products.price ?? 0
+    const baseUnit = r.products.sale_price ?? r.products.price ?? 0
+    const unit = vvipUnitPrice(baseUnit, r.partner_id)
     authoritativeSubtotal += unit * (r.quantity as number)
   }
 
@@ -264,7 +301,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 등급은 "이 주문 이전까지의" 누적 결제금액 기준으로 산정(이번 주문으로 오른 등급은 다음 구매부터 적용).
   // 실패해도 결제 성공 응답에는 영향 주지 않음(포인트는 나중에 수기 보정 가능, 결제 자체가 우선).
   const buyerUserId = (orderRows.find((r) => r.user_id)?.user_id as string | undefined) ?? null
-  if (buyerUserId && paidAmount > 0) {
+  // VVIP는 할인만 받고 적립은 없음(2026-09-03 대표님 확정) — 등급 적립률과 무관하게 이 주문은 건너뜀.
+  if (buyerUserId && paidAmount > 0 && !buyerIsVvip) {
     try {
       const { data: tiers } = await supabase
         .from('membership_tiers')

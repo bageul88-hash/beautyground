@@ -22,6 +22,7 @@ interface Props {
   paymentReady: boolean
   liveCoupon: LiveCoupon | null
   subtotal: number
+  isVvip: boolean
   blockedNames: string[]
   itemNotices: string[]
   savedAddresses: Address[]
@@ -67,6 +68,7 @@ export default function DesktopOrder({
   paymentReady,
   liveCoupon,
   subtotal,
+  isVvip,
   blockedNames,
   itemNotices,
   savedAddresses,
@@ -131,6 +133,12 @@ export default function DesktopOrder({
               <p className="text-[12.5px] text-ink-soft">
                 <span className="font-bold text-ink">{(liveCoupon.min_purchase - subtotal).toLocaleString('ko-KR')}원</span> 더 담으면 라이브 쿠폰 {couponLabel(liveCoupon)} 적용!
               </p>
+            </div>
+          )}
+
+          {isVvip && (
+            <div className="bg-signal-yellow/20 border border-rule px-5 py-3">
+              <p className="text-[12.5px] font-bold text-ink">VVIP 회원 할인이 적용된 가격이에요</p>
             </div>
           )}
 
