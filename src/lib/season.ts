@@ -15,3 +15,48 @@ export function resolveActiveSeason(override: string | null | undefined): Season
   if (override && (SEASONS as string[]).includes(override)) return override as Season
   return autoSeasonByMonth(new Date().getMonth() + 1)
 }
+
+// 하루를 8시간씩 3등분 — 아침 06~14시 · 점심 14~22시 · 저녁 22~06시(익일)(2026-09-04 대표님 확정).
+export type TimeSlot = '아침' | '점심' | '저녁'
+
+export function timeSlotByHour(hour: number): TimeSlot {
+  if (hour >= 6 && hour < 14) return '아침'
+  if (hour >= 14 && hour < 22) return '점심'
+  return '저녁'
+}
+
+// 계절×시간대별로 지금 눈에 먼저 띄면 좋을 카테고리 — "지금 확인할 상품" 큐레이션의 우선순위로만 쓰인다
+// (해당 카테고리 상품이 부족하면 계절 전체 → 전체 상품 순으로 자연스럽게 채워짐, 섹션이 비지 않음).
+// products.category 값(한글 라벨)과 그대로 매칭 — src/constants/index.ts의 CATEGORIES.label 참고.
+export const SEASON_TIMESLOT_CATEGORIES: Record<Season, Record<TimeSlot, string[]>> = {
+  봄: {
+    아침: ['스킨케어'],
+    점심: ['메이크업'],
+    저녁: ['바디케어'],
+  },
+  여름: {
+    아침: ['스킨케어'],
+    점심: ['향수', '메이크업'],
+    저녁: ['바디케어'],
+  },
+  가을: {
+    아침: ['스킨케어'],
+    점심: ['메이크업'],
+    저녁: ['헤어케어', '바디케어'],
+  },
+  겨울: {
+    아침: ['스킨케어'],
+    점심: ['메이크업'],
+    저녁: ['바디케어', '뷰티 디바이스'],
+  },
+  추석: {
+    아침: ['스킨케어'],
+    점심: ['메이크업'],
+    저녁: ['바디케어'],
+  },
+  설: {
+    아침: ['스킨케어'],
+    점심: ['메이크업'],
+    저녁: ['바디케어'],
+  },
+}
