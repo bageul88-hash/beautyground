@@ -12,7 +12,7 @@ const sep = <span className="text-rule" aria-hidden="true">|</span>
 export default function DesktopFooter() {
   return (
     <footer className="bg-paper border-t border-rule">
-      <div className="max-w-[1200px] mx-auto px-6 pt-10 pb-12">
+      <div className="max-w-[1280px] mx-auto px-6 pt-10 pb-12">
         <nav className="flex items-center gap-4 text-[13px] font-semibold text-ink-soft pb-6 border-b border-rule" aria-label="하단 메뉴">
           <Link to="/app/login" className="hover:text-ink transition-colors">로그인</Link>
         </nav>

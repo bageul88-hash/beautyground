@@ -61,7 +61,7 @@ export default function DesktopProductReviews({
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      <div className="max-w-[900px] mx-auto px-6 py-10">
+      <div className="max-w-[1280px] mx-auto px-6 py-10">
         {name && (
           <button
             type="button"

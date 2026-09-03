@@ -18,7 +18,7 @@ export default function DesktopRecentlyViewed({ loggedIn, lines, onRemove }: Pro
     <div className="bg-paper min-h-screen">
       <DesktopHeader />
 
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
+      <div className="max-w-[1280px] mx-auto px-6 py-10">
         <h1 className="text-[22px] font-bold text-ink mb-8">최근 본 상품</h1>
 
         {!loggedIn ? (
