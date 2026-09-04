@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { IconTruck, IconDownload, IconUpload, IconCheck } from '@tabler/icons-react'
+import { IconTruck, IconDownload, IconUpload, IconCheck, IconPrinter } from '@tabler/icons-react'
 import { supabase } from '../../lib/supabase'
 import type { Order } from '../../lib/types'
 import { won, formatDateTime } from '../../lib/format'
+import { printLabels, type LabelData } from '../../lib/shippingLabel'
 
 // 배송/물류 1단계(반자동, 2026-08-27) — 출고 대기 → CJ 접수 엑셀 내보내기 → LoIS 업로드 →
 // 송장 엑셀 가져오기(주문번호↔송장 매핑) → 배송중 → 배송완료. 2단계(CJ API/LoIS 자동화)에서
@@ -114,6 +115,38 @@ export default function AdminShipping() {
   const toggle = (id: string) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
   const toggleAll = () => setSelected(selected.size === visible.length ? new Set() : new Set(visible.map((g) => g.paymentId)))
 
+  // ── 송장 인쇄 ──
+  // LoIS 에서 송장을 받아오기 전에도 발송은 해야 하므로, 같은 내용을 담은 라벨을
+  // 우리가 그려서 인쇄한다. 100x150mm 는 택배 라벨 프린터와 A4 둘 다 쓰는 규격이다.
+  // 뷰크라크몰과 같은 모듈(lib/shippingLabel.ts)을 쓴다 — 한쪽을 고치면 같이 고친다.
+  const printLabelsForSelected = () => {
+    const target = visible.filter((g) => selected.size === 0 || selected.has(g.paymentId))
+    if (target.length === 0) { setMsg('인쇄할 주문이 없습니다.'); return }
+    const rows: LabelData[] = target.map((g) => ({
+      orderNo: g.paymentId.slice(0, 12).toUpperCase(),
+      carrier: 'CJ대한통운',
+      trackingNo: g.tracking,
+      recipientName: g.recipient,
+      recipientPhone: g.phone,
+      zip: g.zip,
+      address: g.address,
+      memo: g.memo,
+      itemName: g.items.map((r) => r.products?.name ?? r.order_name ?? '').filter(Boolean).join(', ') || '상품',
+      quantity: g.items.reduce((s, r) => s + (r.quantity ?? 0), 0),
+      senderName: SENDER.name,
+      senderPhone: SENDER.phone,
+      senderZip: '',
+      senderAddr: SENDER.address,
+    }))
+    const missing = rows.filter((r) => !r.address).length
+    if (missing > 0 && !window.confirm(
+      `${missing}건은 배송지가 비어 있습니다.
+주소 없이 인쇄하면 손으로 적어야 합니다.
+계속할까요?`
+    )) return
+    if (!printLabels(rows)) setMsg('팝업이 차단됐습니다. 이 사이트의 팝업을 허용해 주세요.')
+  }
+
   // ── CJ(LoIS) 접수용 엑셀 내보내기 — 열 순서는 LoIS 일괄등록 양식 확정 후 조정 ──
   const exportExcel = () => {
     const target = visible.filter((g) => selected.size === 0 || selected.has(g.paymentId))
@@ -207,6 +240,10 @@ export default function AdminShipping() {
         <div className="flex items-center gap-2">
           <button onClick={exportExcel} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-control bg-ink text-paper text-[13px] font-semibold hover:opacity-90">
             <IconDownload className="w-4 h-4" /> CJ 접수 엑셀 내보내기{selected.size > 0 ? ` (${selected.size})` : ''}
+          </button>
+          {/* 송장 인쇄 — 고른 게 있으면 그것만, 없으면 지금 탭에 보이는 것 전부 */}
+          <button onClick={printLabelsForSelected} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-control border border-ink text-ink text-[13px] font-semibold hover:bg-quiet">
+            <IconPrinter className="w-4 h-4" /> 송장 인쇄{selected.size > 0 ? ` (${selected.size})` : ''}
           </button>
           <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-control border border-ink text-ink text-[13px] font-semibold hover:bg-quiet">
             <IconUpload className="w-4 h-4" /> 송장 엑셀 가져오기
